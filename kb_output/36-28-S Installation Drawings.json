@@ -1,0 +1,135 @@
+{
+  "model": "36-28-S",
+  "variant": "SURFACE",
+  "product_type": "Parallelogram Lift / Console Surface Mount",
+  "capacity": "36,000 lbs",
+  "dimensions": {
+    "overall_length": "264.00",
+    "overall_width": "168.00",
+    "runway_length": "216.00",
+    "runway_width": "28.00",
+    "lift_height": "78.00",
+    "console_width": "32.00",
+    "console_depth": "12.00",
+    "console_height": "36.00",
+    "front_overhang": "24.00",
+    "rear_overhang": "24.00",
+    "approach_angle": "15\u00b0",
+    "service_clearance": "36.00",
+    "control_panel_dimensions": "10.5 x 8 x 27.0",
+    "units": "inches"
+  },
+  "installation_requirements": {
+    "slab_thickness": "6.00 minimum",
+    "slab_reinforcement": "Standard console location layout",
+    "anchor_details": "See anchor bolt location layout details",
+    "conduit_size": "Electrical service supply conduit",
+    "location_layout": "Standard console location layout according to ultimate locations",
+    "power_requirements": "Incoming conduits - floor type 1-6-250 mm, floor type 1-6-250 mm as shown, see top view"
+  },
+  "parts_list": [
+    {
+      "part_number": "A",
+      "description": "Anchor bolt",
+      "qty": "Multiple"
+    },
+    {
+      "part_number": "B",
+      "description": "Component B",
+      "qty": "Multiple"
+    },
+    {
+      "part_number": "C",
+      "description": "Component C",
+      "qty": "Multiple"
+    },
+    {
+      "part_number": "D",
+      "description": "Component D",
+      "qty": "Multiple"
+    },
+    {
+      "part_number": "E",
+      "description": "Component E",
+      "qty": "Multiple"
+    },
+    {
+      "part_number": "F",
+      "description": "Component F",
+      "qty": "Multiple"
+    },
+    {
+      "part_number": "G",
+      "description": "Component G",
+      "qty": "Multiple"
+    },
+    {
+      "part_number": "H",
+      "description": "Component H",
+      "qty": "Multiple"
+    }
+  ],
+  "certifications": [
+    "MOHAWK RESOURCES LTD"
+  ],
+  "notes": [
+    "Notice of confidential information/installation drawings",
+    "Scale of confidential information drawings 1:50",
+    "Wiring conduits - floor type 1-6-250 mm conduit grounded, floor type 1-6-250 mm as shown",
+    "Incoming conduits - see top view",
+    "Mohawk bolt location layout details",
+    "Anchor bolt detail",
+    "All dimensions in inches unless otherwise stated"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric view of 36-28 Surface mount parallelogram lift showing overall assembly",
+      "extracted_text": "36-28 SURFACE, PAGE 1 OF 2, MOHAWK RESOURCES LTD"
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view and service clearance details",
+      "extracted_text": "36-28 SURFACE, PAGE 2 OF 2, FROM ELEVATION VIEW, SERVICE LFT"
+    },
+    {
+      "page": 3,
+      "description": "Standard console location layout with dimensions and anchor bolt details",
+      "extracted_text": "36-28 SURFACE, STANDARD CONSOLE LOCATION LAYOUT, SCALE 1/6 1'=0\" & 1' APPROX TO ULTIMATE LOCATIONS"
+    },
+    {
+      "page": 4,
+      "description": "Lift & console surface conduit sections showing wiring layouts",
+      "extracted_text": "LIFT & CONSOLE SURFACE CONDUIT, SECTION VIEWS, SECTION B-B, SECTION C-C, SECTION D-D"
+    },
+    {
+      "page": 5,
+      "description": "Control console and stub up details with top view dimensions",
+      "extracted_text": "CONTROL CONSOLE & STUB UP DETAILS, TOP VIEW OF CONSOLE FRAME, MOHAWK CONDUITS, INCOMING CONDUITS"
+    },
+    {
+      "page": 6,
+      "description": "Anchor details and shimming specifications with reference front center of garage bolts",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, REFERENCE FRONT CENTER OF GARAGE BOLTS"
+    },
+    {
+      "page": 7,
+      "description": "Isometric view of service connections and pointing details",
+      "extracted_text": "ISOMETRIC VIEW OF SERVICE CONNECTIONS AND POINTING"
+    },
+    {
+      "page": 8,
+      "description": "Materials supply and lift unit specifications table",
+      "extracted_text": "MATERIALS SUPPLY ON THIS LIFT - SHIP TO LOCATION, REQUIRED INTERNAL LIST"
+    },
+    {
+      "page": 9,
+      "description": "Surface lifts only specifications and general notes",
+      "extracted_text": "SURFACE LIFTS ONLY, GENERAL NOTES"
+    }
+  ],
+  "_source_file": "36-28-S Installation Drawings.pdf",
+  "_pages_count": 9,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:01:55Z"
+}

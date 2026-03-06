@@ -1,0 +1,125 @@
+{
+  "model": "Multiple Models",
+  "variant": "Pre-existing and New Slab Requirements",
+  "product_type": "Slab Requirements and New Slab Recommendations",
+  "capacity": "Various models with different capacities",
+  "dimensions": {
+    "slab_thickness_minimum": {
+      "pre_existing": "4-1/2\" to 12\"",
+      "new_slab": "12\" minimum"
+    },
+    "slab_dimensions": {
+      "width_minimum": "24\" to 72\"",
+      "length_minimum": "24\" to 220\"",
+      "wej_it_diameter": "3/4\" to 1-1/4\"",
+      "wej_it_length": "5\" to 10\""
+    },
+    "reinforcement_spacing": "6\" to 12\" on center",
+    "anchor_spacing": "6\" minimum from expansion seams"
+  },
+  "installation_requirements": {
+    "concrete_compressive_strength": "4000 psi with 28 day aging",
+    "concrete_curing_time": "28 days minimum",
+    "reinforcement": {
+      "size": "#6 rebar or #4 Temperature Bars",
+      "spacing": "6\" to 12\" on center",
+      "pattern": "Grid pattern with long and short bars"
+    },
+    "anchors": {
+      "type": "3/4\" diameter minimum",
+      "spacing_from_seams": "6\" minimum for 3/4\" anchors, 7.5\" minimum for 1\" anchors",
+      "edge_distance": "1.75E to 0.75E depending on embedment",
+      "dowels": "#4 x 18\" long anchorage dowels spaced every 18\" around perimeter"
+    },
+    "foundation": "Allowable bearing capacity not less than 2,000 lb/sq ft",
+    "key_requirements": [
+      "Must be installed on concrete only",
+      "Continuous single slab required for 2-post lifts",
+      "No installation on expansion seams or cracked concrete",
+      "Floor must be properly aged to ACI specifications"
+    ]
+  },
+  "parts_list": [
+    {
+      "part_number": "#6 rebar",
+      "description": "Reinforcement bars",
+      "qty": "As required per grid pattern"
+    },
+    {
+      "part_number": "#4 Temperature Bars",
+      "description": "Temperature reinforcement bars",
+      "qty": "As required for specific models"
+    },
+    {
+      "part_number": "Wej-it Anchors",
+      "description": "Wedge anchors various sizes",
+      "qty": "Per lift model requirements"
+    }
+  ],
+  "certifications": [
+    "ACI (American Concrete Institute) specifications",
+    "ASTM B-633, Type III, SCI",
+    "ICBO-ES Report #1821",
+    "City of Los Angeles #RR 24939",
+    "Federal QQZ-325C, Type II, Class 3"
+  ],
+  "notes": [
+    "NEVER, NEVER hand mix concrete",
+    "All 2-post lifts require continuous single slab",
+    "DO NOT install on secondary floor without written authorization",
+    "Core sample testing recommended to verify floor properties",
+    "Larger 4' x 4' base pads available for floors with thickness less than 6\"",
+    "Consult building architect for seismic zone installations"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Title page with company contact information",
+      "extracted_text": "MOHAWK PRE-EXISTING SLAB REQUIREMENTS & NEW SLAB RECOMMENDATIONS MOHAWK RESOURCES LTD. 65 VROOMAN AVE. AMSTERDAM, NY 12010 TOLL FREE: 1-800-833-2006 LOCAL: 1-518-842-1431 FAX: 1-518-842-1289 INTERNET: www.MOHAWKLIFTS.com E-MAIL: Service@MOHAWKLIFTS.com"
+    },
+    {
+      "page": 2,
+      "description": "Pre-existing minimum floor requirements table with lift models A-7 through TR-75",
+      "extracted_text": "Mohawk Resources Ltd. PRE-EXISTING Minimum Floor Requirements - Table showing Mohawk Lift Models (A-7, System IA, System IA-10, LC-12, LMF-12, TP-15, TP-16, TP-18, TP-20, TP-20-WB, TP-26, TP-26-WB, TP-30, TP-30-WB, TR-19, FL-25, TR-25A, TR-30, TR-33, TR-35, TR-50, TR-75) with Minimum Slab Thickness (4-1/2\" to 12\"), Minimum Compressive Strength (4000 psi with 28 day aging), Reinforcement Size (#6 rebar or ACI Temp only), and Reinforcement Spacing (10 in. to 12 in.)"
+    },
+    {
+      "page": 3,
+      "description": "New slab recommendations with basic concrete requirements",
+      "extracted_text": "New Slab Recommendations: Basic Concrete Requirements: Minimum Tensile Strength of Concrete: 4,000 P.S.I. Minimum Aging of New Concrete Slab: 28 days (cure time) Minimum Thickness of Concrete Slab: See New Slab Table & Figure Attached Minimum Width and Length of Slab: See New Slab Table & Figure Attached - All properties mandatory - New slab must be totally surrounded by existing concrete floor - Care should be taken to locate reinforcement bars away from anchor positions - All 3/4 inch diameter anchors must be minimum 6 inches away from expansion seams - All 1 inch diameter anchors must be minimum 7 1/2 inches away from expansion seams - NEVER, NEVER hand mix your own concrete"
+    },
+    {
+      "page": 4,
+      "description": "Detailed new slab recommendations table with dimensions for all lift models",
+      "extracted_text": "New Slab Recommendations NEW SLABS MUST BE 12\" THICK MINIMUM - Table showing Lift Models with W Slab Width, L Slab Length, R Reinforcement Size, S1 & S2 Reinforcement Spacing, D Wej-it Dia, I Wej-it Length for models A-7 through TR-75 with specific dimensions and requirements including Four Separate Slabs Formed at each Post for TR models"
+    },
+    {
+      "page": 5,
+      "description": "Technical drawing showing new recommended slab design for 2-post lifts",
+      "extracted_text": "NEW RECOMMENDED SLAB DESIGN FOR 2-POST LIFTS FILE: MAN066 DATE: 2/98 REV DATE: 7/2003 - Shows plan view and Section A-A with reinforcement details, anchor specifications, and dimensional callouts including 12\" slab thickness, reinforcement pattern, and anchor placement"
+    },
+    {
+      "page": 6,
+      "description": "Technical drawing showing new recommended slab design for 4-post lifts",
+      "extracted_text": "NEW RECOMMENDED SLAB DESIGN FOR 4-POST LIFTS FILE: MAN069 DATE: 10/00 REV DATE: 7/2003 - Shows plan view and Section A-A with reinforcement details for 4-post configuration including anchor placement and slab dimensions"
+    },
+    {
+      "page": 7,
+      "description": "Detailed technical drawing showing typical base plate detail and anchoring system",
+      "extracted_text": "SYSTEM IA SHOWN BELOW - 8 ANCHORS PER BASE PLATE - Detailed drawing showing base plate anchoring instructions with specific callouts for drilling, anchor installation, and safety requirements including concrete specifications and foundation requirements"
+    },
+    {
+      "page": 8,
+      "description": "Wej-it wedge anchor specifications and capacity tables",
+      "extracted_text": "The Original wej-it Wedge Anchors - Key Features/Benefits including Time-Tested Proven Reliability, Fully Assembled and Ready to Use, Bolt Size is Hole Size - Specifications showing Type Zinc Plating ASTM B-633, ICBO-ES Report #1821, Federal QQZ-325C - Maximum Tensile and Shear Capacity for Static Loads table with various anchor sizes and concrete types - Edge Distance and Spacing Requirements"
+    },
+    {
+      "page": 9,
+      "description": "Wej-it anchor installation instructions and maintenance information",
+      "extracted_text": "Installation Instructions - Mohawk Lifts - Order Information table with Catalog Numbers, Anchor Diameters, Thread Lengths, and Quantities - Installation steps 1-7 including drilling, cleaning, and anchor installation procedures - Inspection & Maintenance Instructions - Length Selection Guide with embedment calculations"
+    }
+  ],
+  "_source_file": "Slab_Requirements (3).pdf",
+  "_pages_count": 9,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:10:20Z"
+}

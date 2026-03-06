@@ -1,0 +1,208 @@
+{
+  "model": "38-26",
+  "variant": "flush",
+  "product_type": "parallelogram lift",
+  "capacity": "38,000 lbs",
+  "dimensions": {
+    "overall_platform_length": "214.00 inches",
+    "platform_width": "38.23 inches",
+    "overall_continuous_base_length": "236.00 inches",
+    "pit_length": "348.00 inches",
+    "pit_width_sections": {
+      "section_1": "162.00 inches",
+      "section_2": "330.00 inches",
+      "section_3": "324.00 inches"
+    },
+    "pit_depths": {
+      "minimum": "16.50 inches",
+      "maximum": "18.50 inches"
+    },
+    "runway_spacing": "109.50 inches",
+    "runway_width": "45.00 inches",
+    "service_leg_spacing": "65.00 inches max",
+    "drainage_channel_depth": "3.50 inches max typ",
+    "finished_floor_coverage": "3.00 inches",
+    "console_dimensions": {
+      "height": "36 inches (914mm)",
+      "width": "10 5/8 inches (270mm)",
+      "depth": "32 1/2 inches (826mm)",
+      "front_height": "7 inches typ (178mm)"
+    }
+  },
+  "installation_requirements": {
+    "anchor_bolt_diameter": "3/4 inch",
+    "total_anchor_bolts": "48",
+    "minimum_embedment_length": "9.00 inches",
+    "minimum_concrete_thickness": "see pit drawings",
+    "concrete_strength": "fc=2,500 psi minimum",
+    "slab_reinforcement": "grade 60 per drawings",
+    "leveling_shim_thickness": "1 inch (25.4mm) maximum",
+    "drainage_slope": "1/16 inch per foot toward drainage channel",
+    "electrical": {
+      "motor_horsepower": "20 hp",
+      "voltage": "208/230/460V 3 phase",
+      "amperage": "50 ampere",
+      "control_circuit_transformer": "1000 VA",
+      "power_supply": "24 VDC 4.8 AMP"
+    },
+    "hydraulic": {
+      "reservoir_capacity": "30 gallons total",
+      "oil_type": "Dexron III ATF",
+      "air_pressure": "85 to 100 psi",
+      "air_volume_lift": "25 CFM each",
+      "air_volume_optional_rolling_jack": "60 CFM",
+      "air_volume_total_required": "30 minimum CFM",
+      "air_volume_total_suggested": "50 CFM"
+    }
+  },
+  "parts_list": [
+    {
+      "part_number": "",
+      "description": "LOCKOUT/TAGOUT DISCONNECT BOX",
+      "qty": 12
+    },
+    {
+      "part_number": "",
+      "description": "LEVELING SHIMS",
+      "qty": 1
+    },
+    {
+      "part_number": "",
+      "description": "3/4\" x 9\" ANCHOR BOLT ASSEMBLY",
+      "qty": 48
+    },
+    {
+      "part_number": "",
+      "description": "1\" SEAL BARRIER",
+      "qty": 9
+    },
+    {
+      "part_number": "",
+      "description": "1-3/4\" REDUCER BUSHING",
+      "qty": 9
+    },
+    {
+      "part_number": "",
+      "description": "1\" SCH 40-90 DEG ELBOW",
+      "qty": 7
+    },
+    {
+      "part_number": "",
+      "description": "JUNCTION BOX TYPE CONDUIT",
+      "qty": 6
+    },
+    {
+      "part_number": "",
+      "description": "1\" RIGID CONDUIT",
+      "qty": 4
+    },
+    {
+      "part_number": "",
+      "description": "FILTER/LUBRICATOR/REGULATOR, DRYER SHUTOFF",
+      "qty": 3
+    },
+    {
+      "part_number": "",
+      "description": "4\" SCH 40 STREET ELBOW",
+      "qty": 2
+    },
+    {
+      "part_number": "",
+      "description": "4\" SCH 40 PIPE",
+      "qty": 1
+    }
+  ],
+  "certifications": [],
+  "notes": [
+    "Grating is recommended to be used to cover the rolling jack pocket during normal use of the lift unit",
+    "This configuration is most often used for fleet maintenance applications that involve a moderate ratio of tire, wheel or brake services",
+    "The front of the lift unit is placed to the front of the lift trench",
+    "Flush mounted installation with manually covered rolling jack lowering pocket",
+    "Concrete used for the base and side walls shall have minimum strength of fc=2,500 psi",
+    "All anchor bolts to be wetset anchors with full thread engagement",
+    "Care must be taken to ensure trench side walls are parallel and straight",
+    "Slope the bottom of trench 1/16 inch per foot toward drainage channel",
+    "Maximum one inch adjustment (shimming) is permitted for installation leveling"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric view of flush mounted 38-26 parallelogram lift installation showing lift platform, service legs, drainage, and console location",
+      "extracted_text": "38-26-FLUSH PAGE 1 of 2, FLUSH MOUNTED INSTALLATION WITH MANUALLY COVERED ROLLING JACK LOWERING POCKET, FRONT, REAR, ENTRY DIRECTION, MOHAWK RESOURCES LTD."
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view and section details showing platform dimensions, service leg spacing, and runway configuration",
+      "extracted_text": "38-26-FLUSH PAGE 2 of 2, FRONT ELEVATION VIEW, 214.00 OVERALL PLATFORM LENGTH, 38.23, 236.00 OVERALL CONTINUOUS BASE LENGTH, 348.00 REF PIT LENGTH"
+    },
+    {
+      "page": 3,
+      "description": "Isometric pit layout showing drainage, conduits, and jacking beam pocket locations",
+      "extracted_text": "38-26-F PAGE 1 of 8, JACKING BEAM POCKET, DRAINAGE CATCH BASIN, CONDUITS TO REAR LEGS OF LIFT PLATFORMS, CONDUITS TO CONSOLE, ENTRANCE DIRECTION"
+    },
+    {
+      "page": 4,
+      "description": "Plan view of pit layout with dimensions and conduit routing details",
+      "extracted_text": "38-26-F PAGE 2 of 8, 348.00, 330.00, 324.00, 162.00, 35.00, ALTERNATE CONSOLE LOCATION, ENTRANCE DIRECTION, STANDARD CONSOLE LOCATION SHOWN"
+    },
+    {
+      "page": 5,
+      "description": "Section A-A showing pit depth, reinforcement details, and construction specifications",
+      "extracted_text": "38-26-F PAGE 3 of 8, SECTION A-A, DETAIL A, TWO LAYERS OF 6 x 6 10/10 WWF, #4 @ 12 DOWELS, #4 @ 12 TIES"
+    },
+    {
+      "page": 6,
+      "description": "Section B-B showing drainage channel details and reinforcement specifications",
+      "extracted_text": "38-26-F PAGE 4 of 8, SECTION B-B, DEPTH OF DRAINAGE CHANNEL VARIES ALONG TRENCH LENGTH, FINISHED FLOOR ELEVATION, TWO LAYERS 6 x 6 10/10 WWF, TYP"
+    },
+    {
+      "page": 7,
+      "description": "Section C-C and D-D showing catch basin construction and drainage details",
+      "extracted_text": "38-26-F PAGE 5 of 8, SECTION C-C, SECTION D-D, 2.50 MAXIMUM DEPTH OF DRAINAGE CHANNEL AT CATCH BASIN, TYP"
+    },
+    {
+      "page": 8,
+      "description": "Section E-E and F-F showing conduit routing to control panel",
+      "extracted_text": "38-26-F PAGE 6 of 8, SECTION E-E, SECTION F-F, TO CONTROL PANEL, THREAD TERMINAL END OF PIPE, TYP"
+    },
+    {
+      "page": 9,
+      "description": "Structural connection details showing bolt and anchor specifications",
+      "extracted_text": "38-26-F PAGE 7 of 8, SECTION G, SECTION H, SECTION J, VIEW K, BOLT 1/2 x 4 @ 16, ANGLE 1/4 x 3 x 3, PLATE 3/8 x 8 x 42, BAR 1/2 x 3/4"
+    },
+    {
+      "page": 10,
+      "description": "Section L-L showing conduit and service connections from console to lift unit",
+      "extracted_text": "38-26-F PAGE 8 of 8, SECTION L-L, SEAL BARRIER AT EACH CONDUIT GOING TO LIFT UNIT, AIR MANIFOLD, OPERATOR SIDE OF POWER CONSOLE"
+    },
+    {
+      "page": 11,
+      "description": "Lift data table and required material list with specifications",
+      "extracted_text": "LIFT DATA TABLE, MOHAWK RESOURCES, LTD, PARALLELOGRAM LIFT MODEL 38-26-FLUSH, MAXIMUM LOAD CAPACITY 38,000 LBS, REQUIRED MATERIAL LIST"
+    },
+    {
+      "page": 12,
+      "description": "Control console and stub-up details with conduit sizing and application notes",
+      "extracted_text": "TOP VIEW OF CONSOLE FRAME, CONTROL CONSOLE & STUB-UP DETAILS, 1 3/4 TYP (44), 10 5/8 (270), BACK OF CONSOLE, UNITS = INCH (mm)"
+    },
+    {
+      "page": 13,
+      "description": "Anchor details and shimming specifications with installation instructions",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, BASE UNIT BASE PLATE, ANCHOR BOLT LOCATION DIMENSIONS AND DETAILS, UNITS = INCH (mm) = POUND (kg)"
+    },
+    {
+      "page": 14,
+      "description": "Isometric view of service connections and routing with detailed assembly information",
+      "extracted_text": "UNITS = INCH (mm), ISOMETRIC VIEW OF SERVICE CONNECTIONS AND ROUTING, ANCHOR BOLT ASSEMBLY, SECTION A-A"
+    },
+    {
+      "page": 15,
+      "description": "General notes and specifications for flush lift installation",
+      "extracted_text": "GENERAL NOTES, FLUSH LIFTS ONLY, NOTE 1-21 covering concrete requirements, reinforcement, installation procedures, and utility specifications"
+    }
+  ],
+  "_source_file": "38-26-F Installation Drawings.pdf",
+  "_pages_count": 15,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:12:29Z"
+}

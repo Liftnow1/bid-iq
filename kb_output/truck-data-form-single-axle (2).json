@@ -1,0 +1,50 @@
+{
+  "model": "Not specified",
+  "variant": "Single Axle Rear",
+  "product_type": "Truck Data Collection Form",
+  "capacity": "Not specified",
+  "dimensions": {
+    "measurement_fields": {
+      "A": "Front Tire Diameter",
+      "B": "Back Tire Diameter",
+      "C": "Front Min. Ground Clearance",
+      "D": "Rear Min. Ground Clearance",
+      "E": "Center Min. Ground Clearance",
+      "F": "Front Bumper-Axle",
+      "G": "Axle-Axle Length",
+      "H": "Tire Width",
+      "I": "Tire Outside-Outside Width",
+      "J": "Front Total Width",
+      "K": "Dual Tire Width",
+      "L": "Tire Outside-Outside Width",
+      "M": "Rear Total Width"
+    },
+    "additional_fields": [
+      "Overall Length (Bumper-Bumper)",
+      "Vehicle Weight (Not GVW)",
+      "Heaviest Axle Weight"
+    ],
+    "units": "inches"
+  },
+  "installation_requirements": {
+    "note": "Determination in suiting lifting requirements is only as accurate and complete as the data received. Note any areas that may cause problems in vehicle lifting."
+  },
+  "parts_list": [],
+  "certifications": [],
+  "notes": [
+    "Please be complete in entering dimensional data",
+    "All dimensions to be entered in inches",
+    "Check box if lowest clearance is equal to longest or shortest wheel base"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Truck data collection form for single axle rear vehicles with three views (side, front, rear) showing dimensional measurement points and data entry table",
+      "extracted_text": "TRUCK DATA FORM (SINGLE AXLE REAR)\n\nSIDE VIEW\nA - TIRE DIAMETER\nB - TIRE DIAMETER\nC\nD\nE - MINIMUM GROUND CLEARANCE\nF\nG\n\nFRONT VIEW\nH\nI\nJ\n\nREAR VIEW\nK\nL\nM\n\nPLEASE BE COMPLETE IN ENTERING DIMENSIONAL DATA. OUR DETERMINATION IN SUITING YOUR LIFTING REQUIREMENTS IS ONLY AS ACCURATE AND COMPLETE AS THE DATA WE RECEIVE. ALSO, NOTE ANY AREAS THAT MAY CAUSE PROBLEMS IN VEHICLE LIFTING.\n\n*ALL DIMENSIONS TO BE ENTERED IN INCHES*\n\nDIMENSION | LONGEST WHEEL BASE | SHORTEST WHEEL BASE | LOWEST CLEARANCE*\nA (FRONT TIRE DIAMETER)\nB (BACK TIRE DIAMETER)\nC (FRONT MIN. GROUND CLEARANCE)\nD (REAR MIN. GROUND CLEARANCE)\nE (CENTER MIN. GROUND CLEARANCE)\nF FRONT BUMPER-AXLE\nG AXLE-AXLE LENGTH\nH TIRE WIDTH\nI TIRE OUTSIDE-OUTSIDE WIDTH\nJ FRONT TOTAL WIDTH\nK (DUAL) TIRE WIDTH\nL TIRE OUTSIDE-OUTSIDE WIDTH\nM REAR TOTAL WIDTH\nOVERALL LENGTH (BUMPER-BUMPER)\nVEHICLE WEIGHT (NOT GVW)\nHEAVIEST AXLE WEIGHT\n*CHECK BOX IF LOWEST CLEARANCE IS EQUAL TO LONGEST OR SHORTEST WHEEL BASE"
+    }
+  ],
+  "_source_file": "truck-data-form-single-axle (2).pdf",
+  "_pages_count": 1,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:11:08Z"
+}

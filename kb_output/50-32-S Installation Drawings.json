@@ -1,0 +1,171 @@
+{
+  "model": "50-32",
+  "variant": "Surface",
+  "product_type": "Parallelogram Lift",
+  "capacity": "50,000 lbs",
+  "dimensions": {
+    "overall_platform_length": "384.00",
+    "platform_width": "36.22",
+    "overall_continuous_base_length": "309.94 REF",
+    "base_length": "284.00",
+    "base_extension": "100.00",
+    "platform_spacing": "109.50",
+    "platform_height": "45.00",
+    "service_leg_height": "15.00",
+    "runway_width": "81.38",
+    "lift_translation_distance": "36 1/8 inches during vertical articulation",
+    "console_dimensions": {
+      "width": "36 inches (914mm)",
+      "height": "32 1/2 inches (826mm)",
+      "depth": "7 TYP (178mm)",
+      "conduit_positions": {
+        "A": "5 inches (127mm)",
+        "B": "8 inches (203mm)",
+        "C": "12 inches (305mm)",
+        "D": "18 inches (457mm)",
+        "E": "22 inches (559mm)",
+        "F": "25 inches (635mm)",
+        "G": "28 inches (211mm)",
+        "H": "31 inches (787mm)"
+      }
+    },
+    "conduit_section_dimensions": {
+      "section_cc": "40.50 x 40.50",
+      "section_dd": "44.50 x 44.50",
+      "section_bb": "18.00 MIN - 20.00 MAX"
+    }
+  },
+  "installation_requirements": {
+    "slab_thickness": "6 inches ON GRADE (SEE NOTE 23)",
+    "minimum_embedment_length": "3.00 inches",
+    "anchor_bolt_diameter": "3/4 inch",
+    "total_anchor_bolts": "60",
+    "bolt_pattern": "SEE ANCHOR DETAILS",
+    "anchor_bolt_setting_torque": "N/A - SEE ANCHOR DETAILS",
+    "minimum_concrete_thickness": "6 inches ON GRADE",
+    "leveling_shim_thickness": "1 inch maximum",
+    "electrical": {
+      "motor_horsepower": "20",
+      "voltage": "208/230, Y, 3 PH - 60 AMPERE",
+      "control_voltage": "460, Y, 3 PH - 30 AMPERE",
+      "control_circuit_transformer": "1000 VA",
+      "power_supply": "24 VDC - 4.5 AMP",
+      "lighting_fixtures": "8 (OPTIONAL LIGHTING KIT)"
+    },
+    "hydraulic": {
+      "reservoir_capacity": "30 GAL TOTAL",
+      "oil_type": "DEXRON III (ATF)"
+    },
+    "shop_air": {
+      "air_pressure": "85 to 100 PSI",
+      "air_volume_lift": "25 EACH CFM(LOCKS)",
+      "air_volume_optional_jack": "25 EACH CFM",
+      "air_volume_total_capacity": "30 MINIMUM - 50 SUGGESTED CFM"
+    },
+    "conduit_requirements": {
+      "power_supply": "1 inch SCH 40 STEEL PIPE",
+      "incoming_airline": "1 inch SCH 40 STEEL PIPE",
+      "hydraulic_air": "4 inch SCH 40 PVC PIPE",
+      "electrical": "1 inch SCH 40 STEEL PIPE"
+    }
+  },
+  "parts_list": [
+    {
+      "part_number": "P-010-D-007",
+      "description": "Surface Installation General Notes",
+      "qty": 1
+    },
+    {
+      "part_number": "P-1510-D-006",
+      "description": "50-32-Surface Lift Data Table",
+      "qty": 1
+    },
+    {
+      "part_number": "P-010-D-005",
+      "description": "Service Leg Conduit Details",
+      "qty": 1
+    },
+    {
+      "part_number": "P-010-D-004",
+      "description": "Anchor Details & Shimming",
+      "qty": 1
+    },
+    {
+      "part_number": "P-010-D-003",
+      "description": "Control Console & Stub-Up Details",
+      "qty": 1
+    },
+    {
+      "part_number": "P-010-D-002",
+      "description": "Lift & Console Conduit Locations, Section Views",
+      "qty": 1
+    },
+    {
+      "part_number": "P-1510-D-001",
+      "description": "50-32-Surface Standard Console Location Layout",
+      "qty": 1
+    }
+  ],
+  "certifications": [],
+  "notes": [
+    "Surface mounted continuous base installation",
+    "This configuration is most often used for fleet maintenance, repair and service applications",
+    "The lift unit translates to the rear approximately 36 1/8 inches during the vertical articulation",
+    "Use smooth electrical 90's in conduits, not plumbing 90's",
+    "Remove all sharp corners & edges unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-7011 core 5.3 flux core wire only",
+    "All floor strength requirements are based on a concrete slab that is on grade (supported by soil)",
+    "The control console must be located in the vicinity of the lift"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric view of 50-32 Surface lift showing overall assembly with platform, service legs, and control console",
+      "extracted_text": "50-32-SURFACE PAGE 1 of 2, MOHAWK RESOURCES LTD., Surface Installation General Notes, 50-32-Surface Lift Data Table, Service Leg Conduit Details, Anchor Details & Shimming, Control Console & Stub-Up Details, Lift & Console Conduit Locations Section Views, 50-32-Surface Standard Console Location Layout"
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view showing platform dimensions, service leg details, and runway end plate configuration",
+      "extracted_text": "384.00 OVERALL PLATFORM LENGTH, 36.22, FRONT, REAR, 15.00, SERVICE LEG, 309.94 REF OVERALL CONTINUOUS BASE LENGTH, 284.00, 100.00, 109.50, RUNWAY END PLATES NOT SHOWN FOR CLARITY, 45.00, 65, 50-32-SURFACE PAGE 2 of 2, 81.38, FRONT ELEVATION VIEW"
+    },
+    {
+      "page": 3,
+      "description": "Plan view showing standard console location layout with platform outline and conduit routing",
+      "extracted_text": "484.00, 384.00, 100.00, ALTERNATE CONSOLE LOCATION, SEE ANCHOR DETAILS, RIGHT RUNWAY, LEFT RUNWAY, PLATFORM OUTLINE (TYP) SHOWN RETRACTED, ELECTRICAL SERVICE SUPPLY CONDUIT SEE NOTE 19, HYDRAULIC SUPPLY CONDUIT SEE NOTE 15, APPROACH RAMP UP, 109.50, 45.00, FRONT, REAR, 36 inches, STANDARD CONSOLE LOCATION LAYOUT, POWER SUPPLY CONDUIT SEE NOTE 20, CONTROL PANEL SEE NOTE 18, COMPRESSED AIR SUPPLY CONDUIT SEE NOTE 21, 36 inches, OPERATOR SIDE OF CONSOLE, 50-32-SURFACE"
+    },
+    {
+      "page": 4,
+      "description": "Section views showing lift and console subgrade conduit locations with dimensional details",
+      "extracted_text": "LIFT & CONSOLE SUBGRADE CONDUIT LOCATIONS, SECTION VIEWS, 40.50, 40.50, 2.00 TYP, LONGITUDINAL CENTERLINE OF LIFT UNIT, SEAL BARRIER AT EACH CONDUIT GOING TO LIFT UNIT (BY OTHERS), AIR MANIFOLD, OPERATOR SIDE OF POWER CONSOLE, INCOMING AIR LINE (BY OTHERS), TO CONTROL PANEL, SECTION C-C, THREAD TERMINAL END OF CONDUIT (TYP), JUNCTION BOX, 44.50, 44.50, THREAD TERMINAL END OF CONDUIT (TYP), FLEX CONDUIT FOR INCOMING POWERLINE (BY OTHERS) SEE NOTES 19 & 20, 36.50, 36.50, 18.00 MIN 20.00 MAX, LONGITUDINAL CENTERLINE OF LIFT UNIT, 2.00 TYP, TO LIFT UNIT, TO CONTROL PANEL, SECTION D-D, SECTION B-B"
+    },
+    {
+      "page": 5,
+      "description": "Control console and stub-up details showing top view with conduit locations and specifications",
+      "extracted_text": "TOP VIEW OF CONSOLE FRAME, 1 3/4 TYP (44), 10 5/8 (270), BACK, UNITS = INCH (mm), BACK OF CONSOLE, 31 (787), 28 (211), 25 (635), 22 (559), 18 (457), 12 (305), BY OTHERS 8 (203), 5 (127), 0, FRONT OF CONSOLE, 7 TYP (178), 36 (914), CONTROL PANEL, H, G, F, E, 32 1/2 (826), 36 (914), D, C, B, A, CONDUIT SIZES & APPLICATION: A: 1 inch SCH 40 STEEL PIPE - INCOMING POWER, B: 1 inch SCH 40 STEEL PIPE - INCOMING AIRLINE, C,D: 4 inch SCH 40 PVC PIPE - HYDRAULIC & AIR TO LIFT, E,F,G,H: 1 inch SCH 40 STEEL PIPE - ELECTRICAL TO LIFT, INCOMING CONDUITS TO PROTRUDE FROM FLOOR ~18 inches (460-500 mm) AS SHOWN (SEE TOP VIEW), FRONT OF CONSOLE, CONTROL CONSOLE & STUB-UP DETAILS, CUSTOMER PREFERENCE OPTIONAL"
+    },
+    {
+      "page": 6,
+      "description": "Anchor details and shimming specifications with bolt location dimensions and installation instructions",
+      "extracted_text": "20.00, 1.50, 1.50, 5.50, BASE UNIT BASE PLATE, WASHER, NUT, 1/2 PLATE THICKNESS, 3/8 REF, TOP OF FLOOR ELEVATION, 16.00 TYP, 11.50 30.00, ANCHOR DETAILS & SHIMMING, 1.25, LEVELING SHIM (WHERE IT IS POSSIBLE GREATER EMBEDMENT DEPTH WILL PROVIDE ANCHORAGE STRENGTH), 90, ANCHOR BOLT LOCATION DIMENSIONS AND DETAILS, LEVELING SHIM, CONCRETE THICKNESS SEE GENERAL NOTES, ANCHOR BOLT, ANCHOR BOLT DETAIL, 1 inch MAXIMUM LEVELING SHIM THICKNESS SEE NOTE 10, 1 inch MAXIMUM LEVELING SHIM THICKNESS SEE NOTE 10, CL OF BASE, 1.14 R, PLACE LEVELING SHIMS IN A STRAIGHT AND ORDERLY FASHION AT EACH ANCHOR BOLT. USE THIN SHIMS TO FULLY FILL OUT EACH LOCATION, 37.8 TYP, REPRESENTATIVE TIGHTENING SEQUENCE FOR ANCHOR BOLTS TIGHTENING FROM CENTER OF BASE OUTWARD, 2.94, 1.43, APPROVED ANCHOR BOLTS PROVIDED BY MOHAWK LIFT, ANCHOR BOLTS ARE MANUFACTURED BY, WEDGE FASTENING SYSTEMS 24/9 EAST MAIN STREET BEREA, OHIO 44017 PHONE: 440-234-7414 OR 800-343-1264, WEB SITE: WWW.WEDFIT.COM, 1.14, 2.28, TYPICAL ANCHOR BOLT, THE MAXIMUM THICKNESS OF ANY STACK OF SHIMS IS 1 inch SEE NOTES 9 & 10, PLACEMENT OF LEVELING SHIM DETAIL, LEVELING SHIMS ARE AVAILABLE IN A RANGE OF THICKNESSES FROM 1/16 inch, 1/8 inch & 1/4 inch, LEVELING SHIM DETAIL"
+    },
+    {
+      "page": 7,
+      "description": "Service leg conduit details showing isometric view of connections and routing",
+      "extracted_text": "REAR LEG OF LIFT UNIT, FLOOR SERVICE SUPPLY COVER, ISOMETRIC VIEW OF SERVICE CONNECTIONS AND ROUTING, NOTE: LEFT HAND (DRIVER'S SIDE) SHOWN. MIRROR THIS VIEW FOR RIGHT HAND SIDE, SECTION A-A, ANCHOR BOLT ASSEMBLY, 5 REF, 5 REF, A, 4 REF, 4 REF, 19.5 REF, A, WIRE COLORS: (1) YELLOW (1) BLACK (1) BLUE, POWER CABLE FOR LIGHTS, HYDRAULIC HOSE, HYDRAULIC 90 DEGREE FITTING, ENCODER AND FIELD SWITCH CABLES"
+    },
+    {
+      "page": 8,
+      "description": "Lift data table and required materials list with specifications and part numbers",
+      "extracted_text": "LIFT DATA TABLE, MOHAWK RESOURCES, LTD, PARALLELOGRAM LIFT MODEL 50-32-SURFACE, LIFT UNIT DATA, MAXIMUM LOAD CAPACITY (LBS): 50,000, ANCHORAGE, ANCHOR BOLT DIAMETER (IN.): 3/4 inch, TOTAL NUMBER OF ANCHOR BOLTS: 60, BOLT PATTERN: SEE ANCHOR DETAILS, ANCHOR BOLT SETTING TORQUE: N/A- SEE ANCHOR DETAILS, MINIMUM EMBEDMENT LENGTH (IN.): 3.00, MINIMUM CONCRETE THICKNESS (IN.): 6 inch ON GRADE (SEE NOTE 23), HYDRAULIC, RESERVOIR CAPACITY (GAL): 30 TOTAL, OIL TYPE: DEXRON III (ATF), ELECTRICAL, MOTOR HORSEPOWER: 20, 208/230, Y, 3 PH: 60 AMPERE, 460, Y, 3 PH: 30 AMPERE, CONTROL CIRCUIT TRANSFORMER 1000 VA: 1.6 AMP, 24 VDC POWER SUPPLY: 4.5 AMP, LIGHT FIXTURES (OPTIONAL LIGHTING KIT): 8, SHOP AIR, AIR PRESSURE (PSI): 85 to 100, AIR VOLUME - LIFT (CFM)(LOCKS): 25 EACH, AIR VOLUME - OPTIONAL ROLLING JACK (CFM): 25 EACH, AIR VOLUME - TOTAL REQ'D CAPACITY (CFM): 30 MINIMUM 50 SUGGESTED, REQUIRED MATERIAL LIST, MATERIALS SHOWN ON THIS LIST SHALL BE USED WITHOUT SUBSTITUTION UNLESS SPECIFICALLY APPROVED IN WRITING BY MOHAWK RESOURCES, LTD."
+    },
+    {
+      "page": 9,
+      "description": "General installation notes and surface lift specific requirements",
+      "extracted_text": "GENERAL NOTES, NOTE 1, NOTE 2, NOTE 3, NOTE 4, NOTE 5, NOTE 6, NOTE 7, NOTE 8, NOTE 9, NOTE 10, NOTE 11, NOTE 12, NOTE 13, NOTE 14, NOTE 15, NOTE 16, NOTE 17, NOTE 18, NOTE 19, NOTE 20, NOTE 21, NOTE 22, NOTE 23, SURFACE LIFTS ONLY"
+    }
+  ],
+  "_source_file": "50-32-S Installation Drawings.pdf",
+  "_pages_count": 9,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:05:51Z"
+}

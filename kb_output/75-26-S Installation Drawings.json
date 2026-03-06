@@ -1,0 +1,172 @@
+{
+  "model": "75-26",
+  "variant": "Surface",
+  "product_type": "Parallelogram Lift - Surface Mount",
+  "capacity": "75,000 LBS",
+  "dimensions": {
+    "overall_platform_length": "312.00",
+    "platform_width_front_to_rear": "100.00",
+    "overall_continuous_base_length": "248.00",
+    "service_leg_width": "109.50",
+    "service_leg_depth": "45.00",
+    "service_leg_height": "63.00",
+    "runway_end_plate_spacing": "81.38",
+    "total_runway_spacing": "111.38",
+    "console_dimensions": {
+      "width": "36 (914)",
+      "depth": "10 5/8 (270)",
+      "height": "32 1/2 (826)",
+      "back_panel_height": "36 (914)"
+    },
+    "approach_ramp_length": "36",
+    "units": "inches (mm where noted)"
+  },
+  "installation_requirements": {
+    "minimum_slab_thickness": "6.00 inches",
+    "minimum_embedment_length": "5.00 inches",
+    "concrete_strength": "4,000 psi minimum (27.6 MPa)",
+    "anchor_bolts": {
+      "diameter": "3/4 inch",
+      "quantity": "48",
+      "pattern": "See anchor details",
+      "type": "WEJ-IT expansion anchors, 3/4 inch (19mm) DIA",
+      "torque_setting": "N/A - see anchor details"
+    },
+    "leveling_shims": {
+      "maximum_thickness": "1 inch (25.4)",
+      "available_thicknesses": "1/16, 1/8, 1/4 thick"
+    },
+    "utilities": {
+      "electrical": "See electrical service supply conduit",
+      "hydraulic": "See hydraulic supply conduit",
+      "compressed_air": "See compressed air supply conduit",
+      "power_supply": "See power supply conduit"
+    }
+  },
+  "parts_list": [
+    {
+      "part_number": "12",
+      "description": "LOCKOUT/TAGOUT DISCONNECT BOX",
+      "qty": 1
+    },
+    {
+      "part_number": "11*",
+      "description": "LEVELING SHIMS",
+      "qty": "AR"
+    },
+    {
+      "part_number": "10*",
+      "description": "3/4 x 5 ANCHOR BOLT ASSEMBLY",
+      "qty": 48
+    },
+    {
+      "part_number": "9",
+      "description": "1 SEAL BARRIER",
+      "qty": 4
+    },
+    {
+      "part_number": "8",
+      "description": "3/4 REDUCER BUSHING",
+      "qty": 4
+    },
+    {
+      "part_number": "7",
+      "description": "1 SCH 40-90 DEG ELBOW",
+      "qty": 4
+    },
+    {
+      "part_number": "6*",
+      "description": "JUNCTION BOX 10 (305x2)",
+      "qty": 1
+    },
+    {
+      "part_number": "5",
+      "description": "3/4 LIQUID TIGHT CONDUIT",
+      "qty": "AR"
+    },
+    {
+      "part_number": "4",
+      "description": "1 RIGID CONDUIT",
+      "qty": "AR"
+    },
+    {
+      "part_number": "3",
+      "description": "FILTER/LUBRICATOR/REGULATOR, DRYER SHUTOFF",
+      "qty": 1
+    },
+    {
+      "part_number": "2",
+      "description": "4 SCH 40 STREET ELBOW",
+      "qty": "AR"
+    },
+    {
+      "part_number": "1",
+      "description": "4 SCH 40 PIPE",
+      "qty": "AR"
+    }
+  ],
+  "certifications": [],
+  "notes": [
+    "Surface mounted continuous base installation",
+    "Most often used for fleet maintenance, repair and service applications",
+    "Lift unit translates to the rear approximately 36 1/8 during vertical articulation",
+    "Remove all sharp corners & edges unless otherwise specified",
+    "Surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications",
+    "Use smooth electrical 90's in conduits, not plumbing 90's",
+    "Seal barrier at each conduit going to lift unit (by others)",
+    "All floor requirements are based on concrete slab supported by soil",
+    "Installation involving slab not on grade must be reviewed by building architect"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric overview of 75-26 Surface mount parallelogram lift showing overall assembly with control console",
+      "extracted_text": "75-26-SURFACE, PAGE 1 of 2, P-010-D-007 Surface Installation General Notes, P-1110-D-008, P-010-D-005 Service Leg Conduit Details, P-010-D-004 Anchor Details & Shimming, P-010-D-003 Control Console & Stub-up Details, P-010-D-002 Lift & Console Conduit Locations, Section Views, P-1110-D-001, MOHAWK RESOURCES LTD."
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view and service leg details with dimensions",
+      "extracted_text": "312.00 OVERALL PLATFORM LENGTH, 36.23, 14.00, SERVICE LEG, FRONT, 248.00 OVERALL CONTINUOUS BASE LENGTH, REAR, 100, 109.50, 45.00, 63.00, 81.38, 111.38, RUNWAY END PLATES NOT SHOWN, FOR CLARITY, SURFACE MOUNTED CONTINUOUS BASE INSTALLATION, 75-26-SURFACE PAGE 2 of 2, FRONT ELEVATION VIEW"
+    },
+    {
+      "page": 3,
+      "description": "Plan view showing standard console location layout with conduit routing",
+      "extracted_text": "412.00, 312.00, 100.00, ALTERNATE CONSOLE LOCATION, SEE ANCHOR DETAILS, RIGHT RUNWAY, LEFT RUNWAY, 109.50, 45.00, PLATFORM OUTLINE (TYP) SHOWN RETRACTED, ELECTRICAL SERVICE SUPPLY CONDUIT SEE NOTE 16, HYDRAULIC SUPPLY CONDUIT SEE NOTE 15, APPROACH RAMP UP, 36, CONTROL PANEL SEE NOTE 18, POWER SUPPLY CONDUIT SEE NOTE 20, COMPRESSED AIR SUPPLY CONDUIT SEE NOTE 21, OPERATOR SIDE OF CONSOLE, STANDARD CONSOLE LOCATION LAYOUT, 75-26-SURFACE"
+    },
+    {
+      "page": 4,
+      "description": "Lift & console subgrade conduit locations with section views",
+      "extracted_text": "LIFT & CONSOLE SUBGRADE CONDUIT LOCATIONS, SECTION VIEWS, UNITS = INCH (mm) = POUND (kg), 40.50 (1029), 2.00 TYP (51), LONGITUDINAL CENTERLINE OF LIFT UNIT, SEAL BARRIER AT EACH CONDUIT GOING TO LIFT UNIT (BY OTHERS), AIR MANIFOLD, OPERATOR SIDE OF POWER CONSOLE, TO CONTROL PANEL, INCOMING AIR LINE (BY OTHERS), SECTION C-C, THREAD TERMINAL END OF CONDUIT (TYP), JUNCTION BOX, 44.50 (1130), 36.50 (927), FLEX CONDUIT FOR INCOMING POWERLINE (BY OTHERS) SEE NOTES 19 & 20, 18.00 (457) MIN 20.00 (508) MAX, LONGITUDINAL CENTERLINE OF LIFT UNIT, TO LIFT UNIT, TO CONTROL PANEL, SECTION B-B, SECTION D-D"
+    },
+    {
+      "page": 5,
+      "description": "Top view of console frame and control console & stub-up details",
+      "extracted_text": "TOP VIEW OF CONSOLE FRAME, 1 3/4 TYP (44), 10 5/8 (270), BACK OF CONSOLE, UNITS = INCH (mm), 31 (787), 28 (711), 25 (635), 22 (559), 18 (457), 32 1/2 (826), 36 (914), 12 (305), 8 (203), BY OTHERS, 5 (127), FRONT OF CONSOLE, 7 TYP (178), 36 (914), CONDUIT SIZES & APPLICATION, CONTROL CONSOLE & STUB-UP DETAILS, INCOMING CONDUITS TO PROTRUDE FROM FLOOR ~18 (460-500 mm) AS SHOWN (SEE TOP VIEW)"
+    },
+    {
+      "page": 6,
+      "description": "Anchor details & shimming specifications with installation instructions",
+      "extracted_text": "BASE UNIT BASE PLATE, WASHER, NUT, 1/2 PLATE THICKNESS (13), UNITS = INCH (mm) = POUND (kg), 3/8 REF (9.5), TOP OF FLOOR ELEVATION, 1 MINIMUM EMBEDMENT (76) WHERE IT IS POSSIBLE GREATER EMBEDMENT PROVIDES INCREASED ANCHORING STRENGTH, LEVELING SHIM, CONCRETE THICKNESS SEE GENERAL NOTES, ANCHOR BOLT, ANCHOR BOLT DETAIL, ANCHOR BOLT LOCATION DIMENSIONS AND DETAILS, 20.00 (508), 1.50 (38), 5.50 (140), 30, 7.25 (184), 16.00 TYP (406), 11.50 (290), 30.00 (762), 7.25 (184), 30 (25), ANCHOR DETAILS & SHIMMING"
+    },
+    {
+      "page": 7,
+      "description": "Isometric view of service connections and routing with hydraulic details",
+      "extracted_text": "UNITS = INCH (mm), REAR LEG OF LIFT UNIT, FLOOR SERVICE SUPPLY COVER, ISOMETRIC VIEW OF SERVICE CONNECTIONS AND ROUTING, NOTE: LEFT HAND (DRIVER'S SIDE) SHOWN. MIRROR THIS VIEW FOR RIGHT HAND SIDE, ANCHOR BOLT ASSEMBLY, SECTION A-A, 5 REF (127), 5 REF (127), 4 REF (102), 4 REF (102), 13.6 REF (345), (8) YELLOW (7) BLACK (6) WHITE (1) BLUE, POWER CABLE FOR LIGHTS, HYDRAULIC HOSE, HYDRAULIC 90 DEGREE FITTING, ENCODER AND REC2 SWITCH CABLES"
+    },
+    {
+      "page": 8,
+      "description": "Lift data table and required material list",
+      "extracted_text": "LIFT DATA TABLE, MOHAWK RESOURCES, LTD, PARALLELOGRAM LIFT MODEL 75-26-SURFACE, LIFT UNIT DATA MAXIMUM LOAD CAPACITY (LBS) 75,000, ANCHORAGE ANCHOR BOLT DIAMETER (IN.) 3/4, TOTAL NUMBER OF ANCHOR BOLTS 48, BOLT PATTERN SEE ANCHOR DETAILS, ANCHOR BOLT SETTING TORQUE N/A- SEE ANCHOR DETAILS, MINIMUM EMBEDMENT LENGTH (IN.) 5.00, MINIMUM SLAB THICKNESS (IN.) 6.00, HYDRAULIC RESERVOIR CAPACITY (GAL) 30 TOTAL, OIL TYPE DEXRON II (ATF), ELECTRICAL MOTOR HORSEPOWER 20, 208/230 V 50 AMPERE, 460/575 V 3 PH 56 AMPERE, CONTROL CIRCUIT TRANSFORMER 1000 VA 7.9 AMP, 24 VDC POWER SUPPLY 4.8 AMP, LIGHT FIXTURES (OPTIONAL LIGHTING KIT) QTY 6, SHOP AIR AIR PRESSURE (PSI) 85 to 100, AIR VOLUME- STANDARD (CFM) 5, AIR VOLUME- OPTIONAL ROLLING JACK (CFM) 25 EACH, AIR VOLUME- OPTIONAL SHOP AIR KIT (CFM) 20, AIR VOLUME- TOTAL REQ'D CAPACITY (CFM) 30 MINIMUM, AIR VOLUME- TOTAL REQ'D CAPACITY (CFM) 50 SUGGESTED, REQUIRED MATERIAL LIST"
+    },
+    {
+      "page": 9,
+      "description": "General notes and surface lifts specifications",
+      "extracted_text": "GENERAL NOTES, SURFACE LIFTS ONLY, UNITS = INCH (mm), NOTE 1 Where existing concrete floor has a minimum ultimate strength of not less than Fc= 4,000 psi (27.6 MPa) and is at least 6 inches (152) thick, then the floor system may be used without alterations, NOTE 2 If the concrete floor system does not meet minimum specifications of note 1 above, then a new concrete floor shall be installed to support the lift, NOTE 3 If the strength of an existing floor system is unknown or not documented, its strength should be determined by core samples, NOTE 4 Any new concrete used for repairs or alterations to the floor system shall be at a minimum Fc=4,000 psi (27.6 MPa), with heavy aggregate, NOTE 12 In certain cases the floor slab may have adequate strength to support the lift unit but may not be thick enough to provide the minimum embedment depth for the at WEJ-IT anchor bolts"
+    }
+  ],
+  "_source_file": "75-26-S Installation Drawings.pdf",
+  "_pages_count": 9,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:06:48Z"
+}

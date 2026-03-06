@@ -1,0 +1,64 @@
+{
+  "model": "Parallelogram Lift",
+  "variant": "Surface Mount and Flush Mount",
+  "product_type": "Parallelogram Vehicle Lift",
+  "capacity": "50,000, 75,000 & 100,000 lbs",
+  "dimensions": {
+    "track_lengths": "32', 35', 42' or 48' (lengths available dependent on capacity)",
+    "approach_ramp_length": "100\" (2.54m) - standard (shorter or longer or portable available)",
+    "overall_length_sm": "34'6\" to 56'4\" (10.52 to 17.17 meters)",
+    "lifting_height_stroke": "63\" SM or 79\" FM (1.60m SM or 2.00m FM)",
+    "lowered_height": "13\" (.33m) on SM or 16\" (.41m) on FM",
+    "track_width": "32\" (.81m)",
+    "overall_width": "109 1/2\" (2.78m)",
+    "width_between_platforms": "44\" (1.12m)",
+    "lifting_speed": "60 Seconds",
+    "horizontal_movement": "36 1/8\" (.92m) @ full stroke"
+  },
+  "installation_requirements": {
+    "power_requirements": "20 H.P. 220/440/575 volt 3 Phase motor",
+    "slab_requirements": "See installation instructions for structural specs",
+    "optional_locations": "Up to 200' from control console (additional charges will or may apply)"
+  },
+  "parts_list": [],
+  "certifications": [
+    "ALI",
+    "ANSI",
+    "ASME",
+    "AISI",
+    "ASTM",
+    "ASA",
+    "NEC",
+    "AWG",
+    "NEMA",
+    "MEETS CURRENT NATIONAL ANSI CODE FOR LIFTS"
+  ],
+  "notes": [
+    "SPECIFICATIONS SUBJECT TO CHANGE WITHOUT NOTICE. ABOVE EXAMPLE SHOWN WITH 32' LONG RUNWAYS",
+    "Mohawk builds the best products with the finest materials, to the highest standards",
+    "Our staff will assist you with a fleet evaluation, design assistance and answer any technical questions you have",
+    "Available under discounted government contract in all 50 states"
+  ],
+  "optional_equipment": [
+    "Rolling Jack/Jacking Platforms",
+    "Track Lighting",
+    "Air/Hydraulic Tire Dolly",
+    "Keyed Control Lock-Out",
+    "Stainless Steel Bases",
+    "Marine Paint (Rustoleum standard)",
+    "Drive Thru Ramps",
+    "Track Tape Switch-Shut Off",
+    "Air Inflatable Movable Approach Ramps"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Product specification sheet showing surface mount and flush mount parallelogram lift configurations with technical diagrams, specifications table, and company information",
+      "extracted_text": "PARALLELOGRAM SPECIFICATIONS, SURFACE MOUNT, FLUSH MOUNT, Capacities 50,000, 75,000 & 100,000 lbs, Track Lengths 32', 35', 42' or 48', Approach Ramp Length 100\", Overall Length (SM model) 34'6\" to 56'4\", Lifting Height (stroke) 63\" SM or 79\" FM, Lowered Height 13\" on SM or 16\" on FM, Track Width 32\", Overall Width 109 1/2\", Width Between Platforms 44\", Lifting Speed 60 Seconds, Power Requirements 20 H.P. 220/440/575 volt 3 Phase motor, Horizontal Movement 36 1/8\" @ full stroke, OPTIONAL EQUIPMENT, Rolling Jack/Jacking Platforms, Track Lighting, Air/Hydraulic Tire Dolly, Keyed Control Lock-Out, Stainless Steel Bases, Marine Paint (Rustoleum standard), Drive Thru Ramps, Track Tape Switch-Shut Off, Air Inflatable Movable Approach Ramps, SM = Surface Mount Model, FM = Flush Mount Model, THESE LIFTS CONFORM TO ANSI/ALI STANDARDS, MOHAWK LIFTS, Mohawk Lifts, LLC., P.O. Box 110, 65 Vrooman Ave, Amsterdam, NY 12010, (800) 833-2006, (518) 842-1431, FAX. (518) 842-1289, www.mohawklifts.com, REV 10/21"
+    }
+  ],
+  "_source_file": "parallelogram.pdf",
+  "_pages_count": 1,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:10:22Z"
+}

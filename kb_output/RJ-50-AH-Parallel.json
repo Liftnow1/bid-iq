@@ -1,0 +1,42 @@
+{
+  "model": "RJ-50-AH",
+  "variant": "Parallel",
+  "product_type": "Rolling Jack/Parallelogram Lift",
+  "capacity": "50,000 LB CAPACITY",
+  "dimensions": {
+    "overall_length": "59 1/4 MAX",
+    "width_max": "32 MAX",
+    "width_min": "12 MIN",
+    "height_closed": "7 1/8",
+    "height_extended": "17 5/8",
+    "approach_length": "43 1/2 MIN",
+    "pad_spacing": "7 1/8"
+  },
+  "installation_requirements": {
+    "slab_requirements": "BI-RATED TO 15,000 LB CAPACITY",
+    "optional_attachments": "SLIDE ARM ATTACHMENT"
+  },
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL"
+  ],
+  "notes": [
+    "RJ-50-AH-2-POH-P SERIES AUTO JACKING BEAM",
+    "PARALLEL/DIAGRAM VERSION, 50,000 LB CAP (45 MIN)",
+    "CAPACITY DEPENDENT ON LIFT CAPACITY",
+    "RJ-50-AH-2-POH-P SERIES JACKING BEAM SHOWN ABOVE",
+    "WITH OPTIONAL SLIDE ARM ATTACHMENT",
+    "4 HOLES PER SIDE"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Technical drawing showing top, side and cross-sectional views of RJ-50-AH Parallel rolling jack with dimensions and specifications",
+      "extracted_text": "RJ-50-AH-Parallel.pdf, 59 1/4 MAX, 43 1/2 MIN, 32 MAX, 12 MIN, 7 1/8, 4 HOLES PER SIDE, 17 5/8, 7 1/8, RJ-50-AH-2-POH-P SERIES AUTO JACKING BEAM, PARALLEL/DIAGRAM VERSION, 50,000 LB CAP (45 MIN), CAPACITY DEPENDENT ON LIFT CAPACITY, RJ-50-AH-2-POH-P SERIES JACKING BEAM SHOWN ABOVE, WITH OPTIONAL SLIDE ARM ATTACHMENT, BI-RATED TO 15,000 LB CAPACITY, MOHAWK RESOURCES, LTD, TITLE: RJ-50-AH-2-POH-P SPEC, ALI/ETL, 50,000 LB CAPACITY"
+    }
+  ],
+  "_source_file": "RJ-50-AH-Parallel.pdf",
+  "_pages_count": 1,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:25:58Z"
+}

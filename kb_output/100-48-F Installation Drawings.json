@@ -1,0 +1,138 @@
+{
+  "model": "100-48-FLUSH",
+  "variant": "flush mount",
+  "product_type": "parallelogram lift",
+  "capacity": "10,000 lbs",
+  "dimensions": {
+    "overall_length": "144 inches",
+    "overall_width": "32.5 inches",
+    "runway_length": "120 inches",
+    "runway_width": "18 inches",
+    "lift_height": "72 inches",
+    "lowered_height": "3.5 inches",
+    "pit_length": "146 inches",
+    "pit_width": "36 inches",
+    "pit_depth": "5.5 inches",
+    "approach_angle": "14 degrees",
+    "departure_angle": "12 degrees"
+  },
+  "installation_requirements": {
+    "slab_thickness": "6 inches minimum",
+    "concrete_strength": "3000 PSI minimum",
+    "anchor_bolts": "#8 x 12 PONIES",
+    "electrical": "220V single phase",
+    "hydraulic_unit": "included",
+    "drain_requirement": "pit drain recommended"
+  },
+  "parts_list": [
+    {
+      "part_number": "100-48-F",
+      "description": "FLUSH INSTALL UNIT WITH MANUALLY COVERED ROLLING",
+      "qty": 1
+    },
+    {
+      "part_number": "JACK",
+      "description": "JUMPING FEET (ON WITH MANUALLY COVERED ROLLING)",
+      "qty": 1
+    },
+    {
+      "part_number": "BLADE SERVICE UNIT",
+      "description": "BLADE CUTOUTS FOR PONIES",
+      "qty": 1
+    }
+  ],
+  "certifications": [
+    "ALI/ETL LISTED"
+  ],
+  "notes": [
+    "FLUSH INSTALL UNIT WITH MANUALLY COVERED ROLLING",
+    "JACK JUMPING FEET (ON WITH MANUALLY COVERED ROLLING)",
+    "PIT CUTTING UNIT NO HOSE ADJUSTMENT RADIO OR THE",
+    "BOLT CUTOUTS FOR PONIES",
+    "BLADE SERVICE UNIT",
+    "TYPICAL FOR INSTALL UP THE FRONT OF THE INSTALLATION FRONT",
+    "LIFT UP TILL POSITION WILL CLEAR UP THE THIRD OFF THE",
+    "INSTALL UP THE LIFT UP THE FRONT RADIO INSTALLATION"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric overview of complete lift assembly showing main structure, hydraulics, and entry/exit directions",
+      "extracted_text": "100-48-FLUSH PAGE 1 OF 2 FRONT REAR ENTRY DIRECTION JACK JUMPING FEET FLUSH INSTALL UNIT WITH MANUALLY COVERED ROLLING"
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view showing lift profile, mounting details, and surface clearances",
+      "extracted_text": "100-48-FLUSH PAGE 2 OF 2 FRONT ELEVATION VIEW OVERALL HEIGHT 72 INCHES SURFACE LG"
+    },
+    {
+      "page": 3,
+      "description": "Detailed beam pocket and conduit installation layout with jacking beam positions",
+      "extracted_text": "100-48-F PAGE 1 OF 8 JACKING BEAM POCKET CONDUITS TO CONSOLE FURNACE DIRECTION"
+    },
+    {
+      "page": 4,
+      "description": "Cross-sectional views showing internal hydraulic routing and structural details",
+      "extracted_text": "100-48-F PAGE 2 OF 8 SECTION A-A SECTION B-B HYDRAULIC HOSE ROUTING SLOPE SEE NOTE 8"
+    },
+    {
+      "page": 5,
+      "description": "Detailed section showing lift mechanism, hydraulic cylinder, and power unit installation",
+      "extracted_text": "100-48-F PAGE 3 OF 8 SECTION A-A DETAIL A #8 x 12 PONIES"
+    },
+    {
+      "page": 6,
+      "description": "Section B-B detail showing lift arm geometry and hydraulic connections",
+      "extracted_text": "100-48-F PAGE 4 OF 8 SECTION B-B SLOPE HYDRAULIC HOSE ELEVATION"
+    },
+    {
+      "page": 7,
+      "description": "Sections C-C and D-D showing additional structural and hydraulic details",
+      "extracted_text": "100-48-F PAGE 5 OF 8 SECTION D-D SECTION C-C SLOPE"
+    },
+    {
+      "page": 8,
+      "description": "Sections E-E and F-F showing step-by-step installation sequence",
+      "extracted_text": "100-48-F PAGE 6 OF 8 SECTION F-F SECTION E-E"
+    },
+    {
+      "page": 9,
+      "description": "Detailed views of lift mechanism components and hydraulic cylinder mounting",
+      "extracted_text": "100-48-F PAGE 7 OF 8 VIEW K SECTION G SECTION H SECTION J"
+    },
+    {
+      "page": 10,
+      "description": "Section L-L showing hydraulic terminal end connections and conduit routing",
+      "extracted_text": "100-48-F PAGE 8 OF 8 SECTION L-L HYDRAULIC TERMINAL END"
+    },
+    {
+      "page": 11,
+      "description": "Material list and specifications table with part quantities and descriptions",
+      "extracted_text": "MATERIAL LIST LIFT DATA TABLE MODEL RESOURCES LTD PARALLELOGRAM LIFT MOHAWK RESOURCES"
+    },
+    {
+      "page": 12,
+      "description": "Control console and stub-up details with electrical specifications",
+      "extracted_text": "CONTROL CONSOLE & STUB-UP DETAILS TOP VIEW OF CONSOLE FRAME BACK OF CONSOLE FRONT OF CONSOLE"
+    },
+    {
+      "page": 13,
+      "description": "Anchor bolt details and shimming specifications with installation notes",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING ANCHOR BOLT LOCATION LINE SLING AND DETAILS"
+    },
+    {
+      "page": 14,
+      "description": "Isometric view of service connections and hydraulic routing",
+      "extracted_text": "SECTION A-A ISOMETRIC VIEW OF SERVICE CONNECTIONS AND ROUTING"
+    },
+    {
+      "page": 15,
+      "description": "Flush lifts only - comprehensive installation notes and specifications",
+      "extracted_text": "FLUSH LIFTS ONLY GENERAL NOTES NOTE 1 ONLY CIVIL REINFORCEMENT REBAR NOTE 2 HYDRAULIC SYSTEM"
+    }
+  ],
+  "_source_file": "100-48-F Installation Drawings.pdf",
+  "_pages_count": 15,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:12:02Z"
+}

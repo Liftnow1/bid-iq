@@ -1,0 +1,132 @@
+{
+  "model": "75-30-F",
+  "variant": "flush",
+  "product_type": "parallelogram lift",
+  "capacity": "30,000 lbs",
+  "dimensions": {
+    "overall_length": "144 inches",
+    "overall_width": "32.5 inches",
+    "overall_height": "10.5 inches",
+    "runway_length": "144 inches",
+    "runway_width": "32.5 inches",
+    "approach_ramp_length": "24 inches",
+    "approach_ramp_slope": "7 degrees",
+    "lift_height": "72 inches",
+    "lowered_height": "4.25 inches",
+    "center_to_center_spacing": "120 inches"
+  },
+  "installation_requirements": {
+    "pit_length": "150 inches",
+    "pit_width": "39 inches",
+    "pit_depth": "10.75 inches",
+    "slab_thickness_minimum": "6 inches",
+    "concrete_strength": "3000 PSI minimum",
+    "anchor_bolts": "3/4 inch diameter x 12 inches long",
+    "anchor_quantity": "16 per lift",
+    "electrical": "208/230/460V 3-phase or 208/230V single phase",
+    "hydraulic_line_size": "3/8 inch",
+    "drain_required": true,
+    "reinforcement_steel": "#4 rebar grid 12 inches on center"
+  },
+  "parts_list": [
+    {
+      "part_number": "75-30-F",
+      "description": "30,000 lb capacity flush mount parallelogram lift",
+      "qty": 1
+    }
+  ],
+  "certifications": [
+    "ALI/ETL listed",
+    "ANSI/ALI ALCTV standards compliant"
+  ],
+  "notes": [
+    "Flush mounted installation with concrete approach ramps",
+    "Requires pit excavation",
+    "Conduits to console",
+    "Jacking beam pocket required",
+    "See notes for hydraulic, air and electrical requirements",
+    "Customer supplies lift unit anchoring and approach ramp concrete work",
+    "All dimensions shown in inches unless otherwise noted"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric view of 75-30-F flush mount lift showing overall configuration with approach ramps",
+      "extracted_text": "75-30-F FLUSH PAGE 1 OF 2, ENTRY DIRECTION, REAR, FRONT, MOHAWK RESOURCES LTD"
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view showing lift mechanism and pit requirements with service leg details",
+      "extracted_text": "75-30-F FLUSH PAGE 2 OF 2, FRONT ELEVATION VIEW, SERVICE LEG"
+    },
+    {
+      "page": 3,
+      "description": "Jacking beam pocket detail and conduit routing diagram",
+      "extracted_text": "75-30-F PAGE 1 OF 8, JACKING BEAM POCKET, CONDUITS TO CONSOLE, CONDUITS TO REAR LIFT PLATFORMS, DRAINAGE CATCH BASIN, BREAKAGE DIRECTION"
+    },
+    {
+      "page": 4,
+      "description": "Detailed cross-sections and dimensional drawings with hydraulic console alternate locations",
+      "extracted_text": "75-30-F PAGE 2 OF 8, HYDRAULIC CONSOLE, ALTERNATE CONSOLE, HYDRAULIC, AIR LINE ALTERNATE"
+    },
+    {
+      "page": 5,
+      "description": "Detail A section view with specific mounting and bolt hole specifications",
+      "extracted_text": "75-30-F PAGE 3 OF 8, SECTION A-A, DETAIL A, 3/4 \u00d8 12 TABS, # \u00d8 12 DOWELS"
+    },
+    {
+      "page": 6,
+      "description": "Section B-B detail showing structural mounting and reinforcement details",
+      "extracted_text": "75-30-F PAGE 4 OF 8, SECTION B-B, # \u00d8 12 TABS TP, # \u00d8 12 DOWELS TP, REINFORCED CONCRETE ELEVATION, TOP REBAR 2 x 10 MM TP"
+    },
+    {
+      "page": 7,
+      "description": "Sections C-C and D-D showing additional structural and mounting details",
+      "extracted_text": "75-30-F PAGE 5 OF 8, SECTION C-C, SECTION D-D, 2 x \u00d8 12 TABS EACH \u00d8E REINFORCED CONCRETE ELEVATION, # \u00d8 16 TP, # \u00d8 12 DOWELS TP"
+    },
+    {
+      "page": 8,
+      "description": "Sections E-E and F-F with additional construction and reinforcement specifications",
+      "extracted_text": "75-30-F PAGE 6 OF 8, SECTION F-F, SECTION E-E, \u00d8 12 DOWELS EACH"
+    },
+    {
+      "page": 9,
+      "description": "Sections G, H, J and K showing various structural details and views",
+      "extracted_text": "75-30-F PAGE 7 OF 8, VIEW K, SECTION G, SECTION H, SECTION J, 6 x \u00d8 12 x 3 TABS"
+    },
+    {
+      "page": 10,
+      "description": "Section L-L showing terminal end construction and approach details",
+      "extracted_text": "75-30-F PAGE 8 OF 8, SECTION L-L, FLEX CONDUIT FOR INCOMING, INCOMING AIR LINE, INCOMING HYDRAULIC LINE, SEAL BARRIER & EACH CONDUIT, INCOMING AIR LINE & HYDRAULIC CONSOLE"
+    },
+    {
+      "page": 11,
+      "description": "Custom/ALOUETTE CA parts table with material specifications and quantities",
+      "extracted_text": "CUSTOM - ALOUETTE CA, MATERIAL, QTY, LIST, WEIGHT, MULTIVALS SHOWN ON THIS LIST SHALL BE LISTED WITHOUT APPROVED BY"
+    },
+    {
+      "page": 12,
+      "description": "Top view of console frame with control panel layout and stub-up details",
+      "extracted_text": "TOP VIEW OF CONSOLE FRAME, CONTROL CONSOLE & STUB-UP DETAILS, FRONT OF CONSOLE, BACK OF CONSOLE, INCOMING CONDUITS, CUSTOMER PREFERRED OPTIONAL"
+    },
+    {
+      "page": 13,
+      "description": "Anchor bolt locations, shimming details and placement specifications",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, ANCHOR BOLT LOCATION, SHIM SHIMS, AND JAILS, PLACEMENT OF ELECTRIC SHIM DETAIL"
+    },
+    {
+      "page": 14,
+      "description": "Isometric view of service connections and plumbing layout",
+      "extracted_text": "SECTION A-A, ISOMETRIC VIEW OF SERVICE CONNECTIONS AND PLUMBING, CONSOLE AND PIPING, HYDRAULIC 90\u00b0 STREET FITTING"
+    },
+    {
+      "page": 15,
+      "description": "Flush lifts only specifications and installation notes with detailed requirements",
+      "extracted_text": "FLUSH LIFTS ONLY, GENERAL NOTES, CONCRETE, STEEL, ANCHORING, ELECTRICAL, PLUMBING, HYDRAULIC, AIR, OPTIONAL, APPROACH, CUSTOMER, LIFT UNIT, RESPONSIBILITY, MOHAWK RESOURCES LTD"
+    }
+  ],
+  "_source_file": "75-30-F Installation Drawings.pdf",
+  "_pages_count": 15,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:17:20Z"
+}
