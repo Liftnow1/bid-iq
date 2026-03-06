@@ -4,3 +4,9 @@ __pycache__/
 dist/
 build/
 .env
+.env.local
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
