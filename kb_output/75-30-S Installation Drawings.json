@@ -1,0 +1,104 @@
+{
+  "model": "75-30-S",
+  "variant": "Surface Mount",
+  "product_type": "Parallelogram Lift / Four Post Vehicle Lift",
+  "capacity": "30,000 lbs",
+  "dimensions": {
+    "overall_length": "185 inches",
+    "overall_width": "140 inches",
+    "front_beam_length": "105.50 inches",
+    "rear_beam_length": "105.50 inches",
+    "runway_length": "189 inches",
+    "runway_width": "24 inches",
+    "approach_clearance": "18 inches",
+    "maximum_lift_height": "74 inches",
+    "minimum_clearance_height": "90 inches",
+    "console_dimensions": {
+      "width": "32.12 inches",
+      "height": "32.6 inches",
+      "depth": "10.58 inches"
+    },
+    "post_dimensions": {
+      "front": "40.50 inches",
+      "rear": "40.50 inches"
+    }
+  },
+  "installation_requirements": {
+    "slab_thickness": "6 inches minimum",
+    "concrete_strength": "3000 PSI minimum at 28 days",
+    "anchor_specifications": [
+      "Electrical service: 110V single phase, 15 amp circuit",
+      "Air service: 150 PSI minimum shop air required"
+    ],
+    "foundation_requirements": "Level concrete slab capable of supporting distributed load"
+  },
+  "parts_list": [
+    {
+      "description": "Anchor bolt locations",
+      "qty": 8,
+      "notes": "Per post anchor pattern shown"
+    }
+  ],
+  "certifications": [
+    "ALI Certified",
+    "ETL Listed"
+  ],
+  "notes": [
+    "Mohawk recommends professional installation",
+    "All installation must comply with local codes",
+    "Surface mount installation - no pit required",
+    "Parallelogram design provides level lifting",
+    "Console location layout shown"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric overview drawing of 75-30 Surface lift showing overall configuration",
+      "extracted_text": "75-30-SURFACE, PAGE 1 OF 2, Mohawk Resources Ltd."
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view and service leg details with dimensions",
+      "extracted_text": "FRONT ELEVATION VIEW, SERVICE LEG, 105.50, 40.50, 189.00, 140.00, 90.00 MIN HEIGHT @ OVERHEAD OBSTRUCTION"
+    },
+    {
+      "page": 3,
+      "description": "Standard console location layout with approach details",
+      "extracted_text": "75-30-SURFACE, STANDARD CONSOLE LOCATION LAYOUT, APPROACH CONSOLE, ELECTRICAL SERVICE APPROACH, LIFT RUNWAY, LEFT RUNWAY, RIGHT RUNWAY, SET ANCHOR DETAILS"
+    },
+    {
+      "page": 4,
+      "description": "Lift and console surface conduit sections with electrical details",
+      "extracted_text": "LIFT & CONSOLE SURFACE CONDUIT SECTION VIEWS, SECTION B-B, SECTION C-C, SECTION D-D, FIELD CONDUIT ON INCOMING TO FLR @ 18 FROM SLAB, ELECTRICAL SERVICE APPROACH OR CONDUIT"
+    },
+    {
+      "page": 5,
+      "description": "Top view of console frame with control panel details and dimensions",
+      "extracted_text": "TOP VIEW OF CONSOLE FRAME, CONTROL CONSOLE & STUB UP DETAILS, FRONT OF CONSOLE, BACK OF CONSOLE, 32.12, 32.6, 10.58, BY OTHERS"
+    },
+    {
+      "page": 6,
+      "description": "Anchor bolt location layout and shimming details",
+      "extracted_text": "ANCHOR BOLT LOCATION, SHIMMING, ANCHOR BOLT DETAIL, TYPICAL ANCHOR BOX, 9 TYP"
+    },
+    {
+      "page": 7,
+      "description": "Isometric view of surface connections and pointing details",
+      "extracted_text": "ISOMETRIC VIEW OF SURFACE CONNECTIONS AND POINTING, SECTION A-A"
+    },
+    {
+      "page": 8,
+      "description": "Material list and specifications table",
+      "extracted_text": "MATERIAL, STEEL - SPEC, 75-30-SURFACE, MOHAWK RESOURCES LTD, ALI CERTIFIED, ETL LISTED"
+    },
+    {
+      "page": 9,
+      "description": "Surface lifts only specifications and installation notes",
+      "extracted_text": "SURFACE LIFTS ONLY, Installation specifications, safety requirements, electrical service 110V single phase 15 amp circuit, air service 150 PSI minimum shop air required, concrete slab 6 inch minimum thickness 3000 PSI"
+    }
+  ],
+  "_source_file": "75-30-S Installation Drawings.pdf",
+  "_pages_count": 9,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:18:14Z"
+}

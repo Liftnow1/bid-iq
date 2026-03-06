@@ -1,0 +1,43 @@
+{
+  "model": "Not specified",
+  "variant": "Dual Axle Rear",
+  "product_type": "Truck Data Form",
+  "capacity": "Not specified",
+  "dimensions": {
+    "tire_diameter_front": "A inches",
+    "tire_diameter_rear": "B inches",
+    "front_min_ground_clearance": "C inches",
+    "center_min_ground_clearance": "D inches",
+    "rear_min_ground_clearance": "E inches",
+    "front_axle_to_bumper": "F",
+    "front_axle_to_axle_length": "G",
+    "rear_axle_to_axle_length": "H",
+    "rear_axle_to_bumper": "I",
+    "total_length": "J",
+    "tire_width": "K",
+    "tire_outside_to_outside_width": "L",
+    "front_total_width": "M",
+    "dual_tire_width": "N",
+    "tire_outside_to_outside_width_rear": "O",
+    "rear_total_width": "P"
+  },
+  "installation_requirements": {},
+  "parts_list": [],
+  "certifications": [],
+  "notes": [
+    "PLEASE BE COMPLETE IN ENTERING DIMENSIONAL DATA. OUR DETERMINATION IN SUITING YOUR LIFTING REQUIREMENTS IS ONLY AS ACCURATE AND COMPLETE AS THE DATA WE RECEIVE. ALSO, NOTE ANY AREAS THAT MAY CAUSE PROBLEMS IN VEHICLE LIFTING.",
+    "*ALL DIMENSIONS TO BE ENTERED IN INCHES*",
+    "*CHECK BOX IF LOWEST CLEARANCE IS EQUAL TO LONGEST OR SHORTEST WHEEL BASE"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Truck data form for dual axle rear vehicles showing side view, front view, and rear view with dimensional reference points and measurement table",
+      "extracted_text": "TRUCK DATA FORM (DUAL AXLE REAR)\n\nTIRE DIAMETER: A INCH\nTIRE DIAMETER: B INCH\nMINIMUM GROUND CLEARANCE C ___ INCHES\nMINIMUM GROUND CLEARANCE D ___ INCHES\nMINIMUM GROUND CLEARANCE E ___ INCHES\nCENTER OF GRAVITY\nSIDE VIEW\n\nF G H I J\n\nFRONT VIEW\nK L M\n\nREAR VIEW\nN O P\n\nPLEASE BE COMPLETE IN ENTERING DIMENSIONAL DATA. OUR DETERMINATION IN SUITING YOUR LIFTING REQUIREMENTS IS ONLY AS ACCURATE AND COMPLETE AS THE DATA WE RECEIVE. ALSO, NOTE ANY AREAS THAT MAY CAUSE PROBLEMS IN VEHICLE LIFTING.\n\n*ALL DIMENSIONS TO BE ENTERED IN INCHES*\n\nDIMENSION\nA (FRONT TIRE DIAMETER)\nB (BACK TIRE DIAMETER)\nC (FRONT MIN. GROUND CLEARANCE)\nD (CENTER MIN. GROUND CLEARANCE)\nE (REAR MIN. GROUND CLEARANCE)\nF FRONT AXLE-BUMPER\nG FRONT AXLE-AXLE LENGTH\nH REAR AXLE-AXLE LENGTH\nI REAR AXLE-BUMPER\nJ TOTAL LENGTH\nK TIRE WIDTH\nL TIRE OUTSIDE-OUTSIDE WIDTH\nM FRONT TOTAL WIDTH\nN (DUAL) TIRE WIDTH\nO TIRE OUTSIDE-OUTSIDE WIDTH\nP REAR TOTAL WIDTH\nVEHICLE WEIGHT (NOT GVW)\nHEAVIEST AXLE\n\nLONGEST WHEEL BASE | SHORTEST WHEEL BASE | LOWEST CLEARANCE*\n\n*CHECK BOX IF LOWEST CLEARANCE IS EQUAL TO LONGEST OR SHORTEST WHEEL BASE"
+    }
+  ],
+  "_source_file": "truck_dual_axle (2).pdf",
+  "_pages_count": 1,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:11:08Z"
+}

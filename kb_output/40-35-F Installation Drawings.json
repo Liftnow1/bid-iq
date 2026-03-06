@@ -1,0 +1,198 @@
+{
+  "model": "40-35-F",
+  "variant": "flush",
+  "product_type": "parallelogram lift",
+  "capacity": "40,000 lbs",
+  "dimensions": {
+    "overall_platform_length": "420.00 inches (10668mm)",
+    "overall_continuous_base_length": "378.18 inches (9606mm)",
+    "pit_length": "456.00 inches (11582mm)",
+    "runway_width": "36.25 inches (921mm)",
+    "service_leg_height": "63.09 inches (1603mm) max",
+    "platform_width": "45.00 inches (1143mm)",
+    "pit_dimensions": {
+      "length": "456.00 inches (11582mm)",
+      "width": "438.00 inches (11125mm)",
+      "inner_width": "432.00 inches (10973mm)",
+      "section_length": "215.00 inches (5461mm)",
+      "front_section": "53.00 inches (1346mm)",
+      "depth": "9.00 inches (229mm)",
+      "coverage": "16.50 inches (419mm)"
+    }
+  },
+  "installation_requirements": {
+    "concrete_strength": "F'c=4,000 psi minimum, 5,000 psi recommended",
+    "slab_thickness": "28 day F'c strength, minimum 6000 psi",
+    "anchor_bolts": {
+      "diameter": "3/4 inch",
+      "total_number": "36 bolts",
+      "pattern": "see anchor details",
+      "embedment": "minimum embedment where possible"
+    },
+    "utilities": {
+      "electrical": "20 horsepower motor, 30 amperage at 460V 3 ph, 7.69 amp control circuit transformer 1000 VA, 4.8 amp 24 VDC power supply",
+      "hydraulic_air_supply": "85 to 100 PSI air pressure",
+      "air_volume_rolling_jack": "25 CFM each",
+      "air_volume_shop_kit": "20 CFM",
+      "total_required_capacity": "30 CFM minimum, 50 CFM suggested"
+    },
+    "drainage": "drainage catch basin required, 2.50 inches maximum depth",
+    "conduits": "conduits to rear legs of lift platforms, conduits to console"
+  },
+  "parts_list": [
+    {
+      "part_number": "12",
+      "description": "LOCKOUT/TAGOUT DISCONNECT BOX",
+      "qty": 1
+    },
+    {
+      "part_number": "11*",
+      "description": "LEVELING SHIMS",
+      "qty": "AR"
+    },
+    {
+      "part_number": "10*",
+      "description": "3/4\" x 5\" ANCHOR BOLT ASSEMBLY",
+      "qty": 36
+    },
+    {
+      "part_number": "9",
+      "description": "1\" SEAL BARRIER",
+      "qty": 4
+    },
+    {
+      "part_number": "8",
+      "description": "1\"-3/4\" REDUCER BUSHING",
+      "qty": 4
+    },
+    {
+      "part_number": "7",
+      "description": "1\" SCH 40-90 DEG ELBOW",
+      "qty": 4
+    },
+    {
+      "part_number": "6*",
+      "description": "JUNCTION BOX (JUL15 CONSOLE)",
+      "qty": 1
+    },
+    {
+      "part_number": "5",
+      "description": "30\" THREADED TERMINAL CONDUIT",
+      "qty": 16
+    },
+    {
+      "part_number": "4",
+      "description": "1\" RIGID CONDUIT",
+      "qty": "AR"
+    },
+    {
+      "part_number": "3*",
+      "description": "FILTER/LUBRICATOR/REGULATOR, DRYER SHUTOFF",
+      "qty": 1
+    },
+    {
+      "part_number": "2",
+      "description": "4\" SCH 40 STREET ELBOW",
+      "qty": "AR"
+    },
+    {
+      "part_number": "1",
+      "description": "4\" SCH 40 PIPE",
+      "qty": "AR"
+    }
+  ],
+  "certifications": [],
+  "notes": [
+    "Flush mounted installation with manually covered rolling jack lowering pocket",
+    "Most often used for fleet maintenance applications with moderate tire, wheel or undercarriage services",
+    "Front of lift unit placed to front of lift pit, cylinders translate to rear as they articulate upward",
+    "Approximately 60 inches at rear for HC motion",
+    "Grating recommended to cover rolling jack pocket during use of lift unit",
+    "Two layers of 6 x 6 10/10 WWF reinforcement required",
+    "#4 @ 12 dowels and ties specified",
+    "Concrete strength F'c=4,000 psi minimum recommended where possible",
+    "All sharp corners & edges unless otherwise specified surface finish to be 125 microinch",
+    "Welding return shall conform to AWS specifications to C-max electronics or C-2011 code 3.3 flux core wire only"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric view showing flush mounted installation with rolling jack pocket, lift platforms, and console location",
+      "extracted_text": "40-35-FLUSH PAGE 1 of 2, FLUSH MOUNTED INSTALLATION WITH MANUALLY COVERED ROLLING JACK LOWERING POCKET, FRONT, REAR, ENTRY DIRECTION, P-2210-A-001, MOHAWK RESOURCES LTD."
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view and dimensional details of service legs and platform",
+      "extracted_text": "40-35-FLUSH PAGE 2 of 2, FRONT ELEVATION VIEW, 420.00 (10668) OVERALL PLATFORM LENGTH, 378.18 (9606) OVERALL CONTINUOUS BASE LENGTH, 456.00 (11582) REF PIT LENGTH, RUNWAY END PLATES NOT SHOWN FOR CLARITY, UNITS = INCHES (mm)"
+    },
+    {
+      "page": 3,
+      "description": "Pit plan view showing jacking beam pocket, drainage, and conduit routing",
+      "extracted_text": "40-35-F PAGE 1 of 8, JACKING BEAM POCKET, CONDUITS TO REAR LEGS OF LIFT PLATFORMS, DRAINAGE CATCH BASIN, CONDUITS TO CONSOLE, ENTRANCE DIRECTION"
+    },
+    {
+      "page": 4,
+      "description": "Pit plan with dimensions and console locations",
+      "extracted_text": "40-35-F PAGE 2 of 8, 456.00 (11582), 438.00 (11125), 432.00 (10973), 215.00 (5461), 53.00 (1346), ALTERNATE CONSOLE LOCATION, 36.00 (914), WATER DRAIN CONDUIT SEE NOTE 14, ENTRANCE DIRECTION, ELECTRICAL SERVICE SUPPLY CONDUIT SEE NOTE 13, HYDRAULIC/AIR SUPPLY CONDUIT SEE NOTE 12, STANDARD CONSOLE LOCATION SHOWN SEE NOTE 16, POWER SUPPLY CONDUIT SEE NOTE 20, COMPRESSED AIR SUPPLY CONDUIT SEE NOTE 18"
+    },
+    {
+      "page": 5,
+      "description": "Section A-A showing pit cross-section with reinforcement details",
+      "extracted_text": "40-35-F PAGE 3 of 8, SECTION A-A, DETAIL A, TWO LAYERS OF 6 x 6 10/10 WWF, #4 @ 12 DOWELS, #4 @ 12 TIES, 3-#6, 456.00 (11582), 438.00 (11125), 432.00 (10973), 215.00 (5461), 53.00 (1346), SEE DETAIL A, 9.00 (229), 16.50 (419)"
+    },
+    {
+      "page": 6,
+      "description": "Section B-B showing pit cross-section with drainage details",
+      "extracted_text": "40-35-F PAGE 4 of 8, SECTION B-B, 113.00 (2870), 36.00 (914), 41.00 (1041), 36.00 (914), DEPTH OF DRAINAGE CHANNEL VARIES ALONG TRENCH LENGTH SEE NOTE 8, 3.50 MAX TYP (89), FINISHED FLOOR ELEVATION, TWO LAYERS 6 x 6 10/10 WWF TYP, 6.00 (152), 16.50 (419), SLOPE, 3.00 COVERAGE (76), 3-#6 TYP, #4 @ 12 DOWELS TYP, 9.00 (229), 6.00 TYP (152), #4 @ 12 TIES TYP"
+    },
+    {
+      "page": 7,
+      "description": "Section C-C and Section D-D showing additional pit cross-sections",
+      "extracted_text": "40-35-F PAGE 5 of 8, SECTION C-C, SECTION D-D, 113.00 (2870), 36.00 (914), 41.00 (1549), 36.00 (914), 3.50 MAX TYP (89), FINISHED FLOOR ELEVATION, TWO LAYERS 6 x 6 10/10 WWF TYP, 6.00 (152), 16.50 (419), 3.00 COVERAGE (76), 3-#6 TYP, SLOPE, #4 @ 12 DOWELS TYP, 9.00 (229), 6.00 TYP (152), #4 @ 12 TIES TYP, 2.50 (64) MAXIMUM DEPTH OF DRAINAGE CHANNEL AT CATCH BASIN TYP, 41.00 (1549), 10.00 (254), 10.00 (254), SLOPE"
+    },
+    {
+      "page": 8,
+      "description": "Sections E-E and F-F showing conduit routing details",
+      "extracted_text": "40-35-F PAGE 6 of 8, SECTION E-E, SECTION F-F, 81.00 (2057), 20.00 (508), 20.00 (508), TO CONTROL PANEL, 2.00 MAX TYP (51), 89.00 (2261), 24.00 TYP (610), 73.00 (1854), THREAD TERMINAL END OF PIPE TYP, 18.00 TYP (457), 40.50 (1029) TYP, TO CONTROL PANEL, 2.00 (50) MAX TYP"
+    },
+    {
+      "page": 9,
+      "description": "Sections G, H, J and View K showing structural connection details",
+      "extracted_text": "40-35-F PAGE 7 of 8, SECTION G, SECTION H, SECTION J, VIEW K, BOLT 1/2 x 4 @ 18, ANGLE 1/4 x 3 x 3, PLATE 3/8 x 8 x 42, BAR 1/2 x 3/4, 2 1/4, ANGLE 1/4 x 3 x 3, 4-BOLT 1/2 x 4, REAR LEG OF LIFT UNIT, 26.00 REF (660), 1/2 x 36 x 40 PLATE, 29.00 REF (737), SERVICE SUPPLY COVER, VIEW SHOWING LIFT UNIT"
+    },
+    {
+      "page": 10,
+      "description": "Section L-L showing air manifold and power console connections",
+      "extracted_text": "40-35-F PAGE 8 of 8, SECTION L-L, SEAL BARRIER AT EACH CONDUIT GOING TO LIFT UNIT (BY OTHERS), AIR MANIFOLD, OPERATOR SIDE OF POWER CONSOLE, INCOMING AIR LINE (BY OTHERS) SEE NOTES 17 & 18, THREAD TERMINAL END OF CONDUIT (TYP), JUNCTION BOX, FLEX CONDUIT FOR INCOMING POWERLINE (BY OTHERS) SEE NOTES 19 & 20, 18.00 (457) MIN 20.00 (508) MAX, TO LIFT UNIT"
+    },
+    {
+      "page": 11,
+      "description": "Lift data table and required material list",
+      "extracted_text": "LIFT DATA TABLE, MOHAWK RESOURCES LTD, PARALLELOGRAM LIFT MODEL 40-35-FLUSH, MAXIMUM LOAD CAPACITY (LBS) 40,000, ANCHORAGE ANCHOR BOLT DIAMETER (IN.) 3/4\", TOTAL NUMBER OF ANCHOR BOLTS 36, BOLT PATTERN SEE ANCHOR DETAILS, ANCHOR BOLT SETTING TORQUE N/A - SEE ANCHOR DETAILS, CONCRETE EMBEDMENT LENGTH (IN.) SEE PIT DRAWINGS, MINIMUM CONCRETE THICKNESS (IN.) SEE PIT DRAWINGS, HYDRAULIC RESERVOIR CAPACITY (GAL) 30 TOTAL, OIL TYPE DEXRON III (ATF), ELECTRICAL MOTOR HORSEPOWER 20, AMPERAGE 30 AMPERAGE, at 460 V 3 PH 7.69 AMP, CONTROL CIRCUIT TRANSFORMER 1000 VA 4.8 AMP, 24 VDC POWER SUPPLY QTY 8, LIGHT FIXTURES (OPTIONAL LIGHTING KIT), SHOP AIR AIR PRESSURE (PSI) 85 TO 100, AIR VOLUME - OPTIONAL JACK CYLINDERS (CFM) 25 EACH, AIR VOLUME - OPTIONAL ROLLING JACK (CFM) 20, AIR VOLUME - OPTIONAL SHOP AIR KIT (CFM) 30 MINIMUM, AIR VOLUME - TOTAL REQ'D CAPACITY (CFM) 50 SUGGESTED, REQUIRED MATERIAL LIST"
+    },
+    {
+      "page": 12,
+      "description": "Control console and stub-up details with conduit specifications",
+      "extracted_text": "TOP VIEW OF CONSOLE FRAME, CONTROL CONSOLE & STUB-UP DETAILS, 1 3/4 TYP (44), 10 5/8 (270), BACK OF CONSOLE, 31 (787), 28 (711), 25 (635), 22 (559), 18 (457), 12 (305), BY OTHERS 8 (203), 5 (127), 32 1/2 (826), 36 (914), FRONT OF CONSOLE, 7 TYP (178), 36 (914), CONDUIT SIZES & APPLICATION: A: 1\" (25.4) (MIN) SCHED 40 STEEL PIPE - INCOMING POWER, B: 1\" (25.4) (MIN) SCHED 40 STEEL PIPE - INCOMING AIRLINE, C,D: 4\" (101) SCHED 40 PVC PIPE - HYDRAULIC & AIR TO LIFT, E,F,G,H: 1\" (25.4) (MIN) SCHED 40 STEEL PIPE - ELECTRICAL TO LIFT, INCOMING CONDUITS TO PROTRUDE FROM FLOOR ~18\" (460-500 mm) AS SHOWN (SEE TOP VIEW), FRONT OF CONSOLE"
+    },
+    {
+      "page": 13,
+      "description": "Anchor details and shimming specifications with installation instructions",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, BASE UNIT BASE PLATE, WASHER, NUT, 1/2\" PLATE THICKNESS (13), 3/8\" REF (9.5), TOP OF FLOOR ELEVATION, 16.00 TYP (406), 11.50 (292), 30.00 (762), 7.95 (202), .50 (20), 1\" MINIMUM EMBEDMENT (26) (WHERE IT IS POSSIBLE - GREATER EMBEDMENT PROVIDES ADDITIONAL HOLDING), LEVELING SHIM, CONCRETE THICKNESS SEE GENERAL NOTES, ANCHOR BOLT, ANCHOR BOLT DETAIL, ANCHOR BOLT LOCATION DIMENSIONS AND DETAILS, 1\" (25.4) MAXIMUM LEVELING SHIM THICKNESS SEE NOTE 10, 1\" (25.4) MAXIMUM LEVELING SHIM THICKNESS SEE NOTE 10, CL OF BASE, 1-1/4 R (32), .37 R TYP (9.5), 2.94 (75), REPRESENTATIVE TIGHTENING SEQUENCE FOR ANCHOR BOLTS TIGHTENING FROM CENTER OF BASE OUTWARD, TYPICAL ANCHOR BOLT, 1-1/4 (32), THE MAXIMUM THICKNESS OF ANY STACK OF SHIMS IS 1\" (25.4) SEE NOTES 9 & 10, PLACEMENT OF LEVELING SHIM DETAIL, LEVELING SHIMS ARE AVAILABLE IN A RANGE OF THICKNESSES FROM 1/16\" (1.6), 1/8\" (3.2) & 1/4\" (6.4), LEVELING SHIM DETAIL"
+    },
+    {
+      "page": 14,
+      "description": "Isometric view of service connections and routing with hydraulic details",
+      "extracted_text": "ISOMETRIC VIEW OF SERVICE CONNECTIONS AND ROUTING, REAR LEG OF LIFT UNIT, FLOOR SERVICE SUPPLY COVER, SECTION A-A, 5\" REF (127), 5\" REF (127), 4\" REF (102), 4\" REF (102), 19.6 REF (498), AIR HOSES RED (2) YELLOW (1) BLUE, POWER CABLE (PE) LIGHTS, HYDRAULIC HOSE, HYDRAULIC 90 DEGREE FITTING, ENCODER AND REED SWITCH CABLES, NOTE: LEFT HAND CONSOLE MIRROR IMAGE THIS VIEW FOR RIGHT HAND SIDE"
+    },
+    {
+      "page": 15,
+      "description": "General notes for flush lifts installation requirements and specifications",
+      "extracted_text": "GENERAL NOTES, FLUSH LIFTS ONLY, NOTE 1: CONCRETE USED FOR THE BASE AND THE SIDE WALLS OF EACH TRENCH AND ANY OTHER NEW CONCRETE WHICH IS USED FOR THIS INSTALLATION MAY HAVE A MINIMUM STRENGTH OF F'c=4,000 psi, A STRENGTH OF F'c=5,000 psi IS RECOMMENDED WHERE POSSIBLE. NOTE 2: CONCRETE USED FOR THE BASE AND SIDEWALLS OF THE TRENCH AREAS SHALL REACH ITS FULL 28 DAY F'c STRENGTH BEFORE THE LIFT AND ANCHOR BOLTS ARE INSTALLED. NOTE 3: CONCRETE REINFORCEMENT SIZES AND REINFORCEMENT SPECIFICATION FOR THE BASE OF EACH TRENCH SHALL BE DETERMINED BY AN ENGINEER OR ARCHITECT (AT THE EXPENSE OF THE PURCHASER) AND SHOULD BE DETERMINED CONSIDERING THE LOCAL SOIL CONDITIONS AND THE IMPOSED LOADING. AS A MINIMUM, GRADE 60 LAYERS OF GRADE 60, 6X6-10/10 WELDED WIRE FABRIC SHOULD BE USED IN THE VICINITY OF THE LIFT UNIT AND BETWEEN THE TRENCHES."
+    }
+  ],
+  "_source_file": "40-35-F Installation Drawings.pdf",
+  "_pages_count": 15,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:14:43Z"
+}

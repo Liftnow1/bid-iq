@@ -1,0 +1,158 @@
+{
+  "model": "50-32-F",
+  "variant": "flush",
+  "product_type": "parallelogram lift",
+  "capacity": "50,000 lbs",
+  "dimensions": {
+    "overall_length": "193\"",
+    "overall_width": "144\"",
+    "overall_height": "76\"",
+    "runway_length": "193\"",
+    "runway_width": "30\"",
+    "runway_spacing": "84\"",
+    "rise_height": "76\"",
+    "lowered_height": "7\"",
+    "front_overhang": "24\"",
+    "rear_overhang": "24\"",
+    "pit_length": "204\"",
+    "pit_width": "156\"",
+    "pit_depth": "14\"",
+    "console_dimensions": {
+      "width": "36\"",
+      "depth": "24\"",
+      "height": "32\""
+    },
+    "approach_angle": "11 degrees",
+    "service_legs_height": "78.5\"",
+    "service_legs_width": "30\"",
+    "anchor_spacing": "193\" x 144\"",
+    "conduit_locations": [
+      {
+        "location": "front",
+        "dimension": "62.5\""
+      },
+      {
+        "location": "rear",
+        "dimension": "62.5\""
+      }
+    ]
+  },
+  "installation_requirements": {
+    "pit_dimensions": "204\" x 156\" x 14\" deep",
+    "slab_thickness": "minimum 6\" reinforced concrete",
+    "anchor_bolts": "3/4\" diameter x 12\" embedment",
+    "anchor_quantity": 16,
+    "electrical": "incoming conduits to console",
+    "drainage": "pit drainage recommended",
+    "concrete_strength": "minimum 3000 PSI at 28 days"
+  },
+  "parts_list": [
+    {
+      "part_number": "RZ-AP",
+      "description": "approach ramp",
+      "qty": 2
+    },
+    {
+      "part_number": "RAMP",
+      "description": "service ramp",
+      "qty": 2
+    },
+    {
+      "part_number": "CONSOLE",
+      "description": "control console",
+      "qty": 1
+    }
+  ],
+  "certifications": [
+    "ALI/ETL"
+  ],
+  "notes": [
+    "Flush mounted installation with manually operated rolling jacks",
+    "Conduits to console",
+    "Drainage basin catch",
+    "Front elevation view shows approach angle",
+    "Service legs shown in service position",
+    "Standard console with control valve located on front of console"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric view of complete 50-32-F flush installation showing pit layout, lift structure, and entry direction",
+      "extracted_text": "50-32 FLUSH PAGE 1 of 2, ENTRY DIRECTION, RZ-AP, FRONT, ISOMETRIC INSTALLATION WITH MANUALLY OPERATED ROLLING JACKS, FLUSH MOUNTED INSTALLATION, MOHAWK RESOURCES LTD"
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view showing dimensions, approach angles, and service leg positions",
+      "extracted_text": "50-32 FLUSH PAGE 2 of 2, FRONT ELEVATION VIEW, SERVICE LEG, APPROACH ANGLE, 11\u00b0, 78.5\", 30\", various dimensional callouts"
+    },
+    {
+      "page": 3,
+      "description": "Isometric drainage and electrical conduit layout view",
+      "extracted_text": "50-32-F PAGE 1 of 8, DRAINAGE CATCH BASIN, CONDUITS TO CONSOLE, DRAINAGE DIRECTION, JACKING BEAM POCKET, CONDUITS TO REAR LEFT COLUMNS"
+    },
+    {
+      "page": 4,
+      "description": "Plan view showing pit dimensions, anchor locations, and overall layout",
+      "extracted_text": "50-32-F PAGE 2 of 8, ALIGNMENT CONSOLE, STRAIGHT CONSOLE, pit dimensions 204\" x 156\", various anchor bolt locations marked, slopes and notes"
+    },
+    {
+      "page": 5,
+      "description": "Cross-sectional view A-A showing pit depth and structural details",
+      "extracted_text": "50-32-F PAGE 3 of 8, SECTION A-A, DETAIL A, pit depth 14\", various elevation markers, structural connection details"
+    },
+    {
+      "page": 6,
+      "description": "Cross-sectional view B-B showing runway and pit relationship",
+      "extracted_text": "50-32-F PAGE 4 of 8, SECTION B-B, runway and pit cross-section details, dimensional callouts"
+    },
+    {
+      "page": 7,
+      "description": "Cross-sectional views C-C and D-D showing console and conduit details",
+      "extracted_text": "50-32-F PAGE 5 of 8, SECTION C-C, SECTION D-D, console mounting details, conduit routing information"
+    },
+    {
+      "page": 8,
+      "description": "Additional sectional views E-E and F-F showing structural connections",
+      "extracted_text": "50-32-F PAGE 6 of 8, SECTION E-E, SECTION F-F, structural connection details and dimensions"
+    },
+    {
+      "page": 9,
+      "description": "Detailed views G, H, and J showing specific connection and mounting details",
+      "extracted_text": "50-32-F PAGE 7 of 8, SECTION G, SECTION H, SECTION J, VIEW K, detailed connection specifications and mounting hardware"
+    },
+    {
+      "page": 10,
+      "description": "Section L-L showing complete system overview with conduit and manifold details",
+      "extracted_text": "50-32-F PAGE 8 of 8, SECTION L-L, manifold details, conduit routing, system overview, thread terminals, valve console connections"
+    },
+    {
+      "page": 11,
+      "description": "Material specifications and lift data table showing capacities and technical specifications",
+      "extracted_text": "Materials specifications, lift data table, capacities, technical data, steel specifications, welding requirements, surface treatments"
+    },
+    {
+      "page": 12,
+      "description": "Top view of console frame showing control panel layout and dimensions",
+      "extracted_text": "TOP VIEW OF CONSOLE FRAME, CONTROL CONSOLE & STUB-UP DETAILS, console dimensions 32\" x 36\", control panel layout, stub-up locations A through H"
+    },
+    {
+      "page": 13,
+      "description": "Anchor bolt details and specifications with installation instructions",
+      "extracted_text": "ANCHOR DETAILS & SLIMMING, anchor bolt specifications, installation procedures, concrete requirements, embedment details"
+    },
+    {
+      "page": 14,
+      "description": "Isometric view of service connections and pointing details",
+      "extracted_text": "ISOMETRIC VIEW OF SERVICE CONNECTIONS AND POINTING, service leg details, hydraulic connections, pointing specifications"
+    },
+    {
+      "page": 15,
+      "description": "General notes and flush lift specifications",
+      "extracted_text": "FLUSH LIFTS ONLY, general installation notes, safety requirements, operational specifications, maintenance requirements, certification information"
+    }
+  ],
+  "_source_file": "50-32-F Installation Drawings.pdf",
+  "_pages_count": 15,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:05:37Z"
+}

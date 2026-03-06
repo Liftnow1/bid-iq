@@ -1,0 +1,149 @@
+{
+  "model": "36-28-F",
+  "variant": "flush mount",
+  "product_type": "parallelogram lift",
+  "capacity": "Not explicitly stated in drawings",
+  "dimensions": {
+    "overall_length": "36 (914.4mm)",
+    "overall_width": "32 1/2 (825.5mm)",
+    "console_frame_height": "1 3/4 TYP (44.4mm)",
+    "console_depth": "10 5/8 (270mm)",
+    "back_of_console": "32 1/2 (825.5mm)",
+    "conduit_sizes_application": {
+      "A": "1 (MM) SOLID #0 STEEL PIPE - INCOMING PRIOR",
+      "B": "1/2 (MM) SOLID #0 STEEL PIPE - INCOMING PRIOR",
+      "C": "3/4 (MM) SOLID #0 STEEL PIPE - HYDRAULIC & AIR TO LIFT",
+      "D": "1 (MM) SOLID #0 STEEL PIPE - ELECTRICAL TO LIFT",
+      "E": "1 (MM) SOLID #0 STEEL PIPE - ELECTRICAL (9 1/4)",
+      "F": "1 (MM) SOLID #0 STEEL PIPE - ELECTRICAL",
+      "G": "3/4 (MM) SOLID #0 STEEL PIPE - ELECTRICAL TO LIFT",
+      "H": "BY OTHERS"
+    },
+    "incoming_conduits_floor": "AS SHOWN (SEE TOP VIEW)",
+    "electrical_90s_in_conduits": "NOTE: USE SMOOTH ELECTRICAL 90's IN CONDUITS, NOT PLUMBING 90's"
+  },
+  "installation_requirements": {
+    "flush_mounted_installation": "WITH MANUALLY COVERED ROLLING JACK OPENING POCKET",
+    "lift_unit_recommended": "CONTRACTOR TO LIFT UNIT IS PLACED",
+    "coordination_with_pit_construction": "COORDINATION WITH & USE STEEL PIPE - INCOMING PRIOR TO INSTALLING LEO'S OF LIFT PLATFORMS",
+    "drainage_catch_basin": "DRAINAGE CATCH BASIN",
+    "conduits_to_console": "CONDUITS TO CONSOLE",
+    "jacking_beam_pocket": "JACKING BEAM POCKET",
+    "front_elevation_view": "FRONT ELEVATION VIEW",
+    "anchor_bolt_details": "ANCHOR BOLT LOCATION DRAWINGS #0 DETAIL",
+    "prestressing_tightening_sequence": "PRESTRESSING TIGHTENING SEQUENCE FOR ANCHOR BOLTS",
+    "lifting_shim_detail": "LIFTING SHIM DETAIL"
+  },
+  "parts_list": [
+    {
+      "part_number": "36-28-F",
+      "description": "FLUSH",
+      "qty": 1
+    },
+    {
+      "part_number": "PAGE 1 of 2",
+      "description": "Drawing page reference",
+      "qty": 1
+    },
+    {
+      "part_number": "PAGE 2 of 2",
+      "description": "Drawing page reference",
+      "qty": 1
+    }
+  ],
+  "certifications": [],
+  "notes": [
+    "FLUSH MOUNTED INSTALLATION WITH MANUALLY COVERED ROLLING JACK OPENING POCKET",
+    "WE COORDINATION WITH & USE STEEL PIPE - INCOMING PRIOR TO INSTALLING LEO'S OF LIFT PLATFORMS",
+    "THE RECOMMENDED UNIT IS PLACED TO THE FRONT. ON THE FRONT. ON THE LIT",
+    "THE LOCATION OF THE UNIT. IS PLACED. ON THE FRONT. ON THE LIT TO THE LIT",
+    "INCLUDES THE REAR OF THE LIFT FOR THE JACKING",
+    "USE SMOOTH ELECTRICAL 90'S IN CONDUITS, NOT PLUMBING 90'S"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Title page with company information and project identification",
+      "extracted_text": "MOHAWK MODEL PARALLELOGRAM, MOHAWK, PARALLELOGRAM, 36-28-F FLUSH MOUNT INSTALLATION REQUIREMENT DRAWINGS, MOHAWK RESOURCES LTD., 65 VROOMAN AVE., AMSTERDAM, NY 12010, TOLL FREE: 1-800-833-2006, LOCAL: 1-518-842-1431, FAX: 1-518-842-1289, INTERNET: WWW.MOHAWKLIFTS.COM, E-MAIL: SERVICE@MOHAWKLIFTS.COM"
+    },
+    {
+      "page": 2,
+      "description": "Isometric view of flush mounted installation showing entry direction, rear, front, and jack opening pocket",
+      "extracted_text": "36-28-FLUSH, PAGE 1 of 2, ENTRY DIRECTION, REAR, FRONT, FLUSH MOUNTED INSTALLATION WITH MANUALLY COVERED ROLLING JACK OPENING POCKET"
+    },
+    {
+      "page": 3,
+      "description": "Front elevation view showing installation details and conduit routing",
+      "extracted_text": "36-28-FLUSH, PAGE 2 of 2, FRONT ELEVATION VIEW, SERVICE LOT, TRAVEL AREA, NORMAL DISTANCE, etc."
+    },
+    {
+      "page": 4,
+      "description": "Control console and stub-up details showing dimensions and conduit specifications",
+      "extracted_text": "CONTROL CONSOLE & STUB-UP DETAILS, TOP VIEW OF CONSOLE FRAME, CUSTOMER PROTECTION OPTIONAL, INCOMING CONDUITS (AS SHOWN - SEE TOP VIEW), BY OTHERS, CONDUIT SIZES & APPLICATION"
+    },
+    {
+      "page": 5,
+      "description": "Anchor details and shimming information with lift unit positioning",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, ANCHOR BOLT LOCATION DRAWINGS #0 DETAIL, PRESTRESSING TIGHTENING SEQUENCE FOR ANCHOR BOLTS, TIGHTENING FROM CENTER TO EDGE OUTWARD"
+    },
+    {
+      "page": 6,
+      "description": "Isometric view of service connections and racking for flush installation",
+      "extracted_text": "ISOMETRIC VIEW OF SERVICE CONNECTIONS AND RACKING, DRAIN FOR USE OF PIT MUST, FOR USE OF PIT MUST, SECTION, ISOMETRIC VIEW OF SERVICE CONNECTIONS AND RACKING"
+    },
+    {
+      "page": 7,
+      "description": "Detailed view of conduits to rear legs of lift platforms with drainage",
+      "extracted_text": "36-28-F, PAGE 1 of 8, CONDUITS TO REAR LEGS OF LIFT PLATFORMS, ENTRANCE DIRECTION, REAR, CONDUITS TO CONSOLE, DRAINAGE CATCH BASIN, FRONT, JACKING BEAM POCKET"
+    },
+    {
+      "page": 8,
+      "description": "Detailed section views showing lift installation requirements",
+      "extracted_text": "36-28-F, PAGE 2 of 8, ENTRANCE DIRECTION, TELEPHONE CONSOLE LOCATION, REAR, A, HYDRAULIC & AIR SUPPLY CONTENT, SEE NOTE B, SEE NOTE C, FRONT, A"
+    },
+    {
+      "page": 9,
+      "description": "Section detail A-A showing dimensional requirements",
+      "extracted_text": "36-28-F, PAGE 3 of 8, SECTION A-A, DETAIL A, #4 @ 12 TYP, #6 @ 12 DOWELS, #4 @ 12 TYP, TWO ROWS @ 19 1/2 TYP"
+    },
+    {
+      "page": 10,
+      "description": "Section B-B showing additional construction details",
+      "extracted_text": "36-28-F, PAGE 4 of 8, SECTION B-B, FINISHED FLOOR ELEVATION, #4 @ 12 DOWELS TYP, #4 @ 12 TYP, #4 @ 12 TYP, #4 @ 12 TYP"
+    },
+    {
+      "page": 11,
+      "description": "Sections C-C and D-D showing cross-sectional views",
+      "extracted_text": "36-28-F, PAGE 5 of 8, SECTION C-C, SECTION D-D, #4 @ 12 TYP, #4 @ 12 TYP, FINISHED FLOOR ELEVATION, #4 @ 12 DOWELS TYP"
+    },
+    {
+      "page": 12,
+      "description": "Sections E-E and F-F showing additional cross-sections",
+      "extracted_text": "36-28-F, PAGE 6 of 8, SECTION E-E, SECTION F-F, FINISHED FLOOR ELEVATION, #4 @ 12 TYP, #4 @ 12 TYP"
+    },
+    {
+      "page": 13,
+      "description": "Multiple section views G, H, and J with VIEW K showing detailed construction",
+      "extracted_text": "36-28-F, PAGE 7 of 8, SECTION G, SECTION H, SECTION J, VIEW K, AS REQUIRED #4 TIE"
+    },
+    {
+      "page": 14,
+      "description": "Section I-I showing conduit routing and terminal connections",
+      "extracted_text": "36-28-F, PAGE 8 of 8, SECTION I-I, SEAL REPAIR AT EACH CIRCUIT PIT & CONCRETE THICKNESS, OPERATOR BOX, TELEPHONE CONSOLE, APPROACHING AT LINE, APPROVING AT LINE, SEE NOTES B & C, FLEX CONDUIT FOR INCOMING, CONTROL WIRE FOR INCOMING, SEE NOTES B & C, TO LET UNIT"
+    },
+    {
+      "page": 15,
+      "description": "Material list and specifications table",
+      "extracted_text": "MATERIAL LIST, MOHAWK RESOURCES LTD, MOHAWK RESOURCES - PLUMB TOOL, MOHAWK RESOURCES - LIFT PLUMB, LIFT DATA TABLE, MOHAWK RESOURCES LTD, PLUMB RESOURCES - LIFT PLUMB, MOHAWK RESOURCES - LIFT DATA, LIFT CAPACITY (LBS), LIFT DATA, ACTUAL STROKE, LIFT UNIT LENGTH/IN, MOHAWK RESOURCES LTD"
+    },
+    {
+      "page": 16,
+      "description": "Additional notes and specifications for flush lifts only",
+      "extracted_text": "FLUSH LIFTS ONLY, NOTE 1, NOTE 2, NOTE 3, NOTE 4, NOTE 5, NOTE 6, NOTE 7, NOTE 8, NOTE 9, NOTE 10, NOTE 11, NOTE 12, NOTE 13, NOTE 14, NOTE 15, NOTE 16, NOTE 17, NOTE 18, NOTE 19, NOTE 20, NOTE 21, NOTE 22, NOTE 23"
+    }
+  ],
+  "_source_file": "36-28-F Installation Drawings.pdf",
+  "_pages_count": 16,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:01:28Z"
+}

@@ -1,0 +1,178 @@
+{
+  "model": "Parallelogram Lift Series",
+  "variant": "Multiple variants available (Surface Mount and Flush Mount)",
+  "product_type": "Parallelogram Vehicle Lift",
+  "capacity": "Various capacities from 36,000# to 100,000# with track lengths from 26' to 48'",
+  "dimensions": {
+    "general_lift_dimensions": {
+      "ramp_thickness": "32 1/4 inches",
+      "entrance_angle": "45 degrees",
+      "waffle_stop_changes_to_flip_plate": "36 1/8 inches",
+      "flip_plate_dimension": "not specified",
+      "w/6_conduit_entry": "100 inches total length",
+      "overall_length": "312 inches (26'-0 inches) shown in example"
+    },
+    "installation_clearances": {
+      "entrance_clearance": "4 feet minimum",
+      "open_access_clearance": "50 feet",
+      "side_clearance": "5 feet"
+    }
+  },
+  "installation_requirements": {
+    "power_supply_options": [
+      "208-220 VAC, 3 Phase, 60 HZ - Standard",
+      "230-240 VAC",
+      "440-480 VAC",
+      "575 VAC (Special)"
+    ],
+    "concrete_requirements": "Thickness and PSI strength to be specified by customer",
+    "electrical_connection": "Final electrical connection to local/national code is responsibility of electrical contractor",
+    "pneumatic_power": "Responsibility of mechanical contractor to final designated point",
+    "installation_styles": [
+      "Surface Mount",
+      "Flush Mount (no ramps)",
+      "Dual Pocket with Jack Cavity",
+      "Dual Pocket",
+      "Single Pocket",
+      "Single Pocket with Walkway"
+    ]
+  },
+  "parts_list": [
+    {
+      "part_number": "P-800-A-022",
+      "description": "WASH BAY KIT (4 LEG LIFT) - Includes: Stainless Steel BASE & STRINGER PLATES, ANCHORS & SPECIAL PAINT",
+      "qty": "As required"
+    },
+    {
+      "part_number": "P-800-A-023",
+      "description": "WASH BAY KIT (6 LEG LIFT) - Includes: Stainless Steel BASE & STRINGER PLATES, ANCHORS & SPECIAL PAINT",
+      "qty": "As required"
+    },
+    {
+      "part_number": "P-800-A-024",
+      "description": "WASH BAY KIT (8 LEG LIFT) - Includes: Stainless Steel BASE & STRINGER PLATES, ANCHORS & SPECIAL PAINT",
+      "qty": "As required"
+    },
+    {
+      "part_number": "P-800-A-025",
+      "description": "WASH BAY KIT (4 LEG LIFT) - Includes: Stainless Steel ANCHORS & SPECIAL PAINT",
+      "qty": "As required"
+    },
+    {
+      "part_number": "P-800-A-026",
+      "description": "WASH BAY KIT (6 LEG LIFT) - Includes: Stainless Steel ANCHORS & SPECIAL PAINT",
+      "qty": "As required"
+    },
+    {
+      "part_number": "P-800-A-027",
+      "description": "WASH BAY KIT (8 LEG LIFT) - (GROUTING RECOMMENDED)",
+      "qty": "As required"
+    },
+    {
+      "part_number": "P-060-P-002",
+      "description": "BASE PLATE, 1/2 inch THICK (Carbon Steel)",
+      "qty": "As required"
+    },
+    {
+      "part_number": "P-060-P-004",
+      "description": "STRINGER PLATE, 1/2 inch THK (Carbon Steel)",
+      "qty": "As required"
+    },
+    {
+      "part_number": "600-740-001",
+      "description": "HORSESHOE SHIM, 1/16 inch THK (BLUE)",
+      "qty": "As required"
+    },
+    {
+      "part_number": "600-740-002",
+      "description": "HORSESHOE SHIM, 1/8 inch THK (RED)",
+      "qty": "As required"
+    },
+    {
+      "part_number": "600-740-003",
+      "description": "HORSESHOE SHIM, 1/4 inch THK (BLACK)",
+      "qty": "As required"
+    },
+    {
+      "part_number": "600-710-010",
+      "description": "STEEL WASHER, 1 inch DIA x 3/16 inch THK",
+      "qty": "As required"
+    },
+    {
+      "part_number": "600-670-002",
+      "description": "ANCHOR BOLT, 3/4 DIA x 5 inch LG (STANDARD)",
+      "qty": "As required"
+    },
+    {
+      "part_number": "600-670-003",
+      "description": "ANCHOR BOLT, 3/4 DIA x 6 inch LG",
+      "qty": "As required"
+    },
+    {
+      "part_number": "600-670-004",
+      "description": "ANCHOR BOLT, 3/4 DIA x 8 1/2 LG",
+      "qty": "As required"
+    },
+    {
+      "part_number": "600-670-011",
+      "description": "ANCHOR BOLT, 3/4 DIA x 5 1/2 LG (Stainless Steel)",
+      "qty": "As required"
+    },
+    {
+      "part_number": "P-060-P-006",
+      "description": "BASE PLATE, 1/2 inch THICK (Stainless Steel)",
+      "qty": "As required"
+    },
+    {
+      "part_number": "P-060-P-007",
+      "description": "STRINGER PLATE, 1/2 inch THK (Stainless Steel)",
+      "qty": "As required"
+    }
+  ],
+  "certifications": [
+    "ALI Standard ALCTV - denotes lifts or options that have been tested and certified to ALI Standard ALCTV"
+  ],
+  "notes": [
+    "Standard location shown for control console - optional locations at customer's request",
+    "Additional charges will or may apply for custom console locations",
+    "See installation instructions for additional specs",
+    "Some option combinations are not available",
+    "Specification subject to change without notice",
+    "Electrical and pneumatic power for lift to be brought into lift control console",
+    "If shimming is in excess of 1/2 inch, it is recommended to use base plates",
+    "Additional base plate shims and/or grouting may require longer anchor bolts",
+    "Contact Mohawk Resources for current pricing",
+    "All lift options checked for purchase must be listed on purchase order as separate line items"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "General lift dimensions diagram and installation style selection showing surface mount example with dimensional callouts and various pit installation options",
+      "extracted_text": "PARALLELOGRAM DATA SHEET: (PG1), GENERAL LIFT DIMENSIONS, 32 1/4, RAMP (SURFACE MOUNT ONLY), 45\u00b0, ENTRANCE DIRECTION, 32 1/4, RAMP (SURFACE MOUNT ONLY), STANDARD LOCATION SHOWN, CONTROL CONSOLE, OPTIONAL LOCATIONS AT CUSTOMERS REQUEST, SEE INSTALLATION INSTRUCTIONS FOR ADDITIONAL SPECS, (ADDITIONAL CHARGES WILL OR MAY APPLY), WAFFLE STOP (CHANGES TO FLIP PLATE FOR FLUSH MOUNT LIFT), 36 1/8, FLIP PLATE, w/6 CONDUIT ENTRY, 63\u00b0, 312\u00b0 (26'-0\u00b0), 100\u00b0, * 50-26-S (SURFACE MOUNT LIFT) SHOWN ABOVE AS EXAMPLE, SELECT INSTALLATION STYLE: FLUSH - SELECT STYLE PIT BELOW (NO RAMPS), DUAL POCKET W/ JACK CAVITY, DUAL POCKET, SURFACE, SINGLE POCKET, SINGLE POCKET W/ WALKWAY, INITIAL, INITIAL, INITIAL, INITIAL, INITIAL, - DENOTES LIFTS OR OPTIONS THAT HAVE BEEN TESTED AND CERTIFIED TO ALI STANDARD ALCTV, D-SIZE"
+    },
+    {
+      "page": 2,
+      "description": "Lift model selection chart with capacity and track length options, mount type selection, power supply verification, and available options checklist",
+      "extracted_text": "LIFT MODEL: (CHECK ONE), INITIAL, 36-26-X (36,000# CAP - 26' LG TRACK), 38-26-X (38,000# CAP - 26' LG TRACK), 40-28-X (40,000# CAP - 28' LG TRACK), 40-30-X (40,000# CAP - 30' LG TRACK), 40-32-X (40,000# CAP - 32' LG TRACK), 40-35-X (40,000# CAP - 35' LG TRACK), 45-30-X (45,000# CAP - 30' LG TRACK), 45-32-X (45,000# CAP - 32' LG TRACK), 45-35-X (45,000# CAP - 35' LG TRACK), 50-26-X (50,000# CAP - 26' LG TRACK), 50-30-X (50,000# CAP - 30' LG TRACK), 50-32-X (50,000# CAP - 32' LG TRACK), 50-35-X (50,000# CAP - 35' LG TRACK), 50-38-X (50,000# CAP - 38' LG TRACK), 50-42-X (50,000# CAP - 42' LG TRACK), 50-44-X (50,000# CAP - 44' LG TRACK), 50-48-X (50,000# CAP - 48' LG TRACK), 75-26-X (75,000# CAP - 26' LG TRACK), 75-30-X (75,000# CAP - 30' LG TRACK), 75-32-X (75,000# CAP - 32' LG TRACK), 75-35-X (75,000# CAP - 35' LG TRACK), 75-38-X (75,000# CAP - 38' LG TRACK), 75-42-X (75,000# CAP - 42' LG TRACK), 75-44-X (75,000# CAP - 44' LG TRACK), 75-48-X (75,000# CAP - 48' LG TRACK), 100-42-X (100,000# CAP - 42' LG TRACK), 100-44-X (100,000# CAP - 44' LG TRACK), 100-48-X (100,000# CAP - 48' LG TRACK), MOUNT TYPE: (CHECK ONE), INITIAL, X= F (FLUSH MOUNT), X= S (SURFACE MOUNT), AVAILABLE OPTIONS (At Additional Cost): CHECK ALL THAT APPLY, INITIAL, RJ-50-AH-#-P JACKING BEAM (#=CAPACITY), VERIFY POWER SUPPLY BELOW (CIRCLE ONE), 208-220 VAC, 3 PHASE, 60 HZ - STANDARD, 230-240 VAC, 440-480 VAC, 575 VAC (SPECIAL), INITIAL, CONCRETE FLOOR THICKNESS & STRENGTH: INITIAL, _____ INCHES THICK WITH _____ PSI STRENGTH.., PROPOSED/REQUESTED DELIVERY DATE: ___/___/___, INITIAL, IS THIS FOR A CONSTRUCTION PROJECT: YES, NO, IF NO, CAN THE LIFT SHIP AT ANYTIME? YES, NO, IF YES, WHEN SHOULD MOHAWK VERIFY PRODUCTION TIME?, ___/___/___ CONTACT: _____________, TEL #_______, THIS DRAWING HAS BEEN REVIEWED, INITIAL, AND FOUND TO BE ACCEPTABLE TO, ALL CUSTOMER'S SPECIFICATIONS INDICATED., _________________ ________, MOHAWK REPRESENTATIVE DATE, _________________ ________, OWNER, SHOP MANAGER, FLEET DATE, MANAGER, GENERAL CONTRACTOR,, AND/OR ARCHITECT., 10-14. SEE NEXT PAGE, NOTES:, 1. ELECTRICAL & PNEUMATIC POWER, FOR LIFT TO BE BROUGHT INTO, LIFT CONTROL CONSOLE., 2. SOME OPTION COMBINATIONS, ARE NOT AVAILABLE., 3. SPECIFICATION SUBJECT TO CHANGE, WITHOUT NOTICE., PG 2/4, PARALLELOGRAM, FOR SO#__________, SCALE, DRAWN, MOHAWK RESOURCES LTD., N/A, CHS, CHECKED, APPROVED, TITLE, N/A, PARALLELOGRAM DATA VERIFICATION, DATE, WEIGHT, FROM, DRAWING NUMBER, 4/02, N/A, LB., ZZ730"
+    },
+    {
+      "page": 3,
+      "description": "Lift location details form for bay dimensions and underground conduit specifications with example diagrams showing control console placement",
+      "extracted_text": "PARALLELOGRAM DATA SHEET: (PG3), FOR EXAMPLE:, LIFT LOCATION DETAILS:, OPERATOR HERE, PROVIDE SKETCH OF LIFT BAY BELOW, (SEE NOTE BELOW), CONTROLS, WITH THE FOLLOWING GENERAL DIMENSIONS., HERE, OVERALL BAY LENGTH, SLOPE IN FLOOR (LENGTHWISE), OPEN, ACCESS, OVERALL BAY WIDTH, HERE, SLOPE IN FLOOR (WIDTHWISE), 50', LIFT, OVERALL BAY HEIGHT, 5', OVERHEAD OBSTRUCTIONS, YES OR NO?, 4', IF YES, EXPLAIN, INITIAL, ENTRANCE, NOTE:, ABOVE & BELOW PICTURES SHOW CONSOLE, IN REMOTE LOCATION, REQUIRING ADDITIONAL, COST FOR LONGER HYDRAULIC & ELECTRICAL, SERVICES. CONTACT MOHAWK RESOURCES FOR, STANDARD CONSOLE LOCATION., UNDERGROUND CONDUIT DETAILS:, (SEE NOTE ABOVE), FOR EXAMPLE:, PROVIDE MAXIMUM LENGTH OF, CONTROLS, UNDERGROUND CONDUIT FROM, HERE, CONTROL CONSOLE TO LIFT., MAXIMUM LENGTH, INITIAL, LIFT, 65', TOTAL, VEHICLE DATA FORMS:, PROVIDE INFORMATION ON ATTACHED VEHICLE DATA FORMS (OR PROVIDE SKETCH WITH DIMENSIONS, OF VEHICLE IF THE FORM DOES NOT PROPERLY REFLECT VEHICLE TYPE) FOR VEHICLES INTENDED TO, GO ON THIS LIFT. THIS IS TO ENSURE THAT VEHICLES WILL HAVE NO DIFFICULTY GETTING ON THE, LIFT AND THAT THE LIFT WILL HAVE NO DIFFICULTY RAISING THE VEHICLES IN THE SPACE PROVIDED., PROVIDE DETAILS ON ANY FEATURES OF VEHICLES THAT ARE OF CONCERN. TO NAME JUST A FEW,, THIS WILL ASSIST IN REVIEWING UNDER-VEHICLE CLEARANCE OVER RAMPS, BUMPER CLEARANCE WHEN, APPROACHING RAMPS, REAR END DRAG CLEARANCE OVER RAMPS, OVERHEAD CLEARANCE WHEN FULLY, RAISED, WHEEL BASE LENGTH OVER TRACK LENGTH, ETC., D-SIZE"
+    },
+    {
+      "page": 4,
+      "description": "Shims required section with detailed parts list including wash bay kits, base plates, anchor bolts and various shim components, plus final approval section",
+      "extracted_text": "SHIMS REQUIRED., EXAMINE FLOOR FOR FLATNESS. DETERMINE HOW MUCH SHIMMING WILL BE REQUIRED., NOTE THAT IF THE SHIMMING IS IN EXCESS OF 1/2 INCH, IT IS RECOMMENDED TO USE BASE PLATES., THESE SHIMS ARE NOT INCLUDED WITH A STANDARD LIFT AND WILL BE AN ADDITIONAL CHARGE, AS SHOWN BELOW., INITIAL, QTY, PART NUMBER, DESCRIPTION, P-800-A-022, WASH BAY KIT (4 LEG LIFT), INCLUDES: Stainless Steel, BASE & STRINGER PLATES,, ANCHORS & SPECIAL, PAINT., P-800-A-023, WASH BAY KIT (6 LEG LIFT), P-800-A-024, WASH BAY KIT (8 LEG LIFT), P-800-A-025, WASH BAY KIT (4 LEG LIFT), INCLUDES: Stainless Steel, ANCHORS & SPECIAL, PAINT., P-800-A-026, WASH BAY KIT (6 LEG LIFT), (GROUTING RECOMMENDED), P-800-A-027, WASH BAY KIT (8 LEG LIFT), P-060-P-002, BASE PLATE, 1/2' THICK (Carbon Steel), P-060-P-004, STRINGER PLATE, 1/2' THK (Carbon Steel), 600-740-001, HORSESHOE SHIM, 1/16' THK (BLUE), 600-740-002, HORSESHOE SHIM, 1/8' THK (RED), 600-740-003, HORSESHOE SHIM, 1/4' THK (BLACK), 600-710-010, STEEL WASHER, 1' DIA x 3/16' THK, 600-670-002, ANCHOR BOLT, 3/4 DIA x 5' LG (STANDARD), 600-670-003, ANCHOR BOLT, 3/4 DIA x 6' LG, 600-670-004, ANCHOR BOLT, 3/4 DIA x 8 1/2 LG, 600-670-011, ANCHOR BOLT, 3/4 DIA x 5 1/2 LG (Stainless Steel), P-060-P-006, BASE PLATE, 1/2' THICK (Stainless Steel), P-060-P-007, STRINGER PLATE, 1/2' THK (Stainless Steel), CONTACT MOHAWK RESOURCES FOR CURRENT PRICING., * ADDITIONAL BASE PLATE SHIMS AND/OR GROUTING MAY REQUIRE LONGER ANCHOR BOLTS., A: FINAL ELECTRICAL CONNECTION TO LOCAL/NATIONAL CODE IS THE RESPONSIBILITY, CUSTOMER'S, OF THE ELECTRICAL CONTRACTOR. MORE THAN ONE POINT OF CONNECTION MAY BE, INITIALS, REQUIRED. DISCONNECT SWITCHES, MAIN FUSES, AND MAIN POWER LEADS, ETC, ARE, HERE, NOT PROVIDED BY MOHAWK RESOURCES, LTD, B: PNEUMATIC POWER IS THE RESPONSIBILITY OF THE MECHANICAL CONTRACTOR TO, THE FINAL DESIGNATED POINT OR POINTS AT THE VEHICLE LIFT UNLESS OTHERWISE, SPECIFIED BY ARCHITECT., AFTER ALL SPECIFICATIONS HAVE BEEN, SELECTED AND APPROVED BY CUSTOMER, PG 4/4, (SIGNED), MAKE COPY FOR CUSTOMER, PARALLELOGRAM, AND RETURN SIGNED FORM TO, MOHAWK RESOURCES, LTD, PO BOX 110,, AMSTERDAM, NY, 12010. FOR QUESTIONS,, SCALE, DRAWN, MOHAWK RESOURCES LTD., PLEASE CALL MOHAWK AT, N/A, CHS, 1-(800)-833-2006 OR (518)-842-1431, CHECKED, APPROVED, TITLE, OR FAX MOHAWK AT (518)-842-1289., N/A, PARALLELOGRAM DATA VERIFICATION, ALL LIFT OPTIONS CHECKED FOR PURCHASE, DATE, WEIGHT, FROM, DRAWING NUMBER, (SEE SECTION #4), MUST BE LISTED ON PURCHASE, 4/02, N/A, LB., ZZ730, ORDER AS SEPARATE LINE ITEMS."
+    },
+    {
+      "page": 5,
+      "description": "Truck data form for dual axle rear vehicles with dimensional diagram showing front, side and rear views with measurement fields for vehicle specifications",
+      "extracted_text": "TRUCK DATA FORM (DUAL AXLE REAR), VEHICLE WEIGHT:, (NOT GVW), _______ LBS., * PLEASE BE COMPLETE IN, ENTERING DIMENSIONAL, TIRE DIAMETER: _____ INCH, DATA. OUR DETERMINATION, IN SUITING YOUR LIFTING, REQUIREMENTS IS ONLY AS, ACCURATE AND COMPLETE, AS THE DATA WE RECEIVE., ALSO, OMIT ANY DATA, THAT MAY CAUSE PROBLEMS, IN VEHICLE LIFTING., MINIMUM GROUND, MINIMUM GROUND, TIRE DIAMETER: _____ INCH, CLEARANCE, CLEARANCE, ** ALL DIMENSIONS TO BE ENTERED, IN INCHES., _____ INCHES, _____ INCHES, CENTER, MINIMUM GROUND, OF, CLEARANCE, GRAVITY, _____ INCHES, FRONT VIEW, SIDE VIEW, REAR VIEW, D-SIZE, NOTES:, TOLERANCES:, SCALE, DRAWN, MOHAWK RESOURCES LTD., 1. REMOVE ALL SHARP CORNERS & EDGES., ANGULAR, \u00b1 1\u00b0, R.V., 2. UNLESS OTHERWISE SPECIFIED, SURFACE, FRACTIONAL, \u00b1 .030, FINISH TO BE 125 RMS., DECIMAL, \u00b1 .030, CHECKED, APPROVED, TITLE, \u00b1 .XXX, \u00b1 .005, TRUCK DATA FORM (DUAL AXLE REAR), 3. WELDING SYMBOL SHALL CONFORM TO AWS, SPECIFICATIONS TO E-70XX ELECTRODES OR, PILE NAME, DATE, WEIGHT, FROM, DRAWING NUMBER, E-70TT CODE 5.3 FLUX CORE WIRE ONLY., ZZ06, NEXT ASSEMBLY, 1/95, LB., ZZ06"
+    }
+  ],
+  "_source_file": "Parallelogram_L-Size.pdf",
+  "_pages_count": 5,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:11:50Z"
+}

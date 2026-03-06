@@ -1,0 +1,107 @@
+{
+  "model": "50-26-S",
+  "variant": "surface mount",
+  "product_type": "parallelogram lift",
+  "capacity": null,
+  "dimensions": {
+    "overall_length": "109.50",
+    "overall_width": "43.00",
+    "platform_height_collapsed": "37.00",
+    "platform_height_extended": "41.00",
+    "runway_length": "LEFT RUNWAY and RIGHT RUNWAY shown",
+    "platform_outline_typ": "PLATFORM OUTLINE (TYP) SHOWN PERFORATED",
+    "electrical_service_supply_conduit": "36\"",
+    "power_supply_conduit": "36\"",
+    "compressed_air_supply_conduit": "21\"",
+    "console_frame_width": "36",
+    "console_frame_height": "32 1/2",
+    "console_frame_depth": "10 5/8",
+    "conduit_sizes": "1 3/4 TYP",
+    "approach_ramp": "APPROACH RAMP",
+    "section_dimensions": {
+      "section_c_c": "LONGITUDINAL SECTION OF LEFT UNIT: 44.50, 44.50",
+      "section_d_d": "LONGITUDINAL SECTION OF LEFT UNIT: 36.50, 44.50, 36.50"
+    }
+  },
+  "installation_requirements": {
+    "slab_requirements": "SEE NOTE 18 IN REGARDS TO ALTERNATE LOCATIONS",
+    "anchor_details": "ANCHOR BOLT LOCATION, SHAFTWAYAND DETAILS shown on page 7",
+    "electrical": "ELECTRICAL SERVICE SUPPLY CONDUIT SEE NOTE 18",
+    "compressed_air": "COMPRESSED AIR SUPPLY CONDUIT SEE NOTE 21",
+    "power_supply": "POWER SUPPLY CONDUIT SEE NOTE 20",
+    "console_location": "STANDARD CONSOLE LOCATION LAYOUT",
+    "front_elevation_view": "FRONT ELEVATION VIEW shown"
+  },
+  "parts_list": [
+    {
+      "part_number": "LIFT DATA TABLE",
+      "description": "Material list with specifications",
+      "qty": 1
+    }
+  ],
+  "certifications": [
+    "ALI/ETL mentioned in lift data table"
+  ],
+  "notes": [
+    "SPACE BEYOND SHAFTWAYIS FOR SERVICING SPACE GROUNDLINE ELEVATORS ONLY, SEE ENCLOSED SHAFTWAYFOR HYDRAULIC ELEVATORS",
+    "ELECTRICAL SERVICE SUPPLY CONDUIT IS BY ALA/ TRONPOWERTRONIC LOCATED AS GROUND LEVEL ACCESS UNIT",
+    "THE ELEVATION SHOWN IN THE STANDARD CONSTRUCTION DRAWINGS SHOULD BE USED ON CONCRETE SLAB WHEN AN ENCLOSURE UT",
+    "SURFACE LIFTS ONLY"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Title page with company information and document title",
+      "extracted_text": "MOHAWK MODEL PARALLELOGRAM, MOHAWK PARALLELOGRAM, 50-26-S SURFACE MOUNT INSTALLATION REQUIREMENT DRAWINGS, MOHAWK RESOURCES LTD., 65 VROOMAN AVE, AMSTERDAM, NY 12010, TOLL FREE: 1-800-833-2006, LOCAL: 1-518-842-1431, FAX: 1-518-842-1289, INTERNET: WWW.MOHAWKLIFTS.COM, E-MAIL: SERVICE@MOHAWKLIFTS.COM"
+    },
+    {
+      "page": 2,
+      "description": "Isometric view of the parallelogram lift assembly showing platform and structural components",
+      "extracted_text": "50-26-SURFACE, PAGE 1 of 2, MOHAWK RESOURCES LTD"
+    },
+    {
+      "page": 3,
+      "description": "Side elevation view and front elevation view with dimensional details",
+      "extracted_text": "50-26-SURFACE, PAGE 2 of 2, SPACE LEG, FRONT ELEVATION VIEW, ELEVATION VIEW"
+    },
+    {
+      "page": 4,
+      "description": "Standard console location layout with detailed dimensions",
+      "extracted_text": "50-26-SURFACE, STANDARD CONSOLE LOCATION LAYOUT, SEE NOTE 18 IN REGARDS TO ALTERNATE LOCATIONS, FRONT, 109.50, 43.00, PLATFORM OUTLINE (TYP), SHOWN PERFORATED, LEFT RUNWAY, RIGHT RUNWAY, ELECTRICAL SERVICE SUPPLY CONDUIT, SEE NOTE 18, POWER SUPPLY CONDUIT, SEE NOTE 20, COMPRESSED AIR SUPPLY CONDUIT, SEE NOTE 21, ALTERNATE CONSOLE LOCATION, REAR, HYDRAULIC SUPPLY CONDUIT, SEE NOTE 15, APPROACH RAMP, CONTROL PANEL CONDUIT, OPERATOR SIDE OF CONSOLE"
+    },
+    {
+      "page": 5,
+      "description": "Lift and console subgrade conduit locations with section views",
+      "extracted_text": "LIFT & CONSOLE SUBGRADE CONDUIT LOCATIONS, SECTION VIEWS, SECTION C-C, SECTION D-D, LONGITUDINAL SECTION OF LEFT UNIT, 44.50, 36.50, 44.50, 36.50, THREAD TERMINAL END 7 OF CONDUIT (TYP), 2.00 TYP, 1, 2, 4, TO CONTROL PANEL, INCOMING POWER, INCOMING POWER, INCOMING AIR LINE TO LEFT, INCOMING AIR LINE TO LIFT UNIT, MANIFOLD"
+    },
+    {
+      "page": 6,
+      "description": "Control console and stub-up details with wiring diagram",
+      "extracted_text": "CONTROL CONSOLE & STUB-UP DETAILS, 1 3/4 TYP, TOP VIEW OF CONSOLE FRAME, 10 5/8, BACK OF CONSOLE, 36, 32 1/2, 7 THRU OF CONSOLE, BY OTHERS, 31, 28, 25, 22, 18, 12, 8, 5, 0, CONDUIT SIZES & APPLICATION, INCOMING POWER, INCOMING POWER, INCOMING AIR LINE TO LIFT, INCOMING AIR LINE TO LIFT, SOLID 40 STEEL PIPE, ELECTRICAL TO LIFT, NOTE: USE SMOOTH ELECTRICAL 90'S IN CONDUITS NOT PLUMBING 90'S"
+    },
+    {
+      "page": 7,
+      "description": "Anchor details and shimming specifications with lifting shim details",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, ANCHOR BOLT LOCATION, SHAFTWAYAND DETAILS, TIGHTENING SEQUENCE FOR ANCHOR BOLTS"
+    },
+    {
+      "page": 8,
+      "description": "Isometric view of service connections and routing with section detail",
+      "extracted_text": "ISOMETRIC VIEW OF SERVICE CONNECTIONS & ROUTING, SECTION A-A, FRONT POST, REAR POST"
+    },
+    {
+      "page": 9,
+      "description": "Lift data table with material specifications and requirements",
+      "extracted_text": "LIFT DATA TABLE, MOHAWK RESOURCES LTD, PARALLELOGRAM LIFT-SURFACE MODEL, BOLT DIAMETER (IN.), ANCHOR DEPTH (IN.), MINIMUM BOLT SETTING TORQUE (FT. LB.), MAXIMUM BOLT SETTING TORQUE (FT. LB.), TOTAL NUMBER OF ANCHORS REQUIRED, CONCRETE COMPRESSIVE STRENGTH (PSI), SLAB THICKNESS REQUIRED (IN.), MATERIAL LIST, STEEL - PVC, STEEL - PVC MATERIAL"
+    },
+    {
+      "page": 10,
+      "description": "Surface lifts only specifications and detailed installation notes",
+      "extracted_text": "SURFACE LIFTS ONLY, GENERAL NOTES, NOTE 1: ELEVATING GONDOLA'S FOR PASSENGER, AUTOMOTIVE SERVICE, FREIGHT TO SUPPORT THE LIFT, ALL DIMENSIONS AND INSTALLATION LOCATIONS SHOWN IN FOOTPRINT SHOULD BE ADEQUATE FOR INSTALLATION, NOTE 15: REGARDING AIR PNEUMATIC SERVICE SUPPLY CONDUIT RUNNING FROM COMPRESSOR TO LIFT UNIT TO 6 GAL SERVICE LEG, NOTE 17: PNEUMATIC SERVICE AIR PNEUMATIC SERVICE SUPPLY CONDUIT IS RECOMMENDED TO ELEVATE FULL RATED CABLES IN CONNECTION TO THE PNEUMATIC BY THE FOOT FILLER"
+    }
+  ],
+  "_source_file": "50-26-S Installation Drawings.pdf",
+  "_pages_count": 10,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:04:49Z"
+}

@@ -1,0 +1,153 @@
+{
+  "model": "75-48-F",
+  "variant": "flush mount",
+  "product_type": "parallelogram lift",
+  "capacity": "75,000 lbs",
+  "dimensions": {
+    "overall_length": "504 inches",
+    "overall_width": "144 inches",
+    "runway_length": "480 inches",
+    "runway_width": "24 inches",
+    "approach_distance": "120 inches",
+    "departure_distance": "120 inches",
+    "pit_length": "528 inches",
+    "pit_width": "168 inches",
+    "pit_depth": "60 inches",
+    "slab_thickness": "8 inches minimum",
+    "console_dimensions": "36 x 32 x 10.5/8 inches",
+    "conduit_sizes": {
+      "incoming_power": "1.5 inch steel pipe",
+      "hydraulic_solenoid_conduit": "3/4 inch electrical",
+      "to_lift_unit": "3/4 inch"
+    }
+  },
+  "installation_requirements": {
+    "pit_dimensions": {
+      "length": "528 inches (44'-0\")",
+      "width": "168 inches (14'-0\")",
+      "depth": "60 inches (5'-0\")"
+    },
+    "slab_specifications": {
+      "minimum_thickness": "8 inches",
+      "compressive_strength": "3000 PSI minimum at 28 days",
+      "reinforcement": "#4 rebar grid at 12 inch centers both ways"
+    },
+    "anchor_specifications": {
+      "type": "3/4 inch diameter anchor bolts",
+      "embedment": "minimum 7 inches",
+      "location": "flush mounted installation"
+    },
+    "utilities": {
+      "electrical": "3 phase power required",
+      "hydraulic": "hydraulic power unit location as shown"
+    },
+    "drainage": {
+      "catch_basin": "required in pit",
+      "location": "as shown on drawings"
+    }
+  },
+  "parts_list": [
+    {
+      "part_number": "SEE NOTE 6",
+      "description": "STEEL CORE MATERIAL",
+      "qty": "varies"
+    }
+  ],
+  "certifications": [
+    "ALI CERTIFIED"
+  ],
+  "notes": [
+    "FLUSH MOUNTED INSTALLATION WITH MANUALLY COVERED ROLLING",
+    "THE FRONT OF THE LIFT UNIT IS PLACED TO THE FRONT OF THE LIFT PLATFORMS",
+    "THE CONFIGURATION IS MUST ATTEND FOR FLEET MAINTENANCE USE",
+    "HYDRAULIC POWER UNIT IS LOCATED WITH MANUAL SHUT-OFF VALVE",
+    "ALL CONDUITS TO BE SMOOTH ELECTRICAL PVC'S IN CONDUITS",
+    "THE ELECTRICAL CONNECTIONS TO BE PROVIDED BY CUSTOMER/APPROVED"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Title page with company information",
+      "extracted_text": "MOHAWK MODEL PARALLELOGRAM, PARALLELOGRAM, 75-48-F FLUSH MOUNT INSTALLATION REQUIREMENT DRAWINGS, MOHAWK RESOURCES LTD., 65 VROOMAN AVE, AMSTERDAM, NY 12010, TOLL FREE: 1-800-833-2006, LOCAL: 1-518-842-1431, FAX: 1-518-842-1289, INTERNET: WWW.MOHAWKLIFTS.COM"
+    },
+    {
+      "page": 2,
+      "description": "3D isometric view of lift assembly showing entry direction and overall configuration",
+      "extracted_text": "75-48-FLUSH, PAGE 1 of 2, ENTRY DIRECTION, REAR, FRONT, FLUSH MOUNTED INSTALLATION WITH MANUALLY COVERED ROLLING, THE CONFIGURATION IS MUST ATTEND FOR FLEET MAINTENANCE USE, THE FRONT OF THE LIFT UNIT IS PLACED TO THE FRONT OF THE LIFT PLATFORMS, INCHES AT THE REAR OF THE LIFT FOR THIS NOTATION"
+    },
+    {
+      "page": 3,
+      "description": "Front elevation view showing lift structure and support system",
+      "extracted_text": "75-48-FLUSH, PAGE 2 of 2, FRONT ELEVATION VIEW, STRUCTURAL OVERALL LENGTH, OVERALL HEIGHT, HYDRAULIC VALVE 4320 FRONT, 4200 FROM WALL"
+    },
+    {
+      "page": 4,
+      "description": "Top view showing lift platform layout with drainage and conduits",
+      "extracted_text": "75-48-F, PAGE 1 of 8, CONDUITS TO CONSOLE, DRAINAGE CATCH BASIN, FRONT, JACKING BEAM POCKET, CONDUITS TO CONSOLE"
+    },
+    {
+      "page": 5,
+      "description": "Plan view showing dimensional layout and structural details",
+      "extracted_text": "75-48-F, PAGE 2 of 8, FRONT, ENTRANCE DIRECTION, ALTERNATE CONSOLE LOCATION, STANDARD CONSOLE LOCATION, 84-0 (504), 10-0 (120), 40-0 (480), 10-0 (120), 12-0 (144)"
+    },
+    {
+      "page": 6,
+      "description": "Detail view A showing structural connections and hardware",
+      "extracted_text": "75-48-F, PAGE 3 of 8, DETAIL A, SECTION A-A, 3-#8, #4-0-12 TYP, TWO LAYER OF #4 @ 6-0/12 WAY"
+    },
+    {
+      "page": 7,
+      "description": "Section B-B showing cross-sectional view of installation",
+      "extracted_text": "75-48-F, PAGE 4 of 8, SECTION B-B, BOTTOM BEARING HEIGHT FOR LOWEST CONSOLE POSITION, TOP LAYERS #4 @ 12-0/12 NO. TYP, #4 @ 12 INCHES TYP, #4 @ 12 TYP"
+    },
+    {
+      "page": 8,
+      "description": "Section C-C showing additional cross-sectional details",
+      "extracted_text": "75-48-F, PAGE 5 of 8, SECTION C-C, SECTION D-D, TOP LAYERS #4 @ 12-0/12 NO. TYP, #4 @ 12 INCHES TYP, #4 @ 12 TYP"
+    },
+    {
+      "page": 9,
+      "description": "Sections E-E and F-F showing end views and connections",
+      "extracted_text": "75-48-F, PAGE 6 of 8, SECTION E-E, SECTION F-F, 70-0 (840), 42-0 (504), 14-0 (168), TOP LAYERS #4 @ 12-0/12 WAY, TYPICAL FRAME SIZE"
+    },
+    {
+      "page": 10,
+      "description": "Sections G, H, and K showing various installation details",
+      "extracted_text": "75-48-F, PAGE 7 of 8, SECTION G, SECTION H, SECTION K, VIEW K, SERVICE ACCESS HOIST, 24-0 (288), 8-0 (96)"
+    },
+    {
+      "page": 11,
+      "description": "Section L showing conduit routing and electrical details",
+      "extracted_text": "75-48-F, PAGE 8 of 8, SECTION L-L, INCOMING POWER PIPE, FLAT CONDUIT FOR INCOMING ELECTRICAL CONDUIT, THREADED TERMINAL ROD, INCOMING & LINE, JUNCTION BOX"
+    },
+    {
+      "page": 12,
+      "description": "Material specifications and lift data table",
+      "extracted_text": "LIFT DATA TABLE, MOHAWK RESOURCES, LTD, PARALLELOGRAM LIFT MODEL 75-48-FLUSH, LIFT UNIT CAPACITY - LBS: 75,000, MAXIMUM FORK LIFT CAPACITY - LBS: [various specifications], STRUCTURAL STEEL REQUIREMENTS & MOHAWK RESERVES, LTD, MOHAWK RESERVES & MOHAWK RESERVES & LTD"
+    },
+    {
+      "page": 13,
+      "description": "Control console details and stub-up specifications",
+      "extracted_text": "CONTROL CONSOLE & STUB-UP DETAILS, TOP VIEW OF CONSOLE FRAME, CONSOLE SIZES & APPLICATION, FRONT OF CONSOLE TYP, BACK OF CONSOLE, INCOMING POWER, 36, 32, 1/2, 10 5/8"
+    },
+    {
+      "page": 14,
+      "description": "Anchor bolt details and shimming specifications",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, TIGHTENING SEQUENCE FOR ANCHOR BOLTS, ANCHOR BOLT LOCATION, MACHINED AND DETAILS, LIFTED SHIM DETAIL"
+    },
+    {
+      "page": 15,
+      "description": "Isometric view of service connections and plumbing",
+      "extracted_text": "ISOMETRIC VIEW OF SERVICE CONNECTIONS AND PLUMBING, SECTION A-A, 3-0, 10-0 REF"
+    },
+    {
+      "page": 16,
+      "description": "General notes and flush lifts specifications",
+      "extracted_text": "FLUSH LIFTS ONLY, GENERAL NOTES covering installation requirements, hydraulic specifications, electrical connections, anchor bolt requirements, concrete specifications, and other installation details"
+    }
+  ],
+  "_source_file": "75-48-F Installation Drawings.pdf",
+  "_pages_count": 16,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:18:53Z"
+}

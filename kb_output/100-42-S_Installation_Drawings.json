@@ -1,0 +1,191 @@
+{
+  "model": "100-42-SURFACE",
+  "variant": "surface",
+  "product_type": "parallelogram lift",
+  "capacity": "100,000 LBS",
+  "dimensions": {
+    "overall_platform_length": "604.00",
+    "platform_length": "504.00",
+    "platform_width": "109.50",
+    "service_leg_width": "576.00",
+    "service_leg_length": "100.00",
+    "front_to_rear": "45.00",
+    "lift_unit_translation_vertical": "36 1/8 inches",
+    "console_dimensions": {
+      "back_width": "10 5/8 inches (270mm)",
+      "front_width": "7 TYP (178mm)",
+      "height": "36 inches (914mm)",
+      "depth": "32 1/2 inches (826mm)"
+    },
+    "conduit_spacing": {
+      "longitudinal_centerline_spacing": "40.50",
+      "c_to_c_spacing": "44.50",
+      "d_to_d_spacing": "36.50"
+    }
+  },
+  "installation_requirements": {
+    "anchorage": "94 anchor bolts",
+    "anchor_bolt_diameter": "3/4 inch",
+    "anchor_bolt_setting_torque": "N/A - see anchor details",
+    "minimum_embedment_length": "5.00 inches",
+    "minimum_concrete_thickness": "6 inches on grade (see note 23)",
+    "concrete_strength_minimum": "4,000 psi",
+    "leveling_shim_max_thickness": "1 inch",
+    "electrical": {
+      "motor_horsepower": "20",
+      "voltage": "460 V 3 PH",
+      "amperage": "30 ampere",
+      "control_circuit_transformer": "1000 VA",
+      "power_supply": "24 VDC",
+      "amperage_24v": "4.8 AMP",
+      "light_fixtures": "8 (optional lighting kit)"
+    },
+    "hydraulic": {
+      "reservoir_capacity": "50 total gallons",
+      "oil_type": "DEXRON III (ATF)"
+    },
+    "shop_air": {
+      "air_pressure": "85 to 100 PSI",
+      "air_volume_lift": "5 CFM/LOCKS",
+      "air_volume_rolling_jack": "25 EACH",
+      "air_volume_jacking": "5 EACH",
+      "air_volume_total_required": "30 MINIMUM",
+      "air_volume_suggested": "50 SUGGESTED"
+    }
+  },
+  "parts_list": [
+    {
+      "part_number": "12",
+      "description": "LOCKOUT/TAGOUT DISCONNECT BOX",
+      "qty": 1,
+      "material": "PER LOCAL ELECTRICAL CODES"
+    },
+    {
+      "part_number": "11*",
+      "description": "LEVELING SHIMS",
+      "qty": "AR",
+      "material": "1/16', 1/8', 1/4' THICK"
+    },
+    {
+      "part_number": "10*",
+      "description": "3/4' \u00d8 ANCHOR BOLT ASSEMBLY",
+      "qty": 49,
+      "material": "WEJ-IT - WEDGE ANCHORS"
+    },
+    {
+      "part_number": "9",
+      "description": "SEAL BARRIER",
+      "qty": 4,
+      "material": "CROUSE - HINDS ET53"
+    },
+    {
+      "part_number": "8",
+      "description": "1'-3/4' REDUCER BUSHING",
+      "qty": 4,
+      "material": "CROUSE - HINDS RE53"
+    },
+    {
+      "part_number": "7",
+      "description": "1'-3/4' SEAL TIGHT ADAPTER",
+      "qty": 4,
+      "material": "CROUSE - HINDS EL3"
+    },
+    {
+      "part_number": "6*",
+      "description": "JUNCTION BOX (IN CONSOLE)",
+      "qty": 1,
+      "material": "STEEL"
+    },
+    {
+      "part_number": "5",
+      "description": "SEALTITE FLEXIBLE CONDUIT",
+      "qty": "AR",
+      "material": "METAL CORE CABLE"
+    },
+    {
+      "part_number": "4",
+      "description": "1' RIGID CONDUIT",
+      "qty": "AR",
+      "material": "STEEL"
+    },
+    {
+      "part_number": "3",
+      "description": "FILTER/LUBRICATOR/REGULATOR, DRYER SHUTOFF",
+      "qty": 1,
+      "material": ""
+    },
+    {
+      "part_number": "2",
+      "description": "4' SCH 40 STREET ELBOW",
+      "qty": "AR",
+      "material": "STEEL or PVC"
+    },
+    {
+      "part_number": "1",
+      "description": "4' SCH 40 PIPE",
+      "qty": "AR",
+      "material": "STEEL or PVC"
+    }
+  ],
+  "certifications": [],
+  "notes": [
+    "Surface mounted continuous base installation",
+    "Most often used for fleet maintenance, repair and service applications",
+    "Lift unit translates to the rear approximately 36 1/8 during vertical articulation",
+    "Use smooth electrical 90's in conduits, not plumbing 90's",
+    "Customer preference optional for conduit sizes and application",
+    "Materials shown on list shall be used without substitution unless specifically approved in writing by Mohawk Resources, Ltd.",
+    "Items supplied by Mohawk with the lift unit marked with *"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric view of 100-42-SURFACE parallelogram lift with parts list table",
+      "extracted_text": "100-42-SURFACE PAGE 1 of 2, MOHAWK RESOURCES LTD., Parts list with P-010-D-007 through P-3100-D-001, Notice of confidential information"
+    },
+    {
+      "page": 2,
+      "description": "Side elevation and front elevation views with dimensions",
+      "extracted_text": "604.00 OVERALL PLATFORM LENGTH, 36.22, 504.00, 100.00, SERVICE LEG, 576.00, 109.50 runway end plates not shown for clarity, 45.00, 63\u00b0, 61.38, FRONT ELEVATION VIEW, Surface mounted continuous base installation, 100-42-SURFACE PAGE 2 of 2"
+    },
+    {
+      "page": 3,
+      "description": "Standard console location layout plan view",
+      "extracted_text": "STANDARD CONSOLE LOCATION LAYOUT, RIGHT RUNWAY, LEFT RUNWAY, FRONT, REAR, ALTERNATE CONSOLE LOCATION, SEE ANCHOR DETAILS, APPROACH RAMP, HYDRAULIC SUPPLY CONDUIT, ELECTRICAL SERVICE SUPPLY CONDUIT, POWER SUPPLY CONDUIT, COMPRESSED AIR SUPPLY CONDUIT, CONTROL PANEL, OPERATOR SIDE OF CONSOLE, 100-42-SURFACE"
+    },
+    {
+      "page": 4,
+      "description": "Lift and console subgrade conduit locations with section views",
+      "extracted_text": "LIFT & CONSOLE SUBGRADE CONDUIT LOCATIONS, SECTION VIEWS, SECTION C-C, SECTION D-D, SECTION B-B, 40.50, 2.00 TYP, LONGITUDINAL CENTERLINE OF LIFT UNIT, 44.50, 36.50, TO CONTROL PANEL, TO LIFT UNIT, 18.00 MIN 20.00 MAX"
+    },
+    {
+      "page": 5,
+      "description": "Control console and stub-up details with conduit specifications",
+      "extracted_text": "TOP VIEW OF CONSOLE FRAME, BACK, CONTROL PANEL, FRONT OF CONSOLE, BACK OF CONSOLE, 1 3/4 TYP (44), 10 5/8 (270), 31 (787), 28 (711), 25 (635), 22 (559), 18 (457), 12 (305), 8 (203), 5 (127), BY OTHERS, 32 1/2 (826), 36 (914), 7 TYP (178), 36 (914), CONDUIT SIZES & APPLICATION, INCOMING CONDUITS TO CONTROL CONSOLE FROM FLOOR ~18 (460-500 mm) AS SHOWN, CONTROL CONSOLE & STUB-UP DETAILS"
+    },
+    {
+      "page": 6,
+      "description": "Anchor details and shimming specifications",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, BASE UNIT BASE PLATE, WASHER, NUT, 1/2 PLATE THICKNESS, 3/8 REF, TOP OF FLOOR ELEVATION, 16.00 TYP, 11.50 30.00, 3 MINIMUM EMBEDMENT, 1 MAXIMUM EMBEDMENT PROVIDES ADDITIONAL ANCHORAGE STRENGTH, LEVELING SHIM, CONCRETE THICKNESS SEE GENERAL NOTES, ANCHOR BOLT, ANCHOR BOLT DETAIL, ANCHOR BOLT LOCATION DIMENSIONS AND DETAILS, 1 MAXIMUM LEVELING SHIM THICKNESS, REPRESENTATIVE TIGHTENING SEQUENCE FOR ANCHOR BOLTS, APPROVED ANCHOR BOLTS PROVIDED BY MOHAWK LIFT"
+    },
+    {
+      "page": 7,
+      "description": "Service connections and routing isometric view with section details",
+      "extracted_text": "ISOMETRIC VIEW OF SERVICE CONNECTIONS AND ROUTING, REAR LEG OF LIFT UNIT, FLOOR SERVICE SUPPLY COVER, SECTION A-A, ANCHOR BOLT ASSEMBLY, 5 REF, 5 REF, 4 REF, 4 REF, 19.6 REF, AIR HOSES (2) YELLOW (2) BLACK (1) BLUE, POWER CABLE FOR LIGHTS, HYDRAULIC HOSE, HYDRAULIC 90 DEGREE FITTINGS, ENCODER AND REED SWITCH CABLES"
+    },
+    {
+      "page": 8,
+      "description": "Lift data table and required material list",
+      "extracted_text": "LIFT DATA TABLE, MOHAWK RESOURCES, LTD, PARALLELOGRAM LIFT MODEL 100-42-SURFACE, MAXIMUM LOAD CAPACITY (LBS) 100,000, ANCHORAGE 94, ANCHOR BOLT DIAMETER (IN.) 3/4, TOTAL NUMBER OF ANCHOR BOLTS 94, REQUIRED MATERIAL LIST, MATERIALS SHOWN ON THIS LIST SHALL BE USED WITHOUT SUBSTITUTION UNLESS SPECIFICALLY APPROVED IN WRITING BY MOHAWK RESOURCES, LTD."
+    },
+    {
+      "page": 9,
+      "description": "General installation notes and surface lift specifications",
+      "extracted_text": "GENERAL NOTES, SURFACE LIFTS ONLY, NOTE 1 through NOTE 23 with detailed installation requirements, concrete specifications, anchor bolt requirements, electrical requirements, and safety considerations"
+    }
+  ],
+  "_source_file": "100-42-S_Installation_Drawings.pdf",
+  "_pages_count": 9,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:01:38Z"
+}

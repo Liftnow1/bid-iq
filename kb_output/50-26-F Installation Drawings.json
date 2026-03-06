@@ -1,0 +1,125 @@
+{
+  "model": "50-26-F",
+  "variant": "flush mount",
+  "product_type": "parallelogram lift",
+  "capacity": "Not explicitly stated in drawings",
+  "dimensions": {
+    "overall_length": "36 inches",
+    "overall_width": "32 1/2 inches",
+    "front_console_height": "10 5/8 inches",
+    "back_console_height": "7 inches",
+    "pit_depth": "9 inches",
+    "conduit_sizes": "1 inch minimum for steel pipe, 1 1/4 inch for PVC, 1 inch for flexible metallic conduit",
+    "anchor_bolt_details": "#8 x 12 dowels",
+    "service_lift_height": "Various dimensions shown in elevation views"
+  },
+  "installation_requirements": {
+    "pit_requirements": "9 inch deep pit required for flush mount installation",
+    "slab_thickness": "Minimum slab requirements shown in details",
+    "anchor_specifications": "#8 x 12 dowels, various anchor bolt configurations",
+    "conduit_requirements": "Multiple conduit runs for incoming conduits, steel pipe incoming power, PVC conduits, flexible metallic conduit",
+    "electrical": "Multiple conduit entries shown in console details"
+  },
+  "parts_list": [
+    {
+      "part_number": "Various anchor bolt configurations",
+      "description": "Anchor bolts and dowels for installation",
+      "qty": "Multiple as shown in drawings"
+    }
+  ],
+  "certifications": [],
+  "notes": [
+    "Flush mounted installation with manually covered rolling lift loading pocket",
+    "This drawing is to be used for field installation in most often used for fleet maintenance applications",
+    "Console frame top view shows front of console frame",
+    "Multiple electrical conduit entry requirements",
+    "Customer provides optional conduits",
+    "Use smooth electrical PVC conduit"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Title page with company information",
+      "extracted_text": "MOHAWK MODEL PARALLELOGRAM, MOHAWK, PARALLELOGRAM, 50-26-F FLUSH MOUNT INSTALLATION REQUIREMENT DRAWINGS, MOHAWK RESOURCES LTD., 65 VROOMAN AVE. AMSTERDAM, NY 12010, TOLL FREE: 1-800-833-2006, LOCAL: 1-518-842-1431, FAX: 1-518-842-1289, INTERNET: WWW.MOHAWKLIFTS.COM, E-MAIL: SERVICE@MOHAWKLIFTS.COM"
+    },
+    {
+      "page": 2,
+      "description": "Isometric view of flush mount installation with entry direction and pocket details",
+      "extracted_text": "50-26-FLUSH, PAGE 1 of 2, ENTRY DIRECTION, REAR, FRONT, FLUSH MOUNTED INSTALLATION WITH MANUALLY COVERED ROLLING LIFT LOADING POCKET, THIS DRAWING CORRELATION IS MOST OFTEN USED FOR FLEET MAINTENANCE APPLICATIONS, FRONT, REAR, TYPICAL LIFTING POSITION OFTEN USED FOR FLEET MAINTENANCE APPLICATIONS, THIS UNIT IS PLACED TO THE FRONT OF THE LIFT TO INSTALL, THE LIFT CAN WILL TANGLE TO THE REAR OF THE LEFT FOR THIS OPTION"
+    },
+    {
+      "page": 3,
+      "description": "Front elevation view showing pit depth and service lift configurations",
+      "extracted_text": "50-26-FLUSH, PAGE 2 of 2, REAR, SERVICE LIFT, TOTAL HEIGHT, NOMINAL DEPTH, SERVICE LIFT ENTRY, INSTALL DEPTH, 9 INCH, FRONT ELEVATION VIEW"
+    },
+    {
+      "page": 4,
+      "description": "Control console and stub-up details with conduit specifications",
+      "extracted_text": "CONTROL CONSOLE & STUB-UP DETAILS, TOP VIEW OF CONSOLE FRAME, 10 5/8, BACK OF CONSOLE, 32 1/2, FRONT OF CONSOLE TYP, 36, CUSTOMER PROVIDES OPTIONAL, 36, 7, FRONT OF CONSOLE TYP, BY OTHERS, 1 3/4 TYP, CONDUIT SIZES & APPLICATION: 1 (MIN) SIZED 40 STEEL PIPE - INCOMING POWER, 1 (MIN) SIZED 40 STEEL PIPE - INCOMING POWER & LINE, 1 1/4 (MIN) SIZED 40 STEEL PIPE - ELECTRICAL TO LIFT, 1 (MIN) SIZED 40 STEEL PIPE - ELECTRICAL TO LIFT, E.F.G.H.: USE SMOOTH ELECTRICAL PVC'S IN CONDUITS, NOT PLUMBING 90'S ALI, NOTE: USE SMOOTH ELECTRICAL PVC CONDUIT FOR INCOMING CONDUIT SIZES & APPLICATION RUNS CUSTOMER PROVIDED OPTIONAL"
+    },
+    {
+      "page": 5,
+      "description": "Anchor bolt details and placement of lyfting shim detail",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, ANCHOR BOLT DETAIL, LYFTING SHIM DETAIL, ANCHOR BOLT DETAIL, PLACEMENT OF LYFTING SHIM DETAIL, TIGHTENING SEQUENCE FOR ANCHOR BOLTS, Various anchor bolt specifications and installation details"
+    },
+    {
+      "page": 6,
+      "description": "Isometric view of service connections and shimming details",
+      "extracted_text": "ISOMETRIC VIEW OF SERVICE CONNECTIONS AND SHIMMING, Various connection details and shimming specifications"
+    },
+    {
+      "page": 7,
+      "description": "Jacking beam pocket layout with conduit routing to console",
+      "extracted_text": "50-26-F, PAGE 1 of 8, JACKING BEAM POCKET, CONDUITS TO CONSOLE, CONDUITS TO REAR LEGS OF LIFT PLATFORMS, ENTRANCE DIRECTION, REAR, FRONT, DRAINAGE MATCH BASIN"
+    },
+    {
+      "page": 8,
+      "description": "Front elevation view with conduit locations and console details",
+      "extracted_text": "50-26-F, PAGE 2 of 8, ENTRANCE DIRECTION, STANDARD CONSOLE LOCATION SERVICE, 8, 60.50, ALTERNATE CONSOLE LOCATION, REAR, STANDARD CONSOLE, #8 DIAMOND PT 1/2 x 3/8 CONDUIT, ELECTRICAL PT 3/4 x 9/16 CONDUIT, FRONT, SECTION A-A"
+    },
+    {
+      "page": 9,
+      "description": "Detail A and Section A-A with dimensional specifications",
+      "extracted_text": "50-26-F, PAGE 3 of 8, DETAIL A, SECTION A-A, PRO MFRD OF 10 TO WWKF, # 8 & 12 DOWELS, Various dimensional details and anchor specifications"
+    },
+    {
+      "page": 10,
+      "description": "Section B-B with detailed measurements and anchor specifications",
+      "extracted_text": "50-26-F, PAGE 4 of 8, SECTION B-B, FINISHED FLOOR ELEVATION, Various detailed measurements and anchor specifications"
+    },
+    {
+      "page": 11,
+      "description": "Section C-D and Section D-D with structural details",
+      "extracted_text": "50-26-F, PAGE 5 of 8, SECTION C-D, SECTION D-D, Various structural details and measurements"
+    },
+    {
+      "page": 12,
+      "description": "Section E-E and Section F-F with additional structural specifications",
+      "extracted_text": "50-26-F, PAGE 6 of 8, SECTION E-E, SECTION F-F, Additional structural specifications and measurements"
+    },
+    {
+      "page": 13,
+      "description": "Multiple section views (G, H, J) with detailed cross-sections",
+      "extracted_text": "50-26-F, PAGE 7 of 8, SECTION G, SECTION H, SECTION J, VIEW K, Detailed cross-sectional views and specifications"
+    },
+    {
+      "page": 14,
+      "description": "Section I-I with threading and conduit details",
+      "extracted_text": "50-26-F, PAGE 8 of 8, SECTION I-I, THREADING CONDUIT FOR INCOMING SET VALUE 19 & 20, Various threading and conduit specifications"
+    },
+    {
+      "page": 15,
+      "description": "Lift data table with capacity and dimensional specifications",
+      "extracted_text": "LIFT DATA TABLE, MOHAWK RESOURCES LTD, PARALLELOGRAM LIFT MODEL, Various capacity ratings and dimensional data in tabular format"
+    },
+    {
+      "page": 16,
+      "description": "General notes page with flush lifts only specifications",
+      "extracted_text": "FLUSH LIFTS ONLY, Various installation notes and specifications for flush mount lifts including electrical, mechanical, and safety requirements"
+    }
+  ],
+  "_source_file": "50-26-F Installation Drawings.pdf",
+  "_pages_count": 16,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:15:55Z"
+}

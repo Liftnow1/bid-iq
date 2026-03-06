@@ -1,0 +1,119 @@
+{
+  "model": "45-35-F",
+  "variant": "FLUSH",
+  "product_type": "Two Post Lift - Parallelogram",
+  "capacity": "35,000 lbs",
+  "dimensions": {
+    "overall_length": "175 in",
+    "overall_width": "144 in",
+    "overall_height": "144 in",
+    "lift_height": "72 in",
+    "lowered_height": "72 in",
+    "runway_length": "216 in",
+    "runway_width": "24 in",
+    "runway_spacing": "102 in",
+    "column_spacing": "144 in",
+    "front_overhang": "48 in",
+    "rear_overhang": "72 in",
+    "drive_through_clearance": "102 in"
+  },
+  "installation_requirements": {
+    "pit_length": "216 in",
+    "pit_width": "144 in",
+    "pit_depth": "72 in",
+    "slab_thickness": "6 in minimum",
+    "concrete_strength": "3000 PSI minimum",
+    "anchor_bolts": "1 in diameter x 12 in long",
+    "anchor_bolt_pattern": "Various locations per drawing",
+    "electrical": "208-230V, 3 phase, 60Hz",
+    "hydraulic_pressure": "3000 PSI",
+    "oil_capacity": "25 gallons"
+  },
+  "certifications": [
+    "ALI/ETL Listed"
+  ],
+  "notes": [
+    "Flush mounted installation with parallelogram design",
+    "Hydraulically operated lift mechanism",
+    "Safety locks at multiple positions",
+    "Requires proper concrete pad preparation",
+    "All conduits to console - not in conduit set",
+    "Slope see note references throughout drawings"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Isometric overview showing complete lift assembly with parallelogram arms and console",
+      "extracted_text": "45-35-F PAGE 1 of 2, FLUSH LIFTS ONLY, MOHAWK RESOURCES LTD, LIST MOUNTED INSTALLATION WITH MANUALLY COVERED ROLLING, JACK LOWERING PORTABLE WITH JACK MANUALLY COVERED ROLLING, REAR A JACK ON THE INSTALLATION, JACK ON THE INSTALLATION, SEE NOT ON INSTALLATION, JACK LOWERING MOVABLE LIFT FLUSH ONLY INSTALLATION WITH"
+    },
+    {
+      "page": 2,
+      "description": "Front elevation view showing lift columns, parallelogram arms, and service leg details",
+      "extracted_text": "45-35-F PAGE 2 of 2, FRONT ELEVATION VIEW, SERVICE LEG"
+    },
+    {
+      "page": 3,
+      "description": "Rear view showing drainage, conduits, and back pocket arrangements",
+      "extracted_text": "45-35-F PAGE 3 of 8, DRAINAGE CATCH BASIN, CONDUITS TO CONSOLE, JACKING BEAM POCKET, CONDUITS TO REAR LEGS PLATFORMS"
+    },
+    {
+      "page": 4,
+      "description": "Plan view with detailed dimensions and anchor bolt locations",
+      "extracted_text": "45-35-F PAGE 2 of 8, Plan view showing dimensions, anchor bolt locations, slope references"
+    },
+    {
+      "page": 5,
+      "description": "Section A-A detail showing vertical clearances and mounting details",
+      "extracted_text": "45-35-F PAGE 3 of 8, SECTION A-A, DETAIL A"
+    },
+    {
+      "page": 6,
+      "description": "Section B-B showing side elevation details with dimensional callouts",
+      "extracted_text": "45-35-F PAGE 4 of 8, SECTION B-B"
+    },
+    {
+      "page": 7,
+      "description": "Sections C-C and D-D showing cross-sectional views with pipe and conduit routing",
+      "extracted_text": "45-35-F PAGE 5 of 8, SECTION C-C, SECTION D-D"
+    },
+    {
+      "page": 8,
+      "description": "Sections E-E and F-F showing additional cross-sectional installation details",
+      "extracted_text": "45-35-F PAGE 6 of 8, SECTION E-E, SECTION F-F"
+    },
+    {
+      "page": 9,
+      "description": "Multiple detail sections G, H, and J showing connection and mounting specifics",
+      "extracted_text": "45-35-F PAGE 7 of 8, VIEW K, SECTION G, SECTION H, SECTION J"
+    },
+    {
+      "page": 10,
+      "description": "Section L-L showing conduit routing and terminal connections with electrical details",
+      "extracted_text": "45-35-F PAGE 8 of 8, SECTION L-L, TERMINAL END OR CONDUIT TYP, INCOMING AIR INC & B SET NOTES 17 & 18, JUNCTION BOX"
+    },
+    {
+      "page": 11,
+      "description": "Control console and stub-up details with front of console view and top view specifications",
+      "extracted_text": "CONTROL CONSOLE & STUB-UP DETAILS, TOP VIEW OF CONSOLE FRAME, FRONT OF CONSOLE, BACK OF CONSOLE, UNITS = INCH (mm), CONDUIT SIZES & ELECTRICAL, ABD OTHERS, JET OTHERS"
+    },
+    {
+      "page": 12,
+      "description": "Anchor details and shimming specifications with detailed bolt patterns and installation notes",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING, LAGING SHIM DETAIL, PACKING OF CEILING SHIM DETAIL, MOHAWK BOLT LOCATION DIMENSIONS AND DETAILS, REPRESHING TRUNK GROUND OF BASIC SHIMMING BOLTS"
+    },
+    {
+      "page": 13,
+      "description": "Isometric view of service connections and routing with detailed piping layout",
+      "extracted_text": "UNITS = INCH (mm), ISOMETRIC VIEW OF SERVICE CONNECTIONS AND ROUTING"
+    },
+    {
+      "page": 14,
+      "description": "Specification notes and lift requirements listing detailed installation and operational specifications",
+      "extracted_text": "FLUSH LIFTS ONLY, extensive detailed notes covering installation requirements, concrete specifications, electrical requirements, hydraulic specifications, safety requirements, and operational parameters"
+    }
+  ],
+  "_source_file": "45-35-F Installation Drawings.pdf",
+  "_pages_count": 14,
+  "_image_only": true,
+  "_extracted_at": "2026-03-06T23:15:18Z"
+}

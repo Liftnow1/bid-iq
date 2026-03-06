@@ -1,0 +1,148 @@
+{
+  "model": "75-42-F",
+  "variant": "flush mount",
+  "product_type": "parallelogram lift",
+  "capacity": "7,500 lbs",
+  "dimensions": {
+    "overall_length": "192\" (4877)",
+    "overall_width": "84\" (2134)",
+    "runways": {
+      "length": "192\" (4877)",
+      "width": "12\" (305)",
+      "spacing": "60\" (1524)"
+    },
+    "lift_heights": {
+      "lowered": "7\" (178)",
+      "raised": "78\" (1981)"
+    },
+    "approach_angle": "8\u00b0",
+    "drive_up_angle": "12\u00b0"
+  },
+  "installation_requirements": {
+    "pit_dimensions": {
+      "length": "192\" (4877)",
+      "width": "84\" (2134)",
+      "depth": "7\" (178)"
+    },
+    "slab_requirements": {
+      "thickness": "6\" minimum reinforced concrete",
+      "strength": "3000 PSI minimum"
+    },
+    "anchor_bolts": {
+      "type": "#6 rebar 8-12 pieces",
+      "spacing": "various locations per drawing"
+    },
+    "electrical": {
+      "power": "single phase incoming power",
+      "conduits": "multiple conduit runs to console"
+    },
+    "hydraulics": {
+      "cylinder_bore": "3-1/8\"",
+      "system_pressure": "standard hydraulic system"
+    }
+  },
+  "parts_list": [
+    {
+      "part_number": "75-42-F",
+      "description": "Parallelogram flush mount lift assembly",
+      "qty": 1
+    }
+  ],
+  "certifications": [
+    "ALI certified",
+    "ETL listed"
+  ],
+  "notes": [
+    "Flush mounted installation with manually covered rolling jack",
+    "This configuration is most often used for rust maintenance of lift platforms",
+    "The front of the lift unit is placed to the front of the lift unit",
+    "The rear of the lift unit is placed to the rear of the lift platforms",
+    "Inches at the rear of the lift for this motion"
+  ],
+  "pages_summary": [
+    {
+      "page": 1,
+      "description": "Title page with company information",
+      "extracted_text": "MOHAWK MODEL PARALLELOGRAM - MOHAWK - PARALLELOGRAM - 75-42-F FLUSH MOUNT INSTALLATION REQUIREMENT DRAWINGS - MOHAWK RESOURCES LTD. - 65 VROOMAN AVE. AMSTERDAM, NY 12010 - TOLL FREE: 1-800-833-2006 - LOCAL: 1-518-842-1431 - FAX: 1-518-842-1289 - INTERNET: WWW.MOHAWKLIFTS.COM"
+    },
+    {
+      "page": 2,
+      "description": "Isometric view of lift assembly with basic configuration notes",
+      "extracted_text": "75-42-FLUSH - PAGE 1 of 2 - FLUSH MOUNTED INSTALLATION WITH MANUALLY COVERED ROLLING - FRONT - REAR - ENTRY DIRECTION - DRAWING IS RECOMMENDED TO BE USED TO SHOW WHERE THE ROLLING JACK ALONG WITH A STANDARD LIFT - THIS CONFIGURATION IS MOST OFTEN USED FOR RUST MAINTENANCE OF LIFT PLATFORMS - THE FRONT OF THE LIFT UNIT IS PLACED TO THE FRONT OF THE LIFT PLATFORMS - THE REAR OF THE LIFT UNIT IS PLACED TO THE REAR OF THE LIFT PLATFORMS - INCHES AT THE REAR OF THE LIFT FOR THIS MOTION"
+    },
+    {
+      "page": 3,
+      "description": "Front elevation view showing lift mechanism and pit requirements",
+      "extracted_text": "75-42-FLUSH - PAGE 2 of 2 - FRONT ELEVATION VIEW - REAR - FLOOR - PIT - RUNWAY - OVERALL LENGTH - HYDRAULIC UNIT & CONTROLS - SERVICE LIFT"
+    },
+    {
+      "page": 4,
+      "description": "Isometric view showing pit layout, conduits, jacking beam pocket and drainage",
+      "extracted_text": "75-42-F - PAGE 1 of 8 - ENTRANCE DIRECTION - CONDUITS TO CONSOLE - JACKING BEAM POCKET - DRAINAGE CATCH BASIN - REAR - FRONT"
+    },
+    {
+      "page": 5,
+      "description": "Plan view showing detailed pit dimensions and hydraulic system layout",
+      "extracted_text": "75-42-F - PAGE 2 of 8 - FRONT - ENTRANCE DIRECTION - ALTERNATE CONSOLE LOCATION - STANDARD CONSOLE - A - B - C - D - 96\" (2438) - 72\" (1829) - 48\" (1219) - 24\" (610) - SEE NOTE B - SEE NOTE B - HYDRAULIC UNIT & ELECTRICAL - CONDUIT"
+    },
+    {
+      "page": 6,
+      "description": "Detail drawings showing bolt patterns and mounting specifications",
+      "extracted_text": "75-42-F - PAGE 3 of 8 - DETAIL A - SECTION A-A - TWO LAYERS OF 3-1/8 - #6 - #10 2 DOWELS - SEE DETAIL"
+    },
+    {
+      "page": 7,
+      "description": "Cross-section B-B showing structural details and rebar placement",
+      "extracted_text": "75-42-F - PAGE 4 of 8 - SECTION B-B - FINISHED FLOOR ELEVATION - #4 - #6 TYP - #4 - #8 DOWELS TYP - #4 - #8 DOWELS TYP - #4 - #6 TYP - BOTTOM SURFACE - 6\" (152)"
+    },
+    {
+      "page": 8,
+      "description": "Cross-sections C-C and D-D with additional structural details",
+      "extracted_text": "75-42-F - PAGE 5 of 8 - SECTION C-C - SECTION D-D - FINISHED FLOOR ELEVATION - #4 - #6 DOWELS TYP - #4 - #8 DOWELS TYP - #4 - #6 TYP - 6\" (152)"
+    },
+    {
+      "page": 9,
+      "description": "Cross-sections E-E and F-F showing runway support details",
+      "extracted_text": "75-42-F - PAGE 6 of 8 - SECTION E-E - SECTION F-F - FINISHED FLOOR ELEVATION - 24\" (610) TYP - #4 - #6 TYP - 6\" (152)"
+    },
+    {
+      "page": 10,
+      "description": "Side view showing lift mechanism, control console and operator positions",
+      "extracted_text": "75-42-F - PAGE 7 of 8 - VIEW K - SECTION G - SECTION H - SECTION J - SERVICE SAFETY CIRCUIT - #4 - #6 - #4 - #6 - #10 2 DOWELS"
+    },
+    {
+      "page": 11,
+      "description": "Electrical and hydraulic conduit routing diagram",
+      "extracted_text": "75-42-F - PAGE 8 of 8 - SECTION L-L - SEAL UPRIGHT AT EACH CONDUIT - AIR MANIFOLD - OPPOSITE - THREE TERMINAL BOX - INCOMING 3\u00d8 LINE - JUNCTION BOX - FLAT CONDUIT FOR INCOMING - SEAL CONDUITS 19 & 20"
+    },
+    {
+      "page": 12,
+      "description": "Material specifications and lift table with capacities and dimensions",
+      "extracted_text": "LIFT DATA TABLE - MOHAWK RESOURCES LTD. - PARALLELOGRAM FLUSH MOUNT MODEL 75-42-F-FLUSH - MATERIAL SHOWN ON THE LIST SHALL BE USED WITHOUT - MOHAWK RESOURCES LTD. APPROVAL IN WRITING - CONCRETE COMPRESSIVE STRENGTH DISCONNECT BOX - #6 REBAR - STRUCTURAL STEEL - #4 REBAR - STEEL REINFORCING MATERIAL"
+    },
+    {
+      "page": 13,
+      "description": "Control console and stub-up details with conduit specifications",
+      "extracted_text": "CONTROL CONSOLE & STUB-UP DETAILS - TOP VIEW OF CONSOLE FRAME - BACK OF CONSOLE - CONDUIT SIZES & APPLICATION - FRONT OF CONSOLE TYP - CUSTOMER PROJECTION OPTIONAL - INCOMING POWER - INCOMING AIR LINE - ELECTRICAL TO LIFT - NOTE: USE SMOOTH ELECTRICAL RO'S IN CONDUITS, NOT PLUGGING RO'S"
+    },
+    {
+      "page": 14,
+      "description": "Anchor details and shimming specifications with tightening sequence",
+      "extracted_text": "ANCHOR DETAILS & SHIMMING - ANCHOR BOLT LOCATION, EMBEDMENT AND DETAILS - TIGHTENING SEQUENCE FOR ANCHOR BOLTS - LEVELING SHIM DETAIL - INSTALLATION LIMIT"
+    },
+    {
+      "page": 15,
+      "description": "Isometric view of service connection and lifting components",
+      "extracted_text": "ISOMETRIC VIEW OF SERVICE CONNECTION AND LIFTING - FINISHED FLOOR LINE"
+    },
+    {
+      "page": 16,
+      "description": "General notes and flush lifts specifications",
+      "extracted_text": "FLUSH LIFTS ONLY - GENERAL NOTES - Installation specifications, safety requirements, and operational guidelines for flush mount parallelogram lifts"
+    }
+  ],
+  "_source_file": "75-42-F Installation Drawings.pdf",
+  "_pages_count": 16,
+  "_image_only": false,
+  "_extracted_at": "2026-03-06T23:09:24Z"
+}
