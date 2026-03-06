@@ -12,6 +12,9 @@ import click
 from pdf2image import convert_from_path
 from PIL import Image
 
+# Allow large images (some PDFs like engineering drawings are very high-res)
+Image.MAX_IMAGE_PIXELS = 500_000_000
+
 EXTRACTION_PROMPT = """\
 You are analyzing pages from a product installation drawing / specification PDF \
 for a vehicle lift manufacturer (Mohawk Lifts). Extract ALL useful data from these pages.
@@ -68,9 +71,25 @@ def render_pdf_pages(pdf_path: str, dpi: int = 150) -> list[tuple[int, str]]:
     """Render PDF pages to base64-encoded JPEG images."""
     pages = convert_from_path(pdf_path, dpi=dpi, fmt="jpeg")
     encoded = []
+    max_bytes = 4_500_000  # Stay under 5MB API limit
+    max_dim = 7900  # API limit is 8000px per dimension
     for i, page in enumerate(pages):
+        # Cap dimensions first
+        w, h = page.size
+        if w > max_dim or h > max_dim:
+            ratio = min(max_dim / w, max_dim / h)
+            page = page.resize((int(w * ratio), int(h * ratio)), Image.LANCZOS)
         buf = io.BytesIO()
         page.save(buf, format="JPEG", quality=80)
+        # If image is too large in bytes, downscale further
+        if buf.tell() > max_bytes:
+            scale = 0.5
+            w, h = page.size
+            while buf.tell() > max_bytes and scale > 0.1:
+                resized = page.resize((int(w * scale), int(h * scale)), Image.LANCZOS)
+                buf = io.BytesIO()
+                resized.save(buf, format="JPEG", quality=70)
+                scale *= 0.75
         b64 = base64.standard_b64encode(buf.getvalue()).decode("ascii")
         encoded.append((i + 1, b64))
     return encoded
@@ -115,11 +134,22 @@ def extract_with_vision(
 
         content.append({"type": "text", "text": EXTRACTION_PROMPT})
 
-        response = client.messages.create(
-            model=model,
-            max_tokens=8192,
-            messages=[{"role": "user", "content": content}],
-        )
+        # Retry with exponential backoff for rate limits
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                response = client.messages.create(
+                    model=model,
+                    max_tokens=8192,
+                    messages=[{"role": "user", "content": content}],
+                )
+                break
+            except anthropic.RateLimitError:
+                if attempt == max_retries - 1:
+                    raise
+                wait = 2 ** (attempt + 1) * 15  # 30s, 60s, 120s, 240s
+                click.echo(f"    Rate limited on {pdf_name}, waiting {wait}s...")
+                time.sleep(wait)
 
         response_text = response.content[0].text
 

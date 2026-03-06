@@ -35,7 +35,7 @@ def kb():
 )
 @click.option(
     "--max-concurrent",
-    default=5,
+    default=2,
     type=int,
     help="Max concurrent PDF processing tasks.",
 )
