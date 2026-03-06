@@ -54,3 +54,13 @@ def enrich(input_dir, output_dir, model, max_concurrent, dpi):
         max_concurrent=max_concurrent,
         dpi=dpi,
     )
+
+
+@main.command()
+@click.option("--port", default=5000, type=int, help="Port to run the web server on.")
+def ui(port):
+    """Launch the Bid IQ web interface."""
+    from bidiq.web import app
+
+    click.echo(f"Starting Bid IQ UI at http://localhost:{port}")
+    app.run(host="0.0.0.0", port=port, debug=True)
