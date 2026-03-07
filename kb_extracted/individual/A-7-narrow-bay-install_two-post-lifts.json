@@ -1,0 +1,53 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/A-7-narrow-bay-install.pdf",
+  "category": "two-post-lift",
+  "document_type": "shop_layout_drawing",
+  "model": "A-7",
+  "variant": "Narrow Bay Installation Layout",
+  "product_type": "Two-Post Lift Shop Layout (3 Bays)",
+  "capacity": null,
+  "dimensions": {
+    "shop_overall_width": "33 ft 4 inches",
+    "shop_overall_depth": "28 ft 7 inches",
+    "shop_overall_length_with_doors": "36 ft 6 inches",
+    "walk_thru_between_shared_posts": "75 inches (between Post 2 & 3, or Post 4 & 5)",
+    "vehicles_shown_length": "18 ft 5 inches long",
+    "work_bench_depth": "3 ft",
+    "number_of_bays": 3,
+    "number_of_posts": 6,
+    "number_of_doors": 3
+  },
+  "weight": null,
+  "installation_requirements": {
+    "layout_configuration": "3 Mohawk A-7 lifts in narrow bay configuration",
+    "post_sharing": "Posts 2&3 shared between Bay 1 and Bay 2; Posts 4&5 shared between Bay 2 and Bay 3",
+    "vehicle_orientation": "Bay 1: car rear toward door; Bay 2: car front toward door (backed in); Bay 3: car rear toward door"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "drawing_number": "ZZ1332",
+    "scale": "Feet (0-5-10 scale bar shown)",
+    "layout_type": "Plan (top) view of cars on lift"
+  },
+  "features": [
+    "3-bay narrow layout with Mohawk A-7 lifts",
+    "Alternating vehicle orientation (forward/backed in/forward)",
+    "Shared post configuration to minimize space",
+    "Space for work bench, brake lathe, and tire changer along back wall",
+    "75 inch walk-through between shared posts"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [
+    "Arms of Bay 1 will not touch lift in Bay 2, nor Bay 2 to Bay 3"
+  ],
+  "notes": [
+    "Vehicles shown are 18 ft 5 inches long",
+    "Walk-thru between Post 2 & 3 (or 4 & 5) is 75 inches",
+    "Arms of Bay 1 will not touch lift in Bay 2 nor 2 to 3",
+    "Vehicle #2 is backed in",
+    "Plan (top) view of cars on lift shown",
+    "Layout includes work bench, brake lathe, and tire changer along back wall"
+  ]
+}

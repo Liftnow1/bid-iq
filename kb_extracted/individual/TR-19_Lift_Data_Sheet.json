@@ -1,0 +1,109 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/TR-19_Lift_Data_Sheet.pdf",
+  "category": "four-post-lift",
+  "document_type": "customer_data_verification_form",
+  "model": "TR-19",
+  "variant": null,
+  "product_type": "four_post_track_lift",
+  "capacity": "19,000 lbs",
+  "dimensions": {
+    "standard_width_between_posts_inches": 150,
+    "standard_width_between_posts_feet": "12 ft 6 in",
+    "overall_length_with_20ft_tracks_orientation_A_feet": "27 ft 3 in",
+    "overall_length_with_20ft_tracks_orientation_A_formula": "L + 7 ft 3 in",
+    "overall_length_with_20ft_tracks_orientation_B_feet": "21 ft 7 in",
+    "overall_length_with_20ft_tracks_orientation_B_formula": "L + 1 ft 7 in",
+    "track_inside_spread_standard_inches": 48,
+    "track_width_typical_inches": 24
+  },
+  "weight": null,
+  "installation_requirements": {
+    "power_supply_options": [
+      "208-220/230 VAC, 1 Phase, 60 Hz (Standard)",
+      "440-460/480 VAC, 3 Phase"
+    ],
+    "standard_power": "208-220/230 VAC, 1 Phase, 60 Hz",
+    "electrical_connection": "Final connection to local/national code is responsibility of electrical contractor; more than one point of connection may be required",
+    "electrical_not_provided": "Disconnect switches, main fuses, and main power leads are NOT provided by Mohawk",
+    "pneumatic_power": "Responsibility of mechanical contractor to final designated point at vehicle lift",
+    "concrete_floor_thickness_required": true,
+    "site_survey_info_needed": [
+      "Overall bay length",
+      "Slope in floor (lengthwise)",
+      "Overall bay width",
+      "Slope in floor (widthwise)",
+      "Overall bay height",
+      "Overhead obstructions (yes/no with explanation)"
+    ]
+  },
+  "specifications": {
+    "capacity_lbs": 19000,
+    "lift_type": "4-Post Track Lift",
+    "lift_orientations": ["A (standard)", "B", "C", "D"],
+    "standard_orientation": "A",
+    "track_length_standard_feet": 20,
+    "track_length_note": "Other lengths available (special - contact Mohawk); above is not tip-to-tip length",
+    "approach_ramp_length_standard_feet": 5,
+    "approach_ramp_note": "Other lengths available (special - contact Mohawk)",
+    "track_inside_spread_inches": 48,
+    "drawing_number": "ZZ885",
+    "drawing_date": "6/04",
+    "revision": "E (09/16)"
+  },
+  "features": [
+    "4-post track lift for vehicles up to 19,000 lbs",
+    "4 lift orientation options (A, B, C, D)",
+    "20-foot standard track length",
+    "5-foot standard approach ramp",
+    "Crossrail design with top rails",
+    "48-inch inside track spread (standard)",
+    "Custom track lengths available"
+  ],
+  "optional_equipment": [
+    {
+      "item": "RJ-15 Electric/Hydraulic Jacking Beam",
+      "capacity_lbs": 15000,
+      "note": "48 inch inside tracks only; additional cost"
+    },
+    {
+      "item": "JP-15 Rolling Jacking Platform",
+      "capacity_lbs": 15000,
+      "note": "48 inch inside tracks only; additional cost"
+    },
+    {
+      "item": "Drive Thru Ramps",
+      "note": "Additional cost"
+    },
+    {
+      "item": "Oil Drain Pan",
+      "note": "48 inch inside tracks only; additional cost"
+    },
+    {
+      "item": "Extra Base Plates for Shimming (1/2 inch thick)",
+      "price_each": 115.00,
+      "note": "Requires longer anchor bolts to meet minimum embedment depth; not supplied with standard lift"
+    },
+    {
+      "item": "TD-1000 Tire Dolly",
+      "note": "Additional cost"
+    },
+    {
+      "item": "Other (Contact Mohawk)",
+      "note": "Special options available"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Some option combinations are NOT available",
+    "All lift options checked for purchase must be listed on purchase order as separate line items",
+    "Vehicle data forms must be attached for vehicles intended for this lift",
+    "Fill out data forms for largest, smallest, and lowest underclearance vehicles",
+    "Review under-vehicle clearance over ramps, bumper clearance approaching ramps, rear end drag clearance over ramps, overhead clearance when fully raised, wheel base length over track length",
+    "Truck Data Form (Dual Axle Rear) included - drawing ZZ06 dated 1/95",
+    "Construction project delivery requires advance coordination for production time verification",
+    "Manufacturer: Mohawk Resources Ltd., PO Box 110, Amsterdam, NY 12010",
+    "Phone: 1-800-833-2006 or 518-842-1431, Fax: 518-842-1289"
+  ]
+}

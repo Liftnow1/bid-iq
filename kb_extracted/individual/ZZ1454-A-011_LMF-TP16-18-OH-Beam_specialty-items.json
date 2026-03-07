@@ -1,0 +1,62 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/ZZ1454-A-011_LMF-TP16-18-OH-Beam.pdf",
+  "category": "specialty-item",
+  "document_type": "engineering_drawing",
+  "model": "ZZ1454-A-011",
+  "variant": "O/H Beam Support Assembly",
+  "product_type": "Overhead Beam Support Assembly for 2-Post Lifts",
+  "capacity": null,
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {
+    "compatible_models": ["LMF-12", "TP-16", "TP-18"],
+    "purpose": "Permits installation of these lifts on lower specification concrete floors",
+    "standard_concrete_requirement_without_overhead_beam": "6-1/2 inch thick, 4000 PSI",
+    "minimum_concrete_requirement_with_overhead_beam": {
+      "LMF-12": "4-1/2 inch thick at 4000 PSI, or 6-1/2 inch thick at 3000 PSI",
+      "TP-16": "5 inch thick at 4000 PSI, or 6-1/2 inch thick at 3250 PSI",
+      "TP-18": "5-1/2 inch thick at 4000 PSI, or 6-1/2 inch thick at 3500 PSI"
+    },
+    "concrete_slab_notes": "Continuous concrete slabs to be free of defects and cracks, provide proper anchor edge distance to seams, and have a minimum of 6x6 wire mesh reinforcement"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "part_number": "ZZ1454-A-011",
+    "title": "O/H Beam Support Option",
+    "drawing_number": "ZZ1454-Option",
+    "file_name": "ZZ1454-Option",
+    "scale": "1/16",
+    "drawn_by": "JV",
+    "date": "6/2014",
+    "sheet_size": "D-Size",
+    "tolerances": {
+      "angular": "+/- 1.5 degrees",
+      "fractional": "+/- 0.030",
+      "decimal_XX": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "Overhead beam support connects the two posts at the top",
+    "Allows installation on lower specification concrete floors",
+    "Reduces minimum concrete thickness requirements for LMF-12, TP-16, and TP-18",
+    "Provides structural rigidity between posts"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [
+    "Concrete slabs must be continuous, free of defects and cracks",
+    "Proper anchor edge distance to seams required",
+    "Minimum 6x6 wire mesh reinforcement required in concrete"
+  ],
+  "notes": [
+    "Use of this beam assembly permits installation on lower specification concrete floors",
+    "Standard concrete requirement without overhead beam: 6-1/2 inch thick, 4000 PSI",
+    "With overhead beam, LMF-12 can be installed on 4-1/2 inch thick at 4000 PSI or 6-1/2 inch at 3000 PSI",
+    "With overhead beam, TP-16 can be installed on 5 inch thick at 4000 PSI or 6-1/2 inch at 3250 PSI",
+    "With overhead beam, TP-18 can be installed on 5-1/2 inch thick at 4000 PSI or 6-1/2 inch at 3500 PSI"
+  ]
+}

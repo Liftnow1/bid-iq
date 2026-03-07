@@ -1,0 +1,106 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/FL25 TR25 TR19 SERIES  12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "FL-25 / TR-25 / TR-19",
+  "variant": "FL-25 Forktruck Lift, TR-25 and TR-19 Four-Post Runway Lifts",
+  "product_type": "four_post_runway_lift",
+  "capacity": "TR-19: 19,000 lbs; TR-25: 25,000 lbs; FL-25: 25,000 lbs",
+  "dimensions": {
+    "tr25_overall_length_with_20ft_runways": "27 ft 3 in",
+    "tr25_overall_width": "12 ft 6 in",
+    "tr25_track_width_inches": 24,
+    "tr25_track_adjustment_ft_min": 4,
+    "tr25_track_adjustment_ft_max": 8,
+    "tr25_lifting_stroke_ft": 5,
+    "tr25_height_at_full_stroke_ft_in": "5 ft 9-5/16 in",
+    "tr25_clearance_between_posts_ft": 11,
+    "tr25_inside_track_clearance_inches_min": 48,
+    "tr25_track_length_options_ft": [16, 20, 25, 30],
+    "tr19_runway_length_ft": 20,
+    "fl25_lifting_height_ft_in": "5 ft 9 in"
+  },
+  "weight": {},
+  "installation_requirements": {
+    "concrete_psi": 4000,
+    "concrete_thickness_inches": 4.5,
+    "installation_time_hours": "4 to 6",
+    "mounting": "Surface-mounted, bolts to concrete floor",
+    "indoor_use_only": true
+  },
+  "specifications": {
+    "tr19_capacity_lbs": 19000,
+    "tr25_capacity_lbs": 25000,
+    "fl25_capacity_lbs": 25000,
+    "tr25_lifting_speed_seconds": 120,
+    "tr25_motor_hp": 2.5,
+    "tr25_motor_voltage": "220V Single-Phase (3-phase optional)",
+    "tr19_motor_hp": 2,
+    "lifting_mechanism": "5-inch hydraulic cylinder attached to (4) #646 leaf chains",
+    "cylinder_diameter_inches": 5,
+    "chain_type": "#646 Leaf Chain",
+    "approach_ramp_width_inches": 24,
+    "fl25_mobile_column_accessory_capacity_lbs": 28000,
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "6 feet of unrestricted under-vehicle access",
+    "Direct-drive hydraulic cylinder with leaf chain system - no cables",
+    "Adjustable runways fit any vehicle wheelbase",
+    "Surface-mounted design - no excavation required",
+    "Multi-position mechanical locking wedge",
+    "Patented hydraulic safety systems",
+    "Leaf chain synchronization",
+    "Redundant electronic controls",
+    "24-inch wide runways",
+    "Adjustable track width from 4 to 8 feet",
+    "FL-25: Designed specifically for forklift/forktruck service",
+    "TR-19: Accommodates passenger cars, trucks, utility vehicles, small RVs",
+    "TR-25: Accommodates trucks, buses, utility vehicles, and passenger cars"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Rolling Jacks (Wheels-Free)",
+      "description": "Raise tires off tracks for wheel, brake, and axle service"
+    },
+    {
+      "item": "3rd Wheel Ramp",
+      "description": "Available for 3-wheel forklifts (FL-25)"
+    },
+    {
+      "item": "Mobile Column Lift Accessory Adapter",
+      "description": "28,000 lb capacity adapter for FL-25"
+    },
+    {
+      "item": "Custom Track Lengths",
+      "description": "16, 20, 25, or 30 foot runway lengths available"
+    },
+    {
+      "item": "Wider Configuration",
+      "description": "Can be ordered up to 9 inches wider for oversized vehicles"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets ANSI/ALI ALCTV safety standard for automotive lifts",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Multi-position mechanical locking wedge - infinite positioning",
+    "Patented hydraulic safety systems",
+    "Leaf chain synchronization for level operation",
+    "Redundant electronic controls",
+    "Pressure-compensated flow control valves",
+    "Tamper-proof velocity fuses",
+    "Single-position two-hand release for controlled lowering"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Combined manual covers TR-19, TR-25, and FL-25 models",
+    "FL-25 is specifically designed for forklift/forktruck maintenance",
+    "All models are proudly designed, welded, and manufactured in the USA",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

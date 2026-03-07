@@ -1,0 +1,94 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-20 (1).pdf",
+  "category": "two-post-lift",
+  "document_type": "data_verification_form",
+  "model": "TP-20 & TP-20-WB",
+  "variant": "TP-20 / TP-20-WB",
+  "product_type": "Two Post Inground Lift - Order Verification Form",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": "20,000 lbs",
+  "dimensions": {
+    "site_survey_fields": {
+      "overall_bay_length": "customer to specify",
+      "slope_in_floor_lengthwise": "customer to specify",
+      "overall_bay_width": "customer to specify",
+      "slope_in_floor_widthwise": "customer to specify",
+      "overall_bay_height": "customer to specify",
+      "overhead_obstructions": "yes or no, customer to specify"
+    }
+  },
+  "weight": "N/A",
+  "installation_requirements": {
+    "power_to_lift": "60 PSI pneumatic air (for air locks) to be brought to back of mainside column",
+    "concrete_floor_standard": "6.5\" floor thickness required for standard lift",
+    "concrete_floor_note": "Consult Mohawk for detailed specifications",
+    "electrical_standard": {
+      "voltage": "208-220 VAC",
+      "phase": "1 Phase",
+      "cycle": "60 Hz",
+      "type": "Standard"
+    },
+    "electrical_option_1": {
+      "voltage": "230-240 VAC",
+      "phase": null,
+      "cycle": null,
+      "type": null
+    },
+    "electrical_option_2": {
+      "voltage": "440-480 VAC",
+      "phase": "3 Phase",
+      "cycle": "60 Hz",
+      "type": "Optional"
+    },
+    "electrical_connection_note": "Final electrical connection to local/national code is the responsibility of the electrical contractor. More than one point of connection may be required. Disconnect switches, lock-out/tag-outs, main fuses, and main power leads, etc., are not provided by Mohawk Resources Ltd.",
+    "pneumatic_power_note": "Pneumatic power is the responsibility of the mechanical contractor to the final designated point or points at the vehicle lift unless otherwise specified by architect",
+    "construction_project_verification": "If construction project, verify production time with Mohawk"
+  },
+  "specifications": {
+    "drawing_number": "ZZ1178-A-002",
+    "date": "3/09",
+    "drawn_by": "R.V.",
+    "scale": "N/A",
+    "revision": "A - Initials requests added, TP-18 deleted, TP-20-WB added (09/16 by CHS)",
+    "lift_models_available": [
+      {
+        "model": "TP-20",
+        "capacity": "20,000 lbs"
+      },
+      {
+        "model": "TP-20-WB",
+        "capacity": "20,000 lbs"
+      }
+    ]
+  },
+  "features": [
+    "Two post inground lift design",
+    "Pneumatic air locks",
+    "Standard single phase or optional three phase power"
+  ],
+  "optional_equipment": [
+    "Underground hydraulic lines",
+    "Swivel pads (height adjustable lifting pads)",
+    "Weight indication pressure gauge",
+    "5 HP, 3 Phase, high speed power unit (faster raise speed)",
+    "Other (special)"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL ALCTV certification (note: some options may invalidate this)"
+  ],
+  "safety_features": [
+    "Pneumatic air locks (60 PSI)",
+    "Disconnect switches required per electrical code"
+  ],
+  "notes": [
+    "Power to lift and 60 PSI pneumatic air (for air locks) to be brought to back of mainside column",
+    "Some option combinations are not available. Some options may invalidate ALI/ETL ALCTV certification of lift. Consult a Mohawk representative.",
+    "Final electrical connection to local/national code is the responsibility of the electrical contractor",
+    "Pneumatic power is the responsibility of the mechanical contractor",
+    "After all specifications have been selected and approved by customer, make copy for customer and return signed form to Mohawk Resources Ltd.",
+    "All lift options checked for purchase must be listed on purchase order as separate line items",
+    "Standard lift requires 6 1/2\" floor thickness",
+    "This drawing has been reviewed and found to be acceptable to all customer's specifications indicated (requires signatures from Mohawk representative and owner/general contractor/architect/fleet manager/shop manager or customer)"
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/RJ-50-AH_Series_12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "RJ-50-AH",
+  "variant": "50,000 lb capacity air/hydraulic rolling jack",
+  "product_type": "rolling_jack",
+  "capacity": "50,000 lbs",
+  "dimensions": {},
+  "weight": {},
+  "installation_requirements": {
+    "compatible_lifts": "TR-series four-post lifts, parallelogram lifts, vertical rise lifts",
+    "placement": "Between lift tracks/runways",
+    "air_supply_required": true
+  },
+  "specifications": {
+    "capacity_lbs": 50000,
+    "actuation": "Air/Hydraulic",
+    "lock_type": "Mechanically activated - locks in place when loaded",
+    "compatible_lift_types": ["Four-post runway lifts", "Parallelogram lifts", "Vertical rise lifts"],
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "50,000 lb capacity air/hydraulic rolling jack",
+    "Wheels-free tire and brake service for heavy-duty vehicles",
+    "Rolls full length of runway",
+    "Locks in place when loaded",
+    "Air/hydraulic operation",
+    "Compatible with TR-series, parallelogram, and vertical rise lifts",
+    "Use two jacks to raise entire vehicle off runways"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [
+    "Mohawk Lifts OEM accessory",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Mechanically activated lock engages when loaded",
+    "Air/hydraulic actuation for controlled operation"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Heavy-duty rolling jack for large commercial and municipal vehicles",
+    "Designed for use with Mohawk heavy-duty lift systems",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

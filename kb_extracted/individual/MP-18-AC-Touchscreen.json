@@ -1,0 +1,79 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/mobile-column-lifts/MP-18-AC-Touchscreen.pdf",
+  "category": "mobile-column-lift",
+  "document_type": "data_sheet_order_form",
+  "model": "MP-18",
+  "variant": "AC Touchscreen & Full Diagnostic Display",
+  "product_type": "Mobile Column Lift - AC Powered with Touchscreen",
+  "capacity": "18,000 lbs per column (15\" forks) / 16,000 lbs per column (22\" forks)",
+  "dimensions": {
+    "tire_dimensions_15_inch_forks": {
+      "dim_a_tire_od_max_incl_crown": "48\" max / 20\" min (borderline limits)",
+      "dim_b_rim": "14\" min",
+      "dim_c_contact_width": "15\"",
+      "dim_w_fork_width": "15\""
+    },
+    "tire_dimensions_22_inch_forks": {
+      "dim_a_tire_od_max_incl_crown": "53\" max / 20\" min (borderline limits)",
+      "dim_b_rim": "13\" min",
+      "dim_c_contact_width": "15\"",
+      "dim_w_fork_width": "22\""
+    }
+  },
+  "weight": null,
+  "installation_requirements": {
+    "power_options": [
+      {"supply": "208-240 VAC, 3 Phase, 60 Hz", "full_load_amps_per_post": "10 AMP", "note": "STANDARD"},
+      {"supply": "440-480 VAC, 3 Phase, 60 Hz", "full_load_amps_per_post": "5 AMP"},
+      {"supply": "550-600 VAC, 3 Phase, 60 Hz", "full_load_amps_per_post": "4 AMP"},
+      {"supply": "208-240 VAC, 1 Phase, 60 Hz", "full_load_amps_per_post": "10 AMP"}
+    ],
+    "circuit_breaker_recommendation": "1.5 to 2 times the sum of the full load amps for all posts in the system",
+    "final_electrical_connection": "Responsibility of customer",
+    "non_standard_option_note": "Non-standard option may result in an upcharge"
+  },
+  "specifications": {
+    "max_axle_weight_15_inch_forks": "36,000 lbs (per pair)",
+    "max_axle_weight_22_inch_forks": "32,000 lbs (per pair)",
+    "power_type": "AC",
+    "display": "Touchscreen with Full Diagnostic Display"
+  },
+  "features": [
+    "AC powered mobile column lift",
+    "Full diagnostic touchscreen display",
+    "Available in 2, 4, 6, or 8 column configurations",
+    "15\" and 22\" fork options with mixed configurations available",
+    "Can be added to existing sets of mobile columns"
+  ],
+  "optional_equipment": [
+    "22\" forks (vs standard 15\" forks)",
+    "Mixed fork length configurations",
+    "Non-standard power supply options"
+  ],
+  "parts_list": [
+    {"model": "MP-18-705", "columns": 2, "lift_cap_lbs": 36000, "fork_config": "15\"/15\""},
+    {"model": "MP-18-713", "columns": 2, "lift_cap_lbs": 32000, "fork_config": "22\"/22\""},
+    {"model": "MP-18-706", "columns": 4, "lift_cap_lbs": 72000, "fork_config": "15\"/15\"/15\"/15\""},
+    {"model": "MP-18-730", "columns": 4, "lift_cap_lbs": 68000, "fork_config": "15\"/15\"/22\"/22\""},
+    {"model": "MP-18-714", "columns": 4, "lift_cap_lbs": 64000, "fork_config": "22\"/22\"/22\"/22\""},
+    {"model": "MP-18-707", "columns": 6, "lift_cap_lbs": 108000, "fork_config": "15\"/15\"/15\"/15\"/15\"/15\""},
+    {"model": "MP-18-758", "columns": 6, "lift_cap_lbs": 104000, "fork_config": "15\"/15\"/15\"/15\"/22\"/22\""},
+    {"model": "MP-18-759", "columns": 6, "lift_cap_lbs": 100000, "fork_config": "15\"/15\"/22\"/22\"/22\"/22\""},
+    {"model": "MP-18-715", "columns": 6, "lift_cap_lbs": 96000, "fork_config": "22\"/22\"/22\"/22\"/22\"/22\""},
+    {"model": "MP-18-708", "columns": 8, "lift_cap_lbs": 144000, "fork_config": "15\"x8"},
+    {"model": "MP-18-760", "columns": 8, "lift_cap_lbs": 140000, "fork_config": "15\"x6/22\"x2"},
+    {"model": "MP-18-761", "columns": 8, "lift_cap_lbs": 136000, "fork_config": "15\"x4/22\"x4"},
+    {"model": "MP-18-762", "columns": 8, "lift_cap_lbs": 132000, "fork_config": "15\"x2/22\"x6"},
+    {"model": "MP-18-716", "columns": 8, "lift_cap_lbs": 128000, "fork_config": "22\"x8"}
+  ],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Borderline tire dimension limits: state of tire inflation can impact clearance",
+    "Axle weight cannot exceed the capacity of the pair of MP columns selected/specified",
+    "Heaviest vehicle cannot exceed the listed lift capacity weight",
+    "Recommended circuit breaker size is 1.5 to 2 times the sum of the full load amps for all posts in the system",
+    "Non-standard power option may result in an upcharge",
+    "Final electrical connection is responsibility of customer"
+  ]
+}

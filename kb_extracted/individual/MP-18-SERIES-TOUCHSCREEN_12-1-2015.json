@@ -1,0 +1,77 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/MP-18-SERIES-TOUCHSCREEN_12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "MP-18 Touchscreen",
+  "variant": "18,000 lb per column mobile column lift with touchscreen control",
+  "product_type": "mobile_column_lift",
+  "capacity": "18,000 lbs per column; 32,000 to 144,000 lbs total (2-8 columns)",
+  "dimensions": {
+    "lifting_stroke_inches": 67,
+    "fork_length_options_inches": [15, 22],
+    "tire_diameter_max_inches": 48,
+    "wheel_diameter_range_inches": "13 to 24",
+    "column_mast_width_inches": 5.75
+  },
+  "weight": {},
+  "installation_requirements": {
+    "no_permanent_installation": true,
+    "surface": "Level shop floor",
+    "power_options": "220V or 440V AC, or 24V DC"
+  },
+  "specifications": {
+    "capacity_per_column_lbs": 18000,
+    "total_capacity_range_lbs": "32,000 to 144,000",
+    "lifting_stroke_inches": 67,
+    "locking_positions": 19,
+    "lock_spacing_inches": 3,
+    "control_type": "Touchscreen display",
+    "touchscreen_features": "Operational status, height display, lock status, inspection data, cycle count, technician usage tracking",
+    "power_options": ["220V AC", "440V AC", "24V DC"],
+    "column_configurations": [2, 4, 6, 8],
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "Touchscreen display for operational control and monitoring",
+    "Shows operational status, height, lock engagement",
+    "Tracks inspection data, cycle counts, and technician usage",
+    "18,000 lb capacity per column",
+    "67-inch lifting stroke",
+    "19 locking positions spaced every 3 inches",
+    "Adjustable lifting forks: 15-inch or 22-inch lengths",
+    "Available in AC or DC power configurations",
+    "Each column operates individually, in pairs, or synchronized"
+  ],
+  "optional_equipment": [
+    {
+      "item": "22-inch Lifting Forks",
+      "description": "For flotation tires or super-singles"
+    },
+    {
+      "item": "Wider Carriages",
+      "description": "For expanded vehicle compatibility"
+    },
+    {
+      "item": "Auto Frame Adapter",
+      "description": "For passenger vehicle side-lifting"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets nationally recognized safety standard for vehicle lifts",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Touchscreen displays lock engagement status",
+    "19-position mechanical safety locks every 3 inches",
+    "Synchronized operation across all columns",
+    "Retractable rolling wheels"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Touchscreen version - advanced control interface",
+    "Touchscreen tracks inspection, cycles, and technician usage data",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

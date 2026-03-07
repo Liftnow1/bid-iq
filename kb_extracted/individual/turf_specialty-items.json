@@ -1,0 +1,85 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/turf.pdf",
+  "category": "specialty-item",
+  "document_type": "product_specification_sheet",
+  "model": "Turf Maintenance Lift",
+  "variant": "7,000 lb Capacity",
+  "product_type": "Turf Maintenance Lift (2-Post)",
+  "capacity": "7,000 lbs (3175.2 kg)",
+  "dimensions": {
+    "overall_width": "11 ft 10-3/8 inches (3.61 m)",
+    "width_between_posts": "10 ft (3.0 m)",
+    "column_height": "8 ft 7-1/8 inches (2.62 m)",
+    "overall_hydraulic_line_height": "12 ft (3.66 m) standard, adjustable to accommodate any ceiling height or routed in shop floor",
+    "fork_pan_dimensions_from_drawing": {
+      "width_1": "38-3/4 inches min, 91-5/8 inches max",
+      "width_2": "10-1/2 inches min, 20-1/2 inches max",
+      "width_3": "20-3/8 inches min, 42-7/8 inches max",
+      "width_4": "40-3/4 inches min, 85-3/4 inches max"
+    }
+  },
+  "weight": "2,900 lbs (907.2 kg)",
+  "installation_requirements": {
+    "concrete_floor_requirements": "4000 PSI (27586.2 kPa) mix, 4-1/2 inch (11.43 cm) depth",
+    "anchoring_system": "16 bolts, 3/4 inch x 5 inch (1.90 x 12.7 cm)",
+    "power_requirements": "2.0 HP, 208-230 VAC, single-phase (3 phase optional)",
+    "floor_access_between_posts": "Clear and unobstructed"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources, LTD.",
+    "address": "P.O. Box 110, 65 Vrooman Ave, Amsterdam, NY 12010",
+    "phone_toll_free": "(800) 833-2006",
+    "phone_local": "(518) 842-1431",
+    "fax": "(518) 842-1289",
+    "website": "www.mohawklifts.com",
+    "specs_url": "www.mohawklifts.com/specs",
+    "detailed_info_url": "www.mohawklifts.com/wmamam",
+    "gsa_contract": "#GS-07F-207AA",
+    "revision": "REV 8/14",
+    "lifting_speed": "45 seconds",
+    "motor_rating": "2.0 HP, 208-230 VAC, single-phase (3 phase optional)",
+    "synchronization": "Hydraulic fluid displacement using no chains, cables, or overhead obstructions",
+    "cylinders": "2 (1 per column)",
+    "drive_system": "#646 leaf chain routed over cylinders",
+    "steel_carriage_bearings": "8 per carriage, double-sealed, self lubricating (16 total)",
+    "mechanical_safety_locks": "Automatic, all position, starting at 3 inches (7.62 cm) off the floor",
+    "hydraulic_safety_systems": "Automatic, all position",
+    "warranty": "5 years, plus limited lifetime cylinder seal warranty"
+  },
+  "features": [
+    "7,000 lb capacity turf maintenance lift",
+    "Hydraulic fluid displacement synchronization - no chains, cables, or overhead obstructions",
+    "45 second lifting speed",
+    "Automatic all-position mechanical safety locks starting at 3 inches off floor",
+    "Automatic all-position hydraulic safety systems",
+    "Clear and unobstructed floor access between posts",
+    "Double-sealed self-lubricating steel carriage bearings (16 total)",
+    "#646 leaf chain drive system routed over cylinders",
+    "Overall hydraulic line height adjustable to accommodate any ceiling height or routed in shop floor",
+    "Optional drive-on fork pan",
+    "AUTOcad specs available online"
+  ],
+  "optional_equipment": [
+    "3 Phase motor (standard is single-phase)",
+    "Optional Drive-On Fork Pan"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "GSA Contract (#GS-07F-207AA)",
+    "NJPA (National Joint Powers Alliance)",
+    "HGACBuy",
+    "ARCAT"
+  ],
+  "safety_features": [
+    "Automatic all-position mechanical safety locks starting at 3 inches off the floor",
+    "Automatic all-position hydraulic safety systems",
+    "Hydraulic synchronization with no chains, cables, or overhead obstructions",
+    "Clear and unobstructed floor access between posts"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Available under discounted government contract in all 50 states",
+    "5 year warranty plus limited lifetime cylinder seal warranty"
+  ]
+}

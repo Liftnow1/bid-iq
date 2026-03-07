@@ -1,0 +1,410 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/Slab_Requirements (1).pdf",
+  "category": "four-post-lift",
+  "document_type": "installation_requirements_guide",
+  "model": "All Mohawk Lifts",
+  "variant": null,
+  "product_type": "slab_requirements_and_new_slab_recommendations",
+  "capacity": null,
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {
+    "surface": "Concrete ONLY - no other surfaces permitted",
+    "concrete_aging": "28 day minimum cure time",
+    "hand_mixed_concrete": "NEVER permitted",
+    "secondary_floor_or_basement": "Requires written authorization from building architect and prior consultation/approval from Mohawk Resources Ltd.",
+    "seismic_zones": "Additional provisions required; consult building architect or engineer",
+    "anchor_edge_distances": {
+      "three_quarter_inch_anchors_min_distance_from_seams_inches": 6,
+      "one_inch_anchors_min_distance_from_seams_inches": 7.5
+    },
+    "two_post_lifts": "Require a continuous single slab; spanning expansion seams or positioning posts on separate slabs is not acceptable",
+    "four_post_lifts": "Four separate slabs formed at each post",
+    "pre_existing_floor_requirements": {
+      "A-7": {
+        "min_slab_thickness_inches": 4.5,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 12
+      },
+      "System_IA": {
+        "min_slab_thickness_inches": 4.5,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 12
+      },
+      "System_IA-10": {
+        "min_slab_thickness_inches": 4.5,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 12
+      },
+      "LC-12": {
+        "min_slab_thickness_inches": 6.5,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 12
+      },
+      "LMF-12": {
+        "min_slab_thickness_inches": 6.5,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 12
+      },
+      "TP-15": {
+        "min_slab_thickness_inches": 6.5,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 10
+      },
+      "TP-16": {
+        "min_slab_thickness_inches": 6.5,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 10
+      },
+      "TP-18": {
+        "min_slab_thickness_inches": 6.5,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 10
+      },
+      "TP-20": {
+        "min_slab_thickness_inches": 6.5,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 10
+      },
+      "TP-20-WB": {
+        "min_slab_thickness_inches": 6,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 10
+      },
+      "TP-26": {
+        "min_slab_thickness_inches": 12,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 10
+      },
+      "TP-26-WB": {
+        "min_slab_thickness_inches": 8,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 10
+      },
+      "TP-30": {
+        "min_slab_thickness_inches": 12,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 10
+      },
+      "TP-30-WB": {
+        "min_slab_thickness_inches": 8,
+        "min_compressive_strength_psi": 4000,
+        "compressive_strength_aging": "28 day",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing_inches": 10
+      },
+      "TR-19": {
+        "min_slab_thickness_inches": 4.5,
+        "min_compressive_strength_psi": null,
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only",
+        "note": "Floor must be properly aged to ACI specs; no reinforcement required but 4x4x10/10 wire mesh recommended"
+      },
+      "FL-25": {
+        "min_slab_thickness_inches": 4.5,
+        "min_compressive_strength_psi": null,
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only",
+        "note": "Floor must be properly aged to ACI specs; no reinforcement required but 4x4x10/10 wire mesh recommended"
+      },
+      "TR-25A": {
+        "min_slab_thickness_inches": 4.5,
+        "min_compressive_strength_psi": null,
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only",
+        "note": "Floor must be properly aged to ACI specs; no reinforcement required but 4x4x10/10 wire mesh recommended"
+      },
+      "TR-30": {
+        "min_slab_thickness_inches": 4.5,
+        "min_compressive_strength_psi": null,
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only",
+        "note": "Floor must be properly aged to ACI specs; no reinforcement required but 4x4x10/10 wire mesh recommended"
+      },
+      "TR-33": {
+        "min_slab_thickness_inches": "6 or 4.5 with larger 4x4 base pads",
+        "min_compressive_strength_psi": null,
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only",
+        "note": "Larger 4'x4' base pads (available from Mohawk) required for floors with thickness less than 6 inches but >= 4.5 inches"
+      },
+      "TR-35": {
+        "min_slab_thickness_inches": "6 or 4.5 with larger 4x4 base pads",
+        "min_compressive_strength_psi": null,
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only",
+        "note": "Larger 4'x4' base pads (available from Mohawk) required for floors with thickness less than 6 inches but >= 4.5 inches"
+      },
+      "TR-50": {
+        "min_slab_thickness_inches": "6 or 4.5 with larger 4x4 base pads",
+        "min_compressive_strength_psi": null,
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only",
+        "note": "Larger 4'x4' base pads (available from Mohawk) required for floors with thickness less than 6 inches but >= 4.5 inches"
+      },
+      "TR-75": {
+        "min_slab_thickness_inches": "6 or 4.5 with larger 4x4 base pads",
+        "min_compressive_strength_psi": null,
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only",
+        "note": "Larger 4'x4' base pads (available from Mohawk) required for floors with thickness less than 6 inches but >= 4.5 inches"
+      }
+    },
+    "new_slab_recommendations": {
+      "minimum_thickness_inches": 12,
+      "minimum_tensile_strength_psi": 4000,
+      "minimum_aging_days": 28,
+      "new_slab_compressive_strength_psi": 4000,
+      "must_be_surrounded_by_existing_concrete": true,
+      "foundation_bed_min_bearing_capacity_psf": 2000,
+      "anchorage_dowels": "#4 x 18 inch long, spaced every 18 inches around perimeter",
+      "alternative_to_dowels": "6-inch key-in around perimeter of slab",
+      "slab_edge_taper_min_inches": 3,
+      "slab_bottom_width_inches": 15,
+      "top_surface_tolerance_inches": "3/4 to 1-1/4",
+      "reinforcement_steel_grade": "Grade 60 deformed bars",
+      "optional_wwf": "6x6 - 10/10 WWF at mid height advisable in extreme hot/cold climates",
+      "spacing_tolerance_inches": 1,
+      "two_post_lift_slabs": {
+        "A-7": { "width_inches": 48, "length_inches": 144, "reinforcement": "8 #4 Main Bars, 21 #4 Temperature Bars", "long_bar_spacing_inches": 6, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "System_IA": { "width_inches": 48, "length_inches": 161, "reinforcement": "8 #4 Main Bars, 21 #4 Temperature Bars", "long_bar_spacing_inches": 6, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "System_IA-10": { "width_inches": 48, "length_inches": 161, "reinforcement": "8 #4 Main Bars, 21 #4 Temperature Bars", "long_bar_spacing_inches": 6, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "LC-12": { "width_inches": 72, "length_inches": 168, "reinforcement": "12 #4 Main Bars, 23 #4 Temperature Bars", "long_bar_spacing_inches": 6, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 6 },
+        "LMF-12": { "width_inches": 72, "length_inches": 168, "reinforcement": "12 #4 Main Bars, 23 #4 Temperature Bars", "long_bar_spacing_inches": 6, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 6 },
+        "TP-15": { "width_inches": 72, "length_inches": 168, "reinforcement": "12 #4 Main Bars, 23 #4 Temperature Bars", "long_bar_spacing_inches": 6, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 6 },
+        "TP-16": { "width_inches": 72, "length_inches": 168, "reinforcement": "12 #4 Main Bars, 23 #4 Temperature Bars", "long_bar_spacing_inches": 6, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 6 },
+        "TP-18": { "width_inches": 72, "length_inches": 168, "reinforcement": "12 #4 Main Bars, 23 #4 Temperature Bars", "long_bar_spacing_inches": 6, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 6 },
+        "TP-20": { "width_inches": 72, "length_inches": 186, "reinforcement": "18 #4 Main Bars, 24 #4 Temperature Bars", "long_bar_spacing_inches": 4, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 6 },
+        "TP-20-WB": { "width_inches": 72, "length_inches": 186, "reinforcement": "18 #4 Main Bars, 24 #4 Temperature Bars", "long_bar_spacing_inches": 4, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 0.75, "anchor_length_inches": 6 },
+        "TP-26": { "width_inches": 72, "length_inches": 198, "reinforcement": "18 #4 Main Bars, 24 #4 Temperature Bars", "long_bar_spacing_inches": 4, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 1, "anchor_length_inches": 10 },
+        "TP-26-WB": { "width_inches": 72, "length_inches": 220, "reinforcement": "18 #4 Main Bars, 24 #4 Temperature Bars", "long_bar_spacing_inches": 4, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 1, "anchor_length_inches": 8 },
+        "TP-30": { "width_inches": 72, "length_inches": 198, "reinforcement": "18 #4 Main Bars, 24 #4 Temperature Bars", "long_bar_spacing_inches": 4, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 1, "anchor_length_inches": 10 },
+        "TP-30-WB": { "width_inches": 72, "length_inches": 220, "reinforcement": "18 #4 Main Bars, 24 #4 Temperature Bars", "long_bar_spacing_inches": 4, "short_bar_spacing_inches": 8, "anchor_diameter_inches": 1, "anchor_length_inches": 8 }
+      },
+      "four_post_lift_slabs": {
+        "TR-19": { "width_inches": 24, "length_inches": 24, "reinforcement": "4 #4 Bars, 8 Bars Total", "spacing_inches": 6, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "FL-25": { "width_inches": 24, "length_inches": 24, "reinforcement": "4 #4 Bars, 8 Bars Total", "spacing_inches": 6, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "TR-25": { "width_inches": 24, "length_inches": 24, "reinforcement": "4 #4 Bars, 8 Bars Total", "spacing_inches": 6, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "TR-30": { "width_inches": 48, "length_inches": 48, "reinforcement": "4 #4 Bars, 8 Bars Total", "spacing_inches": 6, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "TR-33": { "width_inches": 72, "length_inches": 72, "reinforcement": "12 #4 Bars, 24 Bars Total", "spacing_inches": 6, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "TR-35": { "width_inches": 72, "length_inches": 72, "reinforcement": "12 #4 Bars, 24 Bars Total", "spacing_inches": 6, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "TR-50": { "width_inches": 72, "length_inches": 72, "reinforcement": "12 #4 Bars, 24 Bars Total", "spacing_inches": 6, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 },
+        "TR-75": { "width_inches": 72, "length_inches": 72, "reinforcement": "12 #4 Bars, 24 Bars Total", "spacing_inches": 6, "anchor_diameter_inches": 0.75, "anchor_length_inches": 5 }
+      }
+    },
+    "base_plate_anchoring_instructions": {
+      "anchors_per_base_plate": 8,
+      "anchor_type": "Wej-it style expansion anchor bolts",
+      "anchor_diameter_inches": 0.75,
+      "shim_max_thickness_inches": 0.25,
+      "shims_type": "Colored (horseshoe shaped)",
+      "min_distance_from_seams_inches": 6,
+      "drilling_preference": "Through entire slab thickness preferred - allows anchors to be hammered flush",
+      "system_ia_10_inside_post_dimension_inches": 120,
+      "drawing_number": "009-010-006"
+    },
+    "wej_it_anchor_specifications": {
+      "zinc_plating": "ASTM B-633, Type III, SCI",
+      "icbo_es_report": "#1821",
+      "city_of_los_angeles": "#RR 24939",
+      "federal_specs": [
+        "QQZ-325C, Type II, Class 3 (Clear Chromate added)",
+        "FFS-325, Group II, Type 4, Class 1"
+      ],
+      "safety_factor": "4:1 recommended for static loads",
+      "anchor_torque_ft_lbs": 85
+    }
+  },
+  "specifications": {
+    "wej_it_anchor_capacity_tables": {
+      "limestone_aggregate_2000psi": {
+        "sizes": [
+          { "anchor_size": "1/4", "embedment_inches": 1.125, "tension_lbs": 1132, "shear_lbs": 1211 },
+          { "anchor_size": "1/4", "embedment_inches": 1.75, "tension_lbs": 1256, "shear_lbs": 1211 },
+          { "anchor_size": "5/16", "embedment_inches": 1.25, "tension_lbs": 1308, "shear_lbs": 1210 },
+          { "anchor_size": "5/16", "embedment_inches": 2, "tension_lbs": 1181, "shear_lbs": 1210 },
+          { "anchor_size": "3/8", "embedment_inches": 1.25, "tension_lbs": 994, "shear_lbs": 1223 },
+          { "anchor_size": "3/8", "embedment_inches": 4, "tension_lbs": 1728, "shear_lbs": 1223 },
+          { "anchor_size": "1/2", "embedment_inches": 1.75, "tension_lbs": 1542, "shear_lbs": 3009 },
+          { "anchor_size": "1/2", "embedment_inches": 6, "tension_lbs": 2695, "shear_lbs": 3009 }
+        ]
+      },
+      "unreinforced_stone_aggregate_3000psi": {
+        "sizes": [
+          { "anchor_size": "1/4", "embedment_inches": 1.125, "tension_lbs": 1320, "shear_lbs": 1751 },
+          { "anchor_size": "1/4", "embedment_inches": 1.5, "tension_lbs": 1856, "shear_lbs": 1751 },
+          { "anchor_size": "5/16", "embedment_inches": 1.25, "tension_lbs": 2057, "shear_lbs": 1839 },
+          { "anchor_size": "5/16", "embedment_inches": 1.75, "tension_lbs": 2389, "shear_lbs": 1839 },
+          { "anchor_size": "3/8", "embedment_inches": 1.5, "tension_lbs": 2876, "shear_lbs": 4286 },
+          { "anchor_size": "3/8", "embedment_inches": 4, "tension_lbs": 3488, "shear_lbs": 4286 },
+          { "anchor_size": "1/2", "embedment_inches": 2.25, "tension_lbs": 3473, "shear_lbs": 7138 },
+          { "anchor_size": "1/2", "embedment_inches": 5, "tension_lbs": 4809, "shear_lbs": 7138 },
+          { "anchor_size": "5/8", "embedment_inches": 3.5, "tension_lbs": 7582, "shear_lbs": 10719 },
+          { "anchor_size": "5/8", "embedment_inches": 4.75, "tension_lbs": 9179, "shear_lbs": 10719 },
+          { "anchor_size": "3/4", "embedment_inches": 3, "tension_lbs": 11579, "shear_lbs": 15537 },
+          { "anchor_size": "3/4", "embedment_inches": 7, "tension_lbs": 15444, "shear_lbs": 15537 },
+          { "anchor_size": "7/8", "embedment_inches": 4.5, "tension_lbs": 15266 },
+          { "anchor_size": "7/8", "embedment_inches": 7, "tension_lbs": 16992 },
+          { "anchor_size": "1", "embedment_inches": 5.5, "tension_lbs": 16351 },
+          { "anchor_size": "1", "embedment_inches": 7, "tension_lbs": 17837 }
+        ]
+      },
+      "aggregate_concrete_5000psi": {
+        "sizes": [
+          { "anchor_size": "1/4", "tension_lbs": 1760, "shear_lbs": 2316 },
+          { "anchor_size": "1/4", "tension_lbs": 2473, "shear_lbs": 2316 },
+          { "anchor_size": "5/16", "tension_lbs": 2742, "shear_lbs": 2530 },
+          { "anchor_size": "5/16", "tension_lbs": 3185, "shear_lbs": 2530 },
+          { "anchor_size": "3/8", "tension_lbs": 3834, "shear_lbs": 5213 },
+          { "anchor_size": "3/8", "tension_lbs": 4650, "shear_lbs": 5213 },
+          { "anchor_size": "1/2", "tension_lbs": 5789, "shear_lbs": 10748 },
+          { "anchor_size": "1/2", "tension_lbs": 8015, "shear_lbs": 10748 },
+          { "anchor_size": "5/8", "tension_lbs": 12636, "shear_lbs": 15583 },
+          { "anchor_size": "5/8", "tension_lbs": 15299, "shear_lbs": 15583 },
+          { "anchor_size": "3/4", "tension_lbs": 19299, "shear_lbs": 21000 },
+          { "anchor_size": "3/4", "tension_lbs": 25740, "shear_lbs": 21000 },
+          { "anchor_size": "7/8", "tension_lbs": 25444, "shear_lbs": 25099 },
+          { "anchor_size": "7/8", "tension_lbs": 28320, "shear_lbs": 25099 },
+          { "anchor_size": "1", "tension_lbs": 27252, "shear_lbs": 33083 },
+          { "anchor_size": "1", "tension_lbs": 29728, "shear_lbs": 33083 }
+        ]
+      },
+      "carbon_steel_7000psi": {
+        "sizes": [
+          { "anchor_size": "1/4", "tension_lbs": 2464, "shear_lbs": 2494 },
+          { "anchor_size": "1/4", "tension_lbs": 3462, "shear_lbs": 2494 },
+          { "anchor_size": "5/16", "tension_lbs": 3939, "shear_lbs": 3439 },
+          { "anchor_size": "5/16", "tension_lbs": 4459, "shear_lbs": 3439 },
+          { "anchor_size": "3/8", "tension_lbs": 5368, "shear_lbs": 5658 },
+          { "anchor_size": "3/8", "tension_lbs": 6510, "shear_lbs": 5658 },
+          { "anchor_size": "1/2", "tension_lbs": 8105, "shear_lbs": 11550 },
+          { "anchor_size": "1/2", "tension_lbs": 11221, "shear_lbs": 11550 },
+          { "anchor_size": "5/8", "tension_lbs": 17690, "shear_lbs": 16700 },
+          { "anchor_size": "5/8", "tension_lbs": 21419, "shear_lbs": 16700 },
+          { "anchor_size": "3/4", "tension_lbs": 27019, "shear_lbs": 23103 },
+          { "anchor_size": "3/4", "tension_lbs": 36036, "shear_lbs": 23103 },
+          { "anchor_size": "7/8", "tension_lbs": 33622, "shear_lbs": 28718 },
+          { "anchor_size": "7/8", "tension_lbs": 39648, "shear_lbs": 28718 },
+          { "anchor_size": "1", "tension_lbs": 38153, "shear_lbs": 35700 },
+          { "anchor_size": "1", "tension_lbs": 41619, "shear_lbs": 35700 }
+        ]
+      },
+      "unreinforced_lightweight_idealite_5000psi": {
+        "sizes": [
+          { "anchor_size": "1/4", "embedment_inches": 1.5, "tension_lbs": 1861, "shear_lbs": 1947 },
+          { "anchor_size": "5/16", "embedment_inches": 1.5, "tension_lbs": 2493, "shear_lbs": 3064 },
+          { "anchor_size": "3/8", "embedment_inches": 1.75, "tension_lbs": 3125, "shear_lbs": 4289 },
+          { "anchor_size": "1/2", "embedment_inches": 2.25, "tension_lbs": 4778, "shear_lbs": 9833 },
+          { "anchor_size": "5/8", "embedment_inches": 2.5, "tension_lbs": 6455, "shear_lbs": 12500 },
+          { "anchor_size": "3/4", "embedment_inches": 3.5, "tension_lbs": 17293, "shear_lbs": 19050 },
+          { "anchor_size": "1", "embedment_inches": 4.5, "tension_lbs": 21616, "shear_lbs": 31666 }
+        ]
+      }
+    },
+    "edge_distance_spacing": {
+      "shallow_less_than_6d": { "spacing": "3.50E", "edge_distance": "1.75E" },
+      "standard_6d_to_8d": { "spacing": "2.00E", "edge_distance": "1.00E" },
+      "deep_greater_than_8d": { "spacing": "1.50E", "edge_distance": "0.75E" }
+    }
+  },
+  "features": [
+    "Comprehensive slab requirement guide for all Mohawk lift models",
+    "Pre-existing floor minimum requirements table",
+    "New slab recommendation specifications with detailed reinforcement schedules",
+    "Separate slab designs for 2-post and 4-post lifts",
+    "Wej-it wedge anchor specifications and capacity tables",
+    "Base plate anchoring instructions"
+  ],
+  "optional_equipment": [
+    {
+      "item": "4' x 4' base pads",
+      "description": "Required for TR-33/35/50/75 on floors with thickness less than 6 inches but >= 4.5 inches",
+      "available_from": "Mohawk"
+    }
+  ],
+  "parts_list": [
+    {
+      "part_number": "Wej-it 3440",
+      "description": "3/4 x 4 inch wedge anchor, 18/108 box/carto"
+    },
+    {
+      "part_number": "Wej-it 3450",
+      "description": "3/4 x 5 inch wedge anchor, 12/72 box/carto"
+    },
+    {
+      "part_number": "Wej-it 3460",
+      "description": "3/4 x 6 inch wedge anchor, 12/72 box/carto"
+    },
+    {
+      "part_number": "Wej-it 3470",
+      "description": "3/4 x 7 inch wedge anchor, 10/60 box/carto"
+    },
+    {
+      "part_number": "Wej-it 3482",
+      "description": "3/4 x 8.5 inch wedge anchor, 10/30 box/carto"
+    },
+    {
+      "part_number": "Wej-it 3410",
+      "description": "3/4 x 10 inch wedge anchor, 10/30 box/carto"
+    },
+    {
+      "part_number": "Wej-it 1080",
+      "description": "1 x 8 inch wedge anchor, 10/30 box/carto"
+    },
+    {
+      "part_number": "Wej-it 1010",
+      "description": "1 x 10 inch wedge anchor, 5/15 box/carto"
+    },
+    {
+      "part_number": "Wej-it 1012",
+      "description": "1 x 12 inch wedge anchor, 5/15 box/carto"
+    }
+  ],
+  "certifications": [],
+  "safety_features": [
+    "All anchors must be minimum 6 inches from expansion seams for 3/4 inch diameter",
+    "All anchors must be minimum 7.5 inches from expansion seams for 1 inch diameter",
+    "Do not install on cracked or defective concrete",
+    "Do not install on expansion seams",
+    "Never install on hand mixed concrete",
+    "Verify torque on anchors to 85 ft-lbs for future/annual inspections",
+    "Use only solid carbide-tipped drill bits meeting ANSI B212.15"
+  ],
+  "notes": [
+    "Revision date for pre-existing requirements: 5/2014",
+    "Revision date for new slab recommendations: 5/16/2012",
+    "New slab design for 2-post lifts: File MAN066, dated 2/98, rev 7/2003",
+    "New slab design for 4-post lifts: File MAN089, dated 10/00, rev 7/2003",
+    "Base plate anchoring detail drawing: 009-010-006, dated 7/05",
+    "Wej-it anchor installation: Do NOT use impact wrench; tighten nut 3-5 full turns past hand tight",
+    "Manufacturer: Mohawk Resources Ltd., 65 Vrooman Ave., Amsterdam, NY 12010",
+    "Phone: 1-800-833-2006, Local: 1-518-842-1431, Fax: 1-518-842-1289",
+    "Website: www.MOHAWKLIFTS.com, Email: Service@MOHAWKLIFTS.com"
+  ]
+}

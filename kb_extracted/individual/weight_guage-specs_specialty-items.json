@@ -1,0 +1,79 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/weight_guage-specs.pdf",
+  "category": "specialty-item",
+  "document_type": "product_specification_sheet",
+  "model": "Weight Gauge",
+  "variant": "4 gauge models for different lift capacities",
+  "product_type": "Lift Weight Gauge (Scale for Lift)",
+  "capacity": "Varies by gauge model - 7,000 to 30,000 lbs",
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {
+    "installation_method": "Screws into hydraulic fitting",
+    "installation_difficulty": "Simple"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources, LTD.",
+    "address": "P.O. Box 110, 65 Vrooman Ave, Amsterdam, NY 12010",
+    "phone_toll_free": "(800) 833-2006",
+    "phone_local": "(518) 842-1431",
+    "fax": "(518) 842-1289",
+    "website": "www.mohawklifts.com",
+    "gsa_contract": "#GS-07F-207AA",
+    "revision": "REV 10/19",
+    "accuracy": "+/- 5%",
+    "gauge_models": {
+      "Gauge_1": {
+        "fits_models": ["A7 (7,000 lbs)", "System 1 (9,000 lbs)", "System 1A-10 (10,000 lbs)", "LC-12 (12,000 lbs)"],
+        "range": "7,000 to 12,000 lbs"
+      },
+      "Gauge_2": {
+        "fits_models": ["LMF 12 (12,000 lbs)", "TP-16 (16,000 lbs)", "TP-18 (18,000 lbs)"],
+        "range": "12,000 to 18,000 lbs"
+      },
+      "Gauge_3": {
+        "fits_models": ["TP-20 (20,000 lbs)", "TP-26 (26,000 lbs)", "TP-30 (30,000 lbs)"],
+        "range": "20,000 to 30,000 lbs"
+      },
+      "Gauge_4": {
+        "fits_models": ["MP-18 (18,000 lbs)", "MP-24 (24,000 lbs)", "MP-30 (30,000 lbs)"],
+        "range": "18,000 to 30,000 lbs",
+        "type": "Mobile lifts"
+      }
+    }
+  },
+  "features": [
+    "Visually verifies lift has been lowered onto mechanical locks",
+    "Diagnoses driveability, mileage and handling issues if vehicle is overweight",
+    "Visual show and tell for customers when to install heavier duty shocks, better brakes or heavier ply tires",
+    "Simple to install - just screws into hydraulic fitting",
+    "Raise the vehicle and the weight is clearly displayed",
+    "Accurate to within +/- 5%",
+    "Available for both 2-post lifts and mobile column lifts"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "ALI/ETL Certified and Validated",
+    "GSA Contract (#GS-07F-207AA)",
+    "Sourcewell Awarded Contract",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy"
+  ],
+  "safety_features": [
+    "Confirms balanced load from side to side on mobile lifts",
+    "Balanced load means better driveability",
+    "Balanced load means extended tire life",
+    "Balanced load equals a safer truck",
+    "Balanced load means lower chance of rollover",
+    "Visually verifies lift has been lowered onto mechanical locks",
+    "Protects lift from overloading",
+    "Protects workers from unsafe conditions"
+  ],
+  "notes": [
+    "Weight Gauge on Mobile Lifts can confirm balanced load from side to side",
+    "Available under discounted government contract in all 50 states",
+    "Gauge scale markings visible in images show increments of 1000 lbs"
+  ]
+}

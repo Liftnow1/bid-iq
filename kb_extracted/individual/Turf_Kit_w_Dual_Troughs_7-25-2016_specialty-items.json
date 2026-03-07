@@ -1,0 +1,123 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/Turf Kit w Dual Troughs 7-25-2016.pdf",
+  "category": "specialty-item",
+  "document_type": "optional_equipment_manual_with_drawings",
+  "model": "Turf Kit w/ Dual Troughs",
+  "variant": "Multiple variants for different lift models",
+  "product_type": "Turf Kit with Dual Troughs (converts frame engaging lift into turf maintenance lift)",
+  "capacity": "6,000 lbs max total (3,000 lbs per trough)",
+  "dimensions": {
+    "shipping_dimensions": "32 inches W x 24 inches H x 120 inches L",
+    "trough_width": "95.5 inches (95 1/2) per drawing",
+    "trough_detail_width": "14.4 inches (System IA version) / 14.5 inches (TP-16 version)",
+    "trough_detail_height": "2.25 inches",
+    "trough_detail_angle": "45 degrees",
+    "trough_side_height": "5.25 inches",
+    "overall_width_on_lift_system_IA": "103.5 inches",
+    "overall_width_on_lift_TP16": "103.5 inches",
+    "minimum_wheelbase_system_IA": "49.625 inches (49 5/8)",
+    "maximum_wheelbase_system_IA": "109.625 inches (109 5/8)",
+    "minimum_wheelbase_TP16": "48.5 inches",
+    "maximum_wheelbase_TP16_3stage": "118.5 inches",
+    "maximum_wheelbase_TP16_standard": "109.5 inches",
+    "adjustment_increments": "3 inches"
+  },
+  "weight": "670 lbs (System IA kit) / 668 lbs (TP-16 standard arms kit) / 700 lbs (shipping weight on pallet)",
+  "installation_requirements": {
+    "compatible_models": ["System IA-10", "LC-12", "LMF-12", "TP-16", "TP-18"],
+    "arm_types": ["Standard Arms", "Optional 3-Stage Arms"],
+    "installation_steps": [
+      "With lift fully lowered, swing all arms to fully wide position providing clear path between lift",
+      "Fully extend all arms by pulling sliders to maximum extension on all arms",
+      "Place arm covers over all arms, ensure pins go completely thru slider holes and cover sits flat over swing arm tubes",
+      "Place troughs over opposing swing arm covers, retain with spring pins in holes provided in swing arm covers",
+      "Spread distance between troughs as desired, ensuring retention pin actuates",
+      "Always ensure troughs are evenly spread from center of posts"
+    ]
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "address": "65 Vrooman Ave, P.O. Box 110, Amsterdam, NY 12010",
+    "phone_toll_free": "1-800-833-2006",
+    "phone_local": "1-518-842-1431",
+    "fax": "1-518-842-1289",
+    "website": "www.MOHAWKLIFTS.com",
+    "email": "service@MOHAWKLIFTS.com",
+    "file_reference": "Turf Kit w Dual Troughs 7-25-2016.DOC",
+    "part_number_base": "601-800-XXX",
+    "adapter_capacity_ratings": {
+      "3000_lbs": "42 inch minimum tire center width",
+      "2500_lbs": "31 inch minimum tire center width",
+      "2000_lbs": "15 inch minimum tire center width",
+      "1500_lbs": "No restriction on tire center width"
+    },
+    "kit_variants": {
+      "009-012-001": {
+        "description": "Turf Kit w/ Dual Troughs for System IA-10 (Standard Arms)",
+        "capacity": "6,000 lbs max (3,000 lbs per trough)",
+        "weight": "670 lbs",
+        "date": "8/2015"
+      },
+      "015-011-076": {
+        "description": "Turf Kit w/ Dual Troughs for LC-12/LMF-12/TP-16/TP-18 (Optional 3-Stage Arms)",
+        "capacity": "6,000 lbs max (3,000 lbs per trough)",
+        "weight": "822 lbs",
+        "date": "1/2016"
+      },
+      "015-011-081": {
+        "description": "Turf Kit w/ Dual Troughs for LC-12/LMF-12/TP-16/TP-18 (Standard Arms)",
+        "capacity": "6,000 lbs max (3,000 lbs per trough)",
+        "weight": "668 lbs (assembly) / 822 lbs (3-stage variant)",
+        "date": "7/2016"
+      }
+    }
+  },
+  "features": [
+    "Converts frame engaging 2-post lift into turf/mower maintenance lift",
+    "Dual trough design for support of turf/mower equipment",
+    "Adjustable troughs accommodate variety of wheelbased vehicles",
+    "3 inch adjustment increments",
+    "Spring pin retention system",
+    "Wheel chocks included for smaller diameter tires",
+    "T-handle bolt fastening system"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {"item": 1, "part_number": "009-012-005", "description": "Trough Weldment (For System IA)", "quantity": 2, "kit": "009-012-001"},
+    {"item": 2, "part_number": "009-012-004", "description": "Tube Cover Weldment (Standard SysIA Arm)", "quantity": 4, "kit": "009-012-001"},
+    {"item": 3, "part_number": "009-012-104", "description": "T-Handle Bolt, 1/2-13 NC", "quantity": 4, "kit": "009-012-001"},
+    {"item": 4, "part_number": "600-680-001", "description": "Nut, Plain, 1/2-13 NC", "quantity": 4, "kit": "009-012-001"},
+    {"item": 1, "part_number": "015-011-072", "description": "Trough Weldment, for TP-16", "quantity": 2, "kit": "015-011-076"},
+    {"item": 2, "part_number": "015-011-074", "description": "Tube Cover Weldment (3 Stage Arm)", "quantity": 4, "kit": "015-011-076"},
+    {"item": 3, "part_number": "009-012-104", "description": "T-Handle Bolt, 1/2-13 NC", "quantity": 4, "kit": "015-011-076"},
+    {"item": 4, "part_number": "600-680-001", "description": "Nut, Plain, 1/2-13 NC", "quantity": 4, "kit": "015-011-076"},
+    {"item": 1, "part_number": "015-011-072", "description": "Trough Weldment, for TP-16", "quantity": 2, "kit": "015-011-081"},
+    {"item": 2, "part_number": "015-011-079", "description": "Tube Cover Weldment (Standard TP16 Arm)", "quantity": 4, "kit": "015-011-081"},
+    {"item": 3, "part_number": "009-012-104", "description": "T-Handle Bolt, 1/2-13 NC", "quantity": 4, "kit": "015-011-081"},
+    {"item": 4, "part_number": "600-680-001", "description": "Nut, Plain, 1/2-13 NC", "quantity": 4, "kit": "015-011-081"},
+    {"item": "Shipping", "part_number": "009-012-103", "description": "Pallet, Turf Dual Trough Kit", "quantity": 1},
+    {"item": "Shipping", "part_number": "009-012-404", "description": "Stud, Rough Cut", "quantity": 2},
+    {"item": "Shipping", "part_number": "601-600-019", "description": "Cardboard", "quantity": 10},
+    {"item": "Assembly", "part_number": "009-012-003", "description": "Trough and Tube-Cover Set (As Ordered) System IA", "quantity": 1, "kit": "009-012-001"},
+    {"item": "Assembly", "part_number": "015-011-075", "description": "Trough and Tube-Cover Set (As Ordered)", "quantity": 1, "kit": "015-011-076"},
+    {"item": "Assembly", "part_number": "015-011-082", "description": "Trough and Tube-Cover Set (As Ordered) TP16 Std Arms", "quantity": 1, "kit": "015-011-081"}
+  ],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member"
+  ],
+  "safety_features": [
+    "Use of turf kit reduces lifting capacity of entire lift to 6,000 lbs total (3,000 lbs per trough)",
+    "Do not use single troughs to support one end of a vehicle",
+    "Always ensure troughs are evenly spread from center of posts",
+    "Always ensure retainer pins are securely inserted into ends of each trough",
+    "Ensure vehicle is centered between posts",
+    "Wheel chocks included for smaller diameter tires"
+  ],
+  "notes": [
+    "Adapters rated according to tire width: 3000 lbs at 42 inch min tire center, 2500 lbs at 31 inch min, 2000 lbs at 15 inch min, 1500 lbs no restriction",
+    "Use of turf kit reduces entire lift capacity to 6,000 lbs total",
+    "Made in the USA",
+    "File: Turf Kit w Dual Troughs 7-25-2016.DOC",
+    "Part # 601-800-XXX"
+  ]
+}

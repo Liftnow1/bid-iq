@@ -1,0 +1,80 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/mobile-column-lifts/800-Series-Mobile-Spec-Sheet (3).pdf",
+  "category": "mobile-column-lift",
+  "document_type": "spec_sheet",
+  "model": "800 Series",
+  "variant": "MP-800-014 / MP-800-018",
+  "product_type": "Mobile Column Lift",
+  "capacity": "14,000 lbs per column (MP-800-014) / 18,000 lbs per column (MP-800-018)",
+  "dimensions": {
+    "height_of_lift_unit": "88.5\" (2,248 mm)",
+    "height_of_lift_unit_at_full_rise": "157.125\" (3,991 mm)",
+    "width_of_lift_unit": "44.25\" (1,124 mm)",
+    "length_of_lift_unit": "53.625\" (1,362 mm)",
+    "max_lift_height_4_or_more_units": "69\" (1,753 mm)",
+    "max_lift_height_2_units_wheel_lift_mode": "32\" (813 mm)",
+    "min_max_wheel_diameter": "5\" - 24.5\" (127 - 622 mm)",
+    "footprint_of_lift_unit": "560 sq in. (3,613 sq cm)",
+    "turning_radius": "47\" (1,194 mm)"
+  },
+  "weight": "1,485 lbs (674 kg) for MP-800-014 / 1,510 lbs (685 kg) for MP-800-018",
+  "installation_requirements": {
+    "charger_voltage_required": "120 VAC @ 60 Hz",
+    "charger_amps_required": "1.3 amps",
+    "floor_requirements": "Capable of supporting ground pressure at max load"
+  },
+  "specifications": {
+    "model_mp_800_014": {
+      "lifting_capacity_per_column": "14,000 lbs",
+      "max_hydraulic_system_operating_pressure": "2,180 psi",
+      "weight": "1,485 lbs (674 kg)",
+      "ground_pressure_max_load": "27.7 psi (191 kPa)"
+    },
+    "model_mp_800_018": {
+      "lifting_capacity_per_column": "18,000 lbs",
+      "max_hydraulic_system_operating_pressure": "2,600 psi",
+      "weight": "1,510 lbs (685 kg)",
+      "ground_pressure_max_load": "36.6 psi (252 kPa)"
+    },
+    "common_specs": {
+      "height_of_lift_unit": "88.5\" (2,248 mm)",
+      "height_at_full_rise": "157.125\" (3,991 mm)",
+      "width": "44.25\" (1,124 mm)",
+      "length": "53.625\" (1,362 mm)",
+      "max_lift_height_4_plus_units": "69\" (1,753 mm)",
+      "max_lift_height_2_units": "32\" (813 mm)",
+      "min_max_wheel_diameter": "5\" - 24.5\" (127 - 622 mm)",
+      "lift_speed_max_load": "60\" (1,524 mm) per min",
+      "footprint": "560 sq in. (3,613 sq cm)",
+      "turning_radius": "47\" (1,194 mm)",
+      "operating_peak_power": "4 HP",
+      "operating_voltage": "24 VDC Nominal",
+      "charger_voltage_required": "120 VAC @ 60 Hz",
+      "charger_amps_required": "1.3 amps"
+    }
+  },
+  "features": [
+    "Mobile column lift design - no permanent installation required",
+    "Battery powered (24 VDC) for cordless operation",
+    "Available in 14,000 lb and 18,000 lb per column capacities",
+    "Can operate with 2 units (wheel lift mode) or 4+ units",
+    "47\" turning radius for maneuverability",
+    "560 sq in. footprint per unit",
+    "4 HP peak power motor",
+    "Optional mobile jack stands with large castors"
+  ],
+  "optional_equipment": [
+    "Mobile jack stands with large castors"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI Certified - Independently Tested and Validated"
+  ],
+  "safety_features": [],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Part number: MP-0000-A-802",
+    "Website: www.MohawkLifts.com",
+    "Phone: 1-800-833-2006"
+  ]
+}

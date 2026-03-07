@@ -1,0 +1,63 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/RJ-15_RJ-25-12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "RJ-15 / RJ-25",
+  "variant": "15,000 and 25,000 lb capacity rolling electric/hydraulic jacks",
+  "product_type": "rolling_jack",
+  "capacity": "RJ-15: 15,000 lbs; RJ-25: 25,000 lbs",
+  "dimensions": {
+    "positioning_from_mainside_track_inches": 48,
+    "dunnage_support_dimensions": "4 x 4 x 12 inches (two pieces)"
+  },
+  "weight": {},
+  "installation_requirements": {
+    "compatible_lifts": "Four-post runway lifts (TR-series)",
+    "placement": "Between lift tracks",
+    "support": "Two pieces of 4 x 4 x 12 inch dunnage",
+    "positioning": "48 inches from mainside track",
+    "power": "110V electric/hydraulic"
+  },
+  "specifications": {
+    "rj15_capacity_lbs": 15000,
+    "rj25_capacity_lbs": 25000,
+    "power_type": "110V electric/hydraulic",
+    "pump_type": "Fixed displacement gear pump submerged in reservoir",
+    "reservoir_capacity_cubic_inches": 76,
+    "reservoir_material": "Steel",
+    "relief_valve": "Full flow externally adjustable system relief valve",
+    "hydraulic_fluid": "Dexron III",
+    "lock_type": "Mechanically activated",
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "15,000 or 25,000 lb capacity rolling jacks",
+    "Wheels-free tire and brake service capability",
+    "Roll full length of runway",
+    "Use two jacks to raise entire vehicle off runways",
+    "Lock in place when loaded - mechanically activated",
+    "Self-contained modular design",
+    "110V electric/hydraulic operation",
+    "Fixed displacement gear pump submerged in reservoir",
+    "76 cubic inch steel reservoir",
+    "Full flow externally adjustable system relief valve",
+    "Dexron III hydraulic fluid"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [
+    "Mohawk Lifts OEM accessory",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Mechanically activated lock engages when loaded",
+    "Must be supported on dunnage when not in use",
+    "Self-contained hydraulic system with relief valve"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Rolling jacks are accessories for four-post runway lifts",
+    "Enable wheels-free service for brakes, tires, and axles",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

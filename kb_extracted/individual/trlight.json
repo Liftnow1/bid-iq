@@ -1,0 +1,60 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/trlight.pdf",
+  "category": "four-post-lift",
+  "document_type": "accessory_spec_sheet",
+  "model": "Track Light Kit",
+  "variant": "TR-Light",
+  "product_type": "Track Light Kit for Four Post Track Lift",
+  "capacity": null,
+  "dimensions": {
+    "light_fixture_length": "50\"",
+    "bulb_length": "4'"
+  },
+  "weight": "150 lbs approx. (shipping weight)",
+  "installation_requirements": {
+    "compatible_models": ["TR-33", "TR-35", "TR-50", "TR-75"],
+    "power_feed_required": "120 VAC, 20 Amp",
+    "installation_by": "Only by experienced, factory authorized professionals"
+  },
+  "specifications": {
+    "quantity_of_light_fixtures_20ft_tracks": 4,
+    "quantity_of_light_fixtures_25ft_tracks": 6,
+    "quantity_of_light_fixtures_30ft_tracks": 8,
+    "light_type": "Fluorescent",
+    "light_fixture_length": "50\"",
+    "bulb_wattage": "32 WATT",
+    "bulb_length": "4'",
+    "bulb_type": "Standard F32T8",
+    "power_feed_required": "120 VAC, 20 Amp",
+    "electrical_system": "All electrical components are CSA or UL listed",
+    "system_controls": "On-off electrical toggle switch located at post for light switching"
+  },
+  "features": [
+    "Fluorescent track lighting for under-vehicle illumination",
+    "On-off electrical toggle switch located at post",
+    "All electrical components CSA or UL listed",
+    "Class I-Div 2 rated for garage-type environments",
+    "Limit switch kit blocks power when lift is below 18\" from floor level",
+    "Made in the USA"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [
+    "Certified to ANSI/ALI ALCTV-1998",
+    "ETL Listed to UL-201",
+    "All electrical components CSA or UL listed",
+    "Meets or exceeds UL-201 and ANSI/ALI ALCTV-1998"
+  ],
+  "safety_features": [
+    "All light fixtures rated Class I-Div 2 for garage-type environments",
+    "Power to track lights blocked by limit switch kit when lift is below 18\" from floor level"
+  ],
+  "notes": [
+    "Track light kit for use on a four post track lift",
+    "Quantities may vary with special length tracks and combinations of other options",
+    "Warranty: Five (5) years parts and labor for structural & mechanical; One (1) year parts and labor for electrical components and power unit",
+    "Sales, installation, training & service only by experienced, factory authorized professionals",
+    "Document revision: 04/03/00 (r.v.)",
+    "File path: Q:\\eng\\specs\\newspec\\tr-light.doc"
+  ]
+}

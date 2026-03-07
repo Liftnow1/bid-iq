@@ -1,0 +1,129 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/sys-i-specs.pdf",
+  "category": "two-post-lift",
+  "document_type": "spec_sheet",
+  "model": "System I",
+  "variant": "System I / System IA-10",
+  "product_type": "Two Post Lift",
+  "manufacturer": "Mohawk Lifts, LLC.",
+  "capacity": "10,000 lbs",
+  "dimensions": {
+    "overall_width": "11' 10\" adjustable",
+    "width_between_posts": "10' adjustable",
+    "width_between_lifting_arms": "8' 10\" adjustable",
+    "column_height": "8' 7\"",
+    "overhead_hydraulic_line_height": "12' standard, adjustable to accommodate any height ceiling or routed in-floor",
+    "arm_pad_height_min": "3.3\"",
+    "lifting_height": "6' 3/4\" under arm",
+    "arm_pad_height_at_full_rise": "6' 3 1/2\" min.",
+    "lift_pad_height_with_adaptors": "7' 1/2\"",
+    "drawing_dimensions_front_view": {
+      "overall_width_3stage_inches": 105.1,
+      "arm_spread_3stage_inches": 60.8,
+      "arm_spread_2stage_inches": 60.6,
+      "column_height_inches": 121.5,
+      "arm_rotation_min_inches": 29.9,
+      "arm_rotation_min_note": "MIN",
+      "arm_rotation_max_3stage_inches": 55.0,
+      "arm_rotation_max_3stage_note": "MAX",
+      "arm_rotation_max_2stage_inches": 54.7,
+      "arm_rotation_max_2stage_note": "MAX",
+      "arm_rotation_min_2stage_inches": 36.5,
+      "arm_rotation_min_2stage_note": "MIN",
+      "overall_height_2stage_inches": 121.2
+    },
+    "drawing_dimensions_top_view": {
+      "between_posts_inches": 120,
+      "overall_height_2stage_inches": 144.0,
+      "column_height_front_inches": 103.1,
+      "arm_reach_3stage_1_inches": 84.2,
+      "arm_reach_3stage_2_inches": 84.62,
+      "arm_reach_2stage_inches": 75.3,
+      "arm_reach_2stage_2_inches": 72.75,
+      "pad_height_inches": 3.3,
+      "overall_width_top_inches": 142.4
+    }
+  },
+  "weight": "2500 lbs",
+  "installation_requirements": {
+    "concrete_floor": "4000 psi mix, 4 1/2\" depth",
+    "anchoring_system": "(16) 3/4\" x 5\" bolts, included",
+    "motor_rating": "2.0 HP / 208-230V, Single-phase (3-phase optional)"
+  },
+  "specifications": {
+    "lifting_speed": "50 seconds (faster with lighter load)",
+    "motor_rating": "2.0 HP / 208-230V, Single-phase (3-phase optional)",
+    "synchronization": "Hydraulic fluid displacement using no chains, cables, or overhead obstructions",
+    "cylinders": "2 (1 per column)",
+    "drive_system": "#646 leaf chain routed over twin bearings",
+    "steel_carriage_bearings": "(8) per carriage, double sealed, self-lubricating",
+    "floor_access_between_posts": "Clear and unobstructed",
+    "revision": "9/25"
+  },
+  "features": [
+    "Available with both 3 stage and 2 stage arms",
+    "Hydraulic fluid displacement synchronization - no chains, cables, or overhead obstructions",
+    "#646 leaf chain drive system routed over twin bearings",
+    "Clear and unobstructed floor access between posts",
+    "Adjustable overall width",
+    "Adjustable width between posts",
+    "Adjustable width between lifting arms",
+    "Double sealed self-lubricating carriage bearings",
+    "Overhead hydraulic lines adjustable to any ceiling height or routed in-floor",
+    "Mechanical safety locks starting at 4\" off the floor"
+  ],
+  "optional_equipment": [
+    "3\" Frame Adaptors (stackable) - 4 included as standard equipment",
+    "6\" Frame Adaptors (stackable) - 4 included as standard equipment",
+    "3-phase motor option",
+    "Speedlane Drive On Adaptors - converts 2 post lift into drive-on lift, ALI certified",
+    "Car Storage & Service Lifts - converts from frame contact to wheel engaging lift, standard model fits wheelbases up to 116\", takes up less shop space than any 4-post lift",
+    "Turf Maintenance Equipment & Auto Service Lift - converts from frame engaging to turf maintenance lift, services cars/trucks/zero turn mowers/turf equipment/four wheelers, fits 2 stage and 3 stage arms with max wheelbase of 119.5\" (on 3 stage arms), 7,000 lb capacity, ALI Certified (Accessory #009-012-001)",
+    "Backsaver - hang tires from lift swing arms, heavy rubber coating prevents damage, swings 180 degrees when not in use, 100 lb capacity, available for all Mohawk 10,000 to 20,000 lb two post lifts (Accessory #ZZ757-D)"
+  ],
+  "parts_list": [
+    {
+      "part_number": "016-011-012",
+      "description": "System IA-10 Speedlane Accessory"
+    },
+    {
+      "part_number": "009-012-001",
+      "description": "Turf Maintenance Lift Accessory"
+    },
+    {
+      "part_number": "ZZ757-D",
+      "description": "Backsaver Accessory"
+    }
+  ],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "ALI Certified (Speedlane option)",
+    "ALI Certified (Turf Maintenance option)"
+  ],
+  "safety_features": [
+    "Mechanical Safety Locks: Automatic, all position starting at 4\" off the floor",
+    "Hydraulic Safety Systems: Automatic, all position",
+    "Swing Arm Restraints: Automatic upon ascent"
+  ],
+  "warranty": {
+    "structural": "25 years",
+    "mechanical": "10 years",
+    "cylinder_seal": "Limited lifetime"
+  },
+  "government_contracts": [
+    "GSA Contract Holder",
+    "CP Choice Partners",
+    "Sourcewell",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy",
+    "Available under discounted government contract in all 50 states"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Dare to Compare 10,000-12,000 LB capacity lifts - mohawklifts.com/dare2compare10k",
+    "Speedlane: No wasted time positioning arms, wheels & tires hang free for tire, brake and under vehicle service, provides full undercar access",
+    "Car Storage: Ideal for vehicle storage, keeps tires at street level for exhaust work, never needs a wheels free jack",
+    "Turf Maintenance: Services cars, trucks, zero turn mowers, turf equipment and four wheelers",
+    "Backsaver: Reduces injuries, increases shop productivity"
+  ]
+}

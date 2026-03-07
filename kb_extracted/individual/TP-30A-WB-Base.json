@@ -1,0 +1,100 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-30A-WB-Base.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TP-20-WB / TP-26A-WB / TP-30-WB",
+  "variant": "Wider Base Models - Special Base Plate",
+  "product_type": "Two Post Inground Lift - Base Plate Drawing",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": null,
+  "dimensions": {
+    "base_plate_overall_length_inches": 47.5,
+    "base_plate_overall_width_inches": 42.5,
+    "base_plate_material_size": "1\" x 42.5 x 47.5",
+    "anchor_bolt_holes_diameter_inches": "1 1/8\" dia burns (14 places)",
+    "anchor_hole_radius_inches": "1 1/2 rad typ (8 places)",
+    "bolt_pattern_length_inches": 38.5,
+    "bolt_pattern_width_inches": 25.5,
+    "inner_spacing_1_inches": 18.125,
+    "inner_spacing_2_inches": 4.5,
+    "inner_spacing_3_inches": 5.5,
+    "inner_spacing_4_inches": 2.75,
+    "center_slot_radius": "3/16 R typ",
+    "banked_opening": "4 1/2 x 5 1/2 banked opening",
+    "edge_to_first_bolt_row_inches": 14.5,
+    "second_edge_spacing_inches": 14.5,
+    "vertical_spacing_1_inches": 11,
+    "vertical_spacing_2_inches": 13,
+    "vertical_spacing_3_inches": 1.5,
+    "horizontal_center_spacing_inches": "22.25 typ",
+    "inner_center_spacing_inches": "19.125 typ",
+    "outer_dimension_inches": 23.75,
+    "plate_reference_thickness_inches": "1\" REF",
+    "center_mark_spacing_inches": "35 typ",
+    "drill_thru_hole": "two (2) 1 1/8 dia drill thru hole"
+  },
+  "weight": "38 lbs (approximately)",
+  "installation_requirements": {
+    "applicable_models": ["TP-20-WB", "TP-26A-WB", "TP-30-WB"],
+    "note": "Used on wider base models only",
+    "material": "ASTM A-36 Plate",
+    "plate_dimensions": "1\" x 42 1/2 x 47 1/2",
+    "anchor_bolt_holes": "14 places, 1 1/8\" diameter",
+    "welding_specs": "AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "specifications": {
+    "drawing_number": "ZZ2901-01",
+    "file_name": "ZZ2901-A",
+    "next_assembly": "ZZ2901-B",
+    "part_number": "0600-000-051",
+    "title": "Special Base Plate (TP20/TP26)",
+    "for_reference": "For DEF NYC",
+    "date": "11/03",
+    "drawn_by": "R.V.",
+    "sheet_size": "D-SIZE",
+    "revision_history": [
+      {
+        "rev": "1",
+        "description": "Was 1\" - removed"
+      },
+      {
+        "rev": "2",
+        "description": "Two (2) 1 1/8 dia drill thru hole",
+        "date": "7/05",
+        "by": "dok"
+      }
+    ],
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_0XX": "+/- 0.030",
+      "decimal_0XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "Wider base plate for enhanced stability",
+    "ASTM A-36 steel plate construction",
+    "14-point anchor bolt pattern",
+    "Compatible with TP-20-WB, TP-26A-WB, and TP-30-WB models"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "0600-000-051",
+      "description": "Special Base Plate (TP20/TP26)",
+      "material": "ASTM A-36 Plate",
+      "size": "1\" x 42 1/2 x 47 1/2"
+    }
+  ],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Used on TP-20-WB, TP-26A-WB & TP-30-WB wider base models only",
+    "Notice of confidential information",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "Identical drawing to TP-20-WB-Base and TP-26A-WB-Base - same base plate for all WB models"
+  ]
+}

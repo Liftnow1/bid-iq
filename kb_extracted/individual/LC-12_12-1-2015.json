@@ -1,0 +1,109 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/LC-12_12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "LC-12",
+  "variant": "LC-12-3SA - 12,000 lb Low Ceiling Clear Floor Two Post Lift",
+  "product_type": "two_post_lift",
+  "capacity": "12,000 lbs (5,443.11 kg)",
+  "dimensions": {
+    "overall_width_ft_in": "12 ft 7 in",
+    "overall_width_m": 3.84,
+    "width_between_posts_ft": 10,
+    "width_between_posts_m": 3.05,
+    "width_between_lifting_arms_ft_in": "8 ft 10 in",
+    "width_between_lifting_arms_m": 2.69,
+    "base_footprint_width_inches": 30,
+    "base_footprint_depth_inches": 24,
+    "base_plate_thickness_inches": 0.75,
+    "arm_pad_height_min_inches": 5,
+    "arm_pad_height_min_cm": 12.7,
+    "lifting_height_under_arm_ft": 6,
+    "lifting_height_under_arm_m": 1.83,
+    "lift_pad_height_full_rise_ft_in": "6 ft 5 in",
+    "lift_pad_height_full_rise_m": 1.96,
+    "lift_pad_height_full_rise_with_adaptors_ft_in": "7 ft 3 in",
+    "lift_pad_height_full_rise_with_adaptors_m": 2.21
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting": "Surface-mounted, bolts to concrete floor",
+    "base_footprint": "30 in wide x 24 in, constructed from 3/4 in thick plate",
+    "lag_bolts": 8,
+    "hydraulic_lines": "Overhead stainless steel (optional in-floor)",
+    "indoor_use_only": true
+  },
+  "specifications": {
+    "capacity_lbs": 12000,
+    "capacity_kg": 5443.11,
+    "motor_hp": 2.5,
+    "motor_voltage": "208-230V Single-Phase (3-phase optional)",
+    "lifting_speed_full_load_seconds": 80,
+    "cylinder_type": "Twin cylinder direct drive",
+    "cylinder_diameter_inches": 4,
+    "number_of_cylinders": 2,
+    "column_material": "3/4 inch thick forklift mast steel",
+    "roller_bearings_per_carriage": 8,
+    "roller_bearing_type": "Double-sealed self-lubricating steel ball bearing",
+    "swing_arm_type": "Three-stage (3SA)",
+    "synchronization": "Patented hydraulic synchronization - no cables, chains, or pulleys",
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "Low ceiling design",
+    "Clear floor configuration - no base plate obstructions",
+    "Twin cylinder direct drive - no chains or cables",
+    "Dual 4-inch heavy-duty hydraulic cylinders",
+    "8 double-sealed self-lubricating steel ball bearing rollers per carriage",
+    "3/4-inch thick forklift mast columns",
+    "Three-stage swing arms (3SA model)",
+    "Patented hydraulic synchronization eliminates cables, pulleys, chains",
+    "Overhead or optional in-floor stainless steel hydraulic lines",
+    "Adjustable width between posts",
+    "80-second lift speed at full load",
+    "Faster lift speed with lighter vehicles"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Stackable Adapter Pads - 5 inch",
+      "description": "5-inch height adapter pads"
+    },
+    {
+      "item": "Stackable Adapter Pads - 7.5 inch",
+      "description": "7.5-inch height adapter pads"
+    },
+    {
+      "item": "Stackable Adapter Pads - 10 inch",
+      "description": "10-inch height adapter pads"
+    },
+    {
+      "item": "In-Floor Hydraulic Lines",
+      "description": "Alternative to overhead routing for stainless steel hydraulic lines"
+    },
+    {
+      "item": "3-Phase Motor",
+      "description": "Optional 3-phase motor upgrade"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets ANSI/ALI ALCTV safety standard",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "All-position 1-inch thick mechanical locks on BOTH carriages",
+    "Mechanical locks engage for full length of travel",
+    "Patented infinite-position internal hydraulic safeties",
+    "External pressure-compensated flow controls",
+    "Velocity fuse valving"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Warranty: 25 years structural, 10 year mechanical, limited lifetime cylinder seal",
+    "Low ceiling version of Mohawk two-post lift line",
+    "3SA designation indicates three-stage swing arms",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

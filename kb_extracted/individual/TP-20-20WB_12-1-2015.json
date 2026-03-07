@@ -1,0 +1,83 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/TP-20-20WB 12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "TP-20 / TP-20WB",
+  "variant": "20,000 lb capacity heavy duty two-post lift (standard and wide base)",
+  "product_type": "two_post_lift",
+  "capacity": "20,000 lbs",
+  "dimensions": {
+    "base_footprint_width_inches": 48,
+    "base_footprint_depth_inches": 30,
+    "base_plate_thickness_inches": 1.0,
+    "concrete_thickness_required_inches": 6.5,
+    "lifting_height_ft": 6,
+    "arm_pad_height_min_inches": 5.375
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting": "Surface-mounted, bolts to concrete floor",
+    "concrete_psi": 4000,
+    "concrete_thickness_inches": 6.5,
+    "base_footprint": "48 in wide x 30 in deep, 1 inch thick plate",
+    "hydraulic_lines": "Overhead or in-floor stainless steel",
+    "indoor_use_only": true
+  },
+  "specifications": {
+    "capacity_lbs": 20000,
+    "motor_hp": 5,
+    "motor_voltage": "208-230V or 440-480V, 3-phase",
+    "cylinder_type": "Twin cylinder direct drive",
+    "column_material": "1 inch thick forklift mast",
+    "roller_bearings_per_carriage": 16,
+    "roller_bearing_diameter_inches": 4,
+    "roller_bearing_type": "Double sealed self-lubricating steel rollers",
+    "swing_arm_type": "Double telescoping 3-stage swing arms",
+    "swing_arm_height_inches": 5.375,
+    "synchronization": "Patented hydraulic synchronization",
+    "swing_arm_bolt_diameter_inches": 1.125,
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "20,000 lb capacity heavy duty two-post lift",
+    "TP-20WB wide base variant available",
+    "1-inch thick forklift mast columns",
+    "16 x 4-inch double sealed self-lubricating steel rollers per carriage",
+    "48 in x 30 in baseplate of 1-inch thick plate",
+    "Double telescoping 3-stage swing arms at 5-3/8 inch height",
+    "Twin cylinder direct drive - no chains or cables",
+    "5 HP 3-phase motor",
+    "Patented hydraulic synchronization",
+    "Standard 5, 7.5, and 10-inch stackable truck adapters",
+    "Clear floor design"
+  ],
+  "optional_equipment": [
+    {
+      "item": "In-Floor Hydraulic Lines",
+      "description": "Alternative to overhead routing"
+    },
+    {
+      "item": "Stackable Truck Adapters",
+      "description": "5-inch, 7.5-inch, and 10-inch adapters (standard equipment)"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets ANSI/ALI ALCTV safety standard",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "All-position mechanical locks on both carriages",
+    "Patented hydraulic locking system with velocity fuses",
+    "Pressure-compensated flow control",
+    "Automatic swing arm restraints"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Warranty: 25 years structural, 10 year mechanical, limited lifetime cylinder",
+    "WB designation indicates wide base variant",
+    "Requires 6.5 inches of concrete (more than lighter models)",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/parallelogram-lifts/truck-data-form-single-axle (2).pdf",
+  "category": "parallelogram-lift",
+  "document_type": "vehicle_data_form",
+  "model": null,
+  "variant": "Single Axle Rear",
+  "product_type": "Truck Data Form (Single Axle Rear)",
+  "capacity": null,
+  "dimensions": {
+    "form_fields": {
+      "A": "Front Tire Diameter",
+      "B": "Back Tire Diameter",
+      "C": "Front Minimum Ground Clearance",
+      "D": "Rear Minimum Ground Clearance",
+      "E": "Center Minimum Ground Clearance",
+      "F": "Front Bumper to Axle",
+      "G": "Axle to Axle Length",
+      "H": "Front Tire Width",
+      "I": "Front Tire Outside-to-Outside Width",
+      "J": "Front Total Width",
+      "K": "Rear Dual Tire Width",
+      "L": "Rear Tire Outside-to-Outside Width",
+      "M": "Rear Total Width",
+      "overall_length": "Bumper to Bumper",
+      "vehicle_weight": "Vehicle Weight (not GVW)",
+      "heaviest_axle_weight": "Heaviest Axle Weight"
+    },
+    "unit_of_measurement": "inches",
+    "columns": ["Longest Wheel Base", "Shortest Wheel Base", "Lowest Clearance"]
+  },
+  "weight": null,
+  "installation_requirements": {},
+  "specifications": {
+    "form_purpose": "Vehicle dimensional data collection for lift sizing and compatibility determination",
+    "views_included": ["Side View", "Front View", "Rear View"],
+    "vehicle_type": "Single axle rear truck"
+  },
+  "features": [
+    "Comprehensive vehicle measurement form for lift compatibility",
+    "Three-column format for longest wheelbase, shortest wheelbase, and lowest clearance vehicles",
+    "Side view, front view, and rear view diagrams with dimension callouts",
+    "Captures tire dimensions, ground clearances, widths, and weights"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "All dimensions to be entered in inches",
+    "Check box if lowest clearance is equal to longest or shortest wheel base",
+    "Note any areas that may cause problems in vehicle lifting",
+    "Determination in suiting lifting requirements is only as accurate and complete as the data received"
+  ]
+}

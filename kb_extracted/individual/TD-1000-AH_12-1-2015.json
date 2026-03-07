@@ -1,0 +1,67 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/TD-1000-AH 12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "TD-1000-AH",
+  "variant": "1,000 lb capacity air/hydraulic tire dolly",
+  "product_type": "tire_dolly",
+  "capacity": "1,000 lbs",
+  "dimensions": {
+    "lifting_height_inches": 46,
+    "side_shift_inches": 6,
+    "tire_clearance_inches": 48
+  },
+  "weight": {},
+  "installation_requirements": {
+    "no_permanent_installation": true,
+    "surface": "Hard, level surface capable of sustaining the load",
+    "compatible_lifts": "Any above-ground or in-ground lift"
+  },
+  "specifications": {
+    "capacity_lbs": 1000,
+    "lifting_height_inches": 46,
+    "tire_raise_height_inches": 48,
+    "side_shift_inches": 6,
+    "actuation": "Air/Hydraulic",
+    "hand_crank": "High gear ratio for one-handed operation",
+    "foot_pump": "Hands-free operation",
+    "rear_casters": "Two 360-degree swivel casters with locks",
+    "caster_safety": "Safety chain to secure locks",
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "1,000 lb capacity tire dolly",
+    "Full 46-inch lifting height",
+    "Raises full-sized dually tires up to 48 inches",
+    "6-inch side shifting ability for alignment",
+    "Hand crank with high gear ratio for one-handed operation",
+    "Foot pump for hands-free operation",
+    "Two rear 360-degree swivel casters with locks",
+    "Safety chain to secure caster locks",
+    "Compatible with any above-ground or in-ground lift",
+    "Faster, safer heavy-duty tire handling"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "TD-1000-AH",
+      "description": "1,000 lb capacity air/hydraulic tire dolly"
+    }
+  ],
+  "certifications": [
+    "Mohawk Lifts OEM product",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Swivel caster locks with safety chain",
+    "Lower lifting arms and center/secure load before moving",
+    "Use load restraint device to secure tire",
+    "Use only on hard, level surfaces"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Also available in 2,000 lb capacity (TD-2000)",
+    "Designed for single and dual tire handling on heavy-duty trucks",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

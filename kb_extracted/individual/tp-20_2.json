@@ -1,0 +1,127 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/tp-20 (2).pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing_with_specs",
+  "model": "TP-20",
+  "variant": "Symmetrical 2-Post Lift",
+  "product_type": "Two Post Inground Lift",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": "20,000 lbs",
+  "dimensions": {
+    "overall_width_inches": 192,
+    "overall_width_meters": 4.88,
+    "overall_width_feet": "14 feet",
+    "width_between_posts_inches": 132,
+    "width_between_posts_meters": 3.35,
+    "width_between_posts_feet": "11 feet",
+    "width_between_carriage_inches": "108 7/16",
+    "width_between_carriage_meters": 2.75,
+    "width_between_carriage_feet": "9'-0\"",
+    "column_height_inches": "121 1/2",
+    "column_height_meters": 3.09,
+    "column_height_feet": "10'-1 1/2\"",
+    "max_cylinder_height_inches": "162 5/8",
+    "max_cylinder_height_meters": 4.13,
+    "max_cylinder_height_feet": "13'-6 5/8\"",
+    "overhead_hydraulic_line_height_feet": "16 feet standard (adjustable)",
+    "arm_pad_height_min_inches": "5 3/8",
+    "arm_pad_height_min_meters": 0.14,
+    "lifting_height_stroke_feet": "6 feet",
+    "arm_height_at_full_rise_feet": "6'-5 3/8\"",
+    "max_pad_height_with_adapters_feet": "7'-3 3/8\"",
+    "arm_reach_1_inches": "87 3/8",
+    "arm_reach_1_meters": 2.22,
+    "arm_reach_2_inches": "77 3/8",
+    "arm_reach_2_meters": 1.97,
+    "arm_reach_3_inches": "88 1/8",
+    "arm_reach_3_meters": 2.24,
+    "drive_through_clearance_inches": 168,
+    "drive_through_clearance_meters": 4.27,
+    "top_view_arm_spread_inches": "68 7/8",
+    "top_view_arm_spread_meters": 1.75,
+    "top_view_arm_length_inches": "137 3/4",
+    "top_view_arm_length_meters": 3.50,
+    "arm_sweep_width_inches": "139 1/4",
+    "arm_sweep_width_meters": 3.54,
+    "double_telescoping_arm_minimum_inches": "37 7/8",
+    "double_telescoping_arm_minimum_meters": 0.96,
+    "double_telescoping_arm_maximum_inches": "62 1/8",
+    "double_telescoping_arm_maximum_meters": 1.58
+  },
+  "weight": "7000 lbs approx (shipping)",
+  "installation_requirements": {
+    "concrete_floor": "(18) 3/4 dia x 6\" Wej-its in 6 1/2 THK x 4000 psi concrete",
+    "motor_rating": "4 HP, 220 VAC, 1 Phase",
+    "overhead_steel_hydraulic_lines": true,
+    "adjustable_height_overhead_lines": true
+  },
+  "specifications": {
+    "lifting_speed": "80 seconds",
+    "motor_rating": "4 HP, 220 VAC, 1 Phase",
+    "synchronization": "Hydraulic fluid displacement using no chains, cables nor overhead obstructions",
+    "cylinders": "2 (1 per column)",
+    "carriage_bearings": "(16) 5\" diameter (8 per carriage) double sealed self lubricating",
+    "thrust_bearings": "(8) 4\" diameter (4 per carriage) double sealed self lubricating",
+    "floor_access_between_posts": "Clear and unobstructed",
+    "drawing_number": "TP-20",
+    "file_name": "TP-20",
+    "date": "8/98",
+    "drawn_by": "R.V.",
+    "scale": "3/64",
+    "sheet_size": "D-SIZE",
+    "units": "inches [meters]",
+    "revision_history": [
+      {
+        "rev": "E",
+        "description": "Was ALCTV-2006",
+        "date": "1/14",
+        "by": "C.S."
+      },
+      {
+        "rev": "A",
+        "description": "ALI verification logo change",
+        "date": "12/15",
+        "by": "CHS"
+      }
+    ],
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_0XX": "+/- 0.030",
+      "decimal_0XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "Symmetrical 2-post lift design",
+    "Double telescoping arms",
+    "Hydraulic fluid displacement synchronization - no chains, cables, or overhead obstructions",
+    "Clear and unobstructed floor access between posts",
+    "Adjustable height over-head steel hydraulic lines",
+    "Single point lock release at control",
+    "Multi-position mechanical safety locks every 6\""
+  ],
+  "optional_equipment": [
+    "5\" Frame Adapters (stackable) - 4 included as standard equipment",
+    "7 1/2\" Frame Adapters (stackable) - 4 included as standard equipment",
+    "10\" Frame Adapters (stackable) - 4 included as standard equipment"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "Independently Tested and Validated - Certified",
+    "Tested and certified by a nationally recognized testing laboratory (NRTL) to meet requirements of U.L. Standard 201 for garage equipment and ANSI/ALI ALCTV-2011 for automotive lift construction"
+  ],
+  "safety_features": [
+    "Mechanical Safety Locks: Multi-position every 6\"",
+    "Mechanical Safety Release: Single point lock release at control",
+    "Hydraulic Safety System: Automatic, all position",
+    "Swing Arm Locks: Automatic locking upon ascent"
+  ],
+  "notes": [
+    "Mohawk Resources, Ltd. reserves the right to make changes without notice",
+    "Notice of confidential information",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only"
+  ]
+}

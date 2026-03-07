@@ -1,0 +1,51 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/Light_Kit-ALCTV-TR-33-35-50-75.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_and_operation_manual",
+  "model": "Light Kit ALCTV",
+  "variant": "ALCTV-certified track lighting kit for TR-33, TR-35, TR-50, TR-75 four-post lifts",
+  "product_type": "lighting_kit_accessory",
+  "capacity": "N/A - accessory kit",
+  "dimensions": {},
+  "weight": {},
+  "installation_requirements": {
+    "compatible_lifts": ["TR-33", "TR-35", "TR-50", "TR-75"],
+    "lift_type": "Four-post runway lift",
+    "electrical_supply_required": true,
+    "certification_compatibility": "ALCTV certified lifts"
+  },
+  "specifications": {
+    "certification_standard": "ANSI/ALI ALCTV",
+    "purpose": "Under-vehicle lighting for four-post lift runways",
+    "compatible_models": ["TR-33", "TR-35", "TR-50", "TR-75"]
+  },
+  "features": [
+    "Track-mounted lighting for under-vehicle illumination",
+    "ALCTV-certified version for certified lift installations",
+    "Compatible with TR-33, TR-35, TR-50, and TR-75 models",
+    "Mounts along lift runways for complete undercarriage visibility",
+    "Fluorescent or LED runway lighting"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "Light Kit ALCTV TR-33/35/50/75",
+      "description": "ALCTV-certified track lighting kit for TR-series four-post lifts"
+    }
+  ],
+  "certifications": [
+    "ANSI/ALI ALCTV certified",
+    "Mohawk Lifts OEM accessory",
+    "Designed for use with ALI/ETL certified Mohawk four-post lifts"
+  ],
+  "safety_features": [
+    "ALCTV-compliant installation",
+    "Electrical components rated for lift environment",
+    "Wiring routed to avoid interference with lift operation"
+  ],
+  "notes": [
+    "ALCTV version specifically designed for ANSI/ALI ALCTV certified lifts",
+    "Different from non-ALCTV light kit - see separate manual for non-certified version",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

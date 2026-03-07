@@ -1,0 +1,105 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/TR-110-120 12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "TR-110 / TR-120",
+  "variant": "110,000 and 120,000 lb capacity four-post runway lifts",
+  "product_type": "four_post_lift",
+  "capacity": "TR-110: 110,000 lbs; TR-120: 120,000 lbs",
+  "dimensions": {
+    "lifting_height_ft_in": "6 ft 6-7/8 in",
+    "column_material_thickness_inches": 1.0,
+    "column_width_inches": 7,
+    "roller_diameter_inches": 5
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting": "Surface-mounted",
+    "concrete_requirements": "Heavy-duty floor rated for load",
+    "control_box": "Positioned per customer preference",
+    "power": "High-capacity electrical supply"
+  },
+  "specifications": {
+    "tr110_capacity_lbs": 110000,
+    "tr120_capacity_lbs": 120000,
+    "lifting_height_ft_in": "6 ft 6-7/8 in",
+    "column_material": "1 inch x 7 inch forklift mast sections",
+    "roller_diameter_inches": 5,
+    "roller_type": "Sealed rollers",
+    "lifting_cylinders": "Inverted heavy duty cylinders in each column",
+    "drive_system": "Direct drive - no chains or cables",
+    "control_system": "Computer controlled PLC for synchronous 4-cylinder operation",
+    "control_interface": "Up, Down, Park (lock)",
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "110,000 or 120,000 lb capacity - heaviest Mohawk four-post lifts",
+    "6 ft 6-7/8 in lifting height",
+    "1 inch x 7 inch forklift mast column sections",
+    "5-inch sealed roller carriages",
+    "Inverted heavy duty lifting cylinders in each column",
+    "Direct drive - no chains or cables",
+    "Computer controlled PLC synchronization for all 4 cylinders",
+    "Simple control: Up, Down, Park (lock)",
+    "Control box positioned per customer preference",
+    "Built-in front and rear wheel stops",
+    "Automatic flip-up chocks",
+    "Double-sealed self-lubricating ball-bearing rollers",
+    "All-position safety locks in all four posts",
+    "Pivoting approach ramps",
+    "Custom configurations available (longer, taller, wider, heavier)"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Rolling Jacks",
+      "description": "Wheels-free service"
+    },
+    {
+      "item": "Track Lighting",
+      "description": "Under-vehicle illumination"
+    },
+    {
+      "item": "Air Lines",
+      "description": "Compressed air along runways"
+    },
+    {
+      "item": "Oil Drain Pans",
+      "description": "Integrated oil drain capability"
+    },
+    {
+      "item": "110-Volt Outlets",
+      "description": "Electrical outlets along runways"
+    },
+    {
+      "item": "2,500 lb Air/Hydraulic Scissor Lifting Table",
+      "description": "For removing rear ends, differentials, or heavy transmissions"
+    },
+    {
+      "item": "Custom Configurations",
+      "description": "Longer, taller, shorter, wider, or heavier capacity available"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Multi-position mechanical locks in all four posts",
+    "Redundant hydraulic safeties",
+    "Pressure-compensated flow control",
+    "Tamper-proof velocity fuses",
+    "Single-point lock release",
+    "Mechanical side-to-side chain synchronization",
+    "Automatic track leveler",
+    "Built-in wheel stops and automatic flip-up chocks",
+    "PLC-controlled synchronous operation"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Heaviest capacity Mohawk four-post lifts",
+    "Custom configurations available - contact Mohawk directly",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

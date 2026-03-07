@@ -1,0 +1,163 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/vertical-rise-lifts/vertical-rise-specs.pdf",
+  "category": "vertical-rise-lift",
+  "document_type": "spec_sheet",
+  "model": "VR-Series (All Types: A, B, C)",
+  "variant": "V-085-C-23S featured (85,000 lb with 23 ft runway)",
+  "product_type": "Vertical Rise Lift - Full Specification Sheet",
+  "manufacturer": "Mohawk Lifts, LLC., P.O. Box 110, 65 Vrooman Ave, Amsterdam, NY 12010",
+  "capacity": "35,000 - 99,000 lbs (Type A: 35-64K, Type B: 77K, Type C: 85-99K)",
+  "dimensions": {
+    "type_a_35_64K": {
+      "lifting_height_inches": 79.5,
+      "lowered_height_inches": 14.2,
+      "track_width_inches": 30,
+      "overall_width_std_inches": 106.4
+    },
+    "type_b_77K": {
+      "lifting_height_inches": 80.4,
+      "lowered_height_inches": 14.2,
+      "track_width_inches": 30,
+      "overall_width_std_inches": 106.4
+    },
+    "type_c_85_99K": {
+      "lifting_height_inches": 82.7,
+      "lowered_height_inches": 15.4,
+      "track_width_inches": 36.6,
+      "overall_width_std_inches": 119.7
+    },
+    "common_dimensions": {
+      "track_lengths": "23 ft to 48 ft (other lengths also available)",
+      "approach_ramp_length_standard_inches": 101.6,
+      "width_between_tracks_std_inches": 46.5,
+      "width_between_tracks_adjustable": true
+    },
+    "featured_model_V085C23S": {
+      "runway_length_mm": 7000,
+      "runway_length_inches": 275.6,
+      "runway_usable_length_mm": 6370,
+      "runway_usable_length_inches": 250.8,
+      "overhang_each_end_mm": 315,
+      "overhang_each_end_inches": 12.4,
+      "base_plate_depth_mm": 295,
+      "base_plate_depth_inches": 11.6,
+      "inner_segments_mm": [1600, 795, 1600, 795],
+      "inner_segments_inches": [63.0, 31.3, 63.0, 31.3],
+      "total_length_with_ramps_mm": 9580,
+      "total_length_with_ramps_inches": 377.2,
+      "ramp_length_mm": 2580,
+      "ramp_length_inches": 101.6,
+      "base_plate_area_each_side_mm": 350,
+      "base_plate_area_each_side_inches": 13.8,
+      "lift_mechanism_area_mm": 6020,
+      "lift_mechanism_area_inches": 237,
+      "raised_height_mm": 2100,
+      "raised_height_inches": 82.7,
+      "collapsed_height_mm": 390,
+      "collapsed_height_inches": 15.4,
+      "overall_width_mm": 3040,
+      "overall_width_inches": 119.7,
+      "track_width_each_mm": 930,
+      "track_width_each_inches": 36.6,
+      "spacing_between_tracks_mm": 1180,
+      "spacing_between_tracks_inches": 46.5,
+      "inner_clearance_width_mm": 1050,
+      "inner_clearance_width_inches": 41.3,
+      "full_raised_total_height_mm": 2110,
+      "full_raised_total_height_inches": 83.1,
+      "traverse_height_mm": 140,
+      "traverse_height_inches": 5.5,
+      "runway_slope_mm": 65,
+      "runway_slope_inches": 2.5,
+      "upn_channel": "UPN 160"
+    }
+  },
+  "weight": "N/A",
+  "installation_requirements": {
+    "concrete_floor_thickness_min_inches": 6,
+    "concrete_floor_strength_min_psi": 4000,
+    "air_pneumatic_psi": "60 - 120 PSI",
+    "electrical_options": [
+      {"voltage": "200-208 VAC", "amperage": 33, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "230-240 VAC", "amperage": 29, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "400 VAC", "amperage": 17, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "460-480 VAC", "amperage": 15, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "550-575 VAC", "amperage": 13, "phase": "3 Phase", "frequency": "60 Hz"}
+    ],
+    "motor_power_kw": 7.5,
+    "motor_power_hp": 10,
+    "mounting_options": ["SM (Surface Mount)", "FM (Flush Mount)"]
+  },
+  "specifications": {
+    "types": {
+      "type_a": {"capacity_lbs": "35,000 - 64,000", "lifting_height_inches": 79.5, "lowered_height_inches": 14.2, "track_width_inches": 30, "overall_width_inches": 106.4},
+      "type_b": {"capacity_lbs": "77,000", "lifting_height_inches": 80.4, "lowered_height_inches": 14.2, "track_width_inches": 30, "overall_width_inches": 106.4},
+      "type_c": {"capacity_lbs": "85,000 - 99,000", "lifting_height_inches": 82.7, "lowered_height_inches": 15.4, "track_width_inches": 36.6, "overall_width_inches": 119.7}
+    },
+    "track_lengths_feet": "23 to 48 (other lengths available)",
+    "approach_ramp_standard_inches": 101.6,
+    "width_between_tracks_inches": 46.5,
+    "width_between_tracks_adjustable": true,
+    "lifting_speed_seconds": 70,
+    "lifting_speed_note": "Faster with lighter load",
+    "motor_kw": 7.5,
+    "motor_hp": 10,
+    "upn_channel": "UPN 160"
+  },
+  "features": [
+    "Three capacity types: A (35-64K), B (77K), C (85-99K)",
+    "Track lengths from 23 to 48 feet with intermediate lengths available",
+    "Adjustable width between tracks (standard 46.5 inches)",
+    "Surface mount (SM) or flush mount (FM) options",
+    "70 second lifting speed (faster with lighter loads)",
+    "7.5 kW / 10 HP motor",
+    "Multiple voltage options (200-575V)",
+    "UPN 160 traverse channel",
+    "Manufactured to ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA standards",
+    "Available under discounted government contract in all 50 states"
+  ],
+  "optional_equipment": [
+    "Rolling Jack / Jacking Platforms",
+    "Alignment Turntables / Cutouts",
+    "Track Lighting",
+    "Air/Hydraulic Tire Dolly",
+    "Stainless Steel Bases",
+    "Galvanized and Wash Bay Finish",
+    "Drive Thru Ramps"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "Meets current national ANSI code for lifts",
+    "Manufactured in compliance with: ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "GSA Contract Holder (Contract # GS-07F-207AA)",
+    "Sourcewell Awarded Contract (Contract # 013020-MRL)",
+    "Equalis Group",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy.org"
+  ],
+  "safety_features": [],
+  "warranty": {},
+  "contact_info": {
+    "phone": "(800) 833-2006",
+    "local_phone": "(518) 842-1431",
+    "fax": "(518) 842-1289",
+    "website": "www.mohawklifts.com"
+  },
+  "government_contracts": {
+    "gsa_contract": "GS-07F-207AA",
+    "sourcewell_contract": "013020-MRL",
+    "available_all_50_states": true,
+    "cooperative_purchasing": ["Equalis Group", "NASPO ValuePoint", "HGACBuy"]
+  },
+  "notes": [
+    "REV 10/21",
+    "Featured drawing model: V-085-C-23S (85,000 lb with 23 ft runway, surface mount)",
+    "Type A and B share same track width (30 inches) and overall width (106.4 inches)",
+    "Type C has wider tracks (36.6 inches) and wider overall width (119.7 inches)",
+    "Type C has higher lifting height (82.7 inches) and higher lowered height (15.4 inches) vs Type A/B",
+    "All types share same concrete requirements (6 inch / 4000 PSI minimum)",
+    "All types share same electrical options and motor (7.5 kW / 10 HP)",
+    "Specifications subject to change without notice"
+  ]
+}

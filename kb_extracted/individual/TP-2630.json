@@ -1,0 +1,121 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-2630.pdf",
+  "category": "two-post-lift",
+  "document_type": "spec_sheet",
+  "model": "TP-26 / TP-30",
+  "variant": "Standard and Wide Base (WB)",
+  "product_type": "Two Post Inground Lift",
+  "manufacturer": "Mohawk Lifts, LLC.",
+  "capacity": "TP-26: 26,000 lbs (11793.41 Kg) / TP-30: 30,000 lbs (13607.78 Kg)",
+  "dimensions": {
+    "overall_width": "15' (4.57 m) standard; wider base model 17' (5.18 m)",
+    "width_between_posts": "12' (3.66 m)",
+    "width_between_carriage": "9' 9\" (2.97 m)",
+    "column_height": "11' (3.35 m)",
+    "max_cylinder_height": "13' 6 1/8\" (4.12 m)",
+    "overhead_hydraulic_line": "Adjustable to any height or routed in floor",
+    "arm_pad_height_min": "7\" (20.32 cm)",
+    "lifting_height_stroke": "6' (1.83 m)",
+    "arm_height_at_full_rise": "6' 7\" (2.01 m)",
+    "max_pad_height_with_adaptors": "7' 5\" (2.26 m)",
+    "drawing_dimensions": {
+      "overall_height_inches": 162.1,
+      "overall_height_meters": 4.12,
+      "overall_width_inches": 180,
+      "overall_width_meters": 4.57,
+      "width_between_posts_inches": 144,
+      "width_between_posts_meters": 3.66,
+      "width_between_carriage_inches": 117,
+      "width_between_carriage_meters": 2.97,
+      "column_height_inches": 122.5,
+      "column_height_meters": 3.11,
+      "arm_reach_1_inches": 89,
+      "arm_reach_1_meters": 2.26,
+      "arm_reach_2_inches": 79,
+      "arm_reach_2_meters": 2.01,
+      "arm_reach_3_inches": 78.7,
+      "arm_reach_3_meters": 2.00,
+      "arm_spread_top_view_inches": 47.8,
+      "arm_spread_top_view_meters": 1.21,
+      "arm_length_top_view_inches": 66.9,
+      "arm_length_top_view_meters": 1.70,
+      "arm_sweep_inches": 157.5,
+      "arm_sweep_meters": 4.00,
+      "pad_height_inches": 7,
+      "pad_height_meters": 0.18,
+      "drive_through_clearance_inches": 98.5,
+      "drive_through_clearance_meters": 2.50
+    }
+  },
+  "weight": {
+    "tp_26_shipping": "8880 lbs (4027.90 Kg)",
+    "tp_30_shipping": "9300 lbs (4218.41 Kg)"
+  },
+  "installation_requirements": {
+    "concrete_floor_wide_base": "8\" of 4,000 psi concrete (TP-26/30 WB)",
+    "concrete_floor_standard": "12\" of 4,000 psi concrete (TP-26/30)",
+    "anchoring_system_12_inch_floor": "(18) 1\" x 10\" Wej-it bolts",
+    "anchoring_system_8_inch_floor": "(28) 1\" x 8\" Wej-it bolts",
+    "motor_rating": "5 HP 208-230v or 440-480v 3 Phase"
+  },
+  "specifications": {
+    "lifting_speed": "135 seconds",
+    "motor_rating": "5 HP 208-230v or 440-480v 3 Phase",
+    "synchronization": "Hydraulic Fluid Displacement using no chains, cables nor overhead obstructions",
+    "cylinders": "2 (1 per column)",
+    "carriage_bearings": "(16) 5\" (12.7 cm) diameter, (8 per carriage) double sealed self lubricating",
+    "thrust_bearings": "(8) 5\" (12.7 cm) diameter, (4 per carriage) double sealed self lubricating",
+    "floor_access_between_posts": "Clear and unobstructed",
+    "revision": "10/21",
+    "units": "Inches [Meters], Standard Unit Shown"
+  },
+  "features": [
+    "Hydraulic Fluid Displacement synchronization - no chains, cables, or overhead obstructions",
+    "Clear and unobstructed floor access between posts",
+    "Adjustable overhead hydraulic lines to any height or routed in floor",
+    "Wide base model option (17' overall width vs 15' standard)",
+    "Double sealed self-lubricating carriage and thrust bearings",
+    "Single point air lock release"
+  ],
+  "optional_equipment": [
+    "5\" Frame Adaptors (stackable) - 4 included as standard",
+    "7.5\" Frame Adaptors (stackable) - 4 included as standard",
+    "10\" Frame Adaptors (stackable) - 4 included as standard",
+    "Wide base (WB) model"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "ANSI",
+    "ASME",
+    "AISI",
+    "ASTM",
+    "ASA",
+    "NEC",
+    "AWG",
+    "NEMA",
+    "Meets current national ANSI (ANSI/ALI ALCTV) code for lifts"
+  ],
+  "safety_features": [
+    "Mechanical Safety Locks: Multi-position, interlocked redundant safety systems (single point air lock release)",
+    "Hydraulic Safety System: Automatic, all position",
+    "Swing Arm Restraints: Automatic engaging upon ascent"
+  ],
+  "warranty": {
+    "structural": "25 years",
+    "mechanical": "10 years",
+    "cylinder_seal": "Limited lifetime"
+  },
+  "government_contracts": [
+    "GSA Contract # GS-07F-207AA",
+    "Sourcewell Contract # 013020-MRL",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy",
+    "Equalis Group",
+    "Available under discounted government contract in all 50 states"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Units = Inches [Meters], Standard Unit Shown"
+  ]
+}

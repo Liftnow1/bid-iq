@@ -1,0 +1,72 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/mobile-column-lifts/MP-18-DC-Touchscreen.pdf",
+  "category": "mobile-column-lift",
+  "document_type": "data_sheet_order_form",
+  "model": "MP-18",
+  "variant": "DC Touchscreen & Full Diagnostic Display - 24 Volt Battery Operated",
+  "product_type": "Mobile Column Lift - DC Battery Operated with Touchscreen",
+  "capacity": "18,000 lbs per column (15\" forks) / 16,000 lbs per column (22\" forks)",
+  "dimensions": {
+    "tire_dimensions_15_inch_forks": {
+      "dim_a_tire_od_max_incl_crown": "48\" max / 20\" min (borderline limits)",
+      "dim_b_rim": "14\" min",
+      "dim_c_contact_width": "15\"",
+      "dim_w_fork_width": "15\""
+    },
+    "tire_dimensions_22_inch_forks": {
+      "dim_a_tire_od_max_incl_crown": "53\" max / 20\" min (borderline limits)",
+      "dim_b_rim": "13\" min",
+      "dim_c_contact_width": "15\"",
+      "dim_w_fork_width": "22\""
+    }
+  },
+  "weight": null,
+  "installation_requirements": {
+    "power_type": "24 Volt DC Battery Operated",
+    "charging_requirement": "110 volt outlet required for charging batteries",
+    "final_electrical_connection": "Responsibility of customer"
+  },
+  "specifications": {
+    "max_axle_weight_15_inch_forks": "36,000 lbs (per pair)",
+    "max_axle_weight_22_inch_forks": "32,000 lbs (per pair)",
+    "power_type": "DC - 24 Volt Battery Operated",
+    "display": "Touchscreen with Full Diagnostic Display"
+  },
+  "features": [
+    "DC battery operated (24 volt) mobile column lift - cordless operation",
+    "Full diagnostic touchscreen display",
+    "Available in 2, 4, 6, or 8 column configurations",
+    "15\" and 22\" fork options with mixed configurations available",
+    "Can be added to existing sets of mobile columns",
+    "No hardwired power supply needed - only 110V outlet for charging"
+  ],
+  "optional_equipment": [
+    "22\" forks (vs standard 15\" forks)",
+    "Mixed fork length configurations"
+  ],
+  "parts_list": [
+    {"model": "MP-18-605", "columns": 2, "lift_cap_lbs": 36000, "fork_config": "15\"/15\""},
+    {"model": "MP-18-613", "columns": 2, "lift_cap_lbs": 32000, "fork_config": "22\"/22\""},
+    {"model": "MP-18-606", "columns": 4, "lift_cap_lbs": 72000, "fork_config": "15\"/15\"/15\"/15\""},
+    {"model": "MP-18-630", "columns": 4, "lift_cap_lbs": 68000, "fork_config": "15\"/15\"/22\"/22\""},
+    {"model": "MP-18-614", "columns": 4, "lift_cap_lbs": 64000, "fork_config": "22\"/22\"/22\"/22\""},
+    {"model": "MP-18-607", "columns": 6, "lift_cap_lbs": 108000, "fork_config": "15\"/15\"/15\"/15\"/15\"/15\""},
+    {"model": "MP-18-658", "columns": 6, "lift_cap_lbs": 104000, "fork_config": "15\"/15\"/15\"/15\"/22\"/22\""},
+    {"model": "MP-18-659", "columns": 6, "lift_cap_lbs": 100000, "fork_config": "15\"/15\"/22\"/22\"/22\"/22\""},
+    {"model": "MP-18-615", "columns": 6, "lift_cap_lbs": 96000, "fork_config": "22\"/22\"/22\"/22\"/22\"/22\""},
+    {"model": "MP-18-608", "columns": 8, "lift_cap_lbs": 144000, "fork_config": "15\"x8"},
+    {"model": "MP-18-660", "columns": 8, "lift_cap_lbs": 140000, "fork_config": "15\"x6/22\"x2"},
+    {"model": "MP-18-661", "columns": 8, "lift_cap_lbs": 136000, "fork_config": "15\"x4/22\"x4"},
+    {"model": "MP-18-662", "columns": 8, "lift_cap_lbs": 132000, "fork_config": "15\"x2/22\"x6"},
+    {"model": "MP-18-616", "columns": 8, "lift_cap_lbs": 128000, "fork_config": "22\"x8"}
+  ],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Borderline tire dimension limits: state of tire inflation can impact clearance",
+    "Axle weight cannot exceed the capacity of the pair of MP columns selected/specified",
+    "Heaviest vehicle cannot exceed the listed lift capacity weight",
+    "Final electrical connection (110 volt outlet required for charging batteries) responsibility of customer",
+    "DC model numbers use 6xx series (vs AC model 7xx series)"
+  ]
+}

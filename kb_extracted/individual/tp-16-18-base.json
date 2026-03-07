@@ -1,0 +1,91 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/tp-16-18-base.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TP-16 / TP-18",
+  "variant": "Base Plate (Cast)",
+  "product_type": "Two Post Inground Lift - Base Plate Drawing",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": null,
+  "dimensions": {
+    "base_plate_overall_width_inches": 23.75,
+    "base_plate_overall_length_inches": 26.50,
+    "base_plate_thickness_inches": "0.75 REF",
+    "inner_width_1_inches": 20.87,
+    "inner_width_2_inches": 15.18,
+    "inner_width_3_inches": 13.75,
+    "inner_width_4_inches": 12.25,
+    "vertical_dimension_1_inches": 21.13,
+    "vertical_dimension_2_inches": 15.79,
+    "vertical_dimension_3_inches": 7.88,
+    "vertical_dimension_4_inches": 27.00,
+    "vertical_dimension_5_inches": 13.75,
+    "side_offset_1_inches": 8.50,
+    "side_offset_2_inches": 4.00,
+    "side_offset_3_inches": 8.38,
+    "corner_angle_degrees": 45,
+    "anchor_bolt_holes_diameter_inches": "0.88 dia burn thru (typ 8 places)",
+    "anchor_hole_radius_inches": "1.00 rad (typ 8 places)",
+    "small_hole_diameter_inches": "0.18 (typ 8 places)",
+    "center_slot_radius_inches": "0.563 rad (2 places)",
+    "center_mark_ref_inches": "1.00 REF (2 locations)",
+    "inner_spacing_1_inches": 4.50,
+    "inner_spacing_2_inches": 8.00,
+    "plate_height_inches": 26.50,
+    "angled_cut_dimension_inches": 15,
+    "material_plate_size": "23.75 x 26.50 x 0.75 THK"
+  },
+  "weight": "110.5 lbs",
+  "installation_requirements": {
+    "applicable_models": ["TP-16", "TP-18"],
+    "material": "A-36 plate, 0.75 THK",
+    "plate_dimensions": "23.75 x 26.50 x 0.75 THK",
+    "anchor_bolt_holes": "8 places, 0.88\" diameter burn through",
+    "welding_specs": "AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "specifications": {
+    "drawing_number": "012-012-114",
+    "file_name": "D13114",
+    "part_numbers": ["013-000-003", "016-000-004"],
+    "next_assembly_numbers": ["012-012-007", "012-012-006"],
+    "title": "Plate (Cast) - TP-16 & TP-18",
+    "date": "3/92",
+    "drawn_by": "R.V.",
+    "scale": "3/16",
+    "sheet_size": "D-SIZE",
+    "revision": "A - Drawing redrawn & replaced (3/98 by B.V.)",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_0XX": "+/- 0.030",
+      "decimal_0XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "Cast base plate for TP-16 and TP-18 models",
+    "A-36 steel plate construction",
+    "8-point anchor bolt pattern",
+    "45 degree angled corner cuts"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "600-000-041",
+      "description": "Base Plate (Cast) for TP-16 & TP-18",
+      "material": "A-36 plate",
+      "thickness": "0.75\"",
+      "size": "23.75 x 26.50",
+      "weight": "110.5 lbs"
+    }
+  ],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Used on Mohawk Model TP-16 & TP-18",
+    "Notice of confidential information",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only"
+  ]
+}

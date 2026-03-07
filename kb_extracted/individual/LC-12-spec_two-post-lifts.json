@@ -1,0 +1,112 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/LC-12-spec.pdf",
+  "category": "two-post-lift",
+  "document_type": "product_specification_sheet",
+  "model": "LC-12 / LC-12-3SA",
+  "variant": "Standard 2-Stage Arms / 3-Stage Arms",
+  "product_type": "Symmetrical 2-Post Lift",
+  "capacity": "12,000 lbs (5443 kg)",
+  "dimensions": {
+    "LC-12_standard": {
+      "between_posts": "120 inches (3.05 m)",
+      "overall_width": "151.5 inches (3.85 m)",
+      "between_carriages": "105.8 inches (2.69 m)",
+      "column_height_std": "144 inches (3.65 m) STD",
+      "arm_reach_min": "36.1 inches MIN (0.92 m)",
+      "arm_reach_max": "54 inches MAX (1.37 m)",
+      "arm_inner": "73 inches (1.85 m)",
+      "arm_mid": "77 inches (1.96 m)",
+      "arm_outer": "87 inches (2.21 m)",
+      "carriage_height": "103 inches (2.62 m)",
+      "pad_height": "5 inches (0.13 m)",
+      "arm_base_width": "60.2 inches (1.53 m)",
+      "arm_span": "120.3 inches (3.05 m)"
+    },
+    "LC-12-3SA": {
+      "between_posts": "120 inches (3.05 m)",
+      "overall_width": "151.5 inches (3.85 m)",
+      "between_carriages": "105.8 inches (2.69 m)",
+      "column_height_std": "144 inches (3.65 m) STD",
+      "arm_reach_min": "36.3 inches MIN (0.92 m)",
+      "arm_reach_max": "59 inches MAX (1.50 m)",
+      "arm_inner": "72.5 inches (1.84 m)",
+      "arm_mid": "76.5 inches (1.94 m)",
+      "arm_outer": "86.5 inches (2.20 m)",
+      "carriage_height": "103 inches (2.62 m)",
+      "pad_height": "4.5 inches (0.11 m)",
+      "arm_base_width": "65.2 inches (1.66 m)",
+      "arm_span": "130.3 inches (3.31 m)"
+    }
+  },
+  "weight": "3,100 lbs (1406 kg)",
+  "installation_requirements": {
+    "concrete_floor": "4000 PSI (27579.2 kPa) mix, 6-1/2 inch (16.5 cm) depth",
+    "anchoring_system": "14 Wej-it bolts, 3/4 inch x 6 inch (1.90 x 15.2 cm)",
+    "power": "2.5 HP/208-230 VAC, single-phase, 60 cycle (3-phase optional)",
+    "hydraulic_line_height": "12 ft (3.65 m) standard, adjustable or routed in-floor"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "address": "P.O. Box 110, 65 Vrooman Avenue, Amsterdam, NY 12010",
+    "phone_toll_free": "(800) 833-2006",
+    "phone_local": "(518) 842-1431",
+    "fax": "(518) 842-1289",
+    "drawing_number": "LC-12",
+    "file_name": "LC-12",
+    "drawn_by": "rwv7089",
+    "date": "4/2011",
+    "revision_A": "WAS ALCTV-2006, 3/27/2014",
+    "revision_B": "ALI Verification Logo Change, Add Specs of Both Lifts, 12/1/2015",
+    "lifting_speed": "85 seconds",
+    "synchronization": "Hydraulic fluid displacement using no chains, cables, or overhead obstructions",
+    "arm_pad_height_standard": "5 inches (12.7 cm) minimum",
+    "arm_pad_height_3SA": "4-1/2 inches (11.4 cm) minimum",
+    "lifting_height_stroke": "6 ft (1.83 m)",
+    "arm_height_full_rise_standard": "6 ft 5 inches (1.96 m)",
+    "arm_height_full_rise_3SA": "6 ft 4-1/2 inches (1.94 m)",
+    "max_pad_height_adaptors_standard": "7 ft 2 inches (2.18 m)",
+    "max_pad_height_adaptors_3SA": "7 ft 1-1/2 inches (2.17 m)",
+    "overall_width": "12 ft 7-1/2 inches (3.85 m)",
+    "width_between_posts": "10 ft (3.05 m)",
+    "width_between_carriages": "8 ft 9-3/4 inches (2.69 m)",
+    "column_height": "8 ft 7 inches (2.62 m)",
+    "cylinders": "2 (1 per column)",
+    "drive_system": "#646 leaf chain routed over cylinder",
+    "steel_carriage_bearings": "8 per carriage, double-sealed, self-lubricating",
+    "warranty": "5 years, Lifetime on cylinders"
+  },
+  "features": [
+    "Symmetrical 2-post lift design",
+    "Hydraulic fluid displacement synchronization",
+    "Automatic all-position mechanical safety locks starting at 3 inches off floor",
+    "Automatic all-position hydraulic safety systems",
+    "Automatic swing arm restraints upon ascent",
+    "Manual mechanical safety release at both columns",
+    "Clear and unobstructed floor access between posts",
+    "Shown with adjustable height over-head steel hydraulic lines"
+  ],
+  "optional_equipment": [
+    "3-phase motor",
+    "5 inch Frame Adaptors (stackable) - 4 included standard",
+    "7-1/2 inch Frame Adaptors (stackable) - 4 included standard",
+    "10 inch Frame Adaptors (stackable) - 4 included standard"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI Member",
+    "ALI/ETL Certified, Independently Tested and Validated",
+    "Tested by NRTL to UL Standard 201 for Garage Equipment",
+    "ANSI/ALI ALCTV-2011 for Automotive Lift Construction"
+  ],
+  "safety_features": [
+    "Automatic all-position mechanical safety locks starting at 3 inches off the floor",
+    "Automatic all-position hydraulic safety systems",
+    "Automatic swing arm restraints upon ascent",
+    "Manual mechanical safety release at both columns"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Mohawk Resources Ltd. reserves the right to make changes without notice",
+    "Units: inches [meters], pounds [kg]"
+  ]
+}

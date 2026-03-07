@@ -1,0 +1,93 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/TR-30 12-18-2013.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "TR-30",
+  "variant": "30,000 lb capacity four-post runway lift",
+  "product_type": "four_post_lift",
+  "capacity": "30,000 lbs",
+  "dimensions": {
+    "lifting_height_ft_in": "6 ft 11 in",
+    "runway_width_options_inches": [24, 32],
+    "clearance_between_runways_ft": 4,
+    "working_height_ft_in": "6 ft 2-1/2 in",
+    "approach_ramp_width_inches": 24,
+    "runway_length_options_ft": [20, 25, 30, 35]
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting": "Surface-mounted (flush-mount option available)",
+    "concrete_psi": 4000,
+    "concrete_thickness_inches": 5,
+    "alternative_footings": "Four footings 6 ft x 6 ft x 12 in deep"
+  },
+  "specifications": {
+    "capacity_lbs": 30000,
+    "lifting_height_ft_in": "6 ft 11 in",
+    "motor_hp": 10,
+    "runway_construction": "Three parallel 12-inch wide-flange I-beams",
+    "lifting_mechanism": "Direct drive cylinders at each post",
+    "drive_system": "No cables, no top rail obstruction",
+    "lock_spacing_inches": 6,
+    "lock_type": "All-position safety locks to full lifting height",
+    "synchronization": "Mechanical side-to-side chain synchronization",
+    "leveling": "Automatic track leveler",
+    "manual_revision_date": "12/18/2013"
+  },
+  "features": [
+    "30,000 lb capacity four-post lift",
+    "6 ft 11 in lifting height",
+    "All-position safety locks with pivoting approach ramps",
+    "Three parallel 12-inch wide-flange I-beam runway construction",
+    "Direct drive cylinders at each post - no cables",
+    "No top rail obstruction",
+    "24 or 32-inch runway widths",
+    "4 feet clear span between runways",
+    "6 ft 2-1/2 in working height",
+    "10 HP power unit",
+    "Safety locks engage every 6 inches to full height",
+    "Mechanical chain synchronization",
+    "Automatic track leveler",
+    "Runway lengths: 20, 25, 30, or 35 feet",
+    "24-inch wide shallow angle approach ramps",
+    "Surface or flush-mount installation"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Rolling Jacks",
+      "description": "Wheels-free service for brakes, tires, axles"
+    },
+    {
+      "item": "Flush Mount Installation",
+      "description": "Runways level with shop floor"
+    },
+    {
+      "item": "Custom Runway Lengths",
+      "description": "Available upon request"
+    },
+    {
+      "item": "Moveable Ramps",
+      "description": "Shorter/longer or moveable approach ramps"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Multi-position mechanical locks in all four posts",
+    "Redundant hydraulic safeties",
+    "Pressure-compensated flow control valves",
+    "Tamper-proof velocity fuses",
+    "Single-point lock release",
+    "Mechanical chain synchronization",
+    "Automatic track leveler"
+  ],
+  "notes": [
+    "Manual revision date: 12/18/2013",
+    "Older manual version predating the 12/1/2015 standard revision",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

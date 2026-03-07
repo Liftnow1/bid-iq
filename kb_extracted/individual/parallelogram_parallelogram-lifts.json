@@ -1,0 +1,102 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/parallelogram-lifts/parallelogram.pdf",
+  "category": "parallelogram-lift",
+  "document_type": "product_specification_sheet",
+  "model": "Parallelogram Lift",
+  "variant": "SM (Surface Mount) / FM (Flush Mount)",
+  "product_type": "Parallelogram Lift",
+  "capacity": "50,000 / 75,000 / 100,000 lbs",
+  "dimensions": {
+    "track_lengths": "32 ft, 35 ft, 42 ft, or 48 ft (lengths available dependent on capacity)",
+    "approach_ramp_length": "100 inches (2.54 m) standard (shorter, longer, or portable available)",
+    "overall_length_SM": "34 ft 6 in to 56 ft 4 in (10.52 to 17.17 meters)",
+    "lifting_height_stroke_SM": "63 inches (1.60 m)",
+    "lifting_height_stroke_FM": "79 inches (2.00 m)",
+    "lowered_height_SM": "13 inches (0.33 m)",
+    "lowered_height_FM": "16 inches (0.41 m)",
+    "track_width": "32 inches (0.81 m)",
+    "overall_width": "109.5 inches (2.78 m)",
+    "width_between_platforms": "44 inches (1.12 m)",
+    "horizontal_movement_at_full_stroke": "36.125 inches (0.92 m)",
+    "ramp_width_from_drawing": "32.25 inches each side",
+    "entrance_width_from_drawing": "48 inches",
+    "flush_mount_height_from_drawing": "63 inches",
+    "flush_mount_overall_width_from_drawing": "109.50 inches",
+    "flush_mount_platform_width_from_drawing": "49.50 inches",
+    "overall_platform_length_from_drawing": "384.00 inches",
+    "service_leg_shown_at_rear": true
+  },
+  "weight": null,
+  "installation_requirements": {
+    "power_requirements": "20 HP, 220/440/575 volt, 3 Phase motor",
+    "mounting_types": ["Surface Mount (SM)", "Flush Mount (FM)"],
+    "control_console_location": "Standard location shown, optional locations at customer request (additional charges will or may apply)"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Lifts, LLC.",
+    "address": "P.O. Box 110, 65 Vrooman Ave, Amsterdam, NY 12010",
+    "phone_toll_free": "(800) 833-2006",
+    "phone_local": "(518) 842-1431",
+    "fax": "(518) 842-1289",
+    "website": "www.mohawklifts.com",
+    "capacities_lbs": [50000, 75000, 100000],
+    "lifting_speed": "60 seconds",
+    "motor_hp": 20,
+    "voltage_options": "220/440/575 volt",
+    "phase": "3 Phase",
+    "government_contracts": {
+      "sourcewell_contract": "#013020-MRL",
+      "gsa_contract": "GS-07F-207AA"
+    },
+    "revision": "REV 10/21"
+  },
+  "features": [
+    "Surface Mount and Flush Mount configurations available",
+    "Multiple capacity options: 50,000 / 75,000 / 100,000 lbs",
+    "Multiple track lengths: 32, 35, 42, or 48 feet",
+    "60 second lifting speed",
+    "Standard approach ramp length 100 inches with custom options",
+    "Control console with optional placement locations",
+    "Available under discounted government contract in all 50 states",
+    "Fleet evaluation and design assistance available from staff"
+  ],
+  "optional_equipment": [
+    "Rolling Jack/Jacking Platforms",
+    "Track Lighting",
+    "Air/Hydraulic Tire Dolly",
+    "Keyed Control Lock-Out",
+    "Stainless Steel Bases",
+    "Marine Paint (Rustoleum standard)",
+    "Drive Thru Ramps",
+    "Track Tape Switch-Shut Off",
+    "Air Inflatable Movable Approach Ramps"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ANSI/ALI Standards",
+    "ALI (Automotive Lift Institute) Member",
+    "ANSI",
+    "ASME",
+    "AISI",
+    "ASTM",
+    "ASA",
+    "NEC",
+    "AWG",
+    "NEMA",
+    "Meets Current National ANSI Code for Lifts",
+    "ALI/ETL Certified and Validated",
+    "GSA Contract Holder (GS-07F-207AA)",
+    "Sourcewell Awarded Contract (#013020-MRL)",
+    "Equalis Group",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy"
+  ],
+  "safety_features": [],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Above example shown with 32 ft long runways",
+    "Track lengths available dependent on capacity",
+    "SM = Surface Mount Model, FM = Flush Mount Model",
+    "See installation instructions for additional specs on control console placement"
+  ]
+}

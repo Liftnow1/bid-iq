@@ -1,0 +1,87 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/ML-220-base.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "ML-220",
+  "variant": "Base Plate (ML-220)",
+  "product_type": "Base Plate for ML-220 2-Post Lift",
+  "capacity": null,
+  "dimensions": {
+    "overall_width": "26.50 inches",
+    "overall_depth": "25.50 inches",
+    "plate_thickness": "0.75 inches",
+    "material_size": "29.5 x 23.75 x 0.75 inches thick",
+    "top_width": "23.75 inches",
+    "upper_section_width": "21.13 inches",
+    "notch_width": "9.50 inches",
+    "mid_section_widths": ["15.75 inches", "7.88 inches"],
+    "offset_from_edge": "4.00 inches",
+    "angle_cut_1": "15 degrees",
+    "angle_cut_2": "45 degrees",
+    "lower_section_measurements": {
+      "height_1": "23.75 inches",
+      "height_2": "20.87 inches",
+      "height_3": "15.75 inches",
+      "height_4": "13.75 inches",
+      "height_5": "12.25 inches"
+    },
+    "anchor_hole_diameter": "0.88 inches (burn thru, typical 8 places)",
+    "anchor_hole_slot_width": "0.16 inches (typical 8 places)",
+    "anchor_hole_spacing_width": "9.00 inches",
+    "anchor_hole_spacing_half": "4.50 inches",
+    "anchor_hole_spacing_outer": "13.75 inches",
+    "anchor_hole_spacing_full": "27.00 inches",
+    "corner_radius_large": "1.00 inch RAD (typical 8 places)",
+    "corner_radius_small": "0.563 inch RAD (2 places)",
+    "edge_ref_bottom": "1.00 inch REF",
+    "edge_ref_side": "1.00 inch REF",
+    "top_edge_ref": "0.75 inch REF",
+    "notch_dimension": "8.38 inches",
+    "section_width": "6.38 inches"
+  },
+  "weight": "110.5 lbs",
+  "installation_requirements": {
+    "compatible_models": ["ML-220"],
+    "anchor_holes": "8 holes, 0.88 inch diameter burn thru",
+    "material": "ASTM A-36, 0.75 inch thick plate, 29.5 x 23.75 x 0.75 inches"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "title": "Plate ML-220",
+    "drawing_number": "012-012-114",
+    "file_name": "D12114",
+    "next_assembly_numbers": ["015-000-003", "015-000-004", "012-012-007", "012-012-008"],
+    "from": "600-000-041",
+    "scale": "0.5:1",
+    "drawn_by": "R.V.",
+    "date": "3/92",
+    "revision": "Drawing redrawn and replaced",
+    "sheet_size": "D-Size",
+    "material": "ASTM A-36, 0.75 inch thick plate",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.060",
+      "decimal_XX": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "ASTM A-36 steel plate construction",
+    "0.75 inch thick base plate",
+    "8 anchor bolt holes with 0.88 inch diameter",
+    "Used on Mohawk ML-220 2-post lift model",
+    "45 degree angle cut on one corner",
+    "Same base plate design shared with LC-12/LMF-12/TP-15/TP-16/TP-18 series"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Used on Mohawk model ML-220",
+    "Material: ASTM A-36, 0.75 inch thick plate, 29.5 x 23.75 x 0.75 inches",
+    "Drawing redrawn and replaced 3/92",
+    "Remove all sharp corners & edges",
+    "Welding medium shall conform to AWS specifications"
+  ]
+}

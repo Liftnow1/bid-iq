@@ -1,0 +1,65 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-16-2SA.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TP-16",
+  "variant": "2 Stage Arms",
+  "product_type": "2-Post Lift with 2-Stage Arms",
+  "capacity": null,
+  "dimensions": {
+    "overall_width": "151.5 inches (3.85 m)",
+    "between_posts": "Adjustable from 114-120 inches",
+    "column_height_std": "180 inches (4.57 m) STD",
+    "carriage_height": "103 inches (2.62 m)",
+    "pad_height": "5 inches (0.13 m)",
+    "arm_width_inner": "73 inches (1.85 m)",
+    "arm_width_mid": "77 inches (1.96 m)",
+    "arm_width_outer": "87 inches (2.21 m)",
+    "arm_reach_min": "36.1 inches MIN (0.92 m)",
+    "arm_reach_max": "56 inches MAX (1.55 m)",
+    "arm_base_width": "60.2 inches (1.53 m)",
+    "overall_arm_span": "120.3 inches (3.05 m)"
+  },
+  "weight": "N/A",
+  "installation_requirements": {
+    "post_spacing": "Adjustable from 114-120 inches between posts",
+    "overhead_lines": "Shown with adjustable height over-head steel hydraulic lines"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "title": "TP-16: 2 Stage Arms",
+    "drawing_number": "ZZ1336",
+    "file_name": "ZZ1336",
+    "drawn_by": "G. Gore",
+    "date": "08/11",
+    "sheet_size": "B-Size",
+    "units": "Inches [Meters]",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_XX": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "2-stage swing arm configuration",
+    "Adjustable post spacing from 114-120 inches",
+    "Adjustable height over-head steel hydraulic lines",
+    "Symmetrical 2-post lift design",
+    "Same arm dimensions as LMF-12 2-stage arm variant"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications",
+    "Units: inches [meters]",
+    "Drawing shares same file name (ZZ1336) and dimensions as LMF-12 2SA drawing - same physical arm/column dimensions, different model designation"
+  ]
+}

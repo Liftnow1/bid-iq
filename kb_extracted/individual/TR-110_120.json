@@ -1,0 +1,142 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/TR-110_120.pdf",
+  "category": "four-post-lift",
+  "document_type": "lift_data_form_and_order_configuration",
+  "model": "TR-110/TR-120",
+  "variant": "TR-110 (110,000 lb) and TR-120 (120,000 lb)",
+  "product_type": "four_post_track_lift",
+  "capacity": "TR-110: 110,000 lbs / TR-120: 120,000 lbs",
+  "dimensions": {
+    "overall_length_inches": 585.5,
+    "overall_length_feet": "48 ft 9.5 in",
+    "track_section_length_inches": 413,
+    "track_section_length_feet": "34 ft 5 in",
+    "offside_post_spacing_inches": 377,
+    "offside_post_spacing_feet": "31 ft 5 in",
+    "approach_ramp_length_inches": 172.5,
+    "approach_ramp_length_feet": "14 ft 4.5 in",
+    "rear_overhang_inches": 189,
+    "rear_overhang_feet": "15 ft 9 in",
+    "track_width_inches": 36,
+    "track_width_typ_inches": 36,
+    "inside_track_spread_inches": 42,
+    "column_width_inches": 132,
+    "column_width_feet": "11 ft 0 in",
+    "rear_column_to_end_inches": 114,
+    "rear_column_to_end_feet": "9 ft 8 in",
+    "max_width_inches": 178,
+    "max_width_feet": "14 ft 10 in",
+    "min_width_at_ramp_inches": 123,
+    "min_width_at_ramp_feet": "10 ft 3 in",
+    "cylinder_stroke_fore_inches": 64.75,
+    "cylinder_stroke_fore_feet": "5 ft 4.75 in",
+    "cylinder_stroke_fore_at_5ft": "5 ft stroke",
+    "cylinder_stroke_aft_inches": 78.875,
+    "cylinder_stroke_aft_feet": "6 ft 6.875 in",
+    "cylinder_stroke_aft_at_5ft": "5 ft stroke",
+    "post_1_to_power_unit_inches": 18.875,
+    "post_base_width_inches": 4.75,
+    "hydraulic_hose_length_feet": 20
+  },
+  "weight": null,
+  "installation_requirements": {
+    "power_supply_options": [
+      "208-220 VAC, 3 Phase, 60 Hz (Standard)",
+      "230-240 VAC",
+      "440-480 VAC",
+      "Special (custom voltage)"
+    ],
+    "standard_power": "208-220 VAC, 3 Phase, 60 Hz",
+    "separate_120vac_required": "Yes, to Post #1 for track lights and track outlets",
+    "electric_and_pneumatic_power": "Must be brought into back of lift control console",
+    "pneumatic_power": "Responsibility of mechanical contractor to final designated point at vehicle lift",
+    "electrical_connection": "Final connection to local/national code is responsibility of electrical contractor",
+    "electrical_note": "More than one point of connection may be required. Disconnect switches, main fuses, and main power leads are NOT provided by Mohawk",
+    "console_type_options": ["Stationary", "Portable"],
+    "console_lift_orientations": ["A", "B", "C", "D"],
+    "track_length_standard_feet": 30,
+    "track_length_note": "Other lengths available; above is not tip-to-tip length",
+    "approach_ramp_length_standard_feet": 14,
+    "approach_ramp_options": ["Fixed", "Pivoting"],
+    "floor_requirements": "Examine floor for flatness; determine shimming needed",
+    "shimming_note": "If shimming exceeds 1/2 inch, base plates recommended at $115.00 each (1/2 inch thick); requires longer anchor bolts",
+    "concrete_floor_info_required": "Thickness (inches) and PSI strength"
+  },
+  "specifications": {
+    "capacity_tr110_lbs": 110000,
+    "capacity_tr120_lbs": 120000,
+    "track_configuration": "3 ft wide x 30 ft long tracks (standard)",
+    "tracks_inside_spread_inches": 42,
+    "other_track_lengths_available": true,
+    "other_track_widths_available": true,
+    "drawing_number": "ZZ866",
+    "drawing_date": "2/04",
+    "revision": "C (09/16)",
+    "truck_data_form_drawing": "ZZ06 (dated 1/95)"
+  },
+  "features": [
+    "4-post track lift for heavy-duty vehicles",
+    "110,000 or 120,000 lb capacity options",
+    "3-foot wide by 30-foot long tracks (standard configuration)",
+    "Tracks set at 42 inches inside spread (shown)",
+    "Other track lengths and widths available",
+    "4 console-lift orientation options (A, B, C, D)",
+    "Stationary or portable console options",
+    "Fixed or pivoting approach ramps",
+    "14 ft standard approach ramp length",
+    "Multiple power supply voltage options"
+  ],
+  "optional_equipment": [
+    {
+      "item": "RJ-50 Electric/Hydraulic Jacking Beam",
+      "note": "Additional cost"
+    },
+    {
+      "item": "JP-50 Rolling Jack Platform",
+      "note": "Additional cost"
+    },
+    {
+      "item": "RJ-75 Electric/Hydraulic Jacking Beam",
+      "note": "Additional cost"
+    },
+    {
+      "item": "Lights & 110 VAC Outlets in Tracks",
+      "note": "Additional cost"
+    },
+    {
+      "item": "Drive Thru Ramps",
+      "note": "Additional cost"
+    },
+    {
+      "item": "TD-1000 Tire Dolly",
+      "note": "Additional cost"
+    },
+    {
+      "item": "TD-2000 Tire Dolly",
+      "note": "Additional cost"
+    },
+    {
+      "item": "Oil Drain Pan",
+      "note": "Additional cost"
+    },
+    {
+      "item": "Extra Base Plates for Shimming (1/2 inch thick)",
+      "price_each": 115.00,
+      "note": "Requires longer anchor bolts to meet embedment depth and specifications"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Some option combinations are not available",
+    "All lift options checked for purchase must be listed on purchase order as separate line items",
+    "Vehicle data forms must be attached for any vehicles to be lifted - fill out for largest, smallest, and lowest underclearance vehicles",
+    "Mohawk recommendations are only as good as the data received",
+    "Construction project delivery requires advance coordination with Mohawk for production time verification",
+    "Truck Data Form (Dual Axle Rear) included - drawing ZZ06 dated 1/95",
+    "Truck data form captures: vehicle weight (not GVW), tire diameters, minimum ground clearances, front/side/rear views",
+    "Manufacturer: Mohawk Resources Ltd., PO Box 110, Amsterdam, NY 12010",
+    "Phone: 1-800-833-2006 or 518-842-1431, Fax: 518-842-1289"
+  ]
+}

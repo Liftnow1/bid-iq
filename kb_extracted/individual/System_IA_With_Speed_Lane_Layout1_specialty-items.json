@@ -1,0 +1,71 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/System IA  With Speed Lane Layout1.pdf",
+  "category": "specialty-item",
+  "document_type": "engineering_drawing",
+  "model": "System IA-10",
+  "variant": "Speedlane Option",
+  "product_type": "Speedlane Option for System IA-10 Two-Post Lift",
+  "capacity": "5,000 lbs per pad (except at corners as indicated); 1,500 max capacity zones at corners",
+  "dimensions": {
+    "overall_width": "77.875 inches (77 7/8)",
+    "overall_length_from_post": "48.5 inches",
+    "width_at_base": "75.875 inches (75 7/8)",
+    "depth_measurement_1": "31.5 inches",
+    "depth_measurement_2": "13.5 inches",
+    "height_measurement": "22 inches",
+    "side_panel_width": "15 inches",
+    "side_panel_height": "5.5625 inches (5 9/16)",
+    "rubber_lifting_pads_thickness": "0.5 inches",
+    "rubber_lifting_pads_size": "8 x 4-1/2 inches wide x 6 inches high",
+    "rubber_lifting_blocks": "1 inch high x 6 x 4 inches"
+  },
+  "weight": null,
+  "installation_requirements": {
+    "compatible_models": "System IA-10 (also compatible with System IA models, LC-12, TP-15, and TP-16 only)",
+    "compatible_lifts_note": "LMF-12, TP-15 & TP-16 Only"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "title": "Speedlane Option",
+    "drawing_number": "SPEEDLANE OPTION",
+    "file_name": "375 T W/SPEEDLANE",
+    "scale": "3/32",
+    "drawn_by": "G.Gore",
+    "date": "4/28/15",
+    "sheet_size": "D-Size",
+    "tolerances": {
+      "angular": "+/- 1.5 degrees",
+      "fractional": "+/- 0.030",
+      "decimal_XX": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "Speedlane option for rapid vehicle positioning on System IA-10 lift",
+    "5,000 lb capacity per pad",
+    "1,500 lb max capacity at corner zones",
+    "Rubber lifting pads 1/2 inch thick",
+    "Rubber lifting pads 8 x 4-1/2 inches wide x 6 inches high",
+    "Rubber lifting blocks 1 inch high x 6 x 4 inches"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {"item": "Rubber Pads", "description": "1/2 inch thick"},
+    {"item": "Rubber Lifting Pads", "description": "8 x 4-1/2 inches wide x 6 inches high"},
+    {"item": "Rubber Lifting Blocks", "description": "1 inch high x 6 x 4 inches"}
+  ],
+  "certifications": [],
+  "safety_features": [
+    "Reduced 1,500 lb max capacity zones at corners clearly indicated",
+    "5,000 lb per pad capacity rating"
+  ],
+  "notes": [
+    "Remove all sharp corners and edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications",
+    "Information contained herein is confidential and property of Mohawk Resources Ltd.",
+    "Compatible with System IA models, LMF-12, TP-15 & TP-16 only"
+  ]
+}

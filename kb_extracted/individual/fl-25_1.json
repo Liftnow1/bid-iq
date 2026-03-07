@@ -1,0 +1,116 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/fl-25 (1).pdf",
+  "category": "four-post-lift",
+  "document_type": "illustration_and_specifications",
+  "model": "FL-25",
+  "variant": "FL-25A (Fork Truck Lift with 13-foot tracks shown)",
+  "product_type": "four_post_track_fork_truck_lift",
+  "capacity": "25,000 lbs",
+  "dimensions": {
+    "overall_length_inches": 243.0625,
+    "overall_length_feet": "20 ft 3 1/16 in",
+    "overall_width_inches": 150.1875,
+    "overall_width_feet": "12 ft 6 3/16 in",
+    "track_width_inches": 24,
+    "track_width_note": "Standard",
+    "lifting_stroke_feet": 5,
+    "clearance_between_posts_inches": 132,
+    "clearance_between_posts_feet": "11 ft 0 in",
+    "track_length_shown_inches": 163,
+    "track_length_shown_feet": "13 ft 7 in",
+    "ramp_tip_to_end_inches": 234.5625,
+    "ramp_tip_to_end_feet": "19 ft 6 9/16 in",
+    "side_view_height_inches": 101.4375,
+    "side_view_height_feet": "8 ft 5 7/16 in",
+    "side_view_lowered_height_inches": 71.5625,
+    "side_view_lowered_height_feet": "5 ft 11 9/16 in",
+    "side_view_track_height_inches": 9.3125,
+    "ramp_height_inches": 8.5,
+    "ramp_approach_height_inches": 18,
+    "ramp_approach_height_feet": "1 ft 6 in",
+    "top_view_width_between_columns_inches": 132,
+    "top_view_between_tracks_inches": 48,
+    "top_view_between_tracks_note": "4 ft; set to customer vehicle fleet requirements",
+    "top_view_track_spread_96_inches": 96,
+    "top_view_track_spread_96_note": "8 ft; set to customer vehicle fleet requirements",
+    "top_view_track_ref_inches": 24,
+    "top_view_cross_member_ref_inches": 8,
+    "front_view_174_inches": 174.75,
+    "front_view_174_feet": "14 ft 6 3/4 in",
+    "lock_release_ref_inches": 11.75
+  },
+  "weight": {
+    "weight_lbs": 4200
+  },
+  "installation_requirements": {
+    "power_standard": "2 HP, 208-230 VAC Single Phase",
+    "power_optional": "3 Phase optional"
+  },
+  "specifications": {
+    "capacity_lbs": 25000,
+    "lifting_speed_seconds": 120,
+    "motor_rating": "2 HP, 208-230 VAC Single Phase (3 Phase optional)",
+    "lifting_mechanism": "5-inch hydraulic cylinder attached to (4) #646 leaf chains",
+    "track_width_inches": 24,
+    "clearance_between_posts_feet": "11 ft 0 in",
+    "mechanical_safety_release": "Single point",
+    "mechanical_safety_locks": "All position",
+    "backup_hydraulic_safety_systems": "P.C. flow controls and velocity fuses",
+    "drawing_number": "FL-25A",
+    "drawing_date": "8/98",
+    "revision": "C (3/00)",
+    "revision_history": [
+      "Rev A (8/97): Overall width was 11 ft 9 3/16 in; clearance between posts was 10 ft 3 in",
+      "Rev B (8/97): Ramp and ramp tip overall lengths revised per new design",
+      "Rev C (3/00): Dimensional adjustments made to lift"
+    ]
+  },
+  "features": [
+    "4-post track fork truck lift with 25,000 lb capacity",
+    "Designed specifically for servicing forklifts/fork trucks",
+    "5-inch hydraulic cylinder with (4) #646 leaf chains",
+    "2 HP / 208-230 VAC single-phase motor (3-phase optional)",
+    "5-foot lifting stroke",
+    "24-inch wide standard tracks",
+    "11-foot clearance between posts",
+    "All position mechanical safety locks",
+    "Single point lock release handle",
+    "P.C. flow controls and velocity fuses",
+    "Tracks set to customer vehicle fleet requirements",
+    "Shown with 13-foot tracks"
+  ],
+  "optional_equipment": [
+    { "item": "3-foot track extensions", "note": "Front, rear, or both" },
+    { "item": "3 Phase power", "options": ["208-230 VAC @ 60 Hz", "460 VAC @ 60 Hz", "575 VAC @ 60 Hz"] },
+    { "item": "Alignment package" },
+    { "item": "RJ-25 Rolling Electric/Hydraulic Jacking Beam" },
+    { "item": "115 VAC duplex outlet at power unit" },
+    { "item": "Electric solenoid down valve" },
+    { "item": "Runway lighting" },
+    { "item": "Third wheel option" },
+    { "item": "JP-25 Rolling Jacking Platform" },
+    { "item": "Oil drain pan" },
+    { "item": "Obstacle sensor package" },
+    { "item": "Lockable main switch" },
+    { "item": "Audible descent warning" },
+    { "item": "Drive through ramps" }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "Automotive Lift Institute (ALI) Member"
+  ],
+  "safety_features": [
+    "All position mechanical safety locks",
+    "Single point lock release handle",
+    "P.C. flow controls",
+    "Velocity fuses"
+  ],
+  "notes": [
+    "Shown with 13-foot tracks",
+    "Tracks set to customer's vehicle fleet requirements",
+    "Mohawk Resources Ltd. reserves the right to make changes without notice",
+    "Confidential document - property of Mohawk Resources Ltd.",
+    "Manufacturer: Mohawk Resources Ltd., P.O. Box 110, 65 Vrooman Avenue, Amsterdam, NY 12010",
+    "Phone: (800) 833-2006, In NY: (518) 842-1431, Fax: (518) 842-1289"
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/MOHAWK-VRL-35K-64K.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "VRL-35K / VRL-64K",
+  "variant": "35,000 and 64,000 lb capacity Vertical Rise Lifts",
+  "product_type": "vertical_rise_lift",
+  "capacity": "VRL-35K: 35,000 lbs; VRL-64K: 64,000 lbs",
+  "dimensions": {
+    "rise_height_inches_min": 79,
+    "rise_height_inches_max": 82,
+    "runway_length_options_ft": "23 to 48",
+    "note": "Up to 13 inches higher rise than competing models"
+  },
+  "weight": {
+    "note": "Up to 40% heavier than competitive models for longer service life"
+  },
+  "installation_requirements": {
+    "mounting_options": ["Surface-mounted", "Flush-mounted", "Recessed pit"],
+    "floor_design": "Sturdy base design spreads weight evenly - can be installed virtually anywhere",
+    "flush_mount": "Runways sit level with shop floor when fully lowered"
+  },
+  "specifications": {
+    "vrl_35k_capacity_lbs": 35000,
+    "vrl_64k_capacity_lbs": 64000,
+    "rise_height_inches_min": 79,
+    "rise_height_inches_max": 82,
+    "runway_construction": "Segmented box-girder construction similar to bridge spans",
+    "synchronization": "Closed-loop hydraulic/mechanical system - level within 1/8 inch",
+    "cylinder_diameter_inches": 7.75,
+    "bearing_type": "Self-lubricating composite bearings with chrome-plated pivot pins",
+    "energy_absorbing_system": "Patented AOS Energy Absorbing System",
+    "manufacturing_country": "Italy"
+  },
+  "features": [
+    "79-82 inches of rise height",
+    "Up to 13 inches higher rise than competing models",
+    "Segmented box-girder runway construction prevents sagging or twisting",
+    "Up to 40% heavier than competitive models",
+    "Patented AOS Energy Absorbing System eliminates sliding legs",
+    "No structural cross-bracing between runways - clear work area",
+    "Closed-loop hydraulic/mechanical synchronization within 1/8 inch",
+    "Large 7.75-inch hydraulic cylinders reduce operating pressure",
+    "Self-lubricating composite bearings - maintenance-free",
+    "Chrome-plated pivot pins with easy-access grease fittings",
+    "Surface, flush, or recessed pit mounting options",
+    "Simple 3-button operation: Raise, Lower, Park (lock)",
+    "Available in fully galvanized steel for wash bay environments"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Rolling Jacks - 26,400 lb",
+      "description": "Wheels-free service for brakes, tires, and axles"
+    },
+    {
+      "item": "Rolling Jacks - 44,000 lb",
+      "description": "Heavy-duty wheels-free service"
+    },
+    {
+      "item": "Track Lighting",
+      "description": "Under-vehicle illumination"
+    },
+    {
+      "item": "Galvanized Steel Construction",
+      "description": "For corrosive wash bay environments"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Meets current national ANSI code for lifts"
+  ],
+  "safety_features": [
+    "Closed-loop hydraulic/mechanical synchronization system",
+    "Level within 1/8 inch regardless of weight distribution",
+    "Hydraulic safeties with pressure-compensated flow control valves",
+    "Velocity fuses",
+    "Patented AOS Energy Absorbing System",
+    "Laser cut high strength T-1 steel safety latch racks",
+    "Dual high-resolution chain-driven encoders monitor lift movement 60 times per second"
+  ],
+  "notes": [
+    "Heaviest-built vertical rise lift in the world per manufacturer",
+    "Manufactured in Italy",
+    "Covers VRL-35K and VRL-64K models",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

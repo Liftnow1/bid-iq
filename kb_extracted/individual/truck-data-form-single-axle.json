@@ -1,0 +1,52 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/truck-data-form-single-axle.pdf",
+  "category": "four-post-lift",
+  "document_type": "data_collection_form",
+  "model": null,
+  "variant": "Single Axle Rear",
+  "product_type": "Truck Data Form (Single Axle Rear)",
+  "capacity": null,
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {},
+  "specifications": {
+    "form_type": "Truck Data Form (Single Axle Rear)",
+    "units": "All dimensions to be entered in inches",
+    "data_columns": ["Longest Wheel Base", "Shortest Wheel Base", "Lowest Clearance"],
+    "dimension_fields": {
+      "A": "Front Tire Diameter",
+      "B": "Back Tire Diameter",
+      "C": "Front Min. Ground Clearance",
+      "D": "Rear Min. Ground Clearance",
+      "E": "Center Min. Ground Clearance",
+      "F": "Front Bumper-Axle",
+      "G": "Axle-Axle Length",
+      "H": "Tire Width",
+      "I": "Tire Outside-Outside Width",
+      "J": "Front Total Width",
+      "K": "(Dual) Tire Width",
+      "L": "Tire Outside-Outside Width",
+      "M": "Rear Total Width",
+      "Overall_Length": "Bumper-Bumper",
+      "Vehicle_Weight": "Not GVW",
+      "Heaviest_Axle_Weight": "Heaviest Axle Weight"
+    },
+    "views_included": ["Side View", "Front View", "Rear View"]
+  },
+  "features": [
+    "Dimensional data collection form for single axle rear trucks",
+    "Includes side view, front view, and rear view diagrams",
+    "Captures tire dimensions, ground clearances, widths, and weights",
+    "Supports multiple wheel base configurations (longest, shortest, lowest clearance)"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Please be complete in entering dimensional data - determination in suiting lifting requirements is only as accurate and complete as the data received",
+    "Note any areas that may cause problems in vehicle lifting",
+    "All dimensions to be entered in inches",
+    "Check box if lowest clearance is equal to longest or shortest wheel base"
+  ]
+}

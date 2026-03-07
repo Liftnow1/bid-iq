@@ -1,0 +1,63 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/MP-18-Series_6-13-2018.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "MP-18-AF-Series",
+  "variant": "18,000 lb per column AC electric/hydraulic mobile column lift - 2018 revision",
+  "product_type": "mobile_column_lift",
+  "capacity": "18,000 lbs per column; 32,000 to 144,000 lbs total (2-8 columns)",
+  "dimensions": {
+    "lifting_stroke_inches": 67,
+    "fork_length_options_inches": [15, 22],
+    "tire_diameter_max_inches": 48,
+    "wheel_diameter_range_inches": "13 to 24",
+    "column_mast_width_inches": 5.75
+  },
+  "weight": {},
+  "installation_requirements": {
+    "no_permanent_installation": true,
+    "surface": "Level shop floor",
+    "power_source": "220V or 440V AC"
+  },
+  "specifications": {
+    "capacity_per_column_lbs": 18000,
+    "total_capacity_range_lbs": "32,000 to 144,000",
+    "lifting_stroke_inches": 67,
+    "locking_positions": 19,
+    "lock_spacing_inches": 3,
+    "power_type": "AC Electric/Hydraulic",
+    "column_configurations": [2, 4, 6, 8],
+    "manual_revision_date": "6/13/2018"
+  },
+  "features": [
+    "AC electric/hydraulic operation",
+    "18,000 lb capacity per column",
+    "67-inch lifting stroke",
+    "19 locking positions spaced every 3 inches",
+    "Updated 2018 revision"
+  ],
+  "optional_equipment": [
+    {
+      "item": "22-inch Lifting Forks",
+      "description": "For flotation tires or super-singles"
+    },
+    {
+      "item": "Auto Frame Adapter",
+      "description": "For passenger vehicle side-lifting"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "19-position mechanical safety locks every 3 inches",
+    "Synchronized operation across all columns"
+  ],
+  "notes": [
+    "Manual revision date: 6/13/2018",
+    "Updated version of the 12/1/2015 AC series manual",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

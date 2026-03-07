@@ -1,0 +1,68 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-26-26WB-shop-layout.pdf",
+  "category": "two-post-lift",
+  "document_type": "shop_layout_drawing",
+  "model": "TP-26A / TP-30A / TP-26-WB / TP-30-WB",
+  "variant": "Standard and Wide Base Bay Site Layouts",
+  "product_type": "Two Post Inground Lift - Bay Site Layout",
+  "manufacturer": "Mohawk",
+  "capacity": null,
+  "dimensions": {
+    "tp_26a_layout": {
+      "overall_bay_width_feet": "20' 0\"",
+      "overall_bay_length_feet": "25'",
+      "suggested_minimum_post_to_wall_feet": "10' 0\"",
+      "width_between_posts_feet": "9' 6\" (see note)",
+      "vehicle_length_feet": "19'",
+      "increase_for_specialized_vehicles_over_19ft": "12' 6\"",
+      "bay_depth_side_feet": "19' (see note)",
+      "between_adjacent_columns_multi_unit": "2' 6\""
+    },
+    "tp_26_wb_layout": {
+      "overall_bay_width_feet": "22' 0\"",
+      "overall_bay_length_feet": "25'",
+      "suggested_minimum_post_to_wall_feet": "10' 0\"",
+      "width_between_posts_feet": "9' 6\" (see note)",
+      "vehicle_length_feet": "19'",
+      "increase_for_specialized_vehicles_over_19ft": "12' 6\"",
+      "bay_depth_side_feet": "19' (see note)",
+      "between_adjacent_columns_multi_unit": "2' 7\""
+    }
+  },
+  "weight": null,
+  "installation_requirements": {
+    "tp_26a_minimum_bay_width": "20' 0\"",
+    "tp_26a_minimum_bay_length": "25'",
+    "tp_26_wb_minimum_bay_width": "22' 0\"",
+    "tp_26_wb_minimum_bay_length": "25'",
+    "suggested_minimum_distance_post_to_wall": "10' 0\"",
+    "tp_26a_multi_unit_spacing_between_adjacent_columns": "2' 6\"",
+    "tp_26_wb_multi_unit_spacing_between_adjacent_columns": "2' 7\"",
+    "vehicle_clearance": "Designed for vehicles up to 19 feet in length",
+    "increase_clearance_for_longer_vehicles": "12' 6\" increase for specialized vehicles over 19 ft long"
+  },
+  "specifications": {
+    "file_name_page1": "MAN065",
+    "file_name_page2": "MAN065A",
+    "page_numbers": [23, 24],
+    "applicable_models": ["TP-26A", "TP-30A", "TP-26-WB", "TP-30-WB"]
+  },
+  "features": [
+    "Bay site layout for shop planning - standard base (TP-26A)",
+    "Bay site layout for shop planning - wide base (TP-26-WB)",
+    "Multi-unit installation capability",
+    "Accommodates vehicles up to 19 feet in length",
+    "Wide base model requires 2 additional feet of bay width (22' vs 20')"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Most vehicles' center of gravity (C.O.G.) lie between wheel base centers, however, some vehicles C.O.G. may be offset. Verify the center of gravity on the vehicle fleet to insure rear and front access of the vehicle.",
+    "TP-26A standard base requires 20' bay width with 2' 6\" between adjacent columns for multi-unit installation",
+    "TP-26-WB wide base requires 22' bay width with 2' 7\" between adjacent columns for multi-unit installation",
+    "Layout also applies to TP-30A and TP-30-WB models",
+    "Increase bay dimensions for specialized vehicles over 19 ft long"
+  ]
+}

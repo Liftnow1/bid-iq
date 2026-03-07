@@ -1,0 +1,63 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/tr-35-base.pdf",
+  "category": "four-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TR-33 / TR-35 / TR-50 / TR-75",
+  "variant": "Base Plate",
+  "product_type": "Base Plate for 4-Post Track Lifts",
+  "capacity": null,
+  "dimensions": {
+    "plate_length": "23.50\"",
+    "plate_width": "23.50\"",
+    "plate_thickness": "3/4\"",
+    "hole_diameter": "0.81\" DIA (4 places, burn thru)",
+    "edge_reference": "0.16 REF",
+    "hole_spacing_length": "22.00\"",
+    "hole_spacing_width": "22.00\"",
+    "edge_margin": "0.75\"",
+    "bottom_reference": "0.75 REF"
+  },
+  "weight": "122.4 lbs",
+  "installation_requirements": {
+    "applicable_models": ["TR-33", "TR-35", "TR-50", "TR-75"],
+    "material": "ASTM A-36 Plate",
+    "material_dimensions": "3/4\" THK x 23.50 x 23.50"
+  },
+  "specifications": {
+    "material": "ASTM A-36 Plate",
+    "thickness": "3/4\"",
+    "hole_count": 4,
+    "hole_diameter": "0.81\" DIA burn thru",
+    "hole_spacing": "22.00\" x 22.00\" center-to-center",
+    "drawing_number": "050-000-113",
+    "next_assembly": "033-002-024",
+    "file_name": "050-000-003",
+    "scale": "0.25=1",
+    "date": "5/92"
+  },
+  "features": [
+    "Universal base plate for TR-33, TR-35, TR-50, and TR-75 models",
+    "4 burn-thru holes for anchor bolts",
+    "ASTM A-36 structural steel construction"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part": "Base Plate",
+      "material": "ASTM A-36 Plate",
+      "dimensions": "3/4\" THK x 23.50 x 23.50",
+      "drawing_number": "050-000-113",
+      "from_drawing": "600-000-041"
+    }
+  ],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Used on Mohawk Model TR-33, TR-35, TR-50, & TR-75",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70TI code 5.3 flux core wire only",
+    "Revision A: Drawing redrawn & replaced, 5/92, R.V.",
+    "Tolerances: Angular +/- 1 deg, Fractional +/- 1/16, Decimal 0.XX +/- .030, 0.XXX +/- .005"
+  ]
+}

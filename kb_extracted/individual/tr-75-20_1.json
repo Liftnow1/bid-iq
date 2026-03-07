@@ -1,0 +1,101 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/tr-75-20 (1).pdf",
+  "category": "four-post-lift",
+  "document_type": "illustration_and_specs",
+  "model": "TR-75",
+  "variant": "TR-75-20",
+  "product_type": "4-Post Track Lift",
+  "capacity": "75,000 lbs",
+  "dimensions": {
+    "overall_length": "32' 0 1/4\"",
+    "overall_width": "14' 5 9/16\"",
+    "track_width": "24\"",
+    "lifting_stroke": "5'",
+    "clearance_between_posts": "11' 8\"",
+    "track_length": "20'",
+    "between_channels": "144 1/2\"",
+    "raised_height": "74 1/2\"",
+    "fully_stroked": "134 1/2\"",
+    "runway_length": "251\"",
+    "overall_length_inches": "274 1/2\"",
+    "total_length_with_ramps": "384 1/4\"",
+    "mainside_to_offside": "173 9/16\"",
+    "post_depth": "150\"",
+    "post_square": "23 1/2\" SQ.",
+    "offside_dimension": "109 3/4\"",
+    "back_view_between_channels": "144 1/2\"",
+    "back_view_96": "96\"",
+    "back_view_48": "48\"",
+    "back_view_24": "24\"",
+    "back_view_96_1_8": "96 1/8\"",
+    "back_view_105_3_8": "105 3/8\"",
+    "side_view_height_7a": "7'",
+    "side_view_14_9_16": "14 9/16\""
+  },
+  "weight": "12,000 lbs",
+  "installation_requirements": {
+    "floor_requirements": "4000 PSI concrete, 4 1/2\" thick",
+    "power": "10 HP, 208-230 VAC Three Phase",
+    "power_unit_location": "Per customer's specification (shown in standard location)"
+  },
+  "specifications": {
+    "capacity": "50,000 lbs (spec sheet states 50,000 LB; model designation is 75,000 LBS)",
+    "lifting_speed": "120 seconds",
+    "motor_rating": "10 HP, 208-230 VAC Three Phase",
+    "lifting_mechanism": "(4) 4\" Hydraulic Cylinders, Direct Drive",
+    "synchronization_main_to_offside": "(4) #646 Leaf Chains",
+    "synchronization_fore_to_aft": "Electrically Automatic / Manually Adjustable",
+    "back_up_hydraulic_safety_systems": "P.C. Flow Controls & Velocity Fuses",
+    "mechanical_safety_locks": "Multi-Position",
+    "mechanical_safety_release": "Single Point"
+  },
+  "features": [
+    "4-Post Track Lift design",
+    "(4) 4\" Hydraulic Cylinders, Direct Drive lifting mechanism",
+    "(4) #646 Leaf Chains for main-to-offside synchronization",
+    "Electrically Automatic / Manually Adjustable fore-to-aft synchronization",
+    "P.C. Flow Controls & Velocity Fuses back-up hydraulic safety",
+    "Multi-Position Mechanical Safety Locks",
+    "Single Point Mechanical Safety Release",
+    "Control panel with UP, FORE, DOWN AFT, POWER ON/OFF, LOCK, MANUAL LEVEL, AUTO LEVEL, SETTLE DOWN controls",
+    "Anti-freeze leveler system (Ethylene Glycol only)"
+  ],
+  "optional_equipment": [
+    "Three Phase Power, 480 VAC",
+    "Drive Through Ramps",
+    "Runway Lighting (ETL Approved)",
+    "RJ-50A Rolling Hydraulic Jacking Beam (ETL Approved)",
+    "Air Lines Plumbed Into Tracks",
+    "Oil Drain Pan",
+    "20', 25' or 30' Tracks",
+    "Runway Lighting & Outlets (Non-ETL Approved)",
+    "RJ-50 Rolling Hydraulic Jacking Beam (Non-ETL Approved)",
+    "JP-50 Rolling Jack Platform (Non-ETL Approved)",
+    "Obstacle Sensor Package (Non-ETL Approved)"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "Tested and Certified by a Nationally Recognized Testing Laboratory (NRTL)",
+    "Meets requirements of U.L. Standard 201 for Garage Equipment",
+    "Meets ANSI/ALI ALCTV-2011 for Automotive Lift Construction",
+    "Automotive Lift Institute (ALI) Member",
+    "Independently Tested and Validated - Certified"
+  ],
+  "safety_features": [
+    "P.C. Flow Controls & Velocity Fuses (back-up hydraulic safety)",
+    "Multi-Position Mechanical Safety Locks",
+    "Single Point Mechanical Safety Release",
+    "Anti-freeze leveler system"
+  ],
+  "notes": [
+    "Model designation is TR-75 with capacity 75,000 LBS, but spec table lists capacity as 50,000 LB",
+    "Some option combinations are not available",
+    "Some options may invalidate ANSI/ALI certification of lift",
+    "Mohawk Resources, Ltd. reserves the right to make changes without notice",
+    "Power unit location per customer's specification, shown above in standard location",
+    "Shown with 20' runways",
+    "Do not open, drain or fill leveler vessel - use Ethylene Glycol (anti-freeze) only",
+    "Consult Mohawk Resources, Ltd. for leveler adjustment",
+    "Drawing number: TR-75-20, File name: TR-75-20, Date: 4/08, Revision E: ALI Verification Logo Changed 12/15"
+  ]
+}

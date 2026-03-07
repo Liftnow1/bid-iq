@@ -1,0 +1,51 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/truck_frame.pdf",
+  "category": "four-post-lift",
+  "document_type": "data_collection_form",
+  "model": null,
+  "variant": "Single Axle Rear - Frame Engagement",
+  "product_type": "Truck Data Form (Single Axle Rear) - Frame Lift Point Version",
+  "capacity": null,
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {},
+  "specifications": {
+    "form_type": "Truck Data Form (Single Axle Rear)",
+    "units": "All dimensions to be entered in inches",
+    "drawing_number": "ZZ73",
+    "file_name": "ZZ73",
+    "date": "1/95",
+    "drawn_by": "R.V.",
+    "size": "B-Size",
+    "dimension_fields": {
+      "overall_length": "Bumper to Bumper (inches)",
+      "tire_diameter_front": "Tire Diameter (front)",
+      "tire_diameter_rear": "Tire Diameter (rear)",
+      "minimum_ground_clearance": "Minimum Ground Clearance",
+      "vehicle_weight": "Vehicle Weight (Not GVW) in LBS",
+      "lift_point": "Lift Point location",
+      "tire": "Tire position"
+    },
+    "views_included": ["Side View", "Top View", "Front View", "Rear View"]
+  },
+  "features": [
+    "Dimensional data collection form for single axle rear trucks with frame engagement lifting",
+    "Includes side view, top view, front view, and rear view diagrams",
+    "Shows lift point location on frame",
+    "Captures tire diameters, minimum ground clearance, overall length, and vehicle weight",
+    "Top view shows frame rail and tire positions"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Please be complete in entering dimensional data - determination in suiting lifting requirements is only as accurate and complete as the data received",
+    "Note any areas that may cause problems in vehicle lifting",
+    "All dimensions to be entered in inches",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70TI code 5.3 flux core wire only",
+    "Tolerances: Angular +/- 1 deg, Fractional +/- .030, Decimal 0.XX +/- .030, 0.XXX +/- .006"
+  ]
+}

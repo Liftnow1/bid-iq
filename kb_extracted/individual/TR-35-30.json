@@ -1,0 +1,105 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/TR-35-30.pdf",
+  "category": "four-post-lift",
+  "document_type": "illustration_and_specifications",
+  "model": "TR-35",
+  "variant": "30-foot track",
+  "product_type": "four_post_track_lift",
+  "capacity": "35,000 lbs",
+  "dimensions": {
+    "overall_length_inches": 503.6875,
+    "overall_length_feet": "41 ft 11 11/16 in",
+    "overall_width_inches": 173.5625,
+    "overall_width_feet": "14 ft 5 9/16 in",
+    "track_width_inches": 24,
+    "lifting_stroke_feet": 5,
+    "clearance_between_posts_feet": "11 ft 8 in",
+    "raised_height_inches": 74.5,
+    "fully_stroked_height_inches": 134.5,
+    "lowered_height_inches": 14.5625,
+    "approach_ramp_angle_degrees": 7,
+    "ramp_length_inches": 109.1875,
+    "post_to_post_length_inches": 394.5,
+    "post_spacing_offside_inches": 371,
+    "base_pad_size_inches": "23.5 x 23.5 (square)",
+    "back_view_between_channels_inches": 144.5,
+    "back_view_width_96_inches": 96,
+    "back_view_width_48_inches": 48,
+    "back_view_width_24_inches": 24,
+    "back_view_height_inches": 105.375,
+    "back_view_column_height_inches": 96.125,
+    "overall_width_at_back_inches": 150
+  },
+  "weight": {
+    "weight_lbs": 22000
+  },
+  "installation_requirements": {
+    "floor_requirements": "4000 PSI concrete, 4.5 inches thick minimum",
+    "power": "10 HP, 208-230 VAC, Three Phase"
+  },
+  "specifications": {
+    "capacity_lbs": 35000,
+    "lifting_speed_seconds": 120,
+    "motor_rating": "10 HP, 208-230 VAC Three Phase",
+    "lifting_mechanism": "(4) 4-inch hydraulic cylinders, direct drive",
+    "lifting_stroke_feet": 5,
+    "track_width_inches": 24,
+    "clearance_between_posts": "11 ft 8 in",
+    "mechanical_safety_release": "Single point",
+    "mechanical_safety_locks": "Multi-position",
+    "backup_hydraulic_safety_systems": "P.C. flow controls and velocity fuses",
+    "synchronization_main_to_offside": "(4) #646 leaf chains",
+    "synchronization_fore_to_aft": "Electrically automatic / manually adjustable",
+    "drawing_number": "TR-35-30",
+    "drawing_date": "4/08"
+  },
+  "features": [
+    "4-post track lift with 35,000 lb capacity",
+    "30-foot runways (shown)",
+    "5-foot lifting stroke",
+    "Multi-position mechanical safety locks",
+    "Single point mechanical safety release",
+    "P.C. flow controls and velocity fuses for backup hydraulic safety",
+    "(4) #646 leaf chain synchronization (main to offside)",
+    "Electrically automatic / manually adjustable synchronization (fore to aft)",
+    "Direct drive hydraulic cylinders",
+    "Power unit location per customer specification"
+  ],
+  "optional_equipment": [
+    { "item": "Three Phase Power, 480 VAC" },
+    { "item": "Drive Through Ramps" },
+    { "item": "Runway Lighting (ETL Approved)" },
+    { "item": "RJ-50A Rolling Hydraulic Jacking Beam (ETL Approved)" },
+    { "item": "Air Lines Plumbed into Tracks" },
+    { "item": "Oil Drain Pan" },
+    { "item": "20, 25, or 30 foot Tracks" },
+    { "item": "Runway Lighting & Outlets (Non-ETL Approved)", "note": "May invalidate ANSI/ALI certification" },
+    { "item": "RJ-50 Rolling Hydraulic Jacking Beam (Non-ETL Approved)", "note": "May invalidate ANSI/ALI certification" },
+    { "item": "JP-50 Rolling Jack Platform (Non-ETL Approved)", "note": "May invalidate ANSI/ALI certification" },
+    { "item": "Obstacle Sensor Package (Non-ETL Approved)", "note": "May invalidate ANSI/ALI certification" }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "Tested and certified by a Nationally Recognized Testing Laboratory (NRTL)",
+    "Meets U.L. Standard 201 for Garage Equipment",
+    "Meets ANSI/ALI ALCTV-2006 for Automotive Lift Construction",
+    "ALI Member",
+    "ETL Validated/Certified"
+  ],
+  "safety_features": [
+    "Multi-position mechanical safety locks",
+    "Single point mechanical safety release",
+    "P.C. flow controls at each cylinder",
+    "Velocity fuses for backup hydraulic safety",
+    "(4) #646 leaf chain synchronization",
+    "Electrically automatic synchronization (fore to aft)"
+  ],
+  "notes": [
+    "Shown with 30-foot runways",
+    "Power unit location per customer specification; shown in standard location",
+    "Some option combinations are not available",
+    "Some options may invalidate ANSI/ALI certification of lift",
+    "Mohawk Resources Ltd. reserves the right to make changes without notice",
+    "Confidential document - property of Mohawk Resources Ltd."
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/parallelogram-lifts/truck_dual_axle (2).pdf",
+  "category": "parallelogram-lift",
+  "document_type": "vehicle_data_form",
+  "model": null,
+  "variant": "Dual Axle Rear",
+  "product_type": "Truck Data Form (Dual Axle Rear)",
+  "capacity": null,
+  "dimensions": {
+    "form_fields": {
+      "A": "Front Tire Diameter",
+      "B": "Back Tire Diameter",
+      "C": "Front Minimum Ground Clearance",
+      "D": "Center Minimum Ground Clearance",
+      "E": "Rear Minimum Ground Clearance",
+      "F": "Front Axle to Bumper",
+      "G": "Front Axle to Axle Length",
+      "H": "Rear Axle to Axle Length",
+      "I": "Rear Axle to Bumper",
+      "J": "Total Length",
+      "K": "Front Tire Width",
+      "L": "Front Tire Outside-to-Outside Width",
+      "M": "Front Total Width",
+      "N": "Rear Dual Tire Width",
+      "O": "Rear Tire Outside-to-Outside Width",
+      "P": "Rear Total Width",
+      "vehicle_weight": "Vehicle Weight (not GVW)",
+      "heaviest_axle": "Heaviest Axle"
+    },
+    "unit_of_measurement": "inches",
+    "columns": ["Longest Wheel Base", "Shortest Wheel Base", "Lowest Clearance"]
+  },
+  "weight": null,
+  "installation_requirements": {},
+  "specifications": {
+    "form_purpose": "Vehicle dimensional data collection for lift sizing and compatibility determination",
+    "views_included": ["Side View", "Front View", "Rear View"],
+    "vehicle_type": "Dual axle rear truck (3-axle vehicle)",
+    "additional_callouts": ["Center of Gravity noted on side view diagram"]
+  },
+  "features": [
+    "Comprehensive vehicle measurement form for dual axle rear trucks",
+    "Three-column format for longest wheelbase, shortest wheelbase, and lowest clearance vehicles",
+    "Side view, front view, and rear view diagrams with dimension callouts",
+    "Captures tire dimensions, ground clearances at three points (front, center, rear), widths, and weights",
+    "Includes center of gravity reference on side view",
+    "Accommodates front axle-to-axle and rear axle-to-axle measurements separately"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "All dimensions to be entered in inches",
+    "Check box if lowest clearance is equal to longest or shortest wheel base",
+    "Note any areas that may cause problems in vehicle lifting",
+    "Determination in suiting lifting requirements is only as accurate and complete as the data received"
+  ]
+}

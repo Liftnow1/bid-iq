@@ -1,0 +1,79 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-26_Underground_Hoses.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TP-26A",
+  "variant": "Under Slab Hoses - New Floor Installation",
+  "product_type": "Two Post Inground Lift - Underground Hydraulic Hoses Layout",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": null,
+  "dimensions": {
+    "overall_length_ref_inches": "198\" REF",
+    "column_to_column_inches": "161 1/4",
+    "column_base_plate_width_inches": "18 3/8",
+    "column_base_plate_depth_inches": "23 3/4",
+    "column_base_plate_thickness_inches": "1\" thick",
+    "electrical_conduit_clearance_hole_width_inches": 10,
+    "electrical_conduit_clearance_hole_depth_inches": 5,
+    "electrical_conduit_clearance_hole_diameter_inches": "1 1/4 dia thru (2 places)",
+    "electrical_conduit_clearance_note": "Special order only",
+    "slab_thickness_ref_inches": "12\" REF thick (reinforce per new-slab chart)",
+    "pvc_tubing_diameter_inches": "4\" dia PVC tubing (by others)",
+    "conduit_trench_width_inches": 16,
+    "right_side_height_inches": "72\" REF",
+    "right_side_offset_inches": 36
+  },
+  "weight": null,
+  "installation_requirements": {
+    "new_floor_installation": true,
+    "in_ground_hydraulic_hoses": true,
+    "concrete_slab_thickness": "12\" REF (reinforce per new-slab chart)",
+    "pvc_tubing": "4\" dia PVC tubing (by others)",
+    "electrical_conduit": "By others",
+    "conduit_trench_width": "16\"",
+    "elbow_type": "Smooth 90 deg elbow, typ both ends",
+    "column_base_plate": "1\" thick baseplate, REF",
+    "new_floor_surface": true,
+    "welding_specs": "AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "specifications": {
+    "drawing_number": "030-002-025",
+    "file_name": "030-002-025",
+    "title": "New Floor Installation for In-Ground Hydraulic Hoses",
+    "date": "11/07",
+    "drawn_by": "dok",
+    "scale": "1/16",
+    "sheet_size": "C-SIZE",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_0XX": "+/- 0.030",
+      "decimal_0XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "Under-slab hydraulic hose routing for TP-26A",
+    "New floor installation design",
+    "4\" PVC tubing conduit for hoses",
+    "Smooth 90 degree elbows at both ends",
+    "Electrical conduit clearance hole option (special order only)"
+  ],
+  "optional_equipment": [
+    "Electrical conduit clearance hole (special order only) - 1 1/4\" dia thru, 2 places"
+  ],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Notice of confidential information",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "Electrical conduit by others",
+    "4\" dia PVC tubing by others",
+    "Reinforce slab per new-slab chart",
+    "Electrical conduit clearance hole is special order only",
+    "Hoses under slab configuration"
+  ]
+}
