@@ -4,36 +4,46 @@ import kbData from "./knowledge-base.json";
 
 export const maxDuration = 60;
 
-// Build a compact text representation of the KB (no pretty-printing)
-const kbText = (kbData as Record<string, unknown>[])
-  .map((entry) => {
-    const model = (entry.model as string) || "Unknown";
-    const variant =
-      (entry.variant as string) || (entry.product_type as string) || "N/A";
-    return `[${model} - ${variant}] ${JSON.stringify(entry)}`;
-  })
-  .join("\n");
+// Build a compact text representation of the KB
+const kbEntries = (kbData as Record<string, unknown>[]).map((entry) => {
+  const model = (entry.model as string) || "Unknown";
+  const variant =
+    (entry.variant as string) || (entry.product_type as string) || "N/A";
+  return `[${model} - ${variant}] ${JSON.stringify(entry)}`;
+});
+const kbText = kbEntries.join("\n");
 
-const SYSTEM_PROMPT = `You are a Mohawk Lifts product expert. You have access to a comprehensive knowledge base of Mohawk Lifts products below. This includes parallelogram lifts (surface mount and flush mount), rolling jacks, installation drawings with dimensions, slab requirements, and truck data forms.
+const SYSTEM_PROMPT = `You are a Mohawk Lifts product expert assistant. You answer questions about Mohawk Lifts products using the knowledge base provided below.
 
-KNOWLEDGE BASE:
+<knowledge_base>
 ${kbText}
+</knowledge_base>
 
-INSTRUCTIONS:
-- Answer questions accurately using ONLY the knowledge base above.
-- Be precise with numbers, units, and model numbers.
-- If comparing models, organize clearly with side-by-side data.
-- If the KB does not contain information to answer, say so clearly. Do not fabricate data.
-- Keep answers practical and useful for someone evaluating or bidding on Mohawk equipment.`;
+Rules:
+- Answer based ONLY on the knowledge base above
+- Be precise with numbers, units, and model numbers
+- If comparing models, organize clearly
+- If the knowledge base does not contain the answer, say "I don't have information about that in the Mohawk Lifts knowledge base" and explain what data IS available
+- Never say "please enter a question" or anything similar — always attempt to answer`;
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const question = body?.question;
+    const text = await request.text();
+    let question = "";
+
+    try {
+      const body = JSON.parse(text);
+      question = body?.question || "";
+    } catch {
+      return NextResponse.json(
+        { error: `Invalid request body: ${text.slice(0, 200)}` },
+        { status: 400 }
+      );
+    }
 
     if (!question || typeof question !== "string" || !question.trim()) {
       return NextResponse.json(
-        { error: "Please enter a question." },
+        { error: `No question found in body. Received keys: ${text.slice(0, 200)}` },
         { status: 400 }
       );
     }
@@ -67,14 +77,16 @@ export async function POST(request: NextRequest) {
     if (err instanceof Error) {
       message = err.message;
     }
-    if (
-      typeof err === "object" &&
-      err !== null &&
-      "status" in err &&
-      (err as { status: number }).status === 401
-    ) {
-      message = "API key not configured. Add ANTHROPIC_API_KEY in Vercel settings.";
-    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
+}
+
+// Test endpoint to verify the route is working
+export async function GET() {
+  return NextResponse.json({
+    status: "ok",
+    kb_entries: kbEntries.length,
+    kb_size_chars: kbText.length,
+    has_api_key: !!process.env.ANTHROPIC_API_KEY,
+  });
 }
