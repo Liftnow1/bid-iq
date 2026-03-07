@@ -21,7 +21,7 @@
     "lower_section_measurements": {
       "height_1": "23.75 inches",
       "height_2": "20.87 inches",
-      "height_3": "15.13 inches",
+      "height_3": "15.75 inches",
       "height_4": "13.75 inches",
       "height_5": "12.25 inches"
     },
@@ -71,7 +71,7 @@
     "8 anchor bolt holes with 0.88 inch diameter",
     "Used on Mohawk ML-220 2-post lift model",
     "45 degree angle cut on one corner",
-    "Same base plate design as LC-12 series"
+    "Same base plate design shared with LC-12/LMF-12/TP-15/TP-16/TP-18 series"
   ],
   "optional_equipment": [],
   "parts_list": [],
@@ -80,6 +80,8 @@
   "notes": [
     "Used on Mohawk model ML-220",
     "Material: ASTM A-36, 0.75 inch thick plate, 29.5 x 23.75 x 0.75 inches",
-    "Drawing redrawn and replaced 3/92"
+    "Drawing redrawn and replaced 3/92",
+    "Remove all sharp corners & edges",
+    "Welding medium shall conform to AWS specifications"
   ]
 }

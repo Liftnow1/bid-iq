@@ -1,0 +1,449 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/Slab_Requirements.pdf",
+  "category": "two-post-lift",
+  "document_type": "installation_guide_and_specifications",
+  "model": "All Mohawk Lift Models",
+  "variant": "Pre-Existing Slab Requirements & New Slab Recommendations",
+  "product_type": "Slab Requirements Reference Document",
+  "capacity": null,
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {
+    "pre_existing_slab_requirements": {
+      "A-7": {
+        "min_slab_thickness": "4.5 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "12 inches"
+      },
+      "System_IA": {
+        "min_slab_thickness": "4.5 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "12 inches"
+      },
+      "System_IA-10": {
+        "min_slab_thickness": "4.5 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "12 inches"
+      },
+      "LC-12": {
+        "min_slab_thickness": "6.5 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "12 inches"
+      },
+      "LMF-12": {
+        "min_slab_thickness": "6.5 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "12 inches"
+      },
+      "TP-15": {
+        "min_slab_thickness": "6.5 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "10 inches"
+      },
+      "TP-16": {
+        "min_slab_thickness": "6.5 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "10 inches"
+      },
+      "TP-18": {
+        "min_slab_thickness": "6.5 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "10 inches"
+      },
+      "TP-20": {
+        "min_slab_thickness": "6.5 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "10 inches"
+      },
+      "TP-20-WB": {
+        "min_slab_thickness": "6 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "10 inches"
+      },
+      "TP-26": {
+        "min_slab_thickness": "12 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "10 inches"
+      },
+      "TP-26-WB": {
+        "min_slab_thickness": "8 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "10 inches"
+      },
+      "TP-30": {
+        "min_slab_thickness": "12 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "10 inches"
+      },
+      "TP-30-WB": {
+        "min_slab_thickness": "8 inches",
+        "min_compressive_strength": "4000 psi with 28 day aging",
+        "reinforcement_size": "#6 rebar",
+        "reinforcement_spacing": "10 inches"
+      },
+      "TR-19": {
+        "min_slab_thickness": "4.5 inches",
+        "min_compressive_strength": "n/a",
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only"
+      },
+      "FL-25": {
+        "min_slab_thickness": "4.5 inches",
+        "min_compressive_strength": "n/a",
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only"
+      },
+      "TR-25A": {
+        "min_slab_thickness": "4.5 inches",
+        "min_compressive_strength": "n/a",
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only"
+      },
+      "TR-30": {
+        "min_slab_thickness": "4.5 inches",
+        "min_compressive_strength": "n/a",
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only"
+      },
+      "TR-33": {
+        "min_slab_thickness": "6 inches or 4.5 inches with larger base pads",
+        "min_compressive_strength": "n/a",
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only"
+      },
+      "TR-35": {
+        "min_slab_thickness": "6 inches or 4.5 inches with larger base pads",
+        "min_compressive_strength": "n/a",
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only"
+      },
+      "TR-50": {
+        "min_slab_thickness": "6 inches or 4.5 inches with larger base pads",
+        "min_compressive_strength": "n/a",
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only"
+      },
+      "TR-75": {
+        "min_slab_thickness": "6 inches or 4.5 inches with larger base pads",
+        "min_compressive_strength": "n/a",
+        "reinforcement_size": "ACI Temp only",
+        "reinforcement_spacing": "ACI Temp only"
+      }
+    },
+    "new_slab_recommendations": {
+      "minimum_thickness": "12 inches",
+      "minimum_tensile_strength": "4000 PSI",
+      "minimum_aging": "28 days cure time",
+      "foundation_bed_bearing_capacity": "Not less than 2000 lb/sq ft (1 ton per sq ft)",
+      "models": {
+        "A-7": {
+          "slab_width": "48 inches min",
+          "slab_length": "144 inches min",
+          "reinforcement": "8 #4 main bars, 21 #4 temperature bars",
+          "spacing_long_bars": "6 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches"
+        },
+        "System_IA": {
+          "slab_width": "48 inches min",
+          "slab_length": "161 inches min",
+          "reinforcement": "8 #4 main bars, 21 #4 temperature bars",
+          "spacing_long_bars": "6 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches"
+        },
+        "System_IA-10": {
+          "slab_width": "48 inches min",
+          "slab_length": "161 inches min",
+          "reinforcement": "8 #4 main bars, 21 #4 temperature bars",
+          "spacing_long_bars": "6 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches"
+        },
+        "LC-12": {
+          "slab_width": "72 inches min",
+          "slab_length": "168 inches min",
+          "reinforcement": "12 #4 main bars, 23 #4 temperature bars",
+          "spacing_long_bars": "6 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "6 inches"
+        },
+        "LMF-12": {
+          "slab_width": "72 inches min",
+          "slab_length": "168 inches min",
+          "reinforcement": "12 #4 main bars, 23 #4 temperature bars",
+          "spacing_long_bars": "6 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "6 inches"
+        },
+        "TP-15": {
+          "slab_width": "72 inches min",
+          "slab_length": "168 inches min",
+          "reinforcement": "12 #4 main bars, 23 #4 temperature bars",
+          "spacing_long_bars": "6 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "6 inches"
+        },
+        "TP-16": {
+          "slab_width": "72 inches min",
+          "slab_length": "168 inches min",
+          "reinforcement": "12 #4 main bars, 23 #4 temperature bars",
+          "spacing_long_bars": "6 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "6 inches"
+        },
+        "TP-18": {
+          "slab_width": "72 inches min",
+          "slab_length": "168 inches min",
+          "reinforcement": "12 #4 main bars, 23 #4 temperature bars",
+          "spacing_long_bars": "6 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "6 inches"
+        },
+        "TP-20": {
+          "slab_width": "72 inches min",
+          "slab_length": "186 inches min",
+          "reinforcement": "18 #4 main bars, 24 #4 temperature bars",
+          "spacing_long_bars": "4 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "6 inches"
+        },
+        "TP-20-WB": {
+          "slab_width": "72 inches min",
+          "slab_length": "186 inches min",
+          "reinforcement": "18 #4 main bars, 24 #4 temperature bars",
+          "spacing_long_bars": "4 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "6 inches"
+        },
+        "TP-26": {
+          "slab_width": "72 inches min",
+          "slab_length": "198 inches min",
+          "reinforcement": "18 #4 main bars, 24 #4 temperature bars",
+          "spacing_long_bars": "4 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "1 inch",
+          "wej_it_length": "10 inches"
+        },
+        "TP-26-WB": {
+          "slab_width": "72 inches min",
+          "slab_length": "220 inches min",
+          "reinforcement": "18 #4 main bars, 24 #4 temperature bars",
+          "spacing_long_bars": "4 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "1 inch",
+          "wej_it_length": "8 inches"
+        },
+        "TP-30": {
+          "slab_width": "72 inches min",
+          "slab_length": "198 inches min",
+          "reinforcement": "18 #4 main bars, 24 #4 temperature bars",
+          "spacing_long_bars": "4 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "1 inch",
+          "wej_it_length": "10 inches"
+        },
+        "TP-30-WB": {
+          "slab_width": "72 inches min",
+          "slab_length": "220 inches min",
+          "reinforcement": "18 #4 main bars, 24 #4 temperature bars",
+          "spacing_long_bars": "4 inches",
+          "spacing_short_bars": "8 inches",
+          "wej_it_diameter": "1 inch",
+          "wej_it_length": "8 inches"
+        },
+        "TR-19": {
+          "slab_width": "24 inches min",
+          "slab_length": "24 inches min",
+          "reinforcement": "4 #4 bars, 8 bars total",
+          "spacing": "6 inches each way",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches",
+          "note": "Four separate slabs formed at each post"
+        },
+        "FL-25": {
+          "slab_width": "24 inches min",
+          "slab_length": "24 inches min",
+          "reinforcement": "4 #4 bars, 8 bars total",
+          "spacing": "6 inches each way",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches",
+          "note": "Four separate slabs formed at each post"
+        },
+        "TR-25": {
+          "slab_width": "24 inches min",
+          "slab_length": "24 inches min",
+          "reinforcement": "4 #4 bars, 8 bars total",
+          "spacing": "6 inches each way",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches",
+          "note": "Four separate slabs formed at each post"
+        },
+        "TR-30": {
+          "slab_width": "48 inches min",
+          "slab_length": "48 inches min",
+          "reinforcement": "4 #4 bars, 8 bars total",
+          "spacing": "6 inches each way",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches",
+          "note": "Four separate slabs formed at each post"
+        },
+        "TR-33": {
+          "slab_width": "72 inches min",
+          "slab_length": "72 inches min",
+          "reinforcement": "12 #4 bars, 24 bars total",
+          "spacing": "6 inches each way",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches",
+          "note": "Four separate slabs formed at each post"
+        },
+        "TR-35": {
+          "slab_width": "72 inches min",
+          "slab_length": "72 inches min",
+          "reinforcement": "12 #4 bars, 24 bars total",
+          "spacing": "6 inches each way",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches",
+          "note": "Four separate slabs formed at each post"
+        },
+        "TR-50": {
+          "slab_width": "72 inches min",
+          "slab_length": "72 inches min",
+          "reinforcement": "12 #4 bars, 24 bars total",
+          "spacing": "6 inches each way",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches",
+          "note": "Four separate slabs formed at each post"
+        },
+        "TR-75": {
+          "slab_width": "72 inches min",
+          "slab_length": "72 inches min",
+          "reinforcement": "12 #4 bars, 24 bars total",
+          "spacing": "6 inches each way",
+          "wej_it_diameter": "3/4 inch",
+          "wej_it_length": "5 inches",
+          "note": "Four separate slabs formed at each post"
+        }
+      }
+    },
+    "base_plate_anchoring_instructions": {
+      "step_1": "Locate posts in desired location of bay, per lift setup dimensions. Refer to lift installation manual for inside dimensions of columns, etc.",
+      "step_2": "Match drill all base plate holes. Refer to anchor bolt installation specifications attached for drill size (3/4 inch diameter original Wej-it style expansion anchor bolts).",
+      "step_3": "Install anchors per anchor bolt installation specifications attached. Shim under base plate as needed to ensure that posts are square and plumb (maximum of 1/4 inch) with colored shims provided (horseshoe shaped).",
+      "step_4": "All anchors must be a minimum of 6 inches away from any expansion seam, control joint, or other floor inconsistencies.",
+      "step_5": "Drilling thru entire slab thickness is preferred when possible. This allows anchors to be hammered flush to concrete.",
+      "system_ia_10_post_dimension": "Inside dimension is 120 inches",
+      "anchors_per_base_plate": 8
+    },
+    "anchor_edge_distances": {
+      "3/4_inch_anchors": "Minimum 6 inches from expansion seams, control joints, or inconsistencies",
+      "1_inch_anchors": "Minimum 7.5 inches from expansion seams, control joints, or inconsistencies"
+    }
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "address": "65 Vrooman Ave, Amsterdam, NY 12010",
+    "phone_toll_free": "1-800-833-2006",
+    "phone_local": "1-518-842-1431",
+    "fax": "1-518-842-1289",
+    "website": "www.MOHAWKLIFTS.com",
+    "email": "Service@MOHAWKLIFTS.com",
+    "pre_existing_file": "Pre-Existing Floor-Requirements.doc",
+    "pre_existing_rev_date": "5/2014",
+    "new_slab_file": "New-Slab.doc",
+    "new_slab_rev_date": "6/7/06",
+    "new_slab_table_file": "New-slab.xls",
+    "new_slab_table_rev_date": "5/16/2012",
+    "slab_design_2post_file": "MAN066",
+    "slab_design_2post_date": "2/98, rev 7/2003",
+    "slab_design_4post_file": "MAN089",
+    "slab_design_4post_date": "10/00, rev 7/2003",
+    "base_plate_anchoring_drawing": "ZZ1474",
+    "base_plate_anchoring_number": "009-010-006",
+    "base_plate_anchoring_drawn_by": "rwv7089",
+    "base_plate_anchoring_checked": "R.V.",
+    "base_plate_anchoring_date": "1/05"
+  },
+  "features": [
+    "Comprehensive slab requirements for ALL Mohawk lift models",
+    "Pre-existing slab minimum requirements table",
+    "New slab recommendations with reinforcement specifications",
+    "New slab design drawings for both 2-post and 4-post lifts",
+    "Base plate anchoring detail and instructions",
+    "Wej-it wedge anchor specifications and ordering information"
+  ],
+  "optional_equipment": [
+    "Larger 4 ft x 4 ft base pads for TR-33/35/50/75 on thinner floors (4.5-6 inches)"
+  ],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [
+    "All Mohawk lifts must be installed on concrete only",
+    "Do not install on expansion seams or cracked/defective concrete",
+    "Never install on hand mixed concrete",
+    "Do not install on secondary floor levels or ground floors with basements without architect authorization",
+    "All 2-post lifts require a continuous single slab - no spanning expansion seams",
+    "Seismic zone installations require consultation with building architect or engineer"
+  ],
+  "wej_it_anchor_specifications": {
+    "type": "Original Wej-it Wedge Anchors",
+    "zinc_plating": "ASTM B-633, Type III, SCI",
+    "icbo_es_report": "#1821",
+    "city_of_la": "#RR 24939",
+    "federal_specs": "QQZ-325C Type II Class 3; FFS-325 Group II Type 4 Class 1",
+    "edge_distance_requirements": {
+      "shallow_embedment_less_6d": "Spacing 3.50E, Edge Distance 1.75E",
+      "standard_6d_to_8d": "Spacing 2.00E, Edge Distance 1.00E",
+      "deep_greater_8d": "Spacing 1.50E, Edge Distance 0.75E"
+    },
+    "installation_torque": "85 ft-lbs for future/annual inspections",
+    "installation_steps": [
+      "Drill hole perpendicular to work surface, do not ream or allow wobble",
+      "Drill hole deeper than intended embedment, not closer than 2 anchor diameters to bottom",
+      "Clean hole using compressed air and nylon brush",
+      "Ensure spear heads are located against wedge pockets",
+      "Turn nut until contact with top of spears and bottom of washer, insert into hole",
+      "Tap anchor into hole with 2.5 lb hammer until washer rests solidly against fixture",
+      "Tighten nut not less than 3 full turns but not more than 5 turns past hand tight"
+    ],
+    "important": "Do NOT use impact wrench for installation"
+  },
+  "notes": [
+    "This is the same slab requirements document that appears in parallelogram-lifts and specialty-items directories",
+    "ACI Temp only means floor must be properly aged to American Concrete Institute specifications",
+    "Minimum 4x4x10/10 wire mesh is recommended for ACI Temp only models",
+    "Main reinforcing and lower temperature steel shall be Grade 60 deformed bars",
+    "Bar spacing tolerance is +/- 1 inch",
+    "New slabs must be 12 inches thick minimum",
+    "New slab must be totally surrounded by existing concrete floor",
+    "New slab design is stand-alone and does not account for surrounding concrete contribution",
+    "Additional layer of 6x6-10/10 WWF at mid height advisable in extreme hot/cold climates",
+    "Keep WWF mesh below anchor elevation to avoid drilling interference",
+    "Section A-A shows: 12 inch slab thickness, 15 inch base, 3/4 to 1-1/4 inch top surface, 3 inch minimum edge overlap",
+    "Alternative to dowels: 6 inch key-in around perimeter of slab",
+    "#4 x 18 inch long anchorage dowels spaced every 18 inches around perimeter"
+  ]
+}

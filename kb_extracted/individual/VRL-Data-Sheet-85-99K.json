@@ -1,0 +1,130 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/vertical-rise-lifts/VRL-Data-Sheet-85-99K.pdf",
+  "category": "vertical-rise-lift",
+  "document_type": "data_verification_form",
+  "model": "VR-Series (85K-99K)",
+  "variant": "Heavy Duty Drive-On Runway Lifts",
+  "product_type": "Vertical Rise Lift - Order Verification / Data Sheet",
+  "manufacturer": "Mohawk Lifts, LLC",
+  "capacity": "85,000 - 99,000 lbs",
+  "dimensions": {
+    "track_dimensions": {
+      "capacity_range": "85-99K",
+      "track_width_inches": 36.6,
+      "overall_outside_dimension_at_46_5_ID_inches": 119.8,
+      "standard_installation_width_ID_inches": 46.5,
+      "rj_rails_width_inches": 2.55,
+      "rj_rails_location": "Inside of each track"
+    },
+    "ramp_options": [
+      {
+        "type": "Standard",
+        "length_inches": 106,
+        "length_mm": 2500,
+        "collapsed_height_mm": 380,
+        "collapsed_height_inches": 15.0,
+        "slope_run_inches": 7,
+        "slope_angle_reference": "21 degrees"
+      },
+      {
+        "type": "Optional 118 inch",
+        "length_inches": 118,
+        "length_mm": 3000,
+        "collapsed_height_mm": 382,
+        "collapsed_height_inches": 15.1,
+        "slope_run_inches": 6,
+        "slope_angle_reference": "16 degrees"
+      },
+      {
+        "type": "Optional 134 inch",
+        "length_inches": 134,
+        "length_mm": 3500,
+        "collapsed_height_mm": 384,
+        "collapsed_height_inches": 15.1,
+        "slope_run_inches": 5,
+        "slope_angle_reference": "15 degrees"
+      },
+      {
+        "type": "Optional 138 inch Double Slope",
+        "length_inches": 138,
+        "length_mm": 3500,
+        "collapsed_height_mm": 368,
+        "collapsed_height_inches": 14.5,
+        "first_slope_run_inches": 13,
+        "second_slope_angle_reference": "14 degrees"
+      }
+    ],
+    "site_survey_fields": {
+      "overall_bay_length": "customer to specify",
+      "slope_in_floor_lengthwise": "customer to specify",
+      "overall_bay_width": "customer to specify",
+      "slope_in_floor_widthwise": "customer to specify",
+      "overall_bay_height": "customer to specify",
+      "overhead_obstructions": "yes or no, customer to specify"
+    }
+  },
+  "weight": "N/A",
+  "installation_requirements": {
+    "installation_styles": ["Surface mount", "Flush mount (no ramps)"],
+    "concrete_floor_thickness_min_inches": 6,
+    "concrete_floor_strength_min_psi": 4000,
+    "electrical_options": [
+      {"voltage": "200-208 VAC", "amperage": 33, "phase": "1 Phase", "frequency": "60 Hz"},
+      {"voltage": "230-240 VAC", "amperage": 29, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "400 VAC", "amperage": 17, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "460-480 VAC", "amperage": 15, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "550-575 VAC", "amperage": 13, "phase": "3 Phase", "frequency": "60 Hz"}
+    ],
+    "pneumatic_pressure_psi": "110-120 PSI",
+    "electrical_connection_note": "Final electrical connection to local/national code is the responsibility of the electrical contractor. More than one point of connection may be required. Disconnect switches, main fuses, main power leads, etc., are NOT provided by Mohawk Lifts, LLC.",
+    "pneumatic_power_note": "Pneumatic power is the responsibility of the mechanical contractor to the final designated point or points at the vehicle lift unless otherwise specified by architect.",
+    "control_console_routing": "Routes to one primary leg (choose Leg A, B, C, or D)",
+    "control_console_max_length_standard_feet": 20,
+    "control_console_extra_length_note": "Lengths over standard 20 ft are charged at extra cost",
+    "shimming_note": "Examine floor for flatness. If shimming exceeds 1/2 inch, base plates are recommended. Shims not included with standard lift - additional charge."
+  },
+  "specifications": {
+    "track_width_inches": 36.6,
+    "standard_id_between_tracks_inches": 46.5,
+    "overall_od_at_standard_id_inches": 119.8,
+    "rj_rails_width_inches": 2.55,
+    "standard_ramp_length_inches": 106,
+    "ramp_collapsed_height_mm": 380
+  },
+  "features": [
+    "Heavy duty drive-on runway design for 85K-99K capacity range",
+    "Surface mount or flush mount installation options",
+    "Multiple ramp length options (106, 118, 134, 138 double slope)",
+    "Multiple voltage/phase options (200-575V)",
+    "4-leg control console routing (A, B, C, D positions)",
+    "Adjustable track width between runways",
+    "Wider tracks (36.6 inches) compared to 35-77K models (29.9 inches)"
+  ],
+  "optional_equipment": [
+    "118 inch approach ramps (additional cost)",
+    "134 inch approach ramps (additional cost)",
+    "138 inch double slope approach ramps (additional cost)",
+    "Shims / base plates for uneven floors (additional charge)",
+    "Extended control console routing beyond 20 ft standard (additional cost)",
+    "Track lights",
+    "Toe guards",
+    "Other options (may impact ID and OD dimensions)"
+  ],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "DRAFT document",
+    "Ramp lengths other than standard 106 inches are at additional cost - contact rep for pricing",
+    "Standard installation width (ID) is 46.5 inches between tracks",
+    "RJ Rails are 2.55 inches wide, located on inside of each track",
+    "Track lights, toe guards, and other options may impact ID and OD dimensions",
+    "Control console lengths over standard 20 ft are charged at extra cost",
+    "If shimming exceeds 1/2 inch, base plates are recommended (additional charge)",
+    "Specifications subject to change without notice",
+    "85-99K models use wider 36.6 inch tracks vs 29.9 inch tracks on 35-77K models",
+    "85-99K models have larger overall OD of 119.8 inches vs 106.4 inches on 35-77K models",
+    "85-99K ramp collapsed heights are taller (380mm/15.0 inches) vs 35-77K (350mm/13.8 inches)",
+    "Similar layout to VRL-Data-Sheet-35-77K but with different track dimensions and ramp profiles for higher capacity"
+  ]
+}

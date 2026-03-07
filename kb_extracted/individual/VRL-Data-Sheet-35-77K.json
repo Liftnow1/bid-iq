@@ -1,0 +1,128 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/vertical-rise-lifts/VRL-Data-Sheet-35-77K.pdf",
+  "category": "vertical-rise-lift",
+  "document_type": "data_verification_form",
+  "model": "VR-Series (35K-77K)",
+  "variant": "Heavy Duty Drive-On Runway Lifts",
+  "product_type": "Vertical Rise Lift - Order Verification / Data Sheet",
+  "manufacturer": "Mohawk Lifts, LLC",
+  "capacity": "35,000 - 77,000 lbs",
+  "dimensions": {
+    "track_dimensions": {
+      "capacity_range": "35-77K",
+      "track_width_inches": 29.9,
+      "overall_outside_dimension_at_46_5_ID_inches": 106.4,
+      "standard_installation_width_ID_inches": 46.5,
+      "rj_rails_width_inches": 2.55,
+      "rj_rails_location": "Inside of each track"
+    },
+    "ramp_options": [
+      {
+        "type": "Standard",
+        "length_inches": 106,
+        "length_mm": 2580,
+        "collapsed_height_mm": 350,
+        "collapsed_height_inches": 13.8,
+        "slope_run_inches": 6,
+        "slope_angle_reference": "20 degrees"
+      },
+      {
+        "type": "Optional 118 inch",
+        "length_inches": 118,
+        "length_mm": 3000,
+        "collapsed_height_mm": 350,
+        "collapsed_height_inches": 13.8,
+        "slope_run_inches": 5.6,
+        "slope_angle_reference": "15.6 degrees"
+      },
+      {
+        "type": "Optional 138 inch",
+        "length_inches": 138,
+        "length_mm": 3500,
+        "collapsed_height_mm": 350,
+        "collapsed_height_inches": 13.8,
+        "slope_run_inches": 4.9,
+        "slope_angle_reference": "15 degrees"
+      },
+      {
+        "type": "Optional 138 inch Double Slope",
+        "length_inches": 138,
+        "length_mm": 3500,
+        "collapsed_height_mm": 342,
+        "collapsed_height_inches": 13.5,
+        "first_slope_run_inches": 12,
+        "second_slope_angle_reference": "14 degrees",
+        "second_section_height_inches": 7.4,
+        "second_section_height_mm": 190
+      }
+    ],
+    "site_survey_fields": {
+      "overall_bay_length": "customer to specify",
+      "slope_in_floor_lengthwise": "customer to specify",
+      "overall_bay_width": "customer to specify",
+      "slope_in_floor_widthwise": "customer to specify",
+      "overall_bay_height": "customer to specify",
+      "overhead_obstructions": "yes or no, customer to specify"
+    }
+  },
+  "weight": "N/A",
+  "installation_requirements": {
+    "installation_styles": ["Surface mount", "Flush mount (no ramps)"],
+    "concrete_floor_thickness_min_inches": 6,
+    "concrete_floor_strength_min_psi": 4000,
+    "electrical_options": [
+      {"voltage": "200-208 VAC", "amperage": 33, "phase": "1 Phase", "frequency": "60 Hz"},
+      {"voltage": "230-240 VAC", "amperage": 29, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "400 VAC", "amperage": 17, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "460-480 VAC", "amperage": 15, "phase": "3 Phase", "frequency": "60 Hz"},
+      {"voltage": "550-575 VAC", "amperage": 13, "phase": "3 Phase", "frequency": "60 Hz"}
+    ],
+    "pneumatic_pressure_psi": "110-120 PSI",
+    "electrical_connection_note": "Final electrical connection to local/national code is the responsibility of the electrical contractor. More than one point of connection may be required. Disconnect switches, main fuses, main power leads, etc., are NOT provided by Mohawk Lifts, LLC.",
+    "pneumatic_power_note": "Pneumatic power is the responsibility of the mechanical contractor to the final designated point or points at the vehicle lift unless otherwise specified by architect.",
+    "control_console_routing": "Routes to one primary leg (choose Leg A, B, C, or D)",
+    "control_console_max_length_standard_feet": 20,
+    "control_console_extra_length_note": "Lengths over standard 20 ft are charged at extra cost",
+    "shimming_note": "Examine floor for flatness. If shimming exceeds 1/2 inch, base plates are recommended. Shims not included with standard lift - additional charge."
+  },
+  "specifications": {
+    "track_width_inches": 29.9,
+    "standard_id_between_tracks_inches": 46.5,
+    "overall_od_at_standard_id_inches": 106.4,
+    "rj_rails_width_inches": 2.55,
+    "standard_ramp_length_inches": 106,
+    "ramp_collapsed_height_mm": 350
+  },
+  "features": [
+    "Heavy duty drive-on runway design",
+    "Surface mount or flush mount installation options",
+    "Multiple ramp length options (106, 118, 138, 138 double slope)",
+    "Multiple voltage/phase options (200-575V)",
+    "4-leg control console routing (A, B, C, D positions)",
+    "Adjustable track width between runways"
+  ],
+  "optional_equipment": [
+    "118 inch approach ramps (additional cost)",
+    "138 inch approach ramps (additional cost)",
+    "138 inch double slope approach ramps (additional cost)",
+    "Shims / base plates for uneven floors (additional charge)",
+    "Extended control console routing beyond 20 ft standard (additional cost)",
+    "Track lights",
+    "Toe guards",
+    "Other options (may impact ID and OD dimensions)"
+  ],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "DRAFT document",
+    "Ramp lengths other than standard 106 inches are at additional cost - contact rep for pricing",
+    "Standard installation width (ID) is 46.5 inches between tracks",
+    "RJ Rails are 2.55 inches wide, located on inside of each track",
+    "Track lights, toe guards, and other options may impact ID and OD dimensions",
+    "Control console lengths over standard 20 ft are charged at extra cost",
+    "If shimming exceeds 1/2 inch, base plates are recommended (additional charge)",
+    "Specifications subject to change without notice",
+    "Drawing must be reviewed and found acceptable to all customer specifications before signing"
+  ]
+}
