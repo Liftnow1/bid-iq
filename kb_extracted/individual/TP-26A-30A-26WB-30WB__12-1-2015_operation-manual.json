@@ -1,0 +1,86 @@
+{
+  "source_file": "/home/runner/work/bid-iq/bid-iq/data/product_data/mohawk/operation-manuals/TP-26A-30A-26WB-30WB  12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "operation-manual",
+  "model": "TP-26A/TP-30A/TP-26-WB/TP-30-WB",
+  "variant": "Standard and Wide Base versions",
+  "product_type": "Two-Post Vehicle Lift",
+  "manufacturer": "Mohawk Lifts",
+  "capacity": "26,000 lbs (TP-26A/TP-26-WB), 30,000 lbs (TP-30A/TP-30-WB)",
+  "dimensions": {
+    "lifting_height": "72 inches",
+    "overall_width": "180 inches",
+    "width_between_posts": "144 inches",
+    "width_between_carriages": "122 inches",
+    "cylinder_extension": "162-5/8 inches",
+    "post_height": "121-1/2 inches",
+    "overhead_hydraulic_lines": "192 inches",
+    "lifting_pad_height_min": "7-1/8 inches",
+    "lifting_pad_height_max": "79-1/8 inches",
+    "shipping_weight": "8,170 lbs"
+  },
+  "specifications": {
+    "motor_voltage": "208/230V",
+    "motor_fla": "15.0/13.2 amps",
+    "motor_horsepower": "5 HP",
+    "motor_phase": "3 phase",
+    "motor_cycle": "60 Hz",
+    "motor_speed": "1,800 RPM",
+    "pump_flow": "3.3 GPM @ 1,800 RPM",
+    "relief_valve_setting": "2,900 PSI",
+    "working_pressure": "2,700 PSI",
+    "reservoir_capacity": "8 gallons",
+    "hydraulic_fluid": "Dexron III",
+    "lifting_speed": "approximately 130 seconds",
+    "per_arm_capacity_tp26": "6,500 lbs",
+    "per_arm_capacity_tp30": "7,500 lbs",
+    "air_pressure": "65 PSIG",
+    "minimum_concrete_thickness": "12 inches (8 inches for wide base)",
+    "minimum_concrete_strength": "4,000 PSI",
+    "minimum_concrete_aging": "28 days"
+  },
+  "features": [
+    "Electric/Hydraulic operation",
+    "Two-post configuration",
+    "Pneumatic safety lock system",
+    "Diverter valve for independent carriage operation",
+    "Height adapters included (5\", 7.5\", 10\")",
+    "Pendant control",
+    "Swing arm design",
+    "Wide base option available"
+  ],
+  "safety_features": [
+    "Mechanical safety locks",
+    "Pneumatic lock release system",
+    "Pressure relief valve",
+    "Lock release cable",
+    "Safety stop mechanisms",
+    "Emergency lowering capability"
+  ],
+  "optional_equipment": [
+    "Height adapters (5\", 7-1/2\", 10\")",
+    "Lifting pads",
+    "Wheel adapters",
+    "Turf adapters"
+  ],
+  "certifications": [
+    "ALI/ETL Automotive Lift Certification",
+    "ANSI/ALI ALCTV:2011 compliance",
+    "ETL listing to ANSI/UL-201"
+  ],
+  "maintenance": [
+    "Daily pre-operation inspection",
+    "Weekly hydraulic safety checks and fluid level verification",
+    "Monthly fastener inspection and tightening",
+    "Semi-annual personnel qualification and torque verification",
+    "Annual hydraulic fluid inspection",
+    "Five-year hydraulic fluid replacement"
+  ],
+  "notes": [
+    "Indoor use only - outdoor installation prohibited",
+    "Must be installed on concrete meeting minimum specifications",
+    "Licensed electrician required for electrical connection and warranty",
+    "25-year structural warranty, 10-year mechanical warranty",
+    "Wide base models (WB) designed for thinner concrete floors"
+  ]
+}
