@@ -1,0 +1,87 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/RJ-50-AH-TR-Series.pdf",
+  "category": "four-post-lift",
+  "document_type": "engineering_drawing_specification",
+  "model": "RJ-50-AH",
+  "variant": "50000 Series Air/Hydraulic Jacking Beam (TR-75 Version)",
+  "product_type": "track_assisted_jacking_beam",
+  "capacity": "50,000 lbs max (capacity dependent on lift capacity); 15,000 lbs with optional slider arm attachment",
+  "dimensions": {
+    "overall_length_max_inches": 59.25,
+    "overall_length_min_inches": 43.5,
+    "width_max_inches": 32,
+    "width_min_inches": 12,
+    "height_inches": 10.25,
+    "pad_height_inches": 7.875,
+    "track_reference_inches": 12,
+    "side_clearance_inches": 2.5,
+    "end_height_inches": 4.375,
+    "holes_per_side": 5
+  },
+  "weight": {
+    "weight_lbs": 854
+  },
+  "installation_requirements": {
+    "compatible_lift": "TR-75 Series four-post lift",
+    "mounting": "Track-assisted, rides on lift tracks",
+    "welding_spec": "AWS E-70XX electrodes or E-70TI Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "specifications": {
+    "capacity_lbs": 50000,
+    "capacity_with_slider_arm_lbs": 15000,
+    "actuation": "Air/Hydraulic",
+    "tolerances": {
+      "angular_degrees": 1,
+      "fractional_inches": 0.030,
+      "decimal_2place_inches": 0.030,
+      "decimal_3place_inches": 0.005
+    },
+    "drawing_scale": "1/4",
+    "drawing_number": "RJ-50-AH-50000 SPEC",
+    "drawing_date": "07/12",
+    "revision": "B"
+  },
+  "features": [
+    "Air/hydraulic powered jacking beam",
+    "Track-assisted operation - rides along lift tracks",
+    "50,000 lb maximum capacity (dependent on lift capacity)",
+    "2 yoke pads included as standard",
+    "2 flat pads included as standard",
+    "Height adapters included as standard: (2) 5-inch, (2) 7.5-inch, and (2) 10-inch",
+    "5 holes per side for positioning",
+    "Adjustable width from 12 inches minimum to 32 inches maximum",
+    "Adjustable length from 43.5 inches minimum to 59.25 inches maximum"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Slider Arm Attachment",
+      "note": "Re-rates jacking beam to 15,000 lb capacity when installed"
+    }
+  ],
+  "parts_list": [
+    {
+      "part_number": "RJ-50-AH-50000",
+      "description": "Air/Hydraulic Jacking Beam for TR-75 Series"
+    }
+  ],
+  "certifications": [
+    "Tested and certified by a Nationally Recognized Testing Laboratory (NRTL)",
+    "Meets U.L. Standard 201 for Garage Equipment",
+    "Meets ANSI/ALI ALCTV-2011 for Automotive Lift Construction",
+    "ALI/ETL Certified - Independently Tested and Validated",
+    "Automotive Lift Institute (ALI) Member"
+  ],
+  "safety_features": [
+    "NRTL certified to UL 201 and ANSI/ALI ALCTV-2011",
+    "All sharp corners and edges removed per manufacturing spec"
+  ],
+  "notes": [
+    "This is a jacking beam accessory designed for use with TR-75 series four-post lifts",
+    "Confidential document - property of Mohawk Resources Ltd.",
+    "Revision A (04/01/2014): Addition of ALCTV certification",
+    "Revision B (12/1/2015): ALI verification logo change",
+    "Capacity is dependent on the lift capacity it is used with",
+    "When optional slider arm is attached, capacity is derated to 15,000 lbs"
+  ]
+}

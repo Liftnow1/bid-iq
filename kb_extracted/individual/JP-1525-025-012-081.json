@@ -1,0 +1,51 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/JP-1525-025-012-081.pdf",
+  "category": "four-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "025-012-081",
+  "variant": "Custom Width Jacking Platform",
+  "product_type": "jacking_platform_accessory",
+  "capacity": null,
+  "dimensions": {
+    "platform_length_inches": 12,
+    "height_inches": 2.75,
+    "track_clearance_height_inches": 8.25,
+    "overall_width_formula": "A + 3 inches (where A = track spread)",
+    "platform_inner_width_formula": "A - 5 3/4 inches (where A = track spread)",
+    "track_spread_range_min_inches": 20,
+    "track_spread_range_max_inches": 33
+  },
+  "weight": null,
+  "installation_requirements": {
+    "mounting": "Placed on lift tracks, no permanent installation required",
+    "positioning": "Can be placed in any location along the length of tracks"
+  },
+  "specifications": {
+    "track_spread_accommodation_min_inches": 20,
+    "track_spread_accommodation_max_inches": 33,
+    "platform_length_inches": 12,
+    "height_above_track_inches": 2.75,
+    "total_height_inches": 8.25,
+    "custom_built": true
+  },
+  "features": [
+    "Custom width - built to accommodate track spreads from 20 inches to 33 inches",
+    "12-inch long platform to facilitate the use of various jacking implements",
+    "Can be placed in any location along the length of tracks",
+    "Rolling wheels for repositioning along tracks"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "025-012-081",
+      "description": "Custom Width Jacking Platform"
+    }
+  ],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "This is an accessory/option for four-post lifts, not a standalone lift",
+    "Part number prefix JP-1525 suggests compatibility with 15,000-25,000 lb capacity lifts",
+    "Platform width is customizable based on track spread dimension 'A'"
+  ]
+}

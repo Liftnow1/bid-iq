@@ -1,0 +1,77 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-16-3SA.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TP-16",
+  "variant": "3 Stage Arms",
+  "product_type": "Two Post Inground Lift",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": null,
+  "dimensions": {
+    "overall_width_inches": 151.5,
+    "overall_width_meters": 3.85,
+    "overall_height_inches": 103,
+    "overall_height_meters": 2.62,
+    "column_height_inches": null,
+    "arm_spread_top_view_inches": 65.2,
+    "arm_spread_top_view_meters": 1.66,
+    "arm_length_top_view_inches": 130.3,
+    "arm_length_top_view_meters": 3.31,
+    "arm_reach_min_inches": 72.5,
+    "arm_reach_min_meters": 1.84,
+    "arm_reach_mid_inches": 76.5,
+    "arm_reach_mid_meters": 1.94,
+    "arm_reach_max_inches": 86.5,
+    "arm_reach_max_meters": 2.2,
+    "pad_height_inches": 4.5,
+    "pad_height_meters": 0.11,
+    "drive_through_clearance_inches": 180,
+    "drive_through_clearance_meters": 4.57,
+    "drive_through_note": "STD",
+    "overhead_line_adjustable_from_inches": "105.8",
+    "arm_adjustable_range_inches": "114-120",
+    "arm_rotation_max_inches": 61,
+    "arm_rotation_max_meters": 1.69,
+    "arm_rotation_min_inches": 36.3,
+    "arm_rotation_min_meters": 0.92
+  },
+  "weight": "N/A",
+  "installation_requirements": {
+    "overhead_steel_hydraulic_lines": true,
+    "adjustable_height_overhead_lines": true,
+    "welding_specs": "AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "specifications": {
+    "drawing_number": "ZZ1336",
+    "file_name": "ZZ1336",
+    "date": "08/11",
+    "drawn_by": "G. Gore",
+    "sheet_size": "B-SIZE",
+    "units": "inches [meters]",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_0XX": "+/- 0.030",
+      "decimal_0XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "3 Stage adjustable arms",
+    "Adjustable height over-head steel hydraulic lines",
+    "Inground two-post design"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [
+    "Remove all sharp corners and edges (manufacturing note)"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "Shown with adjustable height over-head steel hydraulic lines"
+  ]
+}
