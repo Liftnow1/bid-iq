@@ -4,27 +4,18 @@ import kbData from "./knowledge-base.json";
 
 export const maxDuration = 60;
 
-// Build a compact text representation of the KB
-const kbEntries = (kbData as Record<string, unknown>[]).map((entry) => {
-  const model = (entry.model as string) || "Unknown";
-  const variant =
-    (entry.variant as string) || (entry.product_type as string) || "N/A";
-  return `[${model} - ${variant}] ${JSON.stringify(entry)}`;
-});
-const kbText = kbEntries.join("\n");
+// Pre-build compact KB text - no redundant wrapping
+const kbText = JSON.stringify(kbData);
 
-const SYSTEM_PROMPT = `You are a Mohawk Lifts product expert assistant. You answer questions about Mohawk Lifts products using the knowledge base provided below.
+const SYSTEM_PROMPT = `You are a Mohawk Lifts product expert. Answer questions using ONLY this knowledge base (JSON array of product entries):
 
-<knowledge_base>
 ${kbText}
-</knowledge_base>
 
 Rules:
-- Answer based ONLY on the knowledge base above
-- Be precise with numbers, units, and model numbers
+- Be precise with numbers, units, model numbers
 - If comparing models, organize clearly
-- If the knowledge base does not contain the answer, say "I don't have information about that in the Mohawk Lifts knowledge base" and explain what data IS available
-- Never say "please enter a question" or anything similar — always attempt to answer`;
+- If data is not in the KB, say so and list what IS available
+- Always attempt to answer`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,14 +27,14 @@ export async function POST(request: NextRequest) {
       question = body?.question || "";
     } catch {
       return NextResponse.json(
-        { error: `Invalid request body: ${text.slice(0, 200)}` },
+        { error: `Invalid request body` },
         { status: 400 }
       );
     }
 
     if (!question || typeof question !== "string" || !question.trim()) {
       return NextResponse.json(
-        { error: `No question found in body. Received keys: ${text.slice(0, 200)}` },
+        { error: `No question provided` },
         { status: 400 }
       );
     }
@@ -81,11 +72,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Test endpoint to verify the route is working
 export async function GET() {
   return NextResponse.json({
     status: "ok",
-    kb_entries: kbEntries.length,
+    kb_entries: (kbData as unknown[]).length,
     kb_size_chars: kbText.length,
     has_api_key: !!process.env.ANTHROPIC_API_KEY,
   });
