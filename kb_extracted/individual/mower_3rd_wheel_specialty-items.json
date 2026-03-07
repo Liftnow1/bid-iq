@@ -1,0 +1,52 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/mower_3rd_wheel.pdf",
+  "category": "specialty-item",
+  "document_type": "vehicle_data_form",
+  "model": null,
+  "variant": "Third Wheel Mower",
+  "product_type": "Third Wheel Mower Data Sheet",
+  "capacity": null,
+  "dimensions": {
+    "form_fields": {
+      "tire_diameter": "Tire Diameter",
+      "vehicle_weight": "Vehicle Weight (lbs)",
+      "min_clearances": "Multiple MIN ground clearance measurements (side view and front view)"
+    },
+    "unit_of_measurement": "inches",
+    "views_included": ["Side View", "Front View", "Rear View"]
+  },
+  "weight": null,
+  "installation_requirements": {},
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "title": "Third Wheel Mower Data Sheet",
+    "drawing_number": "ZZ596",
+    "file_name": "ZZ596",
+    "scale": "N/A",
+    "drawn_by": "GGK",
+    "date": "12/00",
+    "sheet_size": "B-Size",
+    "tolerances": {
+      "angular": "+/- 1.5 degrees",
+      "fractional": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "Dimensional data form for three-wheeled mower vehicles",
+    "Side view, front view, and rear view diagrams with measurement callouts",
+    "Captures tire diameter, vehicle weight, and minimum ground clearances"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "All dimensions to be entered in inches",
+    "Please be complete in entering dimensional data",
+    "Determination in suiting lifting requirements is only as accurate and complete as the data received",
+    "Note any areas that may cause problems in vehicle lifting"
+  ]
+}

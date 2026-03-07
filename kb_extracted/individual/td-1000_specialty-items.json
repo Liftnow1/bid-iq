@@ -1,0 +1,71 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/td-1000.pdf",
+  "category": "specialty-item",
+  "document_type": "product_specification_sheet",
+  "model": "TD-1000AH",
+  "variant": null,
+  "product_type": "Air/Hydraulic Tire Dolly with Foot Pump",
+  "capacity": "1,000 lbs",
+  "dimensions": {
+    "A": "2.125 inches",
+    "B_lifting_height": "45.25 inches",
+    "C_overall_unit_height": "69.75 inches",
+    "D_min_support_leg_clearance": "4 inches (drawing) / 6 inches (spec text)",
+    "E_overall_width": "43.75 inches (drawing) / 44.75 inches (spec text)",
+    "F_width_of_lifting_arms": "24.5 inches (drawing) / 24 inches (spec text)",
+    "G": "35.75 inches",
+    "H": "41 inches",
+    "I_arm_conveyor_length": "19.75 inches",
+    "overall_length": "44.75 inches",
+    "side_shifting_adjustment": "3 inches left or right",
+    "max_arm_tilt_angle": "13 degrees",
+    "min_arm_elevation": "3 inches",
+    "caster_diameter": "4 inches"
+  },
+  "weight": "474 lbs (shipping weight)",
+  "installation_requirements": {
+    "air_operation": "Foot Control Up and Down"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources, LTD.",
+    "address": "P.O. Box 110, 65 Vrooman Ave, Amsterdam, NY 12010",
+    "phone_toll_free": "(800) 833-2006",
+    "phone_local": "(518) 842-1431",
+    "fax": "(518) 842-1289",
+    "website": "www.mohawklifts.com",
+    "facebook": "www.facebook.com/mohawklifts",
+    "autocad_specs": "www.mohawklifts.com/architects",
+    "gsa_contract": "#GS07F-7099B",
+    "revision": "REV 3/11"
+  },
+  "features": [
+    "Air/Hydraulic foot pump operation",
+    "1,000 lb capacity",
+    "45-1/4 inch lifting height",
+    "Side shifting adjustment of 3 inches left or right",
+    "13 degree max arm tilt angle",
+    "Foot control up and down operation",
+    "4 inch ball bearing type casters with locking rear 360 degree rotation",
+    "AUTOcad specs available online"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "GSA Contract (#GS07F-7099B)",
+    "NJPA (National Joint Powers Alliance)",
+    "WSCA (Western States Contracting Alliance)",
+    "HGACBuy",
+    "ARCAT"
+  ],
+  "safety_features": [
+    "Locking rear casters with 360 degree rotation",
+    "Foot-controlled operation for hands-free lifting/lowering"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Available under discounted government contract in all 50 states",
+    "AUTOcad specs available online at www.mohawklifts.com/architects",
+    "Some dimension discrepancies between drawing labels and spec text (E: 43-3/4 vs 44-3/4; D: 4 vs 6; F: 24-1/2 vs 24)"
+  ]
+}

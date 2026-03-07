@@ -1,0 +1,102 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/LMF12-TP16-TP18 12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "LMF-12 / TP-16 / TP-18",
+  "variant": "12,000 / 16,000 / 18,000 lb capacity two-post lifts",
+  "product_type": "two_post_lift",
+  "capacity": "LMF-12: 12,000 lbs; TP-16: 16,000 lbs; TP-18: 18,000 lbs",
+  "dimensions": {
+    "base_footprint_width_inches": 30,
+    "base_footprint_depth_inches": 24,
+    "base_plate_thickness_inches": 0.75,
+    "lifting_height_ft": 6,
+    "arm_pad_height_min_inches": 5
+  },
+  "weight": {
+    "lmf12_shipping_weight_lbs": 3100,
+    "lmf12_shipping_weight_kg": 1406.13,
+    "tp16_shipping_weight_lbs": 3600,
+    "tp16_shipping_weight_kg": 1632.96,
+    "tp18_shipping_weight_lbs": 3900,
+    "tp18_shipping_weight_kg": 1769.01
+  },
+  "installation_requirements": {
+    "mounting": "Surface-mounted, bolts to concrete floor",
+    "base_footprint": "30 in wide x 24 in, constructed from 3/4 in thick plate",
+    "lag_bolts_per_column": 8,
+    "hydraulic_lines": "Overhead stainless steel (optional in-floor)",
+    "indoor_use_only": true
+  },
+  "specifications": {
+    "lmf12_capacity_lbs": 12000,
+    "lmf12_capacity_kg": 5443.11,
+    "tp16_capacity_lbs": 16000,
+    "tp16_capacity_kg": 7257.49,
+    "tp18_capacity_lbs": 18000,
+    "tp18_capacity_kg": 8164.66,
+    "cylinder_type": "Twin cylinder direct drive",
+    "cylinder_diameter_inches": 4,
+    "number_of_cylinders": 2,
+    "column_material": "3/4 inch thick forklift mast steel",
+    "roller_bearings_per_carriage": 8,
+    "roller_bearing_type": "Double-sealed self-lubricating steel ball bearing",
+    "synchronization": "Patented hydraulic synchronization - overhead or in-floor stainless steel lines",
+    "adapter_heights_inches": [5, 7.5, 10],
+    "max_stacking_height_inches": 17.5,
+    "max_stacking_configuration": "One 10-inch and one 7.5-inch adapter",
+    "swing_arm_bolt_diameter_inches": 1.125,
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "Twin cylinder direct drive - no chains or cables",
+    "Large 4-inch cylinders for longer seal life and lower operating pressures",
+    "Patented hydraulic synchronization system",
+    "Precision steel ball bearing roller carriages",
+    "3/4-inch thick forklift mast columns",
+    "Clear floor design",
+    "Low-profile 5-inch swing arms fit under most passenger cars",
+    "Overhead or in-floor stainless steel hydraulic lines",
+    "6-foot lifting height",
+    "Standard adapters: (4) 5-inch, (4) 7.5-inch, and (4) 10-inch",
+    "All-position mechanical safety locks in both columns",
+    "Automatic swing arm restraints"
+  ],
+  "optional_equipment": [
+    {
+      "item": "In-Floor Hydraulic Lines",
+      "description": "Alternative to overhead routing, available on TP-16"
+    },
+    {
+      "item": "Custom Single-Piece Adapters",
+      "description": "Longer custom adapters available upon request"
+    },
+    {
+      "item": "Stackable Adapter Pads",
+      "description": "(4) 5-inch, (4) 7.5-inch, (4) 10-inch - standard equipment"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets ANSI/ALI ALCTV safety standard",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "All-position 1-inch thick mechanical locks on both carriages",
+    "Locks engage from ground to full lifting height of 6 feet",
+    "Infinite-position internal hydraulic safeties",
+    "External pressure-compensated flow controls",
+    "Velocity fuse valving",
+    "Automatic swing arm restraints engage when lifting begins",
+    "Restraints release only when vehicle is safely lowered"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Warranty: 25 years structural, 10 year mechanical, limited lifetime hydraulic cylinder",
+    "Combined manual covers LMF-12, TP-16, and TP-18 models",
+    "Standard version without airlocks - see separate manual for airlock version",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}
