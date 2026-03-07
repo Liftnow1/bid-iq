@@ -217,7 +217,9 @@
     "_source_file": "100-42-F_Installation_Drawings.pdf",
     "_pages_count": 15,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:04:38Z"
+    "_extracted_at": "2026-03-06T23:04:38Z",
+    "source_file": "100-42-F_Installation_Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "100-42-SURFACE",
@@ -408,7 +410,9 @@
     "_source_file": "100-42-S_Installation_Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:01:38Z"
+    "_extracted_at": "2026-03-06T23:01:38Z",
+    "source_file": "100-42-S_Installation_Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "100-48-FLUSH",
@@ -546,7 +550,9 @@
     "_source_file": "100-48-F Installation Drawings.pdf",
     "_pages_count": 15,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:12:02Z"
+    "_extracted_at": "2026-03-06T23:12:02Z",
+    "source_file": "100-48-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "100-48",
@@ -719,7 +725,9 @@
     "_source_file": "100-48-S_Installation_Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:02:03Z"
+    "_extracted_at": "2026-03-06T23:02:03Z",
+    "source_file": "100-48-S_Installation_Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "36-28-F",
@@ -868,7 +876,9 @@
     "_source_file": "36-28-F Installation Drawings.pdf",
     "_pages_count": 16,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:01:28Z"
+    "_extracted_at": "2026-03-06T23:01:28Z",
+    "source_file": "36-28-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "36-28-S",
@@ -1003,7 +1013,9 @@
     "_source_file": "36-28-S Installation Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:01:55Z"
+    "_extracted_at": "2026-03-06T23:01:55Z",
+    "source_file": "36-28-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "38-26",
@@ -1211,7 +1223,9 @@
     "_source_file": "38-26-F Installation Drawings.pdf",
     "_pages_count": 15,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:12:29Z"
+    "_extracted_at": "2026-03-06T23:12:29Z",
+    "source_file": "38-26-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "38-26",
@@ -1435,7 +1449,9 @@
     "_source_file": "38-26-S Installation Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:04:25Z"
+    "_extracted_at": "2026-03-06T23:04:25Z",
+    "source_file": "38-26-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "40-35-F",
@@ -1633,7 +1649,9 @@
     "_source_file": "40-35-F Installation Drawings.pdf",
     "_pages_count": 15,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:14:43Z"
+    "_extracted_at": "2026-03-06T23:14:43Z",
+    "source_file": "40-35-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "40-35",
@@ -1779,7 +1797,9 @@
     "_source_file": "40-35-S Installation Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:15:07Z"
+    "_extracted_at": "2026-03-06T23:15:07Z",
+    "source_file": "40-35-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "45-35-F",
@@ -1898,7 +1918,9 @@
     "_source_file": "45-35-F Installation Drawings.pdf",
     "_pages_count": 14,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:15:18Z"
+    "_extracted_at": "2026-03-06T23:15:18Z",
+    "source_file": "45-35-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "45-35-S",
@@ -2096,7 +2118,9 @@
     "_source_file": "45-35-S-Installation-Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:04:37Z"
+    "_extracted_at": "2026-03-06T23:04:37Z",
+    "source_file": "45-35-S-Installation-Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "50-26-F",
@@ -2221,7 +2245,9 @@
     "_source_file": "50-26-F Installation Drawings.pdf",
     "_pages_count": 16,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:15:55Z"
+    "_extracted_at": "2026-03-06T23:15:55Z",
+    "source_file": "50-26-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "50-26-S",
@@ -2328,7 +2354,9 @@
     "_source_file": "50-26-S Installation Drawings.pdf",
     "_pages_count": 10,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:04:49Z"
+    "_extracted_at": "2026-03-06T23:04:49Z",
+    "source_file": "50-26-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "50-32-F",
@@ -2486,7 +2514,9 @@
     "_source_file": "50-32-F Installation Drawings.pdf",
     "_pages_count": 15,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:05:37Z"
+    "_extracted_at": "2026-03-06T23:05:37Z",
+    "source_file": "50-32-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "50-32",
@@ -2657,7 +2687,9 @@
     "_source_file": "50-32-S Installation Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:05:51Z"
+    "_extracted_at": "2026-03-06T23:05:51Z",
+    "source_file": "50-32-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "50-35-F",
@@ -2873,7 +2905,9 @@
     "_source_file": "50-35-F Installation Drawings.pdf",
     "_pages_count": 15,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:07:23Z"
+    "_extracted_at": "2026-03-06T23:07:23Z",
+    "source_file": "50-35-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "50-35",
@@ -3075,7 +3109,9 @@
     "_source_file": "50-35-S Installation Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:16:40Z"
+    "_extracted_at": "2026-03-06T23:16:40Z",
+    "source_file": "50-35-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-26-F",
@@ -3288,7 +3324,9 @@
     "_source_file": "75-26-F Installation Drawings.pdf",
     "_pages_count": 15,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:16:51Z"
+    "_extracted_at": "2026-03-06T23:16:51Z",
+    "source_file": "75-26-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-26",
@@ -3460,7 +3498,9 @@
     "_source_file": "75-26-S Installation Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:06:48Z"
+    "_extracted_at": "2026-03-06T23:06:48Z",
+    "source_file": "75-26-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-30-F",
@@ -3592,7 +3632,9 @@
     "_source_file": "75-30-F Installation Drawings.pdf",
     "_pages_count": 15,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:17:20Z"
+    "_extracted_at": "2026-03-06T23:17:20Z",
+    "source_file": "75-30-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-30-S",
@@ -3696,7 +3738,9 @@
     "_source_file": "75-30-S Installation Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:18:14Z"
+    "_extracted_at": "2026-03-06T23:18:14Z",
+    "source_file": "75-30-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-35-F",
@@ -3916,7 +3960,9 @@
     "_source_file": "75-35-F Installation Drawings.pdf",
     "_pages_count": 15,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:08:51Z"
+    "_extracted_at": "2026-03-06T23:08:51Z",
+    "source_file": "75-35-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-35-S",
@@ -4094,7 +4140,9 @@
     "_source_file": "75-35-S Installation Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:09:11Z"
+    "_extracted_at": "2026-03-06T23:09:11Z",
+    "source_file": "75-35-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-42-F",
@@ -4242,7 +4290,9 @@
     "_source_file": "75-42-F Installation Drawings.pdf",
     "_pages_count": 16,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:09:24Z"
+    "_extracted_at": "2026-03-06T23:09:24Z",
+    "source_file": "75-42-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-42",
@@ -4431,7 +4481,9 @@
     "_source_file": "75-42-S_Installation_Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:09:48Z"
+    "_extracted_at": "2026-03-06T23:09:48Z",
+    "source_file": "75-42-S_Installation_Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-48-F",
@@ -4584,7 +4636,9 @@
     "_source_file": "75-48-F Installation Drawings.pdf",
     "_pages_count": 16,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:18:53Z"
+    "_extracted_at": "2026-03-06T23:18:53Z",
+    "source_file": "75-48-F Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "75-48",
@@ -4729,21 +4783,27 @@
     "_source_file": "75-48-S Installation Drawings.pdf",
     "_pages_count": 9,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:22:09Z"
+    "_extracted_at": "2026-03-06T23:22:09Z",
+    "source_file": "75-48-S Installation Drawings.json",
+    "_source_category": "existing-kb"
   },
   {
     "raw_response": "```json\n{\n  \"model\": \"75-30-F\",\n  \"variant\": \"flush mount\",\n  \"product_type\": \"parallelogram lift heavy duty\",\n  \"capacity\": \"75,000 pounds (37.5 tons) minimum per cycle\",\n  \"dimensions\": {\n    \"platform_length\": \"360 inches (30 feet)\",\n    \"platform_width\": \"32 inches\",\n    \"platform_spacing\": \"45 inches\",\n    \"total_platform_width\": \"109.5 inches\",\n    \"minimum_lift_height\": \"63 inches when ramps fully raised\",\n    \"height_when_retracted\": \"flush with floor\",\n    \"first_lock_position\": \"minimum 18 inches height\",\n    \"mechanical_lock_intervals\": \"10 positions evenly distributed\"\n  },\n  \"installation_requirements\": {\n    \"foundation\": \"no pit required in floor\",\n    \"floor_concrete_minimum\": \"3000 PSI compression\",\n    \"anchor_bolts\": \"pre-drilled base to accept anchor bolts appropriate to load\",\n    \"base_frame_construction\": \"A-36 steel plates 30\\\" x 20\\\" x 1/2\\\" thick connected by two A-36 1\\\" thick plates\",\n    \"base_plate_connection\": \"two 3\\\" x 4\\\" x 5/16\\\" thick steel structure tubes\",\n    \"no_permanent_obstruction\": \"between lift platforms\"\n  },\n  \"parts_list\": [\n    {\n      \"part_number\": \"WEJ-IT 3/4\\\" x 5\\\"\",\n      \"description\": \"Wedge anchors\",\n      \"qty\": 56\n    }\n  ],\n  \"certifications\": [\n    \"ANSI/ALI ALCTV standard\",\n    \"Federal, Provincial applicable laws and local safety codes\",\n    \"OSHA, ETL, UL, AWS, NEC standards\"\n  ],\n  \"notes\": [\n    \"Equipment must be new, supplied with all specified installation materials\",\n    \"Reconditioned or used equipment not acceptable\",\n    \"Lifting speed: approximately 60 seconds to reach maximum height\",\n    \"Hydraulic connections must conform to JIC or ORB standards\",\n    \"All pivot pins between legs and platforms made from machined/ground steel bars 2.5\\\" diameter chrome covered\",\n    \"Automatic wheel stop plates engage when ramps lift and retract when ramps reach floor\",\n    \"Wheel stops are interchangeable\",\n    \"Vehicle can be lifted to any height with 10 mechanical lock positions\",\n    \"Safety locks with minimum 3:1 safety factor\",\n    \"Manual pump and descent valves available for power failure\",\n    \"Velocity fuse incorporated in each hydraulic cylinder\",\n    \"All hydraulic cylinders 7 3/4\\\" diameter with 2 1/2\\\" diameter chrome covered push rod\"\n  ],\n  \"pages_summary\": [\n    {\n      \"page\": 1,\n      \"description\": \"Title page and scope specifications\",\n      \"extracted_text\": \"MOHAWK MODÈLE 75-30-F ENCASTRÉ PONT ÉLÉVATEUR PARALLÉLOGRAMME TYPE SERVICE LOURD SPÉCIFICATIONS 1.0 PORTÉE 1.1 Ces spécifications sont établies en vue de l'achat d'un pont élévateur service lourd de type plateforme Parallélogramme permettant de lever des véhicules pesant jusqu'à 75,000 livres. L'installation de cet équipement ne doit requérir aucun pieu dans le sol. Des ponts élévateurs hors sol à ciseaux, poteaux, ou colonnes ne sont pas acceptables. 1.2 L'équipement doit être neuf, fourni avec tout le matériel spécifié pour l'installation lorsque livré. Un équipement reconditionné ou usagé ne sera pas accepté. 1.3 L'équipement doit être conçu en vue de rencontrer toute loi Fédérale, Provinciale applicable et les normes et codes de sécurité locales, ainsi que OSHA, ETL, UL, AWS, NEC et les standards courants ANSI/ALI ALCTV. Le standard ANSI/ALI ALCTV est le seul et unique standard existant de sécurité et de test pour les ponts élévateurs pour véhicules. 1.4 Toutes les dimensions pour l'épaisseur des matériaux et la structure sont des dimensions minimales. Les tolérances des dimensions, à moins d'être spécifiées autrement, sont de: +/- 0.25 pouces pour des dimensions de moins de dix (10) pouces; +/- 1.0 pouces pour des dimensions de (10) pouces à cinq (5) pieds inclusivement, et +/- 3.0 pouces pour les dimensions plus grandes que cinq (5) pieds. 2.0 ÉQUIPEMENT 2.1 L'ensemble complet consiste en deux plateformes soulevées par un système hydraulique et une console de contrôle électro-hydraulique. Les longueurs requises de boyaux hydrauliques renforcis d'acier, de lignes d'air comprimé ainsi que les câbles électriques pour relier le pont élévateur à l'éventuelle localisation de la console de contrôle.\"\n    },\n    {\n      \"page\": 2,\n      \"description\": \"Equipment specifications and lift characteristics\",\n      \"extracted_text\": \"2.1.1 Les longueurs de boyaux hydrauliques, lignes d'air et câbles électrique fournis avec l'équipement doivent permettre de localiser la console de contrôle à dix (10) pieds (maximum) des points de raccords avec le pont élévateur. Si la console doit être localisée plus loin, d'autres longueurs devront être fournies à un coût additionnel. 2.1.2 Les raccords hydrauliques doivent être conformes aux standards JIC ou ORB. 2.2 Caractéristiques du pont élévateur: 2.2.1 Capacité de levage: 37.5 tonnes (75,000 livres) minimum par cycle. 2.2.2 Hauteur de levée minimale entre la surface du plancher et le dessous des pneus: 63 pouces lorsque les rampes sont complètement levées. Les barrures doivent permettre de lever un véhicule à n'importe quelle hauteur avec des intervalles de 10 positions de barrures mécaniques réparties également sur la hauteur de levée. 2.2.3 La première position de barrure doit être à un minimum de 18 pouces de hauteur assurant une position de travail confortable et sécuritaire pour freins/pneus. 2.2.4 Vitesse de levage: 60 secondes approximativement pour atteindre la hauteur maximale de levée. 2.3 Dimensions des plateformes: Longueur des plateformes: 360 pouces (30 pieds) Largeur des plateformes: 32 pouces Espace entre les plateformes: 45 pouces Largeur totale des plateformes: 109.5 pouces. Hauteur lorsque rétractées: égalité du plancher 2.4 Clauses structurelles: 2.4.1 Tous les goujons (pins) de pivots entre les jambes et les plateformes et les cylindres et les jambes de levée seront fabriqués de barres d'acier machiné/meulé/poli de 2 ½ pouces de diamètre recouverts de chrome pour une vie de service prolongée. Des goujeons de pivot de plus petit diamètre ou non recouverts de chrome ne seront pas accepté. 2.4.2 Tous les goujons de joints pivots, étant soumis à des tensions maximales, seront insérés dans un manchon composite imprégné d'huile, pour une durée de vie prolongée et en faciliter les réparations.\"\n    },\n    {\n      \"page\": 3,\n      \"description\": \"Structural specifications and platform construction details\",\n      \"extracted_text\": \"2.4.3 Comme la définition d'un parallélogramme est une figure à quatre côtés comportant deux lignes horizontales reliées par deux lignes à angle parallèles (jambes de levage), les deux composantes horizontales doivent faire partie du parallélogramme pour assurer l'intégrité de la structure et relier la plateforme du haut à celle du bas. Les ponts élévateur conçus sans l'intégrité structurelle de la section horizontale de la base n'est pas acceptable. 2.4.4 Chaque plateforme (rampe et base) doit être fabriquée de plaques en acier d'une épaisseur de 0.375 pouces supporté par (2) 4 x 8 x 0.250 pouces tubes d'acier de structure ASTM A-500 Grade B et une cannelure en acier de structure de 8\\\" @ 11.5 lb/pi. 2.4.5 Chaque rampe doit avoir des plaques à engagement automatique d'arrêt des roues en acier fixées à l'avant et à l'arrière des rampes qui s'engagent dès que les rampes se soulèvent pour empêcher le véhicule de rouler par l'avant ou l'arrière en bas des rampes lorsque les rampes sont soulevées de plus de 12 pouces. 2.4.6 Les plaques d'arrêt doivent être automatiquement en position dès que les rampes se lèvent et se rétracter automatiquement lorsque les rampes atteignent le plancher. 2.4.7 Ces arrêts ne doivent pas réduire la longueur effective des rampes de levage de plus de six (6) pouces. 2.4.8 Les arrêts de roues doivent être interchangeables. 2.5 Clauses relatives au Niveau/Fixation: 2.5.1 La base de chaque bras de levage doit être pré percée pour accepter des boulons d'ancrage de diamètre approprié à la charge imposée par le poids lors de l'utilisation du pont élévateur.. 2.5.2 Le châssis de la base sera fabriqué de plaques en acier A-36 de 30\\\" x 20\\\" x ½ d'épaisseur reliée à chaque jambe de levage par deux plaques en acier A-36 de 1\\\" d'épaisseur. Les plaques de base doivent être reliées l'une à l'autre par deux (2) tubes d'acier de structure de 3\\\" x 4\\\" x 5/16 d'épaisseur. Les ponts élévateurs ayant des plaques de base individuelles qui ne sont pas reliées l'une à l'autre pour créer un châssis mono pièce ne sont pas acceptable. 2.5.3 Le béton du plancher ne doit pas requérir du béton de plus de 3000-PSI en compression. 2.6 Il ne doit y avoir aucune obstruction permanente entre les plateformes de levage.\"\n    },\n    {\n      \"page\": 4,\n      \"description\": \"Hydraulic system specifications and safety features\",\n      \"extracted_text\": \"2.7 Clauses relatives au système hydraulique: 2.7.1 Un fusible de vélocité doit être incorporé dans chaque cylindre hydraulique (soupape de contrôle de débit) en vue de prévenir une descente des plateformes en cas de fuite d'huile. 2.7.2 Les cylindres hydrauliques doivent être fixés sous les rampes à l'abri des sources de poussières, saletés et de dommages causés par des objets qui peuvent tomber dessus. 2.7.3 Tous les cylindres hydrauliques doivent être d'un diamètre de 7 3/4 pouces avec une tige de poussée de 2 1/2 de diamètre recouverte de chrome. Des diamètres plus petits qui requièrent des pressions d'opération plus élevées, imposant plus de stress aux composantes hydrauliques, et réduisant la vie de service du moteur et de la pompe, ne sont pas acceptables. 2.7.4 La pression d'opération ne doit pas excéder 2450 psi sous la charge maximale. Les ponts élévateurs requérant une pression plus élevée, imposant plus de stress aux composantes hydrauliques, et réduisant la vie de service du moteur et de la pompe, ne sont pas acceptables. 2.7.5 Tous les boyaux hydrauliques doivent être renforcés de treillis d'acier et avoir des raccords standard JIC. 2.7.6 Le pont élévateur est activé par une pompe hydraulique fabriquée en Amérique du Nord, produisant la pression et le volume requis pour son opération. 2.7.7 En cas de perte de courant électrique, le pont élévateur pourra être abaissé à partir de toute hauteur par une pompe manuelle et des soupapes de descente manuelles. 2.8 Système de barrures mécaniques de sécurité: 2.8.1 Des barrures de sécurité en acier ayant un facteur de sécurité minimum de 3:1 doivent être fixées sur chaque cylindre de levée et ces barrures doivent s'engager à un minimum de dix (10) positions différentes. Ces barrures doivent assurer un minimum de déplacement en cas de fuite du système hydraulique et maintenir la hauteur des rampes en position. 2.8.2 Les barrures de sécurité doivent se désengager automatiquement quand le bouton de contrôle de descente est activé, et se réengager automatiquement quand ce bouton est relâché. Les barrures doivent s'engager automatiquement lors de la levée des rampes. Ceci assurera un engagement positif des barrures lors de la levée en cas de défaillance hydraulique.\"\n    },\n    {\n      \"page\": 5,\n      \"description\": \"Control system specifications and warranty\",\n      \"extracted_text\": \"2.8.3 La console de contrôle doit abriter les équipements suivants : • Réservoir d'huile en acier (les réservoirs en plastique ne sont pas acceptables) • Passoire sur ligne d'aspiration • Filtre sur le retour de basse pression • Pompe hydraulique type à engrenage • Pompe manuelle avec soupapes de descente manuelles • Moteur électrique de 20 HP, 575, 3 phases, 60 Hz, TEFC 2.9 Les boîtiers abritant les composantes de contrôle doivent rencontrer la norme d'étanchéité NEMA 12 (minimum), les contrôles suivants doivent y être assemblés tout en maintenant la norme NEMA 12 pour chacune des composantes. • Interrupteur arrêt/départ avec système de barrure. • Bouton poussoir pour \\\"LEVER\\\" et \\\"DESCENDRE\\\" • \\\"PARK\\\" bouton pour assoir les jambes de levée sur les barrures mécaniques qui s'illumine (ambré) quand celles-ci sont engagées. • Barrure des contrôles avec une clef • Un écran alphanumérique LED pour identifier les conditions d'opération sécuritaires ou non sécuritaires, indique les statuts de levée et aide en identifiant les problèmes simplement contrairement à un code d'erreur. • L'écran LED est illuminé vert lorsque l'unité est active. • Une alarme sonore audible s'actionne quand les rampes se lèvent ou s'abaissent. L'alarme se désactive quand les rampes sont en position park ou complètement baissées. 2.9.1 Le système de contrôle est opéré par un Contrôle Logique Programmable (CLP) qui arrête toutes les opérations des contrôles si une condition non sécuritaire se développe telle que (mais non limité à): pression d'air insuffisante pour activer les barrures de sécurité, ruban interrupteur déplacé ou différence de hauteur des rampes. L'opération ne doit pas pouvoir se rétablir tant que celle-ci n'est pas corrigée. 2.9.2 Le système de contrôle doit assurer que les plateformes ne diffèrent en hauteur de maximum deux (2) pouces. Si les rampes diffèrent plus que ce nombre, le système doit s'arrêter et ne pouvoir être réactivé tant que le problème n'est pas corrigé. 2.9.3 Le système de contrôle doit être programmable pour arrêter la levée à une hauteur spécifique de façon à pouvoir installer ou enlever des accessoires de lavage tels crics, accommoder chaque technicien ou une hauteur de plafond basse. 3.0 GARANTIE 3.1 La garantie des composantes structurelles et de pouvoir doit être de 2 ans. 3.2 Garantie sur le moteur et la pompe hydraulique est de 1 an.\"\n    },\n    {\n      \"page\": 6,\n      \"description\": \"Standard equipment and optional accessories\",\n      \"extracted_text\": \"4.0 ÉQUIPEMENT STANDARD 4.1 (56) Ancrages wej-it 3/4\\\" x 5\\\". 4.2 Peinture pour retouches, 1 contenant chacun de peinture rouge & jaune. 4.3 Huile Dexron III ATF pour la pompe hydraulique et le réservoir.. 4.4 Cales pour niveler la plateforme lors de l'installation. 4.5 Manuels de l'opérateur et de sécurité. 4.5.1 Manuel ANSI/ALI OIM (ALI standard # ALOIM-2008). 4.5.2 Manuel ANSI/ALI \\\"Lever Correctement\\\" (ALI standard # SM01-2). 4.5.3 Manuel Guide de Points de Levage ANSI/ALI (ALI standard # ALI/LP-guide). 4.5.4 Auto collants de sécurité ANSI/ALI apposés sur le pont élévateur. 5.0 ACCESOIRES OPTIONNEL 5.1 Éclairage des rampes (OPTIONNEL) 5.1.1 Le système optionnel d'éclairage des rampes doit être certifié et testé selon les standards ANSI/ALI ALCTV et UL-201. 5.1.2 Le pont élévateur est fourni avec (8) lampes fluorescentes double goupilles blanc froid 40 watt, 48 pouces de long (minimum). Les lampes doivent être espacées également le long des rampes pour illuminer l'espace intérieur des rampes et le dessous du véhicule. 5.1.3 Une protection doit recouvrir les lampes pour prévenir qu'elles ne soient cassées et aussi protéger l'opérateur lors d'un bris. 5.1.4 Le système d'éclairage doit être dans un boîtier et alimenté par la console. Le système de contrôle doit vérifier la hauteur des rampes et couper l'alimentation en courant lorsque le dessus des rampes est à moins de 18 pouces du plancher.\"\n    },\n    {\n      \"page\": 7,\n      \"description\": \"RJ-50-P Jack on Chariot specifications\",\n      \"extracted_text\": \"5.2 RJ-50-P Cric sur Chariot Air/Hydraulique (OPTIONNEL) 5.2.1 Capacité Maximum par chariot: 50,000 livres. 5.2.2 Tous les crics sur chariot fournis doivent être certifiés et testés selon les standards ANSI/ALI ALCTV et UL-201. 5.2.3 Les chariots soudés des crics doivent être fabriqués de (2) plaques verticales d'une épaisseur de ¾\\\" x 10\\\" de haut ASTM A-36 soudées en parallèle sur une plaque de base en acier de 1/2\\\" ASTM A-36. Les bouts de section se terminent par une plaque en acier de 3/4\\\" d'épaisseur ASTM A-36 pour que celles-ci s'engagent sur le rebord des rampes. Une poignée permet de tirer ou pousser cette plateforme le long des rampes. Des plaques de fixation pour les soupapes et les unités de pouvoir sont prévues à cet effet. 5.2.4 Ensemble de roues: Les roues sont fabriquées en acier CF-1018 et ont un épaulement pour s'adapter aux rails plats qui courent à l'intérieur tout le long de chaque rampe. Les essieux sont fabriqués en acier rond CF-1018 d'un diamètre de 5/8\\\" CF-1018. Les essieux sont montés sur ressorts pour porter le poids des chariots lors d'un déplacement mais se rétractent lorsque qu'une charge est appliquée, transférant la charge du chariot sur les rails des rampes pour sécuriser/barrer le chariot en place. 5.2.5 Deux (2) unités de pouvoir devront être fournis, un pour chaque cylindre, chacun consistant en une pompe hydraulique fonctionnant à l'air et un réservoir en acier. Chaque réservoir sera rectangulaire et en acier de dimensions: 9 1/2\\\" x 11 1/2\\\" x 6 ½ \\\"(3 gallons). 5.2.6 Soupapes: Deux (2) soupapes de contrôle directionnel (2), à ressort centré, de 3000 psi, chacune avec une manette pour un contrôle séparé de chaque cylindre du cric. 5.2.7 Deux (2) cylindres de cric: chacun consistant en un (1) tube de cylindre en acier poli de 4 1/8\\\" OD ASTM A-513-5 et une (1) tige de poussée de 2 5/8\\\" CF-1045 recouverte de chrome.. Les bases de cylindres consistent en une plaque de 3/8\\\" d'épaisseur x 6 1/4\\\" x 8\\\" en acier ASTM A-36. Les bouts des tiges de poussée ont des trous machinés pour accepter des coussins de levée standard et spéciaux pour les essieux. La course de la tige de levée doit être d'environ 8 7/8\\\". 5.2.7.1 Chaque cylindre hydraulique doit avoir une soupape intégrée de contre balancement pour prévenir une descente subite en cas de fuite d'huile. Une pression positive de l'unité de pouvoir doit être présente pour permettre au cylindre de se rétracter. Ce type d'arrangement de soupape assure que les cylindres restent en position pour de longues périodes de temps sans crainte de fuites ou baisse subite. 5.2.8 Deux (2) coussins de levée standard et deux (2) coussins pour essieux doivent être fournis avec chaque cric mobile. Deux (2) rallonges pour camions empilables de 3\\\" de long et deux (2) de 6\\\" de long doivent aussi être fournies.\"\n    },\n    {\n      \"page\": 8,\n      \"description\": \"Additional jack specifications and tire lift specifications\",\n      \"extracted_text\": \"5.2.9 Tubulures Hydraulique: ensemble de tuyau en acier inoxydable sans joint de 3/8\\\" OD, certifié pour une pression 14,000 psig minimum, évasé à chaque bout pour accepter un raccord femelle mâle. Quatre (4) ensembles de boyaux hydraulique: Parker type SAE-100R2, 1/4\\\" ID, certifiés 20,000 psig minimum, résistants à l'huile, aux intempéries et à l'abrasion, chaque bout avec un raccord pivotant #6 JIC femelle. 5.2.10 Dimensions: Conçu pour des rails ayant 45\\\" à l'intérieur des rampes. Dimensions approximative des chariots de cric: hauteur12\\\" x profondeur 28\\\" x longueur 52\\\". 5.3 Ruban Interrupteur de Sécurité (OPTIONNEL) 5.3.1 Le ruban interrupteur de sécurité consiste en trois (3) sections de ruban de 10' fixées au bas de chaque rampe, qui, si une pression est détectée n'importe où sur sa longueur, va instantanément arrêter l'opération de levée ou de descente. Utilisé en tant qu'arrêt d'urgence pour le personnel autour de l'équipement, ou arrêter la descente pour éviter que les rampes endommagent une pièce d'équipement oubliée en dessous. 5.3.2 Le ruban interrupteur peut être fixé sous les rampes à l'intérieur ou à l'extérieur, ou des deux côtés, selon le niveau de sécurité recherché. 5.3.3 Chaque section de ruban interrupteur consiste en un ruban interrupteur enchâssé dans une gaine de protection en caoutchouc, pouvant accepter 1\\\" de dépression, mais activé avec aussi peu que 1 livre de pression. 5.3.4 Le ruban interrupteur de sécurité doit être d'un jaune relié à la sécurité. 5.4 TD-1000-P Chariot Élévateur Contrebalancé pour ensemble de pneus (OPTIONNEL) 5.4.1 Le chariot élévateur contrebalancé pour ensemble de pneus TD-1000-P est conçu pour l'enlèvement ou l'installation de pneus simple, tandem, duplex et jantes qui sont sur un camion qui est levé sur les rampes (i.e. les essieux soulevés par un cric sur chariot). 5.4.2 Le chariot élévateur doit avoir des contre poids à l'arrière, représentant 1 ⅓ fois la capacité établie sur le bout des fourches. Seulement les tubes des fourches doivent dépasser sur le devant de l'unité, permettant aux fourches de lever les roues par le côté des rampes du parallélogramme, tout en restant éloigné de la tranchée de la plateforme. 5.4.2 La capacité du chariot élévateur doit être de 1000 livres minimum. 5.4.3 Le chariot élévateur est équipé d'une pompe à levier de 1,500 livres pour lever et descendre les ensembles de roues.\"\n    },\n    {\n      \"page\": 9,\n      \"description\": \"Tire lift cart details and oil drain basin specifications\",\n      \"extracted_text\": \"5.4.4 Le chariot élévateur doit avoir un chariot mobile ouvert conçu pour avoir un accès facile aux écrous des jantes et une bonne visibilité pour aligner les trous des jantes sur les boulons de roues. 5.4.5 Des fourches de type travaux lourds et une plaque tournante UHMW sur billes permettant une rotation facile des roues pour l'alignement des trous des jantes avec les boulons. 5.4.6 Une pompe à main permettant de déplacer les fourches pour faciliter l'alignement, le rayon de déplacement circulaire est de -2 à +15 degrés. 5.4.7 Une chaîne de sécurité doit être fournie pour fixer les pneus sur le les fourches. 5.4.8 Le chariot élévateur sera équipé de deux (2) roues en avant de 8\\\" de diamètre avec roulement à billes, et deux roues arrières (2) de 8\\\" de diamètre avec plaque tournante sur roulements à billes pour faciliter les manoeuvres. Les roues tournantes doivent comporter un mécanisme de barrures prévenir les mouvements du chariot. 5.4.9 Les fourches du chariot doivent couvrir une étendue en hauteur de 2\\\" minimum à 38\\\" maximum. 5.4.10 Les fourches doivent être ajustables en largeur de 16\\\" à 30\\\" pour accommoder une variété de diamètres de roues. 5.4.11 L'ajustement côte à côte des fourches doit être de 2\\\" minimum, pour faciliter l'alignement des trous de la jante avec les boulons. 5.4.12 Les fourches doivent avoir 25\\\" de long pour accommoder des pneus larges. 5.4.13 Les dimensions hors tout du chariot élévateur doit être de 82 ½\\\" de long, 51 ½\\\" de largeur, 84 1/2\\\" haut. 5.5 Bassin pour Drainer l'huile (OPTIONNEL) 5.5.1 Le bassin pour drainer l'huile est conçu pour s'adapter entre les rampes et glisser sur toute la longueur des rampes, permettant de capturer et retenir tous les liquides drainés des véhicules soulevés sur les rampes. 5.5.2 Le bassin doit pouvoir accumuler 27.8 gallons au maximum au plein rebord. 5.5.3 (1) Le bassin rectangulaire est fabriqué de métal en feuille calibre 12 ASTM A-36 et a une dimension de 42\\\" de long x 18\\\" de largeur x 8 1/2\\\" de profondeur. (2) Deux poignées en acier y sont fixées pour faciliter le déplacement du bassin sur toute la\"\n    },\n    {\n      \"page\": 10,\n      \"description\": \"Oil drain basin details and scissor table specifications\",\n      \"extracted_text\": \"longueur des rampes. Un drain est installé au bas du bassin, contrôlé par une soupape à bille en bronze 1\\\" NPT. 5.5.4 Un (1) couvert de bassin: Le châssis est fabriqué de fer à angle en acier de 2\\\" x 2\\\" x 1/4\\\" ASTM A-36. Un grillage de métal roulé à chaud de 3/4-#9, conçu pour permettre au liquide (Huile) de s'écouler dans le bassin et de retenir toute élément de plus de 5/8\\\" de diamètre. Dimensions du couvert du bassin: 19\\\" x 43\\\". 5.5.5 Ensemble de roues: Les roues sont fabriquées de tiges en chrome AISI C-1045 avec rebords pour s'adapter aux rails situés à l'intérieur de chaque rampe. . Les essieux sont fabriqués de tiges d'acier 3/4\\\" de diamètre ASTM A-311 classe B. Ajustement pour centrer les roues par des boulons de fixation sur les manchons. 5.6 ST-2000 Table avec Cric à Ciseaux pour Transmission (OPTIONNEL) 5.6.1 Capacité de la table 2,000 livres. 5.6.2 Cette table sert manipuler des ensembles d'unité de pouvoir tels que moteur avec la transmission, moteur avec axes de transmission de pouvoir, essieux arrière et grosses batteries de véhicules électriques. Elle sert aussi comme table de travail parce que les pièces peuvent être abaissées à une hauteur convenable pour les réparations. 5.6.3 Dimensions: Hauteur au plus bas: ",
     "_source_file": "Parall-75-30-F.pdf",
     "_pages_count": 11,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:13:21Z"
+    "_extracted_at": "2026-03-06T23:13:21Z",
+    "source_file": "Parall-75-30-F.json",
+    "_source_category": "existing-kb"
   },
   {
     "raw_response": "```json\n{\n  \"model\": \"75-30-S\",\n  \"variant\": \"surface mount\",\n  \"product_type\": \"parallelogram lift\",\n  \"capacity\": \"75,000 pounds (37.5 tons)\",\n  \"dimensions\": {\n    \"platform_length\": \"360 inches (30 feet)\",\n    \"platform_width\": \"32 inches\",\n    \"platform_spacing\": \"45 inches\",\n    \"total_platform_width\": \"109.5 inches\",\n    \"retracted_height\": \"13 inches above floor\",\n    \"minimum_lift_height\": \"63 inches (when ramps fully raised)\",\n    \"first_lock_position\": \"18 inches minimum height\",\n    \"lift_speed\": \"60 seconds approximately to maximum height\"\n  },\n  \"installation_requirements\": {\n    \"installation_type\": \"surface mount - no pit required\",\n    \"concrete_strength\": \"minimum 3000 PSI compression\",\n    \"anchor_bolts\": \"pre-drilled base for appropriate anchor bolts\",\n    \"base_chassis\": \"A-36 steel plates 30\\\" x 20\\\" x 1/2\\\" thick, connected by two A-36 steel plates 1\\\" thick\",\n    \"base_connection\": \"two 3\\\" x 4\\\" x 5/16\\\" thick steel structure tubes\",\n    \"electrical\": \"20 HP, 575V, 3-phase, 60 Hz, TEFC motor\",\n    \"hydraulic_cylinders\": \"7 3/4 inch diameter minimum with 2 1/2 inch chrome-plated rod\",\n    \"operating_pressure\": \"maximum 2450 PSI under maximum load\",\n    \"control_console_distance\": \"maximum 10 feet from lift connection points\"\n  },\n  \"parts_list\": [\n    {\n      \"part_number\": \"N/A\",\n      \"description\": \"Wet-it anchors 3/4\\\" x 5\\\"\",\n      \"qty\": 56\n    },\n    {\n      \"part_number\": \"N/A\",\n      \"description\": \"Touch-up paint (red & yellow containers)\",\n      \"qty\": 2\n    },\n    {\n      \"part_number\": \"N/A\",\n      \"description\": \"Dextron III ATF hydraulic fluid\",\n      \"qty\": 1\n    },\n    {\n      \"part_number\": \"N/A\",\n      \"description\": \"Platform leveling shims\",\n      \"qty\": 1\n    }\n  ],\n  \"certifications\": [\n    \"ANSI/ALI ALCTV standard\",\n    \"Federal, Provincial and local safety codes compliance\",\n    \"OSHA, ETL, UL, AWS, NEC standards\",\n    \"JIC or ORB hydraulic fitting standards\"\n  ],\n  \"notes\": [\n    \"Equipment must be new and supplied with all specified installation materials\",\n    \"Reconditioned or used equipment not acceptable\",\n    \"Above-ground lifts (scissors, posts, columns) not acceptable\",\n    \"No permanent obstructions between lift platforms allowed\",\n    \"Automatic wheel stop plates engage when ramps lift more than 12 inches\",\n    \"Wheel stops automatically retract when ramps reach floor level\",\n    \"Wheel stops interchangeable\",\n    \"Steel oil reservoir required (plastic reservoirs not acceptable)\",\n    \"Manual pump and descent valves for power failure operation\",\n    \"Velocity fuse in each hydraulic cylinder for platform descent prevention\",\n    \"Safety locks with 3:1 minimum safety factor on each lift cylinder\"\n  ],\n  \"pages_summary\": [\n    {\n      \"page\": 1,\n      \"description\": \"Title page and scope specifications\",\n      \"extracted_text\": \"MOHAWK MODÈLE 75-30-S INSTALLÉ EN SURFACE PONT ÉLÉVATEUR PARALLÉLOGRAMME TYPE SERVICE LOURD SPÉCIFICATIONS 1.0 PORTÉE 1.1 Ces spécifications sont établies en vue de l'achat d'un pont élévateur service lourd de type plateforme Parallélogramme permettant de lever des véhicules pesant jusqu'à 75,000 livres. L'installation de cet équipement ne doit requérir aucun pieu dans le sol. Des ponts élévateurs hors sol à ciseaux, poteaux, ou colonnes ne sont pas acceptables. 1.2 L'équipement doit être neuf, fourni avec tout le matériel spécifié pour l'installation lorsque livré. Un équipement reconditionné ou usagé ne sera pas accepté. 1.3 L'équipement doit être conçu en vue de rencontrer toute loi Fédérale, Provinciale applicable et les normes et codes de sécurité locales, ainsi que OSHA, ETL, UL, AWS, NEC et les standards courants ANSI/ALI ALCTV. Le standard ANSI/ALI ALCTV est le seul et unique standard existant de sécurité et de test pour les ponts élévateurs pour véhicules. 1.4 Toutes les dimensions pour l'épaisseur des matériaux et la structure sont des dimensions minimales. Les tolérances des dimensions, à moins d'être spécifiées autrement, sont de: +/- 0.25 pouces pour des dimensions de moins de dix (10) pouces; +/- 1.0 pouces pour des dimensions de (10) pouces à cinq (5) pieds inclusivement, et +/- 3.0 pouces pour les dimensions plus grandes que cinq (5) pieds. 2.0 ÉQUIPEMENT 2.1 L'ensemble complet consiste en deux plateformes soulevées par un système hydraulique et une console de contrôle électro-hydraulique. Les longueurs requises de boyaux hydrauliques renforcis d'acier, de lignes d'air comprimé ainsi que les câbles électriques pour relier le pont élévateur à l'éventuelle localisation de la console de contrôle.\"\n    },\n    {\n      \"page\": 2,\n      \"description\": \"Equipment specifications and lift characteristics\",\n      \"extracted_text\": \"2.1.1 Les longueurs de boyaux hydrauliques, lignes d'air et câbles électrique fournis avec l'équipement doivent permettre de localiser la console de contrôle à dix (10) pieds (maximum) des points de raccords avec le pont élévateur. Si la console doit être localisée plus loin, d'autres longueurs devront être fournies à un coût additionnel. 2.1.2 Les raccords hydrauliques doivent être conformes aux standards JIC ou ORB. 2.2 Caractéristiques du pont élévateur: 2.2.1 Capacité de levage: 37.5 tonnes (75,000 livres) minimum par cycle. 2.2.2 Hauteur de levée minimale entre la surface du plancher et le dessous des pneus: 63 pouces lorsque les rampes sont complètement levées. Les barrures doivent permettre de lever un véhicule à n'importe quelle hauteur avec des intervalles de 10 positions de barrures mécaniques réparties également sur la hauteur de levée. 2.2.3 La première position de barrure doit être à un minimum de 18 pouces de hauteur assurant une position de travail confortable et sécuritaire pour freins/pneus. 2.2.4 Vitesse de levage: 60 secondes approximativement pour atteindre la hauteur maximale de levée. 2.3 Dimensions des plateformes: Longueur des plateformes: 360 pouces (30 pieds) Largeur des plateformes: 32 pouces Espace entre les plateformes: 45 pouces Largeur totale des plateformes: 109.5 pouces. Hauteur lorsque rétractées: 13 pouces au dessus du plancher 2.4 Clauses structurelles:\"\n    },\n    {\n      \"page\": 3,\n      \"description\": \"Structural specifications and platform construction details\",\n      \"extracted_text\": \"2.4.1 Tous les goujons (pins) de pivots entre les jambes et les plateformes et les cylindres et les jambes de levée seront fabriqués de barres d'acier machiné/meulé/poli de 2 ½ pouces de diamètre recouverts de chrome pour une vie de service prolongée. Des goujons de pivot de plus petit diamètre ou non recouverts de chrome ne seront pas accepté. 2.4.2 Tous les goujons de joints pivots, étant soumis à des tensions maximales, seront insérés dans un manchon composite imprégné d'huile, pour une durée de vie prolongée et en faciliter les réparations. 2.4.3 Comme la définition d'un parallélogramme est une figure à quatre côtés comportant deux lignes horizontales reliées par deux lignes à angle parallèles (jambes de levage), les deux composantes horizontales doivent faire partie du parallélogramme pour assurer l'intégrité de la structure et relier la plateforme du haut à celle du bas. Les ponts élévateur conçus sans l'intégrité structurelle de la section horizontale de la base n'est pas acceptable. 2.4.4 Chaque plateforme (rampe et base) doit être fabriquée de plaques en acier d'une épaisseur de 0.375 pouces supporté par (2) 4 x 8 x 0.250 pouces tubes d'acier de structure ASTM A-500 Grade B et une cannelure en acier de structure de 8\\\" @ 11.5 lb/pi. 2.4.5 Chaque rampe doit avoir des plaques à engagement automatique d'arrêt des roues en acier fixées à l'avant et à l'arrière des rampes qui s'engagent dès que les rampes se soulèvent pour empêcher le véhicule de rouler par l'avant ou l'arrière en bas des rampes lorsque les rampes sont soulevées de plus de 12 pouces. 2.4.6 Les plaques d'arrêt doivent être automatiquement en position dès que les rampes se lèvent et se rétracter automatiquement lorsque les rampes atteignent le plancher. 2.4.7 Ces arrêts ne doivent pas réduire la longueur effective des rampes de levage de plus de six (6) pouces. 2.4.8 Les arrêts de roues doivent être interchangeables. 2.5 Clauses relatives au Niveau/Fixation:\"\n    },\n    {\n      \"page\": 4,\n      \"description\": \"Installation and hydraulic system specifications\",\n      \"extracted_text\": \"2.5.1 La base de chaque bras de levage doit être pré percée pour accepter des boulons d'ancrage de diamètre approprié à la charge imposée par le poids lors de l'utilisation du pont élévateur. 2.5.2 Le châssis de la base sera fabriqué de plaques en acier A-36 de 30\\\" x 20\\\" x ½ d'épaisseur reliée à chaque jambe de levage par deux plaques en acier A-36 de 1\\\" d'épaisseur. Les plaques de base doivent être reliées l'une à l'autre par deux (2) tubes d'acier de structure de 3\\\" x 4\\\" x 5/16 d'épaisseur. Les ponts élévateurs ayant des plaques de base individuelles qui ne sont pas reliées l'une à l'autre pour créer un châssis mono pièce ne sont pas acceptable. 2.5.3 Le béton du plancher ne doit pas requérir du béton de plus de 3000-PSI en compression. 2.6 Il ne doit y avoir aucune obstruction permanente entre les plateformes de levage. 2.7 Clauses relatives au système hydraulique: 2.7.1 Un fusible de vélocité doit être incorporé dans chaque cylindre hydraulique (soupape de contrôle de débit) en vue de prévenir une descente des plateformes en cas de fuite d'huile. 2.7.2 Les cylindres hydrauliques doivent être fixés sous les rampes à l'abri des sources de poussières, saletés et de dommages causés par des objets qui peuvent tomber dessus. 2.7.3 Tous les cylindres hydrauliques doivent être d'un diamètre de 7 3/4 pouces avec une tige de poussée de 2 1/2 de diamètre recouverte de chrome. Des diamètres plus petits qui requièrent des pressions d'opération plus élevées, imposant plus de stress aux composantes hydrauliques, et réduisant la vie de service du moteur et de la pompe, ne sont pas acceptable. 2.7.4 La pression d'opération ne doit pas excéder 2450 psi sous la charge maximale. Les ponts élévateur requérant une pression plus élevée, imposant plus de stress aux composantes hydraulique, et réduisant la vie de service du moteur et de la pompe, ne sont pas acceptable. 2.7.5 Tous les boyaux hydrauliques doivent être renforcés de treillis d'acier et avoir des raccords standard JIC. 2.7.6 Le pont élévateur est activé par une pompe hydraulique fabriquée en Amérique du Nord, produisant la pression et le volume requis pour son opération. 2.7.7 En cas de perte de courant électrique, le pont élévateur pourra être abaissé à partir de toute hauteur par une pompe manuelle et des soupapes de descente manuelles. 2.8 Système de barrures mécaniques de sécurité:\"\n    },\n    {\n      \"page\": 5,\n      \"description\": \"Safety systems, control console, and warranty information\",\n      \"extracted_text\": \"2.8.1 Des barrures de sécurité en acier ayant un facteur de sécurité minimum de 3:1 doivent être fixées sur chaque cylindre de levée et ces barrures doivent s'engager à un minimum de dix (10) positions différentes. Ces barrures doivent assurer un minimum de déplacement en cas de fuite du système hydraulique et maintenir la hauteur des rampes en position. 2.8.2 Les barrures de sécurité doivent se désengager automatiquement quand le bouton de contrôle de descente est activé, et se réengager automatiquement quand ce bouton est relâché. Les barrures doivent s'engager automatiquement lors de la levée des rampes. Ceci assurera un engagement positif des barrures lors de la levée en cas de défaillance hydraulique. 2.8.3 La console de contrôle doit abriter les équipements suivants : • Réservoir d'huile en acier (les réservoirs en plastique ne sont pas acceptables) • Passoire sur ligne d'aspiration • Filtre sur le retour de basse pression • Pompe hydraulique type à engrenage • Pompe manuelle avec soupapes de descente manuelles • Moteur électrique de 20 HP, 575, 3 phases, 60 Hz, TEFC 2.9 Les boîtiers abritant les composantes de contrôle doivent rencontrer la norme d'étanchéité NEMA 12 (minimum), les contrôles suivants doivent y être assemblés tout en maintenant la norme NEMA 12 pour chacune des composantes. • Interrupteur arrêt/départ avec système de barrure. • Bouton poussoir pour \\\"LEVER\\\" et \\\"DESCENDRE\\\" • \\\"PARK\\\" bouton pour assoir les jambes de levée sur les barrures mécaniques qui s'illumine (ambré) quand celles-ci sont engagées. • Barrure des contrôles avec une clef • Un écran alphanumérique LED pour identifier les conditions d'opération sécuritaires ou non sécuritaires, indique les statuts de levée et aide en identifiant les problèmes simplement contrairement à un code d'erreur. • L'écran LED est illuminé vert lorsque l'unité est active. • Une alarme sonore audible s'actionne quand les rampes se lèvent ou s'abaissent. L'alarme se désactive quand les rampes sont en position park ou complètement baissées. 2.9.1 Le système de contrôle est opéré par un Contrôle Logique Programmable (CLP) qui arrête toutes les opérations des contrôles si une condition non sécuritaire se développe telle que (mais non limité à): pression d'air insuffisante pour activer les barrures de sécurité, ruban interrupteur déplacé ou différence de hauteur des rampes. L'opération ne doit pas pouvoir se rétablir tant que la condition n'est pas corrigée. 2.9.2 Le système de contrôle doit assurer que les plateformes ne diffèrent en hauteur de maximum deux (2) pouces. Si les rampes diffèrent plus que ce nombre, le système doit s'arrêter et ne pouvoir être réactivé tant que le problème n'est pas corrigé. 2.9.3 Le système de contrôle doit être programmable pour arrêter la levée à une hauteur spécifique de façon à pouvoir installer ou enlever des accessoires de levage tels crics, accommoder chaque technicien ou une hauteur de plafond basse. 3.0 GARANTIE 3.1 La garantie des composantes structurelles et de pouvoir doit être de 2 ans. 3.2 Garantie sur le moteur et la pompe hydraulique est de 1 an.\"\n    },\n    {\n      \"page\": 6,\n      \"description\": \"Standard equipment and optional accessories\",\n      \"extracted_text\": \"4.0 ÉQUIPEMENT STANDARD 4.1 (56) Ancrages wej-it 3/4\\\" x 5\\\". 4.2 Peinture pour retouches, 1 contenant chacun de peinture rouge & jaune. 4.3 Huile Dextron III ATF pour la pompe hydraulique et le réservoir. 4.4 Cales pour niveler la plateforme lors de l'installation. 4.5 Manuels de l'opérateur et de sécurité. 4.5.1 Manuel ANSI/ALI OIM (ALI standard # ALOIM-2008). 4.5.2 Manuel ANSI/ALI \\\"Lever Correctement\\\" (ALI standard # SM01-2). 4.5.3 Manuel Guide de Points de Levage ANSI/ALI (ALI standard # ALI/LP-guide). 4.5.4 Auto collants de sécurité ANSI/ALI apposés sur le pont élévateur. 5.0 ACCESOIRES OPTIONNEL 5.1 Éclairage des rampes (OPTIONNEL) 5.1.1 Le système optionnel d'éclairage des rampes doit être certifié et testé selon les standards ANSI/ALI ALCTV et UL-201. 5.1.2 Le pont élévateur est fourni avec (8) lampes fluorescentes double goupilles blanc froid 40 watt, 48 pouces de long (minimum). Les lampes doivent être espacées également le long des rampes pour illuminer l'espace intérieur des rampes et le dessous du véhicule. 5.1.3 Une protection doit recouvrir les lampes pour prévenir qu'elles ne soient cassées et aussi protéger l'opérateur lors d'un bris. 5.1.4 Le système d'éclairage doit être dans un boîtier et alimenté par la console. Le système de contrôle doit vérifier la hauteur des rampes et couper l'alimentation en courant lorsque le dessus des rampes est à moins de 18 pouces du plancher.\"\n    },\n    {\n      \"page\": 7,\n      \"description\": \"Optional air/hydraulic jack and safety ribbon specifications\",\n      \"extracted_text\": \"5.2 RJ-50-P Cric sur Chariot Air/Hydraulique (OPTIONNEL) 5.2.1 Capacité Maximum par chariot: 50,000 livres. 5.2.2 Tous les crics sur chariot fournis doivent être certifiées et testés selon les standards ANSI/ALI ALCTV et UL-201. 5.2.3 Les chariots soudés des crics doivent être fabriqués de (2) plaques verticales d'une épaisseur de ¾\\\" x 10\\\" de haut ASTM A-36 soudées en parallèle sur une plaque de base en acier de 1/2\\\" ASTM A-36. Les bouts de section se terminent par une plaque en acier de 3/4\\\" d'épaisseur ASTM A-36 pour que celles-ci s'engagent sur le rebord des rampes. Une poignée permet de tirer ou pousser cette plateforme le long des rampes. Des plaques de fixation pour les soupapes et les unités de pouvoir sont prévues à cet effet. 5.2.4 Ensemble de roues: Les roues sont fabriquées en acier CF-1018 et ont un épaulement pour s'adapter aux rails plats qui courent à l'intérieur tout le long de chaque rampe. Les essieux sont fabriqués en acier rond CF-1018 d'un diamètre de 5/8\\\" CF-1018. Les essieux sont montés sur ressorts pour porter le poids des chariots lors d'un déplacement mais se rétractent lorsque qu'une charge est appliquée, transférant la charge du chariot sur les rails des rampes pour sécuriser/barrer le chariot en place. 5.2.5 Deux (2) unités de pouvoir devront être fournis, un pour chaque cylindre, chacun consistant en une pompe hydraulique fonctionnant à l'air et un réservoir en acier. Chaque réservoir sera rectangulaire et en acier de dimensions: 9 1/2\\\" x 11 1/2\\\" x 6 ½ \\\"(3 gallons). 5.2.6 Soupapes: Deux (2) soupapes de contrôle directionnel (2), à ressort centré, de 3000 psi, chacune avec une manette pour un contrôle séparé de chaque cylindre du cric. 5.2.7 Deux (2) cylindres de cric: chacun consistant en un (1) tube de cylindre en acier poli de 4 1/8\\\" OD ASTM A-513-5 et une (1) tige de poussée de 2 5/8\\\" CF-1045 recouverte de chrome.. Les bases de cylindres consistent en une plaque de 3/8\\\" d'épaisseur x 6 1/4\\\" x 8\\\" en acier ASTM A-36. Les bouts des tiges de poussée ont des trous machinés pour accepter des coussins de levée standard et spéciaux pour les essieux. La course de la tige de levée doit être d'environ 8 7/8\\\". 5.2.7.1 Chaque cylindre hydraulique doit avoir une soupape intégrée de contre balancement pour prévenir une descente subite en cas de fuite d'huile. Une pression positive de l'unité de pouvoir doit être présente pour permettre au cylindre de se rétracter. Ce type d'arrangement de soupape assure que les cylindres restent en position pour de longues périodes de temps sans crainte de fuites ou baisse subite. 5.2.8 Deux (2) coussins de levée standard et deux (2) coussins pour essieux doivent être fournis avec chaque cric mobile. Deux (2) rallonges pour camions empilables de 3\\\" de long et deux (2) de 6\\\" de long doivent aussi être fournies.\"\n    },\n    {\n      \"page\": 8,\n      \"description\": \"Hydraulic tubing and additional jack specifications\",\n      \"extracted_text\": \"5.2.9 Tubulures Hydraulique: ensemble de tuyau en acier inoxydable sans joint de 3/8\\\" OD, certifié pour une pression 14,000 psig minimum, évasé à chaque bout pour accepter un raccord femelle mâle. Quatre (4) ensembles de boyaux hydraulique: Parker type SAE-100R2, 1/4\\\" ID, certifiés 20,000 psig minimum, résistants à l'huile, aux intempéries et à l'abrasion, chaque bout avec un raccord pivotant #6 JIC femelle. 5.2.10 Dimensions: Conçu pour des rails ayant 45\\\" à l'intérieur des rampes. Dimensions approximative des chariots de cric: hauteur12\\\" x profondeur 28\\\" x longueur 52\\\". 5.3 Ruban Interrupteur de Sécurité (OPTIONNEL) 5.3.1 Le ruban interrupteur de sécurité consiste en trois (3) sections de ruban de 10' fixées au bas de chaque rampe, qui, si une pression est détectée n'importe où sur sa longueur, va instantanément arrêter l'opération de levée ou de descente. Utilisé en tant qu'arrêt d'urgence pour le personnel autour de l'équipement, ou arrêter la descente pour éviter que les rampes endommagent une pièce d'équipement oubliée en dessous. 5.3.2 Le ruban interrupteur peut être fixé sous les rampes à l'intérieur ou à l'extérieur, ou des deux côtés, selon le niveau de sécurité recherché. 5.3.3 Chaque section de ruban interrupteur consiste en un ruban interrupteur enchâssé dans une gaine de protection en caoutchouc, pouvant accepter 1\\\" de dépression, mais activé avec aussi peu que 1 livre de pression. 5.3.4 Le ruban interrupteur de sécurité doit être d'un jaune relié à la sécurité. 5.4 TD-1000-P Chariot Élévateur Contrebalancé pour ensemble de pneus (OPTIONNEL) 5.4.1 Le chariot élévateur contrebalancé pour ensemble de pneus TD-1000-P est conçu pour l'enlèvement ou l'installation de pneus simple, tandem, duplex et jantes qui sont sur un camion qui est levé sur les rampes (i.e. les essieux soulevés par un cric sur chariot). 5.4.2 Le chariot élévateur doit avoir des contre poids à l'arrière, représentant 1 ⅓ fois la capacité établie sur le bout des fourches. Seulement les tubes des fourches doivent dépasser sur le devant de l'unité, permettant aux fourches de lever les roues par le côté des rampes du parallélogramme, tout en restant éloigné de la tranchée de la plateforme. 5.4.2 La capacité du chariot élévateur doit être de 1000 livres minimum. 5.4.3 Le chariot élévateur est équipé d'une pompe à levier de 1,500 livres pour lever et descendre les ensembles de roues.\"\n    },\n    {\n      \"page\": 9,\n      \"description\": \"Forklift specifications and oil drain basin details\",\n      \"extracted_text\": \"5.4.4 Le chariot élévateur doit avoir un chariot mobile ouvert conçu pour avoir un accès facile aux écrous des jantes et une bonne visibilité pour aligner les trous des jantes sur les boulons de roues. 5.4.5 Des fourches de type travaux lourds et une plaque tournante UHMW sur billes permettant une rotation facile des roues pour l'alignement des trous des jantes avec les boulons. 5.4.6 Une pompe à main permettant de déplacer les fourches pour faciliter l'alignement, le rayon de déplacement circulaire est de -2 à +15 degrés. 5.4.7 Une chaîne de sécurité doit être fournie pour fixer les pneus sur le les fourches. 5.4.8 Le chariot élévateur sera équipé de deux (2) roues en avant de 8\\\" de diamètre avec roulement à billes, et deux roues arrières (2) de 8\\\" de diamètre avec plaque tournante sur roulements à billes pour faciliter les manoeuvres. Les roues tournantes doivent comporter un mécanisme de barrures prévenir les mouvements du chariot. 5.4.9 Les fourches du chariot doivent couvrir une étendue en hauteur de 2\\\" minimum à 38\\\" maximum. 5.4.10 Les fourches doivent être ajustables en largeur de 16\\\" à 30\\\" pour accommoder une variété de diamètres de roues. 5.4.11 L'ajustement côte à côte des fourches doit être de 2\\\" minimum, pour faciliter l'alignement des trous de la jante avec les boulons. 5.4.12 Les fourches doivent avoir 25\\\" de long pour accommoder des pneus larges. 5.4.13 Les dimensions hors tout du chariot élévateur doit être de 82 ½\\\" de long, 51 ½\\\" de largeur, 84 1/2\\\" haut. 5.5 Bassin pour Drainer l'huile (OPTIONNEL) 5.5.1 Le bassin pour drainer l'huile est conçu pour s'adapter entre les rampes et glisser sur toute la longueur des rampes, permettant de capturer et retenir tous les liquides drainés des véhicules soulevés sur les rampes. 5.5.2 Le bassin doit pouvoir accumuler 27.8 gallons au maximum au plein rebord. 5.5.3 (1) Le bassin rectangulaire est fabriqué de métal en feuille calibre 12 ASTM A-36 et a une dimension de 42\\\" de long x 18\\\" de largeur x 8 1/2\\\" de profondeur. (2) Deux poignées en acier y sont fixées pour faciliter le déplacement du bassin sur toute la\"\n    },\n    {\n      \"page\": 10,\n      \"description\": \"Oil drain basin and service table specifications\",\n      \"extracted_text\": \"longueur des rampes. Un drain est installé au bas du bassin, contrôlé par une soupape à bille en bronze 1\\\" NPT. 5.5.4 Un (1) couvert de bassin: Le châssis est fabriqué de fer à angle en acier de 2\\\" x 2\\\" x 1/4\\\" ASTM A-36. Un grillage de métal roulé à chaud de 3/4-#9, conçu pour permettre au liquide (Huile) de s'écouler dans le bassin et de retenir toute élément de plus de 5/8\\\" de diamètre. Dimensions du couvert du bassin: 19\\\" x 43\\\". 5.5.5 Ensemble de roues: Les roués sont fabriquées de tiges en chrome AISI C-1045 avec rebords pour s'adapter aux rails situés à l'intérieur de chaque rampe. . Les essieux sont fabriqués de tiges d'acier 3/4\\\" de diamètre ASTM A-311 classe B. Ajustement pour centrer les roues par des boulons de",
     "_source_file": "Parall-75-30-S.pdf",
     "_pages_count": 11,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:21:59Z"
+    "_extracted_at": "2026-03-06T23:21:59Z",
+    "source_file": "Parall-75-30-S.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "Parallelogram Lift Series",
@@ -4921,7 +4981,9 @@
     "_source_file": "Parallelogram_L-Size.pdf",
     "_pages_count": 5,
     "_image_only": true,
-    "_extracted_at": "2026-03-06T23:11:50Z"
+    "_extracted_at": "2026-03-06T23:11:50Z",
+    "source_file": "Parallelogram_L-Size.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "RJ-50-AH",
@@ -4963,7 +5025,9 @@
     "_source_file": "RJ-50-AH-Parallel.pdf",
     "_pages_count": 1,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:25:58Z"
+    "_extracted_at": "2026-03-06T23:25:58Z",
+    "source_file": "RJ-50-AH-Parallel.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "Multiple Models",
@@ -5088,7 +5152,9 @@
     "_source_file": "Slab_Requirements (3).pdf",
     "_pages_count": 9,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:10:20Z"
+    "_extracted_at": "2026-03-06T23:10:20Z",
+    "source_file": "Slab_Requirements (3).json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "Parallelogram Lift",
@@ -5152,7 +5218,9 @@
     "_source_file": "parallelogram.pdf",
     "_pages_count": 1,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:10:22Z"
+    "_extracted_at": "2026-03-06T23:10:22Z",
+    "source_file": "parallelogram.json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "RJ-50-AH",
@@ -5230,7 +5298,9 @@
     "_source_file": "rj50 (1).pdf",
     "_pages_count": 2,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:22:51Z"
+    "_extracted_at": "2026-03-06T23:22:51Z",
+    "source_file": "rj50 (1).json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "Not specified",
@@ -5280,7 +5350,9 @@
     "_source_file": "truck-data-form-single-axle (2).pdf",
     "_pages_count": 1,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:11:08Z"
+    "_extracted_at": "2026-03-06T23:11:08Z",
+    "source_file": "truck-data-form-single-axle (2).json",
+    "_source_category": "existing-kb"
   },
   {
     "model": "Not specified",
@@ -5323,6 +5395,1856 @@
     "_source_file": "truck_dual_axle (2).pdf",
     "_pages_count": 1,
     "_image_only": false,
-    "_extracted_at": "2026-03-06T23:11:08Z"
+    "_extracted_at": "2026-03-06T23:11:08Z",
+    "source_file": "truck_dual_axle (2).json",
+    "_source_category": "existing-kb"
+  },
+  {
+    "source_file": "JP-1525-025-012-081.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "JP-1525-025-012-081"
+  },
+  {
+    "source_file": "RJ-50-AH-TR-Series.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "RJ-50-AH-TR-Series"
+  },
+  {
+    "source_file": "RJ-50A-SERIES.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "RJ-50A-SERIES"
+  },
+  {
+    "source_file": "Slab_Requirements (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Slab_Requirements (1)"
+  },
+  {
+    "source_file": "TR-110_120.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-110_120"
+  },
+  {
+    "source_file": "TR-19_Lift_Data_Sheet.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-19_Lift_Data_Sheet"
+  },
+  {
+    "source_file": "TR-33-20.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-33-20"
+  },
+  {
+    "source_file": "TR-33-25.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-33-25"
+  },
+  {
+    "source_file": "TR-33-30.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-33-30"
+  },
+  {
+    "source_file": "TR-35-20.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-35-20"
+  },
+  {
+    "source_file": "TR-35-25.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-35-25"
+  },
+  {
+    "source_file": "TR-35-30.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-35-30"
+  },
+  {
+    "source_file": "TR-50-20.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-50-20"
+  },
+  {
+    "source_file": "TR-50-25.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-50-25"
+  },
+  {
+    "source_file": "TR-50-30.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-50-30"
+  },
+  {
+    "source_file": "TR-75-20.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-75-20"
+  },
+  {
+    "source_file": "TR-75-25.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-75-25"
+  },
+  {
+    "source_file": "TR-75-30.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-75-30"
+  },
+  {
+    "source_file": "TR-SERIES.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-SERIES"
+  },
+  {
+    "source_file": "TR110-130.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR110-130"
+  },
+  {
+    "source_file": "TR1925.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR1925"
+  },
+  {
+    "source_file": "TR_Series.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR_Series"
+  },
+  {
+    "source_file": "fl-25 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "fl-25 (1)"
+  },
+  {
+    "source_file": "fl-25-base.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "fl-25-base"
+  },
+  {
+    "source_file": "fl-25.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "fl-25"
+  },
+  {
+    "source_file": "forktruck.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "forktruck"
+  },
+  {
+    "source_file": "forktruck_3rd_wheel.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "forktruck_3rd_wheel"
+  },
+  {
+    "source_file": "rj-15.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "rj-15"
+  },
+  {
+    "source_file": "rj-25a.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "rj-25a"
+  },
+  {
+    "source_file": "rj15.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "rj15"
+  },
+  {
+    "source_file": "rj25.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "rj25"
+  },
+  {
+    "source_file": "rj50.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "rj50"
+  },
+  {
+    "source_file": "tr-19-base.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-19-base"
+  },
+  {
+    "source_file": "tr-19.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-19"
+  },
+  {
+    "source_file": "tr-25-20.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-25-20"
+  },
+  {
+    "source_file": "tr-25-25.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-25-25"
+  },
+  {
+    "source_file": "tr-25-30.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-25-30"
+  },
+  {
+    "source_file": "tr-25-base.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-25-base"
+  },
+  {
+    "source_file": "tr-25.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-25"
+  },
+  {
+    "source_file": "tr-33-20 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-33-20 (1)"
+  },
+  {
+    "source_file": "tr-33-25 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-33-25 (1)"
+  },
+  {
+    "source_file": "tr-33-30 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-33-30 (1)"
+  },
+  {
+    "source_file": "tr-33-base.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-33-base"
+  },
+  {
+    "source_file": "tr-35-20 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-35-20 (1)"
+  },
+  {
+    "source_file": "tr-35-25 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-35-25 (1)"
+  },
+  {
+    "source_file": "tr-35-30 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-35-30 (1)"
+  },
+  {
+    "source_file": "tr-35-base.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-35-base"
+  },
+  {
+    "source_file": "tr-50-20 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-50-20 (1)"
+  },
+  {
+    "source_file": "tr-50-25 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-50-25 (1)"
+  },
+  {
+    "source_file": "tr-50-30 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-50-30 (1)"
+  },
+  {
+    "source_file": "tr-50-base.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-50-base"
+  },
+  {
+    "source_file": "tr-75-20 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-75-20 (1)"
+  },
+  {
+    "source_file": "tr-75-25 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-75-25 (1)"
+  },
+  {
+    "source_file": "tr-75-30 (1).pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-75-30 (1)"
+  },
+  {
+    "source_file": "tr-75-base.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tr-75-base"
+  },
+  {
+    "source_file": "trlight.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "trlight"
+  },
+  {
+    "source_file": "truck-data-form-single-axle.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "truck-data-form-single-axle"
+  },
+  {
+    "source_file": "truck_dual_axle.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "truck_dual_axle"
+  },
+  {
+    "source_file": "truck_frame.pdf",
+    "_source_category": "four-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "truck_frame"
+  },
+  {
+    "source_file": "800-Series-Mobile-Spec-Sheet (3).pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "800-Series-Mobile-Spec-Sheet (3)"
+  },
+  {
+    "source_file": "800-Series-Mobile-Spec-Sheet (4).pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "800-Series-Mobile-Spec-Sheet (4)"
+  },
+  {
+    "source_file": "MP-18-AC-Touchscreen.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-18-AC-Touchscreen"
+  },
+  {
+    "source_file": "MP-18-DC-Touchscreen.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-18-DC-Touchscreen"
+  },
+  {
+    "source_file": "MP-18-Tandem_11-2017.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-18-Tandem_11-2017"
+  },
+  {
+    "source_file": "MP-24-AC_11-2017.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-24-AC_11-2017"
+  },
+  {
+    "source_file": "MP-24-DC_11-2017.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-24-DC_11-2017"
+  },
+  {
+    "source_file": "MP-30-DC-DATASHEET.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-30-DC-DATASHEET"
+  },
+  {
+    "source_file": "MP-30-Series AC 2-1-2017 L-Size.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-30-Series AC 2-1-2017 L-Size"
+  },
+  {
+    "source_file": "MP-7180-A-0870_800_Series_18,000lb_Capacity_Mobile_Column-WIDE.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-7180-A-0870_800_Series_18,000lb_Capacity_Mobile_Column-WIDE"
+  },
+  {
+    "source_file": "MP-8140-A-0760_800_Series_14,000lb_Capacity_Mobile_Column.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-8140-A-0760_800_Series_14,000lb_Capacity_Mobile_Column"
+  },
+  {
+    "source_file": "MP-8180-A-0830_800_Series_18,000lb_Capacity_Mobile_Column (1).pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-8180-A-0830_800_Series_18,000lb_Capacity_Mobile_Column (1)"
+  },
+  {
+    "source_file": "Slab_Requirements (2).pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Slab_Requirements (2)"
+  },
+  {
+    "source_file": "forktruck (1).pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "forktruck (1)"
+  },
+  {
+    "source_file": "forktruck_3rd_wheel (1).pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "forktruck_3rd_wheel (1)"
+  },
+  {
+    "source_file": "mp-series (2).pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "mp-series (2)"
+  },
+  {
+    "source_file": "mp24-4-96spec.pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "mp24-4-96spec"
+  },
+  {
+    "source_file": "truck-data-form-single-axle (1).pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "truck-data-form-single-axle (1)"
+  },
+  {
+    "source_file": "truck_dual_axle (1).pdf",
+    "_source_category": "mobile-column-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "truck_dual_axle (1)"
+  },
+  {
+    "source_file": "800-Series-Mobile-Lifts-10.2021.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "800-Series-Mobile-Lifts-10.2021"
+  },
+  {
+    "source_file": "A7-Master-12-1-2015 (1).pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "A7-Master-12-1-2015 (1)"
+  },
+  {
+    "source_file": "AirLine_Kit_20ft-TR-33-35-50-75.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "AirLine_Kit_20ft-TR-33-35-50-75"
+  },
+  {
+    "source_file": "AirLine_Kit_25ft-TR-33-35-50-75.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "AirLine_Kit_25ft-TR-33-35-50-75"
+  },
+  {
+    "source_file": "AirLine_Kit_30ft-TR-33-35-50-75.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "AirLine_Kit_30ft-TR-33-35-50-75"
+  },
+  {
+    "source_file": "FL25 TR25 TR19 SERIES  12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "FL25 TR25 TR19 SERIES  12-1-2015"
+  },
+  {
+    "source_file": "Jack_Stands_12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Jack_Stands_12-1-2015"
+  },
+  {
+    "source_file": "Jack_Stands_20_30_40_9-15-2016_PASE.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Jack_Stands_20_30_40_9-15-2016_PASE"
+  },
+  {
+    "source_file": "LC-12_12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LC-12_12-1-2015"
+  },
+  {
+    "source_file": "LMF12-TP16-TP18 12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LMF12-TP16-TP18 12-1-2015"
+  },
+  {
+    "source_file": "LMF12-TP16-TP18 w Airlocks  12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LMF12-TP16-TP18 w Airlocks  12-1-2015"
+  },
+  {
+    "source_file": "Light_Kit-ALCTV-TR-33-35-50-75.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Light_Kit-ALCTV-TR-33-35-50-75"
+  },
+  {
+    "source_file": "Light_Kit-NON-ALCTV-TR-33-35-50-75.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Light_Kit-NON-ALCTV-TR-33-35-50-75"
+  },
+  {
+    "source_file": "Light_Kit_TR-19-25 FL-25.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Light_Kit_TR-19-25 FL-25"
+  },
+  {
+    "source_file": "ML-220_5-14-19.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "ML-220_5-14-19"
+  },
+  {
+    "source_file": "MOHAWK-VRL-35K-64K.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MOHAWK-VRL-35K-64K"
+  },
+  {
+    "source_file": "MOHAWK-VRL-77K.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MOHAWK-VRL-77K"
+  },
+  {
+    "source_file": "MOHAWK-VRL-85K-99K.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MOHAWK-VRL-85K-99K"
+  },
+  {
+    "source_file": "MP-18-24VDC_SERIES_12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-18-24VDC_SERIES_12-1-2015"
+  },
+  {
+    "source_file": "MP-18-24VDC_SERIES_6-13-2018.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-18-24VDC_SERIES_6-13-2018"
+  },
+  {
+    "source_file": "MP-18-SERIES-TOUCHSCREEN_12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-18-SERIES-TOUCHSCREEN_12-1-2015"
+  },
+  {
+    "source_file": "MP-18-SERIES-TOUCHSCREEN_6-13-2018.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-18-SERIES-TOUCHSCREEN_6-13-2018"
+  },
+  {
+    "source_file": "MP-18-Series_12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-18-Series_12-1-2015"
+  },
+  {
+    "source_file": "MP-18-Series_6-13-2018.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-18-Series_6-13-2018"
+  },
+  {
+    "source_file": "MP-24_MP-30 Series_12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "MP-24_MP-30 Series_12-1-2015"
+  },
+  {
+    "source_file": "Parallelogram-12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Parallelogram-12-1-2015"
+  },
+  {
+    "source_file": "RJ-15_RJ-25-12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "RJ-15_RJ-25-12-1-2015"
+  },
+  {
+    "source_file": "RJ-50-AH_Series_12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "RJ-50-AH_Series_12-1-2015"
+  },
+  {
+    "source_file": "System_IA-10_12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "System_IA-10_12-1-2015"
+  },
+  {
+    "source_file": "TD-1000-AH 12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TD-1000-AH 12-1-2015"
+  },
+  {
+    "source_file": "TL-7 12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TL-7 12-1-2015"
+  },
+  {
+    "source_file": "TP-20-20WB 12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-20-20WB 12-1-2015"
+  },
+  {
+    "source_file": "TP-26A-30A-26WB-30WB  12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-26A-30A-26WB-30WB  12-1-2015"
+  },
+  {
+    "source_file": "TR-110-120 12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-110-120 12-1-2015"
+  },
+  {
+    "source_file": "TR-30 12-18-2013.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-30 12-18-2013"
+  },
+  {
+    "source_file": "TR-33-35-50-75-33WT-35WT-50WT-70WT-12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-33-35-50-75-33WT-35WT-50WT-70WT-12-1-2015"
+  },
+  {
+    "source_file": "TR-33-35-50-75_Rev_8-28-2008.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TR-33-35-50-75_Rev_8-28-2008"
+  },
+  {
+    "source_file": "Turf Kit w Dual Troughs 7-25-2016 (1).pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Turf Kit w Dual Troughs 7-25-2016 (1)"
+  },
+  {
+    "source_file": "Turfpack 12-1-2015.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Turfpack 12-1-2015"
+  },
+  {
+    "source_file": "uslcylinder.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "uslcylinder"
+  },
+  {
+    "source_file": "uslroller.pdf",
+    "_source_category": "operation-manuals",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "uslroller"
+  },
+  {
+    "source_file": "100-42-F_Installation_Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "100-42-F_Installation_Drawings"
+  },
+  {
+    "source_file": "100-42-S_Installation_Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "100-42-S_Installation_Drawings"
+  },
+  {
+    "source_file": "100-48-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "100-48-F Installation Drawings"
+  },
+  {
+    "source_file": "100-48-S_Installation_Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "100-48-S_Installation_Drawings"
+  },
+  {
+    "source_file": "36-28-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "36-28-F Installation Drawings"
+  },
+  {
+    "source_file": "36-28-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "36-28-S Installation Drawings"
+  },
+  {
+    "source_file": "38-26-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "38-26-F Installation Drawings"
+  },
+  {
+    "source_file": "38-26-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "38-26-S Installation Drawings"
+  },
+  {
+    "source_file": "40-35-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "40-35-F Installation Drawings"
+  },
+  {
+    "source_file": "40-35-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "40-35-S Installation Drawings"
+  },
+  {
+    "source_file": "45-35-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "45-35-F Installation Drawings"
+  },
+  {
+    "source_file": "45-35-S-Installation-Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "45-35-S-Installation-Drawings"
+  },
+  {
+    "source_file": "50-26-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "50-26-F Installation Drawings"
+  },
+  {
+    "source_file": "50-26-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "50-26-S Installation Drawings"
+  },
+  {
+    "source_file": "50-32-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "50-32-F Installation Drawings"
+  },
+  {
+    "source_file": "50-32-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "50-32-S Installation Drawings"
+  },
+  {
+    "source_file": "50-35-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "50-35-F Installation Drawings"
+  },
+  {
+    "source_file": "50-35-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "50-35-S Installation Drawings"
+  },
+  {
+    "source_file": "75-26-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-26-F Installation Drawings"
+  },
+  {
+    "source_file": "75-26-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-26-S Installation Drawings"
+  },
+  {
+    "source_file": "75-30-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-30-F Installation Drawings"
+  },
+  {
+    "source_file": "75-30-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-30-S Installation Drawings"
+  },
+  {
+    "source_file": "75-35-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-35-F Installation Drawings"
+  },
+  {
+    "source_file": "75-35-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-35-S Installation Drawings"
+  },
+  {
+    "source_file": "75-42-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-42-F Installation Drawings"
+  },
+  {
+    "source_file": "75-42-S_Installation_Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-42-S_Installation_Drawings"
+  },
+  {
+    "source_file": "75-48-F Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-48-F Installation Drawings"
+  },
+  {
+    "source_file": "75-48-S Installation Drawings.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "75-48-S Installation Drawings"
+  },
+  {
+    "source_file": "Parall-75-30-F.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Parall-75-30-F"
+  },
+  {
+    "source_file": "Parall-75-30-S.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Parall-75-30-S"
+  },
+  {
+    "source_file": "Parallelogram_L-Size.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Parallelogram_L-Size"
+  },
+  {
+    "source_file": "RJ-50-AH-Parallel.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "RJ-50-AH-Parallel"
+  },
+  {
+    "source_file": "Slab_Requirements (3).pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Slab_Requirements (3)"
+  },
+  {
+    "source_file": "parallelogram.pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "parallelogram"
+  },
+  {
+    "source_file": "rj50 (1).pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "rj50 (1)"
+  },
+  {
+    "source_file": "truck-data-form-single-axle (2).pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "truck-data-form-single-axle (2)"
+  },
+  {
+    "source_file": "truck_dual_axle (2).pdf",
+    "_source_category": "parallelogram-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "truck_dual_axle (2)"
+  },
+  {
+    "source_file": "JS-3047-20-SPEC11.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "JS-3047-20-SPEC11"
+  },
+  {
+    "source_file": "JS-3047-30-SPEC13.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "JS-3047-30-SPEC13"
+  },
+  {
+    "source_file": "JS-3047-40-SPEC15.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "JS-3047-40-SPEC15"
+  },
+  {
+    "source_file": "JS-4775-20-SPEC12.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "JS-4775-20-SPEC12"
+  },
+  {
+    "source_file": "JS-4775-30-SPEC14 (1).pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "JS-4775-30-SPEC14 (1)"
+  },
+  {
+    "source_file": "JS-4775-40-SPEC16.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "JS-4775-40-SPEC16"
+  },
+  {
+    "source_file": "Slab_Requirements (5).pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Slab_Requirements (5)"
+  },
+  {
+    "source_file": "System IA  With Speed Lane Layout1.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "System IA  With Speed Lane Layout1"
+  },
+  {
+    "source_file": "Turf Kit w Dual Troughs 7-25-2016.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Turf Kit w Dual Troughs 7-25-2016"
+  },
+  {
+    "source_file": "ZZ1454-A-011_LMF-TP16-18-OH-Beam.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "ZZ1454-A-011_LMF-TP16-18-OH-Beam"
+  },
+  {
+    "source_file": "ZZ1454-A-011_Tall-LMF-TP16-18.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "ZZ1454-A-011_Tall-LMF-TP16-18"
+  },
+  {
+    "source_file": "ZZ1454-A-100-Short-System-LC12.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "ZZ1454-A-100-Short-System-LC12"
+  },
+  {
+    "source_file": "ZZ1454-A-100_System-LC12.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "ZZ1454-A-100_System-LC12"
+  },
+  {
+    "source_file": "mower_3rd_wheel.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "mower_3rd_wheel"
+  },
+  {
+    "source_file": "td-1000.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "td-1000"
+  },
+  {
+    "source_file": "turf.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "turf"
+  },
+  {
+    "source_file": "wa-I-12.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "wa-I-12"
+  },
+  {
+    "source_file": "weight_guage-specs.pdf",
+    "_source_category": "specialty-items",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "weight_guage-specs"
+  },
+  {
+    "source_file": "A-7-narrow-bay-install.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "A-7-narrow-bay-install"
+  },
+  {
+    "source_file": "Infloor-line-kit-Conduit-and-hoses-LC12-to-ML220-2024.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Infloor-line-kit-Conduit-and-hoses-LC12-to-ML220-2024"
+  },
+  {
+    "source_file": "LC-12 Shop Layout.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LC-12 Shop Layout"
+  },
+  {
+    "source_file": "LC-12-base.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LC-12-base"
+  },
+  {
+    "source_file": "LC-12-spec.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LC-12-spec"
+  },
+  {
+    "source_file": "LC-12_inground.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LC-12_inground"
+  },
+  {
+    "source_file": "LMF-12-2SA.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LMF-12-2SA"
+  },
+  {
+    "source_file": "LMF-12-3SA.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LMF-12-3SA"
+  },
+  {
+    "source_file": "LMF-12-WB-Model.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LMF-12-WB-Model"
+  },
+  {
+    "source_file": "LMF-12_inground.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LMF-12_inground"
+  },
+  {
+    "source_file": "LMF12-specs.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "LMF12-specs"
+  },
+  {
+    "source_file": "ML-220-base.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "ML-220-base"
+  },
+  {
+    "source_file": "ML-220-specs.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "ML-220-specs"
+  },
+  {
+    "source_file": "ML-220_inground.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "ML-220_inground"
+  },
+  {
+    "source_file": "Slab_Requirements.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Slab_Requirements"
+  },
+  {
+    "source_file": "TP-16-2SA.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-16-2SA"
+  },
+  {
+    "source_file": "TP-16-3SA.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-16-3SA"
+  },
+  {
+    "source_file": "TP-16-specs.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-16-specs"
+  },
+  {
+    "source_file": "TP-16_inground.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-16_inground"
+  },
+  {
+    "source_file": "TP-18-specs.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-18-specs"
+  },
+  {
+    "source_file": "TP-18_inground.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-18_inground"
+  },
+  {
+    "source_file": "TP-20 (1).pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-20 (1)"
+  },
+  {
+    "source_file": "TP-20 10.30.2012 27 Shop Layout.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-20 10.30.2012 27 Shop Layout"
+  },
+  {
+    "source_file": "TP-20-WB-Base.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-20-WB-Base"
+  },
+  {
+    "source_file": "TP-20.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-20"
+  },
+  {
+    "source_file": "TP-20_UnderGround_Hoses.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-20_UnderGround_Hoses"
+  },
+  {
+    "source_file": "TP-20_UnderGround_Hydraulic_Lines.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-20_UnderGround_Hydraulic_Lines"
+  },
+  {
+    "source_file": "TP-26-26WB-shop-layout.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-26-26WB-shop-layout"
+  },
+  {
+    "source_file": "TP-2630.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-2630"
+  },
+  {
+    "source_file": "TP-26A-WB-Base.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-26A-WB-Base"
+  },
+  {
+    "source_file": "TP-26_Underground_Hoses.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-26_Underground_Hoses"
+  },
+  {
+    "source_file": "TP-26_Underground_Hydraulic_Lines.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-26_Underground_Hydraulic_Lines"
+  },
+  {
+    "source_file": "TP-30-30WB-shop-layout.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-30-30WB-shop-layout"
+  },
+  {
+    "source_file": "TP-30A-WB-Base.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-30A-WB-Base"
+  },
+  {
+    "source_file": "TP-30_Underground_Hoses.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-30_Underground_Hoses"
+  },
+  {
+    "source_file": "TP-30_Underground_Hydraulic_Lines.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "TP-30_Underground_Hydraulic_Lines"
+  },
+  {
+    "source_file": "a-7.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "a-7"
+  },
+  {
+    "source_file": "lc12.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "lc12"
+  },
+  {
+    "source_file": "sys-i-specs.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "sys-i-specs"
+  },
+  {
+    "source_file": "tp-16-18-base.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-16-18-base"
+  },
+  {
+    "source_file": "tp-20 (2).pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-20 (2)"
+  },
+  {
+    "source_file": "tp-20-UG.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-20-UG"
+  },
+  {
+    "source_file": "tp-20-WB.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-20-WB"
+  },
+  {
+    "source_file": "tp-20-base.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-20-base"
+  },
+  {
+    "source_file": "tp-26.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-26"
+  },
+  {
+    "source_file": "tp-26A-WB.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-26A-WB"
+  },
+  {
+    "source_file": "tp-26a-base.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-26a-base"
+  },
+  {
+    "source_file": "tp-30.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-30"
+  },
+  {
+    "source_file": "tp-30A-WB.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-30A-WB"
+  },
+  {
+    "source_file": "tp-30a-base.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp-30a-base"
+  },
+  {
+    "source_file": "tp2630_datasheet.pdf",
+    "_source_category": "two-post-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "tp2630_datasheet"
+  },
+  {
+    "source_file": "Slab_Requirements (4).pdf",
+    "_source_category": "vertical-rise-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "Slab_Requirements (4)"
+  },
+  {
+    "source_file": "VR-SERIES_35-64K_&_77K.pdf",
+    "_source_category": "vertical-rise-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "VR-SERIES_35-64K_&_77K"
+  },
+  {
+    "source_file": "VRL-Data-Sheet-35-77K.pdf",
+    "_source_category": "vertical-rise-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "VRL-Data-Sheet-35-77K"
+  },
+  {
+    "source_file": "VRL-Data-Sheet-85-99K.pdf",
+    "_source_category": "vertical-rise-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "VRL-Data-Sheet-85-99K"
+  },
+  {
+    "source_file": "VRL_General_Dimensions.pdf",
+    "_source_category": "vertical-rise-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "VRL_General_Dimensions"
+  },
+  {
+    "source_file": "vertical-rise-specs.pdf",
+    "_source_category": "vertical-rise-lifts",
+    "_error": "Could not resolve authentication method. Expected either apiKey or authToken to be set. Or for one of the \"X-Api-Key\" or \"Authorization\" headers to be explicitly omitted",
+    "category": "unknown",
+    "document_type": "unknown",
+    "model": "vertical-rise-specs"
   }
 ]
