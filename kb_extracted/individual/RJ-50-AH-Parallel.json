@@ -1,0 +1,71 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/parallelogram-lifts/RJ-50-AH-Parallel.pdf",
+  "category": "parallelogram-lift",
+  "document_type": "specification-drawing",
+  "model": "RJ-50-AH-37500-P",
+  "variant": "Parallelogram Version",
+  "product_type": "Air/Hydraulic Track Assisted Jacking Beam",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": "50,000 lbs",
+  "dimensions": {
+    "max_height_in": 59.25,
+    "max_width_in": 32.00,
+    "min_height_in": 43.50,
+    "min_clearance_in": 12.00,
+    "yoke_pad_offset_in": 2.50,
+    "holes_per_side": 5,
+    "dimension_a_in": 4.375,
+    "dimension_b_in": 11.625,
+    "dimension_c_in": 11.625,
+    "dimension_d_in": 7.875,
+    "dimension_e_in": 3.875,
+    "dimension_f_ref_in": 9.375
+  },
+  "weight": {
+    "weight_lbs": 854
+  },
+  "installation_requirements": null,
+  "specifications": {
+    "maximum_load_capacity_lbs": 50000,
+    "parallelogram_version_max_lbs": 37500,
+    "re_rated_capacity_lbs": 15000,
+    "capacity_note": "Capacity dependent on lift capacity",
+    "certification": "UL Standard 201 for Garage Equipment and ANSI/ALI ALCTV-2011",
+    "tested_by": "Nationally Recognized Testing Laboratory (NRTL)",
+    "drawing_date": "07/12",
+    "revision_a_date": "04/01/2014",
+    "revision_a_description": "Addition of ALCTV certification",
+    "revision_b_date": "12/1/2015",
+    "revision_b_description": "ALI verification logo"
+  },
+  "features": [
+    "Air/hydraulic track assisted jacking beam for parallelogram lifts",
+    "Rated 37,500 lbs max in parallelogram version",
+    "Re-rated to 15,000 lb capacity with optional slider arm attachment",
+    "(2) Yoke pads standard",
+    "(2) Flat pads standard",
+    "Height adapters standard: (2) 5 inch, (2) 7-1/2 inch, (2) 10 inch",
+    "Optional slider arm attachment available",
+    "5 holes per side for positioning"
+  ],
+  "optional_equipment": [
+    "Slider arm attachment (re-rates to 15,000 lb capacity)"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "UL Standard 201 for Garage Equipment",
+    "ANSI/ALI ALCTV-2011 for Automotive Lift Construction",
+    "ALI/ETL Certified and Validated"
+  ],
+  "safety_features": [
+    "Tested and certified by NRTL",
+    "Capacity dependent on lift capacity"
+  ],
+  "notes": [
+    "RJ-50-AH-37500-P Series Air/Hydraulic Jacking Beam - Parallelogram version",
+    "Track assisted design for use with parallelogram lifts",
+    "Maximum capacity 50,000 lbs (37,500 lbs in parallelogram version)",
+    "Weight: 854 lbs",
+    "Standard accessories include yoke pads, flat pads, and height adapters"
+  ]
+}
