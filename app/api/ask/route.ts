@@ -4,21 +4,8 @@ import { getSQL, ensureSchema } from "@/lib/db";
 
 export const maxDuration = 60;
 
-async function autoSeedIfEmpty() {
-  const sql = getSQL();
-  const result = await sql`SELECT count(*)::int as c FROM products`;
-  if (result[0].c === 0) {
-    // Trigger seed
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
-    await fetch(`${baseUrl}/api/db-seed`, { method: "POST" });
-  }
-}
-
 async function searchProducts(question: string) {
   await ensureSchema();
-  await autoSeedIfEmpty();
   const sql = getSQL();
 
   // Extract potential model numbers and keywords from the question
