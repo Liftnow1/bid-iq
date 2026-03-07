@@ -1,0 +1,103 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/ML-220-specs.pdf",
+  "category": "two-post-lift",
+  "document_type": "product_specification_sheet",
+  "model": "ML-220",
+  "variant": "Standard 3-Stage Arms",
+  "product_type": "Symmetrical 2-Post Lift",
+  "capacity": "20,000 lbs (9000 kg)",
+  "dimensions": {
+    "overall_width": "12 ft 7.5 inches (3.85 m) (adjustable)",
+    "width_between_posts": "10 ft (3.05 m) (adjustable 114-120 inches)",
+    "width_between_lifting_arms": "8 ft 9.75 inches (2.69 m) (adjustable)",
+    "column_height": "8 ft 7 inches (2.62 m)",
+    "max_cylinder_height": "13 ft 6 inches (4.11 m)",
+    "overhead_hydraulic_line_height": "15 ft (4.57 m) standard (adjustable or routed in-floor)",
+    "post_spacing_adjustable": "114-120 inches",
+    "carriage_height": "103 inches (2.62 m)",
+    "arm_width_inner": "72.5 inches (1.84 m)",
+    "arm_width_mid": "76.5 inches (1.94 m)",
+    "arm_width_outer": "86.5 inches (2.20 m)",
+    "arm_reach_min": "36.3 inches MIN (0.92 m)",
+    "arm_reach_max": "61 inches MAX (1.55 m)",
+    "arm_base_width": "65.2 inches (1.66 m)",
+    "overall_arm_span": "130.3 inches (3.31 m)",
+    "pad_height": "4.5 inches (0.11 m)"
+  },
+  "weight": "4,100 lbs (1859.73 kg)",
+  "installation_requirements": {
+    "concrete_floor_wide_base": "5.5 inches of 4,000 PSI concrete",
+    "concrete_floor_standard_base": "6.5 inches of 4,000 PSI concrete",
+    "anchoring_system": "(16) 3/4 inch x 6 inch (1.91 x 15.24 cm) bolts included",
+    "power": "4 HP/208-230V, single-phase (3-phase optional)",
+    "overhead_hydraulic_line_height": "15 ft (4.57 m) standard, adjustable to any ceiling height or routed in-floor"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Lifts, LLC.",
+    "address": "P.O. Box 110, 65 Vrooman Ave, Amsterdam, NY 12010",
+    "phone_toll_free": "(800) 833-2006",
+    "phone_local": "(518) 842-1431",
+    "fax": "(518) 842-1289",
+    "website": "www.mohawklifts.com",
+    "revision": "REV 3/25",
+    "lifting_speed": "90 seconds (faster with lighter load)",
+    "motor_rating": "4 HP/208-230V, single-phase (3-phase optional)",
+    "synchronization": "Hydraulic fluid displacement using no chains, cables, or overhead obstructions",
+    "arm_pad_height": "4.5 inches (11.43 cm) minimum",
+    "lifting_height": "6 ft (1.83 m) under arm",
+    "arm_pad_height_full_rise": "6 ft 5 inches (1.96 m)",
+    "max_pad_height_with_adaptors": "7 ft 3 inches (2.21 m) (includes 5 inch, 7.5 inch, and 10 inch stackable lift adaptor pads)",
+    "cylinders": "2 (1 per column)",
+    "drive_system": "Direct drive (using no cables or chains)",
+    "steel_carriage_bearings": "(16) 4 inch (10.16 cm) diameter, 8 per carriage, double sealed, self-lubricating ball bearing rollers",
+    "floor_access_between_posts": "Clear and unobstructed",
+    "warranty": "25 years structural, 10 year mechanical, plus limited lifetime cylinder seal warranty"
+  },
+  "features": [
+    "20,000 lb capacity - highest capacity Mohawk 2-post lift",
+    "3-stage arm configuration",
+    "Adjustable post spacing from 114-120 inches",
+    "Hydraulic fluid displacement synchronization - no chains, cables, or overhead obstructions",
+    "Direct drive system using no cables or chains",
+    "Automatic multi-position mechanical safety locks starting at 5 inches off the floor",
+    "Automatic all-position hydraulic safety systems",
+    "Automatic swing arm restraints upon ascent",
+    "Clear and unobstructed floor access between posts",
+    "Adjustable height overhead steel hydraulic lines or in-floor routing",
+    "16 double-sealed self-lubricating ball bearing rollers (8 per carriage)",
+    "Wide base option with reduced concrete depth requirement (5.5 inches vs 6.5 inches)",
+    "4 HP motor"
+  ],
+  "optional_equipment": [
+    "3-phase motor option",
+    "5 inch Frame Adaptors (stackable) - 4 included standard",
+    "7.5 inch Frame Adaptors (stackable) - 4 included standard",
+    "10 inch Frame Adaptors (stackable) - 4 included standard",
+    "Wide base option"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "GSA Contract Holder - Contract # GS-07F-207AA",
+    "Sourcewell Awarded Contract # 121223-MRL",
+    "CP Choice Partners",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy.org"
+  ],
+  "safety_features": [
+    "Automatic multi-position mechanical safety locks starting at 5 inches off the floor",
+    "Automatic all-position hydraulic safety systems",
+    "Automatic swing arm restraints upon ascent",
+    "16 double-sealed self-lubricating steel carriage bearings (8 per carriage)"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Available under discounted government contract in all 50 states",
+    "GSA Contract # GS-07F-207AA",
+    "Sourcewell Awarded Contract # 121223-MRL",
+    "Units: inches [meters]",
+    "Dare to Compare comparison available at mohawklifts.com/dare2compare",
+    "Americas Best Lift Investment",
+    "Key differences from LMF-12: 20,000 lb capacity (vs 12,000 lb), 4100 lbs weight (vs 3100 lbs), 90 sec lift speed (vs 60 sec), wide base concrete option at 5.5 inches"
+  ]
+}

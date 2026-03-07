@@ -1,0 +1,79 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/LMF-12-WB-Model.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "LMF-12-WB / TP-16-WB / TP-18-WB / ML-220-WB",
+  "variant": "Leg Base Plate Widebase",
+  "product_type": "Base Plate for Widebase 2-Post Lifts",
+  "capacity": null,
+  "dimensions": {
+    "overall_width": "29.5 inches REF",
+    "overall_depth": "29.75 inches",
+    "plate_thickness": "0.75 inches (3/4 inch REF)",
+    "material_size": "0.750 inches x 29.5 inches x 29.75 inches",
+    "upper_section_depth_1": "28.75 inches",
+    "upper_section_depth_2": "23.75 inches",
+    "upper_section_depth_3": "21.125 inches",
+    "upper_section_depth_4": "19.3125 inches",
+    "notch_width": "14.75 inches",
+    "notch_offset": "10.75 inches",
+    "mid_section_width_1": "7.9375 inches",
+    "mid_section_width_2": "6.375 inches",
+    "lower_dimension": "13.75 inches",
+    "bottom_dimension": "27.5 inches",
+    "offset_small": "4.5 inches",
+    "anchor_hole_spacing": "9 inches",
+    "angle_cut_1": "15 degrees (2 locations)",
+    "angle_cut_2": "45 degrees",
+    "corner_radius_large": "R1 inch (typical 8 places)",
+    "corner_radius_small": "R 9/16 inch (typical 2 places)",
+    "anchor_hole_diameter": "7/8 inch (typical 12 places)",
+    "slot_width": "3/16 inch (typical 10 places)",
+    "bottom_reference": "1 inch"
+  },
+  "weight": "147.2 lbs",
+  "installation_requirements": {
+    "compatible_models": ["LMF-12-WB", "TP-16-WB", "TP-18-WB", "ML-220-WB"],
+    "anchor_holes": "12 holes, 7/8 inch diameter",
+    "material": "Steel ASTM A36 Plate, 0.750 inch x 29.5 inch x 29.75 inch"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Lifts, LLC.",
+    "title": "Leg Base Plate Widebase TP-16/18-WB",
+    "part_number": "016-011-104",
+    "drawing_number": "016-011-104",
+    "from": "600-000-041",
+    "scale": "NTS",
+    "drawn_by": "R.V.",
+    "date": "12/2012",
+    "sheet_size": "D-Size",
+    "material": "Steel ASTM A36 Plate, 0.750 in x 29 1/2 x 29 3/4",
+    "revision_A": "Model and/or drawing migrated from Autodesk Mechanical Desktop to Autodesk Inventor. Border, title block, revision block, etc. updated for consistency. ECN# 000142, 4/29/2019, by CW",
+    "tolerances": {
+      "fractional": "+/- 1/32",
+      "decimal_XX": "+/- 0.03",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "ASTM A36 steel plate construction",
+    "0.75 inch thick widebase plate",
+    "12 anchor bolt holes with 7/8 inch diameter",
+    "Used across multiple Mohawk widebase 2-post lift models",
+    "15 degree and 45 degree angle cuts",
+    "Wider base than standard LC-12 base plate (29.75 vs 25.50 depth)"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Used on Mohawk models LMF-12-WB, TP-16-WB, TP-18-WB, ML-220-WB",
+    "Material: Steel ASTM A36 Plate, 0.750 in x 29 1/2 x 29 3/4",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Refer to Mohawk Resources Ltd. welding procedure for all welding",
+    "All dimensions in inches unless otherwise noted"
+  ]
+}

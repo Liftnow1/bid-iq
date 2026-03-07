@@ -1,0 +1,123 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/TR-33-35-50-75-33WT-35WT-50WT-70WT-12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "TR-33 / TR-35 / TR-50 / TR-75 / TR-33WT / TR-35WT / TR-50WT / TR-70WT",
+  "variant": "33,000 to 75,000 lb capacity four-post lifts including wide track (WT) variants",
+  "product_type": "four_post_lift",
+  "capacity": "TR-33/33WT: 33,000 lbs; TR-35/35WT: 35,000 lbs; TR-50/50WT: 50,000 lbs; TR-75: 75,000 lbs; TR-70WT: 70,000 lbs",
+  "dimensions": {
+    "runway_width_options_inches": [24, 32],
+    "clearance_between_runways_ft": 4,
+    "working_height_ft_in": "6 ft 2-1/2 in",
+    "approach_ramp_width_inches": 24,
+    "runway_length_options_ft": [20, 25, 30, 35],
+    "column_material": "6 inch x 1 inch thick forklift mast sections",
+    "carriage_roller_diameter_inches": 4,
+    "wt_note": "Wide Track models have wider overall width for wider vehicles"
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting": "Surface-mounted (flush-mount option available)",
+    "concrete_psi": 4000,
+    "concrete_thickness_inches": 5,
+    "alternative_footings": "Four footings 6 ft x 6 ft x 12 in deep"
+  },
+  "specifications": {
+    "tr33_capacity_lbs": 33000,
+    "tr35_capacity_lbs": 35000,
+    "tr50_capacity_lbs": 50000,
+    "tr75_capacity_lbs": 75000,
+    "tr33wt_capacity_lbs": 33000,
+    "tr35wt_capacity_lbs": 35000,
+    "tr50wt_capacity_lbs": 50000,
+    "tr70wt_capacity_lbs": 70000,
+    "motor_hp": 10,
+    "runway_construction": "Three parallel 12-inch wide-flange I-beams",
+    "lifting_mechanism": "4 direct drive cylinders at each post",
+    "column_material": "6 inch x 1 inch thick forklift mast sections",
+    "carriage_rollers": "4-inch sealed ball bearing rollers",
+    "lock_type": "Patented infinite-positioning mechanical stop",
+    "lock_spacing_inches": 6,
+    "synchronization": "Mechanical side-to-side chain synchronization",
+    "leveling": "Automatic track leveler",
+    "single_point_lock_release": true,
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "33,000 to 75,000 lb capacities (standard and wide track)",
+    "Wide Track (WT) variants for wider vehicles like winged snow plows",
+    "Three parallel 12-inch wide-flange I-beam runway construction",
+    "4 direct drive cylinders - no cables",
+    "6 inch x 1 inch thick forklift mast columns",
+    "4-inch sealed ball bearing roller carriages",
+    "Patented infinite-positioning mechanical stop",
+    "All-position safety locks every 6 inches to full height",
+    "10 HP power unit",
+    "24 or 32-inch runway widths",
+    "4 feet clear span between runways",
+    "6 ft 2-1/2 in working height",
+    "Runway lengths: 20, 25, 30, or 35 feet (custom available)",
+    "Mechanical chain synchronization",
+    "Automatic track leveler",
+    "Single-point lock release",
+    "Runways adjustable for any vehicle wheelbase",
+    "Can set runways off center for wider equipment",
+    "Alignment compatible at any working height",
+    "Can be wider cross-rails or heavier capacities on request"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Rolling Jacks (Wheels-Free)",
+      "description": "Raise tires off tracks for wheel, brake, and axle service"
+    },
+    {
+      "item": "Track Lighting",
+      "description": "Under-vehicle illumination"
+    },
+    {
+      "item": "Air Lines",
+      "description": "Compressed air along runways"
+    },
+    {
+      "item": "Flush Mount Installation",
+      "description": "Runways level with shop floor"
+    },
+    {
+      "item": "Custom Runway Lengths",
+      "description": "Available upon request"
+    },
+    {
+      "item": "Wider Cross-Rails",
+      "description": "For oversized equipment"
+    },
+    {
+      "item": "Tire Dollies",
+      "description": "1,000 and 2,000 lb capacity"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified (TR-33 through TR-70)",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Multi-position mechanical locks in all four posts",
+    "Patented infinite-positioning mechanical stop (TR-35, 50, 75)",
+    "Redundant hydraulic safeties",
+    "Pressure-compensated flow control valves",
+    "Tamper-proof velocity fuses",
+    "Single-point lock release",
+    "Mechanical chain synchronization",
+    "Automatic track leveler"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Combined manual covering 8 models (4 standard + 4 wide track)",
+    "WT = Wide Track for wider vehicles (snow plows, loaders, etc.)",
+    "TR-70WT is the wide track equivalent capacity near TR-75",
+    "Services full spectrum: passenger cars to heavy equipment",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

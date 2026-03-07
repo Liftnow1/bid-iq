@@ -1,0 +1,45 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/Turfpack 12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_and_operation_manual",
+  "model": "Turfpack",
+  "variant": "Turf equipment accessory pack for two-post lifts",
+  "product_type": "turf_kit_accessory",
+  "capacity": "N/A - accessory kit (subject to host lift capacity)",
+  "dimensions": {},
+  "weight": {},
+  "installation_requirements": {
+    "compatible_lifts": "Mohawk two-post lifts (LMF-12, TP-16, TP-18, and similar)",
+    "lift_type": "Two-post lift"
+  },
+  "specifications": {
+    "purpose": "Enables two-post lifts to service turf maintenance equipment",
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "Converts standard two-post lifts for turf equipment service",
+    "Lifting forks and trough system for turf vehicles",
+    "Accommodates various turf maintenance vehicle types",
+    "Works with Mohawk LMF-12, TP-16, TP-18 and similar two-post lifts"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Dual Trough Kit",
+      "description": "Upgraded dual trough version available separately"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "Mohawk Lifts OEM accessory"
+  ],
+  "safety_features": [
+    "Trough system captures rear wheels securely",
+    "Must be used with compatible Mohawk two-post lift"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Standard turf pack - see also Dual Trough version (7/25/2016)",
+    "Accessory kit - not a standalone lift",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

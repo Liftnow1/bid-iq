@@ -1,0 +1,74 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/LMF-12_inground.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "LMF-12",
+  "variant": "Suggested In-Ground Hydraulic Lines",
+  "product_type": "In-Ground Hydraulic Line Layout for 2-Post Lift",
+  "capacity": null,
+  "dimensions": {
+    "overall_length": "180 inches (15 ft 0 inches)",
+    "overall_width": "149.5 inches (12 ft 5.5 inches)",
+    "between_posts_centerline": "121.25 inches (10 ft 1.25 inches)",
+    "slab_width_top": "151.5 inches (12 ft 7.5 inches)",
+    "slab_width_mid": "90 inches (7 ft 6 inches)",
+    "slab_inset_from_edge": "75.75 inches (6 ft 3.75 inches)",
+    "trench_width": "60.625 inches (5 ft 0.625 inches)",
+    "trench_inset": "74.75 inches (6 ft 2.75 inches)",
+    "base_plate_width": "29.25 inches",
+    "base_plate_depth_left": "14.75 inches",
+    "base_plate_depth_right": "13.75 inches",
+    "column_base_height": "72 inches (6 ft 0 inches)",
+    "column_base_depth_right": "27.5 inches",
+    "hydraulic_slot_width": "36 inches (3 ft 0 inches)",
+    "through_slot_dimension": "1.75 inches wide x 1.5 inches deep",
+    "through_slot_purpose": "Through slot for underground hydraulic tubing"
+  },
+  "weight": null,
+  "installation_requirements": {
+    "floor_type": "Concrete slab",
+    "hydraulic_routing": "In-ground / underground hydraulic tubing",
+    "through_slot": "1 3/4 inch wide x 1 1/2 inch deep through slot for underground hydraulic tubing",
+    "reference": "For further information, see General Floor Requirements in Installation Manual"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Lifts, LLC.",
+    "title": "Suggested In-Ground Hyd. Lines",
+    "drawing_number": "012-012-037",
+    "file_name": "D12037",
+    "next_assembly": "012-011-003",
+    "scale": "5/64",
+    "drawn_by": "dok",
+    "checked_by": "RW",
+    "approved_by": "RW",
+    "date": "10/1",
+    "sheet_size": "C-Size",
+    "revision_A": "Redrawn & Replaced, 10/93, by dok, approved RW",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_XX": "+/- 0.050",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or X-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "In-ground hydraulic line routing between lift columns",
+    "Through slot in concrete slab for underground hydraulic tubing",
+    "Eliminates overhead hydraulic lines",
+    "Center line reference for alignment",
+    "Identical layout to LC-12 inground drawing"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Drawing is identical to LC-12 inground layout but labeled for LMF-12 model",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70xx electrodes or X-70T1 Code 5.3 flux core wire only",
+    "For further information, see General Floor Requirements in Installation Manual"
+  ]
+}

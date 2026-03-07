@@ -1,0 +1,104 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/TP-26A-30A-26WB-30WB  12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "TP-26A / TP-30A / TP-26WB / TP-30WB",
+  "variant": "26,000 and 30,000 lb capacity heavy duty two-post lifts (standard, airlock, and wide base variants)",
+  "product_type": "two_post_lift",
+  "capacity": "TP-26: 26,000 lbs; TP-30: 30,000 lbs",
+  "dimensions": {
+    "base_footprint_width_inches": 48,
+    "base_footprint_depth_options_inches": [30, 42],
+    "base_plate_thickness_inches": 1.0,
+    "lifting_height_ft": 6,
+    "lifting_height_to_locks_ft_in": "6 ft 7 in",
+    "arm_pad_height_min_inches": 7,
+    "lock_spacing_inches": 6,
+    "lock_positions": 12,
+    "lock_plate_thickness_inches": 1.5,
+    "lock_start_height_inches": 5
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting": "Surface-mounted, bolts to concrete floor",
+    "tp26_tp30_concrete_thickness_inches": 12,
+    "optional_concrete_thickness_inches": 8,
+    "base_footprint": "48 in wide x 30 in (or 42 in) deep, 1 inch thick plate",
+    "motor_voltage": "208-230V or 440-480V, 3-phase",
+    "air_supply_required_for_a_models": true,
+    "indoor_use_only": true
+  },
+  "specifications": {
+    "tp26_capacity_lbs": 26000,
+    "tp30_capacity_lbs": 30000,
+    "motor_hp": 5,
+    "motor_voltage": "208-230V or 440-480V, 3 Phase",
+    "cylinder_type": "Twin cylinder direct drive",
+    "column_material": "1 inch thick forklift mast",
+    "roller_bearings_per_carriage": 16,
+    "roller_bearing_diameter_inches": 4,
+    "swing_arm_type": "3-stage arms",
+    "lock_release_a_models": "Air-actuated (airlocks) with automatic re-engagement",
+    "lock_release_standard": "Hand-held pendant control",
+    "lock_positions": 12,
+    "lock_spacing_inches": 6,
+    "lock_plate_thickness_inches": 1.5,
+    "lock_range_inches": "5 to 79 (6 ft 7 in)",
+    "adapter_heights_inches": [5, 7.5, 10],
+    "swing_arm_bolt_diameter_inches": 1.125,
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "26,000 or 30,000 lb capacity heavy duty two-post lifts",
+    "A designation: Air-actuated mechanical lock release (airlocks)",
+    "WB designation: Wide base variant",
+    "1-inch thick forklift mast columns",
+    "16 x 4-inch double sealed self-lubricating steel rollers per carriage",
+    "3-stage swing arms for wide range of wheelbases",
+    "5 HP 3-phase power unit delivers fluid equally to twin cylinders",
+    "12-position mechanical safety locks of 1.5-inch thick steel",
+    "Locks engage every 6 inches from 5 inches to full height of 6 ft 7 in",
+    "Standard 5, 7.5, and 10-inch stackable truck adapters",
+    "Hand-held pendant control (standard) or air-actuated release (A models)",
+    "Clear floor design"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Air-Actuated Lock Release (Airlocks)",
+      "description": "Available as A model designation"
+    },
+    {
+      "item": "Wide Base (WB)",
+      "description": "Extended base footprint for additional stability"
+    },
+    {
+      "item": "8-inch Floor Option",
+      "description": "Optional footprint for shops with only 8-inch floors"
+    },
+    {
+      "item": "In-Floor Hydraulic Lines",
+      "description": "Alternative to overhead routing"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets OSHA and ANSI/ALI ALCTV-2006 standards",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "12-position mechanical locks of 1.5-inch thick steel plates",
+    "Locks engage every 6 inches from 5 inches to 6 ft 7 in",
+    "Patented hydraulic locking system with velocity fuses",
+    "Pressure-compensated flow control",
+    "Air-actuated lock release with automatic re-engagement (A models)",
+    "Hand-held pendant control for safe raising and lowering"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Warranty: 25 years structural, 10 year mechanical, limited lifetime cylinder",
+    "A = Airlock version, WB = Wide Base version",
+    "Requires 12 inches of concrete (or optional 8-inch floor footprint)",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}
