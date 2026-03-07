@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSQL } from "@/lib/db";
+import { getSQL, ensureSchema } from "@/lib/db";
 import fs from "fs";
 import path from "path";
 
@@ -51,6 +51,7 @@ function buildSearchText(data: Record<string, unknown>): string {
 
 export async function POST() {
   try {
+    await ensureSchema();
     const sql = getSQL();
 
     // Clear existing mohawk data
