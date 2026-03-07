@@ -4,37 +4,36 @@ import kbData from "./knowledge-base.json";
 
 export const maxDuration = 60;
 
+// Build a compact text representation of the KB (no pretty-printing)
 const kbText = (kbData as Record<string, unknown>[])
   .map((entry) => {
     const model = (entry.model as string) || "Unknown";
     const variant =
       (entry.variant as string) || (entry.product_type as string) || "N/A";
-    return `=== ${model} (${variant}) ===\n${JSON.stringify(entry, null, 2)}`;
+    return `[${model} - ${variant}] ${JSON.stringify(entry)}`;
   })
-  .join("\n\n");
+  .join("\n");
 
-const SYSTEM_PROMPT = `You are a Mohawk Lifts product expert. You have access to a comprehensive knowledge base of Mohawk Lifts products including parallelogram lifts, rolling jacks, installation drawings, slab requirements, and truck data.
+const SYSTEM_PROMPT = `You are a Mohawk Lifts product expert. You have access to a comprehensive knowledge base of Mohawk Lifts products below. This includes parallelogram lifts (surface mount and flush mount), rolling jacks, installation drawings with dimensions, slab requirements, and truck data forms.
 
-Answer questions accurately based ONLY on the knowledge base data provided. When citing specifications, be precise with numbers and units. If comparing models, organize the comparison clearly.
+KNOWLEDGE BASE:
+${kbText}
 
-If the knowledge base does not contain information to answer the question, say so clearly — do not make up data.
-
-When relevant, mention:
-- Model numbers and variants (surface mount vs flush mount)
-- Exact dimensions, capacities, and specifications
-- Installation requirements (slab, electrical, pit dimensions)
-- Certifications and compliance
-- Parts lists and optional equipment
-
-Keep answers clear, organized, and directly useful for someone evaluating or bidding on Mohawk Lifts equipment.`;
+INSTRUCTIONS:
+- Answer questions accurately using ONLY the knowledge base above.
+- Be precise with numbers, units, and model numbers.
+- If comparing models, organize clearly with side-by-side data.
+- If the KB does not contain information to answer, say so clearly. Do not fabricate data.
+- Keep answers practical and useful for someone evaluating or bidding on Mohawk equipment.`;
 
 export async function POST(request: NextRequest) {
   try {
-    const { question } = await request.json();
+    const body = await request.json();
+    const question = body?.question;
 
-    if (!question || typeof question !== "string") {
+    if (!question || typeof question !== "string" || !question.trim()) {
       return NextResponse.json(
-        { error: "Please provide a question" },
+        { error: "Please enter a question." },
         { status: 400 }
       );
     }
@@ -48,7 +47,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "user",
-          content: `Here is the Mohawk Lifts knowledge base:\n\n${kbText}\n\n---\n\nQuestion: ${question}`,
+          content: question.trim(),
         },
       ],
     });
@@ -62,10 +61,20 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ answer: textBlock.text });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Ask error:", err);
-    const message =
-      err instanceof Error ? err.message : "Failed to answer question";
+    let message = "Failed to answer question";
+    if (err instanceof Error) {
+      message = err.message;
+    }
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "status" in err &&
+      (err as { status: number }).status === 401
+    ) {
+      message = "API key not configured. Add ANTHROPIC_API_KEY in Vercel settings.";
+    }
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

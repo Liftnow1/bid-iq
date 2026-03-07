@@ -33,12 +33,13 @@ export default function Home() {
         body: JSON.stringify({ question: userMessage }),
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to get answer");
-      }
-
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to get answer");
+      }
+      if (!data.answer) {
+        throw new Error("Empty response from API");
+      }
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: data.answer },
