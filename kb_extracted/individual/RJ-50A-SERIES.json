@@ -1,0 +1,151 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/RJ-50A-SERIES.pdf",
+  "category": "four-post-lift",
+  "document_type": "engineering_drawing_specification",
+  "model": "RJ-50A-Series",
+  "variant": "Multiple (RJ-50A-23000, RJ-50A-24500, RJ-50A-35000, RJ-50A-50000)",
+  "product_type": "electric_hydraulic_jacking_beam",
+  "capacity": "23,000 to 50,000 lbs depending on model",
+  "dimensions": {
+    "beam_length_inches": 54.375,
+    "beam_width_inches": 24.4375,
+    "width_between_lifting_pads_min_inches": 10.5,
+    "width_between_lifting_pads_max_inches": 47.75,
+    "cylinder_pad_height_min_inches": 1.625,
+    "cylinder_pad_height_max_inches": 9.5,
+    "max_pad_height_with_adaptors_inches": 19.5,
+    "raised_height_inches": 9.5,
+    "between_runways_inches": 48,
+    "overall_height_inches": 15.75,
+    "side_clearance_inches": 5.1875,
+    "bottom_clearance_inches": 2.0,
+    "beam_end_height_inches": 2.4375,
+    "overall_length_metric_meters": 1.38,
+    "width_between_pads_min_metric_meters": 0.27,
+    "width_between_pads_max_metric_meters": 1.21,
+    "between_runways_metric_meters": 1.22,
+    "beam_width_metric_meters": 0.66,
+    "overall_height_metric_meters": 0.40,
+    "side_clearance_metric_meters": 0.13,
+    "bottom_clearance_metric_meters": 0.05,
+    "beam_end_height_metric_meters": 0.06,
+    "pad_height_min_metric_meters": 0.04
+  },
+  "weight": {
+    "weight_lbs": 600
+  },
+  "installation_requirements": {
+    "electrical": "1 HP, 110 Volts, Single Phase, 60 Cycle",
+    "mounting": "Track-mounted, plugs connect to receptacles located at ends of tracks only",
+    "compatible_lifts": {
+      "RJ-50A-23000": "Mohawk TR-33",
+      "RJ-50A-24500": "Mohawk TR-35",
+      "RJ-50A-35000": "Mohawk TR-50",
+      "RJ-50A-50000": "Mohawk TR-75"
+    },
+    "welding_spec": "AWS E-70XX electrodes or E-70TI Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "specifications": {
+    "models": [
+      {
+        "model": "RJ-50A-23000",
+        "capacity_lbs": 23000,
+        "compatible_lift": "Mohawk TR-33"
+      },
+      {
+        "model": "RJ-50A-24500",
+        "capacity_lbs": 24500,
+        "compatible_lift": "Mohawk TR-35"
+      },
+      {
+        "model": "RJ-50A-35000",
+        "capacity_lbs": 35000,
+        "compatible_lift": "Mohawk TR-50"
+      },
+      {
+        "model": "RJ-50A-50000",
+        "capacity_lbs": 50000,
+        "compatible_lift": "Mohawk TR-75"
+      }
+    ],
+    "lifting_speed_up_one_cylinder_no_load_seconds": 55,
+    "lifting_speed_up_two_cylinder_no_load_seconds": 110,
+    "lifting_speed_down_one_cylinder_no_load_seconds": 40,
+    "lifting_speed_down_two_cylinder_no_load_seconds": 80,
+    "motor_hp": 1,
+    "motor_voltage": 110,
+    "motor_phase": "Single Phase",
+    "motor_frequency_hz": 60,
+    "synchronization": "Manual",
+    "cylinders": 2,
+    "drive_system": "Direct",
+    "hydraulic_safety_systems": "Automatic, all position (flow limiting valve at each cylinder)",
+    "electrical_features": [
+      "Class I - Div 2 rated on/off manual starter with overload protection",
+      "Class I - Div 2 rated locking plug"
+    ],
+    "tolerances": {
+      "angular_degrees": 1,
+      "fractional_inches": 0.030,
+      "decimal_2place_inches": 0.030,
+      "decimal_3place_inches": 0.005
+    },
+    "drawing_scale": "1/4",
+    "drawing_date": "4/00",
+    "revision": "E"
+  },
+  "features": [
+    "Electric/hydraulic powered jacking beam",
+    "Track-mounted operation on four-post lift runways",
+    "Two hydraulic cylinders with direct drive",
+    "Automatic all-position hydraulic safety system with flow limiting valves at each cylinder",
+    "Manual synchronization",
+    "Spring loaded steel wheels with needle bearings (4 per jacking beam)",
+    "Class I - Div 2 rated electrical components",
+    "Adjustable width between lifting pads: 10.5 inches min to 47.75 inches max",
+    "Maximum pad height of 19.5 inches with 10-inch adaptor"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "RJ-50A-23000",
+      "description": "Electric/Hydraulic Jacking Beam rated 23,000 lbs for TR-33"
+    },
+    {
+      "part_number": "RJ-50A-24500",
+      "description": "Electric/Hydraulic Jacking Beam rated 24,500 lbs for TR-35"
+    },
+    {
+      "part_number": "RJ-50A-35000",
+      "description": "Electric/Hydraulic Jacking Beam rated 35,000 lbs for TR-50"
+    },
+    {
+      "part_number": "RJ-50A-50000",
+      "description": "Electric/Hydraulic Jacking Beam rated 50,000 lbs for TR-75"
+    }
+  ],
+  "certifications": [
+    "Tested and certified by a Nationally Recognized Testing Laboratory (NRTL)",
+    "Meets U.L. Standard 201 for Garage Equipment",
+    "Meets ANSI/ALI ALCTV-2011 for Automotive Lift Construction",
+    "ALI/ETL Certified - Independently Tested and Validated",
+    "Automotive Lift Institute (ALI) Member"
+  ],
+  "safety_features": [
+    "Automatic all-position hydraulic safety system",
+    "Flow limiting valve at each cylinder",
+    "Class I - Div 2 rated on/off manual starter with overload protection",
+    "Class I - Div 2 rated locking plug",
+    "NRTL certified to UL 201 and ANSI/ALI ALCTV-2011"
+  ],
+  "notes": [
+    "Total aggregate capacity of any combination of jacking beams cannot exceed rated capacity of lift",
+    "Confidential document - property of Mohawk Resources Ltd.",
+    "Mohawk Resources Ltd. reserves the right to make changes without notice",
+    "Revision E: ALI verification logo change (12/15)",
+    "Standard equipment includes: (2) 5-inch frame adaptors (stackable), (2) 7.5-inch frame adaptors (stackable), (2) 10-inch frame adaptors (stackable), (2) teeth lifting pads, (2) yoke lifting pads for use with axles",
+    "Manufacturer: Mohawk Resources Ltd., P.O. Box 110, 65 Vrooman Avenue, Amsterdam, NY 12010",
+    "Phone: (800) 833-2006, In NY: (518) 842-1431, Fax: (518) 842-1289"
+  ]
+}

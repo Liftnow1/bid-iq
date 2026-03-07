@@ -1,0 +1,118 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/a-7.pdf",
+  "category": "two-post-lift",
+  "document_type": "spec_sheet",
+  "model": "A-7",
+  "variant": null,
+  "product_type": "Two Post Lift",
+  "manufacturer": "Mohawk Lifts, LLC.",
+  "capacity": "7,000 lbs (3175.2 kg)",
+  "dimensions": {
+    "overall_width": "10' 7\" (3.23 m)",
+    "width_between_posts": "7' 7 1/8\" to 8' 1 1/8\" (2.46 m)",
+    "width_between_lifting_arms": "6' 11 3/8\" (2.12 m) to 7' 5 3/8\" (2.26 m)",
+    "column_height": "7' 11 1/2\" (2.43 m)",
+    "overhead_hydraulic_line_height": "12' (3.66 m) standard, adjustable to accommodate any height ceiling or routed in-floor",
+    "arm_pad_height_min": "4\" (10.2 cm)",
+    "lifting_height_stroke": "6' (1.83 m)",
+    "arm_height_at_full_rise": "6'4\" (1.93 m)",
+    "lift_pad_height_with_adaptors": "7' 1\" (2.16 m)",
+    "drawing_dimensions": {
+      "between_posts_inches": 91.1,
+      "between_posts_meters": 2.31,
+      "overhead_line_height_inches": 144,
+      "overhead_line_height_meters": 3.66,
+      "column_height_inches": 95.5,
+      "column_height_meters": 2.43,
+      "overall_width_inches": 127,
+      "overall_width_meters": 3.23,
+      "width_between_carriage_inches": 83.3,
+      "width_between_carriage_meters": 2.12,
+      "arm_reach_1_inches": 85,
+      "arm_reach_1_meters": 2.16,
+      "arm_reach_2_inches": 76,
+      "arm_reach_2_meters": 1.93,
+      "arm_reach_3_inches": 73.1,
+      "arm_reach_3_meters": 1.86,
+      "pad_height_inches": 4.0,
+      "pad_height_meters": 0.10,
+      "arm_rotation_min_inches": 24.5,
+      "arm_rotation_min_meters": 0.62,
+      "arm_rotation_max_inches": 40.2,
+      "arm_rotation_max_meters": 1.02,
+      "top_view_arm_min_inches": 40.5,
+      "top_view_arm_min_meters": 1.03,
+      "top_view_arm_max_inches": 68.7,
+      "top_view_arm_max_meters": 1.69
+    },
+    "note": "Above info shown with lift set at 10' 7\" wide"
+  },
+  "weight": "2000 lbs (907.2 kg)",
+  "installation_requirements": {
+    "concrete_floor": "4000 psi (27579.02 kPa) mix, 4 1/2\" (11.43 cm) depth",
+    "anchoring_system": "14 3/4\" x 5\" (1.90 x 12.7 cm) Wej-it bolts, included",
+    "motor_rating": "2 HP / 208-230V, Single-phase (3-phase optional)",
+    "overhead_steel_hydraulic_lines": true,
+    "adjustable_height_overhead_lines": true
+  },
+  "specifications": {
+    "lifting_speed": "45 seconds",
+    "motor_rating": "2 HP / 208-230V, Single-phase (3-phase optional)",
+    "synchronization": "Hydraulic fluid displacement using no chains, cables, or overhead obstructions",
+    "cylinders": "2 (1 per column)",
+    "drive_system": "#646 leaf chain routed over cylinder",
+    "steel_carriage_bearings": "8 per carriage, double sealed, self-lubricating",
+    "floor_access_between_posts": "Clear and unobstructed",
+    "revision": "10/21"
+  },
+  "features": [
+    "Hydraulic fluid displacement synchronization - no chains, cables, or overhead obstructions",
+    "Clear and unobstructed floor access between posts",
+    "#646 leaf chain drive system routed over cylinder",
+    "Adjustable width between posts",
+    "Double sealed self-lubricating carriage bearings",
+    "Overhead hydraulic lines adjustable to any ceiling height or routed in-floor",
+    "Power unit located at column"
+  ],
+  "optional_equipment": [
+    "3\" Truck Adaptors (stackable) - 4 included as standard equipment",
+    "6\" Truck Adaptors (stackable) - 4 included as standard equipment",
+    "3-phase motor option"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "ANSI",
+    "ASME",
+    "AISI",
+    "ASTM",
+    "ASA",
+    "NEC",
+    "AWG",
+    "NEMA",
+    "Meets current national ANSI code for lifts"
+  ],
+  "safety_features": [
+    "Mechanical Safety Locks: Automatic, all position starting at 3\" (7.62 cm) off the floor",
+    "Hydraulic Safety Systems: Automatic, all position",
+    "Swing Arm Restraints: Automatic upon ascent (starting at 4\")"
+  ],
+  "warranty": {
+    "structural": "25 years",
+    "mechanical": "10 years",
+    "cylinder_seal": "Limited lifetime"
+  },
+  "government_contracts": [
+    "GSA Contract # GS-07F-207AA",
+    "Sourcewell Contract # 013020-MRL",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy",
+    "Equalis Group",
+    "Available under discounted government contract in all 50 states"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Shown with adjustable over-head steel hydraulic lines",
+    "Above info shown with lift set at 10' 7\" wide"
+  ]
+}

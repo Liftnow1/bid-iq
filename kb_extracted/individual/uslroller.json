@@ -1,0 +1,23 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/uslroller.pdf",
+  "category": "operation-manual",
+  "document_type": "operation-manual",
+  "model": "USL Roller",
+  "variant": null,
+  "product_type": "Roller component for underground service lift",
+  "capacity": null,
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {},
+  "specifications": {},
+  "features": [],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "File stored as Git LFS pointer - actual PDF content unavailable for extraction",
+    "LFS OID: sha256:e24d87ea732c0a3505803210d50c6004ef09d891f2c2e71da0a3519a7c4ade64",
+    "File size: 9759 bytes"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-16_inground.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TP-16",
+  "variant": "Suggested In-Ground Hydraulic Lines",
+  "product_type": "Two Post Inground Lift - Hydraulic Line Layout",
+  "manufacturer": "Mohawk Lifts, LLC.",
+  "capacity": null,
+  "dimensions": {
+    "overall_length_inches": "180\" (15'-0\")",
+    "overall_width_inches": "149.5\" (12'-5.5\")",
+    "width_between_posts_inches": "151.5\" (12'-7.5\")",
+    "center_to_center_post_width_inches": "121.25\" (10'-1.25\")",
+    "left_base_width_inches": "75.75\" (6'-3.75\")",
+    "right_base_width_inches": "74.75\" (6'-2.75\")",
+    "top_offset_inches": "90\" (7'-6\")",
+    "center_slot_width_inches": "60.625\" (5'-0.625\")",
+    "left_base_depth_inches": 29.25,
+    "left_base_inner_depth_inches": 14.75,
+    "right_base_depth_inches": 27.5,
+    "right_base_inner_depth_inches": 13.75,
+    "right_side_height_inches": "72\" (6'-0\")",
+    "right_side_top_offset_inches": "36\" (3'-0\")",
+    "through_slot_width": "1.75\" wide x 1.5\" deep",
+    "through_slot_note": "Through slot for underground hydraulic tubing"
+  },
+  "weight": null,
+  "installation_requirements": {
+    "concrete_slab": true,
+    "in_ground_hydraulic_lines": true,
+    "through_slot_for_underground_hydraulic_tubing": "1 3/4 wide x 1 1/2 deep",
+    "welding_specs": "AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified",
+    "reference": "For further information, see general floor requirements in installation manual"
+  },
+  "specifications": {
+    "drawing_number": "012-012-037",
+    "file_name": "D12037",
+    "part_number": "012-011-003",
+    "date": "10/1",
+    "drawn_by": "dok",
+    "approved_by": "RW",
+    "checked_by": "RW",
+    "scale": "5/64",
+    "sheet_size": "C-SIZE",
+    "revision": "A - Redrawn & Replaced (10/93 by dak, approved RW)",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_0XX": "+/- 0.030",
+      "decimal_0XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "In-ground hydraulic line routing",
+    "Through slot for underground hydraulic tubing",
+    "Concrete slab installation"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Notice of confidential information: Information contained herein is confidential and property of Mohawk Resources Ltd. When drawing is furnished to others it shall be used solely for purposes of inspection, installation, or maintenance. The information shall not be used or disclosed by the recipient for any other purpose whatsoever.",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "For further information, see general floor requirements in installation manual"
+  ]
+}

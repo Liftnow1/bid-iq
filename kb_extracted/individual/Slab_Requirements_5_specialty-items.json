@@ -1,0 +1,93 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/Slab_Requirements (5).pdf",
+  "category": "specialty-item",
+  "document_type": "installation_requirements",
+  "model": "Multiple Models",
+  "variant": null,
+  "product_type": "Slab Requirements & New Slab Recommendations",
+  "capacity": null,
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {
+    "surface": "Concrete only",
+    "pre_existing_slab_requirements": {
+      "A-7": {"minimum_slab_thickness": "4-1/2 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "12 inches"},
+      "System_IA": {"minimum_slab_thickness": "4-1/2 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "12 inches"},
+      "System_IA-10": {"minimum_slab_thickness": "4-1/2 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "12 inches"},
+      "LC-12": {"minimum_slab_thickness": "6-1/2 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "12 inches"},
+      "LMF-12": {"minimum_slab_thickness": "6-1/2 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "12 inches"},
+      "TP-15": {"minimum_slab_thickness": "6-1/2 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "10 inches"},
+      "TP-16": {"minimum_slab_thickness": "6-1/2 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "10 inches"},
+      "TP-18": {"minimum_slab_thickness": "6-1/2 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "10 inches"},
+      "TP-20": {"minimum_slab_thickness": "6-1/2 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "10 inches"},
+      "TP-20-WB": {"minimum_slab_thickness": "6 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "10 inches"},
+      "TP-26": {"minimum_slab_thickness": "12 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "10 inches"},
+      "TP-26-WB": {"minimum_slab_thickness": "8 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "10 inches"},
+      "TP-30": {"minimum_slab_thickness": "12 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "10 inches"},
+      "TP-30-WB": {"minimum_slab_thickness": "8 inches", "minimum_compressive_strength": "4000 psi with 28 day aging", "reinforcement_size": "#6 rebar", "reinforcement_spacing": "10 inches"},
+      "TR-19": {"minimum_slab_thickness": "4-1/2 inches", "minimum_compressive_strength": "n/a", "reinforcement_size": "ACI Temp only", "reinforcement_spacing": "ACI Temp only"},
+      "FL-25": {"minimum_slab_thickness": "4-1/2 inches", "minimum_compressive_strength": "n/a", "reinforcement_size": "ACI Temp only", "reinforcement_spacing": "ACI Temp only"},
+      "TR-25A": {"minimum_slab_thickness": "4-1/2 inches", "minimum_compressive_strength": "n/a", "reinforcement_size": "ACI Temp only", "reinforcement_spacing": "ACI Temp only"},
+      "TR-30": {"minimum_slab_thickness": "4-1/2 inches", "minimum_compressive_strength": "n/a", "reinforcement_size": "ACI Temp only", "reinforcement_spacing": "ACI Temp only"},
+      "TR-33": {"minimum_slab_thickness": "6 inches or 4-1/2 inches with larger 4x4 ft base pads", "minimum_compressive_strength": "n/a", "reinforcement_size": "ACI Temp only", "reinforcement_spacing": "ACI Temp only"},
+      "TR-35": {"minimum_slab_thickness": "6 inches or 4-1/2 inches with larger 4x4 ft base pads", "minimum_compressive_strength": "n/a", "reinforcement_size": "ACI Temp only", "reinforcement_spacing": "ACI Temp only"},
+      "TR-50": {"minimum_slab_thickness": "6 inches or 4-1/2 inches with larger 4x4 ft base pads", "minimum_compressive_strength": "n/a", "reinforcement_size": "ACI Temp only", "reinforcement_spacing": "ACI Temp only"},
+      "TR-75": {"minimum_slab_thickness": "6 inches or 4-1/2 inches with larger 4x4 ft base pads", "minimum_compressive_strength": "n/a", "reinforcement_size": "ACI Temp only", "reinforcement_spacing": "ACI Temp only"}
+    },
+    "new_slab_recommendations": {
+      "minimum_thickness": "12 inches",
+      "minimum_tensile_strength": "4000 PSI",
+      "minimum_aging": "28 days cure time",
+      "foundation_bed_bearing_capacity": "not less than 2000 lb/sq ft (1 ton per square foot)",
+      "reinforcement_steel_grade": "Grade 60 deformed bars"
+    },
+    "anchor_requirements": {
+      "3/4_inch_anchors_min_distance_from_seams": "6 inches",
+      "1_inch_anchors_min_distance_from_seams": "7.5 inches",
+      "anchor_torque_inspection": "85 ft-lbs"
+    },
+    "base_plate_anchoring": {
+      "anchors_per_base_plate": 8,
+      "system_IA-10_inside_post_dimension": "120 inches",
+      "max_shim_thickness": "1/4 inch"
+    },
+    "new_slab_cross_section": {
+      "slab_thickness": "12 inches",
+      "key_in_around_perimeter": "6 inches",
+      "key_in_depth": "15 inches",
+      "concrete_cover_over_rebar": "3/4 inch to 1-1/4 inches",
+      "minimum_gap_at_existing_slab": "3 inches min",
+      "anchorage_dowels": "#4 x 18 inch long spaced every 18 inches around perimeter"
+    },
+    "prohibitions": [
+      "Do not install on any surface other than concrete",
+      "Do not install on expansion seams or cracked/defective concrete",
+      "Never install on hand mixed concrete",
+      "Do not install on secondary floor level or ground floor with basement without written authorization"
+    ]
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "address": "65 Vrooman Ave., Amsterdam, NY 12010",
+    "phone_toll_free": "1-800-833-2006",
+    "phone_local": "1-518-842-1431",
+    "fax": "1-518-842-1289",
+    "website": "www.MOHAWKLIFTS.com",
+    "email": "Service@MOHAWKLIFTS.com"
+  },
+  "features": [],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [
+    "Minimum 6 inch clearance from 3/4 inch anchors to expansion seams",
+    "Minimum 7.5 inch clearance from 1 inch anchors to expansion seams",
+    "4:1 safety factor recommended for anchor capacities"
+  ],
+  "notes": [
+    "Duplicate of slab requirements document - same content as parallelogram-lifts version, filed under specialty-items",
+    "File: Pre-Existing Floor-Requirements.doc, Rev Date: 5/2014",
+    "File: New-Slab.doc, Rev: 6/7/06",
+    "File: New-slab.xls, Rev Date: 5/16/2012"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/truck_dual_axle.pdf",
+  "category": "four-post-lift",
+  "document_type": "data_collection_form",
+  "model": null,
+  "variant": "Dual Axle Rear",
+  "product_type": "Truck Data Form (Dual Axle Rear)",
+  "capacity": null,
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {},
+  "specifications": {
+    "form_type": "Truck Data Form (Dual Axle Rear)",
+    "units": "All dimensions to be entered in inches",
+    "data_columns": ["Longest Wheel Base", "Shortest Wheel Base", "Lowest Clearance"],
+    "dimension_fields": {
+      "A": "Front Tire Diameter",
+      "B": "Back Tire Diameter",
+      "C": "Front Min. Ground Clearance",
+      "D": "Center Min. Ground Clearance",
+      "E": "Rear Min. Ground Clearance",
+      "F": "Front Axle-Bumper",
+      "G": "Front Axle-Axle Length",
+      "H": "Rear Axle-Axle Length",
+      "I": "Rear Axle-Bumper",
+      "J": "Total Length",
+      "K": "Tire Width",
+      "L": "Tire Outside-Outside Width",
+      "M": "Front Total Width",
+      "N": "(Dual) Tire Width",
+      "O": "Tire Outside-Outside Width",
+      "P": "Rear Total Width",
+      "Vehicle_Weight": "Not GVW",
+      "Heaviest_Axle": "Heaviest Axle"
+    },
+    "views_included": ["Side View", "Front View", "Rear View"],
+    "additional_labels_on_diagram": ["Center of Gravity", "Minimum Ground Clearance C (inches)", "Minimum Ground Clearance D (inches)", "Minimum Ground Clearance E (inches)", "Tire Diameter A (inch)", "Tire Diameter B (inch)"]
+  },
+  "features": [
+    "Dimensional data collection form for dual axle rear trucks",
+    "Includes side view, front view, and rear view diagrams",
+    "Captures tire dimensions, ground clearances, widths, and weights",
+    "Supports multiple wheel base configurations (longest, shortest, lowest clearance)",
+    "Shows center of gravity reference point on side view",
+    "Three-axle vehicle support (one front, two rear)"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Please be complete in entering dimensional data - determination in suiting lifting requirements is only as accurate and complete as the data received",
+    "Note any areas that may cause problems in vehicle lifting",
+    "All dimensions to be entered in inches",
+    "Check box if lowest clearance is equal to longest or shortest wheel base"
+  ]
+}

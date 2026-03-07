@@ -1,0 +1,83 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/JS-3047-30-SPEC13.pdf",
+  "category": "specialty-item",
+  "document_type": "engineering_drawing",
+  "model": "JS-3047-30",
+  "variant": "PASE Version",
+  "product_type": "Jack Stand",
+  "capacity": "30,000 lbs",
+  "dimensions": {
+    "top_pad_diameter": "6 inches",
+    "floor_space_diameter": "37.25 inches",
+    "overall_height": "47.375 inches",
+    "base_height": "30.75 inches",
+    "thread_adjustment": "7 inches",
+    "center_tube_OD": "3.5 inches",
+    "center_tube_ID": "2.75 inches",
+    "base_tube_OD": "4.5 inches",
+    "base_tube_ID": "3.75 inches",
+    "acme_thread_rod_diameter": "2.5 inches",
+    "wheel_diameter": "4 inches",
+    "hitch_pin_diameter": "1 inch",
+    "support_angles": "4 x 4 x 1/4 inch thick"
+  },
+  "weight": "183 lbs",
+  "installation_requirements": {},
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "title": "Jack Stand (PASE VERSION) JS-3047-30",
+    "drawing_number": "JS-000-A-SPEC13",
+    "file_name": "JS-000-A-SPEC13",
+    "next_assembly": "JS-000-A-015",
+    "scale": "1/10",
+    "drawn_by": "nwv7089",
+    "date": "9/2016",
+    "sheet_size": "C-Size",
+    "tolerances": {
+      "angular": "+/- 1.5 degrees",
+      "fractional": "+/- 0.030",
+      "decimal_XX": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "Spring assisted extension",
+    "Ergonomic handle with grip",
+    "Tube handle for mobility",
+    "Standard rubber pad (quick pin removable)",
+    "4 inch diameter wheels for portability",
+    "7 inch thread adjustment range via acme thread rod",
+    "Storage for optional yoke pad on frame",
+    "1 inch diameter hitch pin"
+  ],
+  "optional_equipment": [
+    "Yoke Pad (optional accessory)"
+  ],
+  "parts_list": [
+    {"item": "Top Pad", "description": "6 inch diameter, standard rubber pad, quick pin removable"},
+    {"item": "Acme Thread Rod", "description": "2.5 inch diameter"},
+    {"item": "Center Tube", "description": "3.5 inch OD x 2.75 inch ID"},
+    {"item": "Base Tube", "description": "4.5 inch OD x 3.75 inch ID"},
+    {"item": "Wheels", "description": "4 inch diameter"},
+    {"item": "Hitch Pin", "description": "1 inch diameter"},
+    {"item": "Support Angles", "description": "4 x 4 x 1/4 inch thick"},
+    {"item": "Tube Handle", "description": "For mobility"},
+    {"item": "Ergonomic Handle with Grip", "description": "For thread adjustment"}
+  ],
+  "certifications": [
+    "Conforms to ASME PASE-2014"
+  ],
+  "safety_features": [
+    "Spring assisted extension mechanism",
+    "Quick pin removable rubber pad for secure contact",
+    "1 inch diameter hitch pin for locking"
+  ],
+  "notes": [
+    "Remove all sharp corners and edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "Information contained herein is confidential and property of Mohawk Resources Ltd."
+  ]
+}

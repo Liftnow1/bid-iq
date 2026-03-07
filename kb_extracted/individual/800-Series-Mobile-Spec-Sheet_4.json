@@ -1,0 +1,107 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/mobile-column-lifts/800-Series-Mobile-Spec-Sheet (4).pdf",
+  "category": "mobile-column-lift",
+  "document_type": "spec_sheet",
+  "model": "800 Series",
+  "variant": "MP-800-014 / MP-800-018",
+  "product_type": "Mobile Column Lift",
+  "capacity": "14,000 lbs per column (MP-800-014) / 18,000 lbs per column (MP-800-018)",
+  "dimensions": {
+    "height_of_lift_unit": "88.5\" (2,248 mm)",
+    "height_of_lift_unit_at_full_rise": "157.125\" (3,991 mm)",
+    "width_of_lift_unit": "44.25\" (1,124 mm)",
+    "length_of_lift_unit": "53.625\" (1,362 mm)",
+    "max_lift_height_4_or_more_units": "69\" (1,753 mm)",
+    "max_lift_height_2_units_wheel_lift_mode": "32\" (813 mm)",
+    "min_max_wheel_diameter": "5\" - 24.5\" (127 - 622 mm)",
+    "footprint_of_lift_unit": "560 sq in. (3,613 sq cm)",
+    "turning_radius": "47\" (1,194 mm)",
+    "mechanical_lock_ladder_increment": "2.5\""
+  },
+  "weight": "1,485 lbs (674 kg) for MP-800-014 / 1,510 lbs (685 kg) for MP-800-018",
+  "installation_requirements": {
+    "charger_voltage_required": "120 VAC @ 60 Hz",
+    "charger_amps_required": "1.3 amps",
+    "no_permanent_installation_required": true
+  },
+  "specifications": {
+    "model_mp_800_014": {
+      "lifting_capacity_per_column": "14,000 lbs",
+      "max_hydraulic_system_operating_pressure": "2,180 psi",
+      "weight": "1,485 lbs (674 kg)",
+      "ground_pressure_max_load": "27.7 psi (191 kPa)",
+      "capacity_set_of_4": "56,000 lbs"
+    },
+    "model_mp_800_018": {
+      "lifting_capacity_per_column": "18,000 lbs",
+      "max_hydraulic_system_operating_pressure": "2,600 psi",
+      "weight": "1,510 lbs (685 kg)",
+      "ground_pressure_max_load": "36.6 psi (252 kPa)",
+      "capacity_set_of_4": "72,000 lbs"
+    },
+    "common_specs": {
+      "height_of_lift_unit": "88.5\" (2,248 mm)",
+      "height_at_full_rise": "157.125\" (3,991 mm)",
+      "width": "44.25\" (1,124 mm)",
+      "length": "53.625\" (1,362 mm)",
+      "max_lift_height_4_plus_units": "69\" (1,753 mm)",
+      "max_lift_height_2_units": "32\" (813 mm)",
+      "min_max_wheel_diameter": "5\" - 24.5\" (127 - 622 mm)",
+      "lift_speed_max_load": "60\" (1,524 mm) per min",
+      "footprint": "560 sq in. (3,613 sq cm)",
+      "turning_radius": "47\" (1,194 mm)",
+      "operating_peak_power": "4 HP",
+      "operating_voltage": "24 VDC Nominal",
+      "charger_voltage_required": "120 VAC @ 60 Hz",
+      "charger_amps_required": "1.3 amps",
+      "touchscreen": "10\" touchscreen with diagnostic and browsing capabilities"
+    }
+  },
+  "features": [
+    "All columns operate together, individually or can be divided into multiple pairs (2, 4, 6 or 8)",
+    "Capacities of 56,000 or 72,000 lb for sets of 4",
+    "Wireless system operates on broad range of channels to limit interference, with multiple frequencies",
+    "Visual indicator lights show real-time charge level status",
+    "24 volt operation with built-in 110 volt charging system",
+    "69\" lifting height in Standard Mode & 32\" with two columns in Wheel-Lift mode",
+    "Hydraulic operation (no screw drives) for safe, efficient, low maintenance, fast & easy lifting",
+    "10\" touchscreen control from any column with diagnostic and browsing capabilities",
+    "Adjustable lifting forks accommodate rims from 5\" to 24.5\"",
+    "No wheel reducer sleeves needed - adjustable forks",
+    "Positive grip ensures carriage forks stay in place when engaged",
+    "Low profile fork angle for easy positioning of columns, especially for floatation tires",
+    "Mechanical lock ladder - safety latch rack engages locks every 2.5\"",
+    "Retractable wheel design - more steel on floor for greater stability",
+    "Made in U.S.A."
+  ],
+  "optional_equipment": [
+    "Mobile jack stands with large castors",
+    "18,000 lb capacity front-to-rear adapter",
+    "15,000 lb capacity forklift adapter"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI Certified - Independently Tested and Validated",
+    "Automotive Lift Institute Member",
+    "GSA Contract Holder (GS-07F-207AA)",
+    "Sourcewell Awarded Contract (#013020-MRL)",
+    "Equalis Group",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy.org"
+  ],
+  "safety_features": [
+    "Mechanical lock ladder - safety latch rack engages locks every 2.5\"",
+    "Retractable wheel design for greater stability and industry leading safety",
+    "Positive grip ensures carriage forks stay in place when engaged",
+    "Hydraulic operation (no screw drives)"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Available under discounted government contract in all 50 states",
+    "Part number: MP-0000-A-802",
+    "REV 10/21",
+    "Mohawk Lifts, LLC., P.O. Box 110, 65 Vrooman Ave, Amsterdam, NY 12010",
+    "Phone: (800) 833-2006 / (518) 842-1431, FAX: (518) 842-1289",
+    "Website: www.mohawklifts.com"
+  ]
+}

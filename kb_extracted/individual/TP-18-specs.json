@@ -1,0 +1,138 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-18-specs.pdf",
+  "category": "two-post-lift",
+  "document_type": "spec_sheet",
+  "model": "TP-18",
+  "variant": "TP-18 & TP-18-3SA (Standard 2 Stage Arms / Optional 3 Stage Arms)",
+  "product_type": "Two Post Inground Lift",
+  "manufacturer": "Mohawk Lifts, LLC.",
+  "capacity": "18,000 lbs (8164.66 Kg)",
+  "dimensions": {
+    "overall_width": "12' 7.5\" (3.85 m) adjustable",
+    "width_between_posts": "10' (3.05 m) adjustable 114-120\"",
+    "width_between_lifting_arms": "8' 9.75\" (2.69 m) adjustable",
+    "column_height": "8' 7\" (2.62 m)",
+    "max_cylinder_height": "13'6\" (4.11 m)",
+    "overhead_hydraulic_line_height": "15' (4.57 m) standard, adjustable to accommodate any height ceiling or routed in-floor",
+    "arm_pad_height_min": "5\" (12.7 cm)",
+    "lifting_height_under_arm": "6' (1.83 m)",
+    "arm_pad_height_at_full_rise": "6'5\" (1.96 m)",
+    "max_arm_pad_height_with_adaptors": "7'3\" (2.21 m)",
+    "overall_width_inches": 151.5,
+    "overall_width_meters": 3.85,
+    "overall_height_inches": 103,
+    "overall_height_meters": 2.62,
+    "standard_2_stage_arms": {
+      "arm_reach_1_inches": 73,
+      "arm_reach_1_meters": 1.85,
+      "arm_reach_2_inches": 87,
+      "arm_reach_2_meters": 2.21,
+      "arm_reach_3_inches": 77,
+      "arm_reach_3_meters": 1.96,
+      "pad_height_inches": 5,
+      "pad_height_meters": 0.13,
+      "top_view_arm_length_inches": 120.3,
+      "top_view_arm_length_meters": 3.05,
+      "top_view_arm_spread_inches": 60.2,
+      "top_view_arm_spread_meters": 1.53,
+      "arm_rotation_min_inches": 36.1,
+      "arm_rotation_min_meters": 0.92,
+      "arm_rotation_max_inches": 56,
+      "arm_rotation_max_meters": 1.55
+    },
+    "optional_3_stage_arms": {
+      "arm_reach_1_inches": 72.5,
+      "arm_reach_1_meters": 1.84,
+      "arm_reach_2_inches": 76.5,
+      "arm_reach_2_meters": 1.94,
+      "arm_reach_3_inches": 86.5,
+      "arm_reach_3_meters": 2.2,
+      "pad_height_inches": 4.5,
+      "pad_height_meters": 0.11,
+      "top_view_arm_spread_inches": 65.2,
+      "top_view_arm_spread_meters": 1.66,
+      "top_view_arm_length_inches": 130.3,
+      "top_view_arm_length_meters": 3.31,
+      "arm_rotation_max_inches": 61,
+      "arm_rotation_max_meters": 1.69,
+      "arm_rotation_min_inches": 36.3,
+      "arm_rotation_min_meters": 0.92
+    },
+    "drive_through_clearance_inches": 180,
+    "drive_through_clearance_meters": 4.57,
+    "drive_through_note": "STD"
+  },
+  "weight": "3900 lbs (1769.01 Kg)",
+  "installation_requirements": {
+    "concrete_floor_wide_base": "5.5\" of 4,000 psi concrete",
+    "concrete_floor_standard_base": "6.5\" of 4,000 psi concrete",
+    "anchoring_system": "(16) 3/4\"x6\" (1.91x15.24 cm) bolts, included",
+    "motor_rating": "4 HP / 208-230V, Single-phase (3-phase optional)",
+    "overhead_steel_hydraulic_lines": true,
+    "adjustable_height_overhead_lines": true
+  },
+  "specifications": {
+    "lifting_speed": "60 seconds (faster with lighter load)",
+    "motor_rating": "4 HP / 208-230V, Single-phase (3-phase optional)",
+    "synchronization": "Hydraulic fluid displacement using no chains, cables, or overhead obstructions",
+    "cylinders": "2 (1 per column)",
+    "drive_system": "Direct drive (using no cables or chains)",
+    "steel_carriage_bearings": "(16) 4\" (10.16 cm) diameter, (8 per carriage) double sealed, self-lubricating ball bearing rollers",
+    "floor_access_between_posts": "Clear and unobstructed",
+    "revision": "10/21"
+  },
+  "features": [
+    "Standard 2 stage arms with optional 3 stage arms (TP-18-3SA)",
+    "Hydraulic fluid displacement synchronization - no chains, cables, or overhead obstructions",
+    "Direct drive system using no cables or chains",
+    "Clear and unobstructed floor access between posts",
+    "Adjustable width between posts (114-120\")",
+    "Adjustable overall width",
+    "Adjustable width between lifting arms",
+    "Double sealed self-lubricating ball bearing rollers",
+    "Overhead hydraulic lines adjustable to any ceiling height or routed in-floor"
+  ],
+  "optional_equipment": [
+    "5\" Frame Adaptors (stackable) - 4 included as standard equipment",
+    "7.5\" Frame Adaptors (stackable) - 4 included as standard equipment",
+    "10\" Frame Adaptors (stackable) - 4 included as standard equipment",
+    "3-phase motor option",
+    "3 Stage Arms (TP-18-3SA variant)"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "ANSI",
+    "ASME",
+    "AISI",
+    "ASTM",
+    "ASA",
+    "NEC",
+    "AWG",
+    "NEMA",
+    "Meets current national ANSI (ANSI/ALI ALCTV) code for lifts"
+  ],
+  "safety_features": [
+    "Mechanical Safety Locks: Automatic, multi-position starting at 5\" (12.7 cm) off the floor",
+    "Hydraulic Safety Systems: Automatic, all position",
+    "Swing Arm Restraints: Automatic upon ascent"
+  ],
+  "warranty": {
+    "structural": "25 years",
+    "mechanical": "10 years",
+    "cylinder_seal": "Limited lifetime"
+  },
+  "government_contracts": [
+    "GSA Contract # GS-07F-207AA",
+    "Sourcewell Contract # 013020-MRL",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy",
+    "Equalis Group",
+    "Available under discounted government contract in all 50 states"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Shown with adjustable height over-head steel hydraulic lines",
+    "Dare to Compare 16,000-20,000 LB capacity lifts - Mohawk Lifts vs. The Competition"
+  ]
+}

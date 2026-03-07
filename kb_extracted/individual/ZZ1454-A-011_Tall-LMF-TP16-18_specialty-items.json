@@ -1,0 +1,75 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/ZZ1454-A-011_Tall-LMF-TP16-18.pdf",
+  "category": "specialty-item",
+  "document_type": "engineering_drawing_with_parts_list",
+  "model": "ZZ1454-A-011",
+  "variant": "TALL (LMF/TP16/TP18) for 2-Post",
+  "product_type": "Overhead Beam Support Assembly (Tall Version)",
+  "capacity": null,
+  "dimensions": {},
+  "weight": "272 lbs",
+  "installation_requirements": {
+    "compatible_models": ["LMF-12", "TP-16", "TP-18"],
+    "purpose": "Permits installation of these lifts on lower specification concrete floors",
+    "standard_concrete_requirement_without_overhead_beam": "6-1/2 inch thick, 4000 PSI",
+    "minimum_concrete_requirement_with_overhead_beam": {
+      "LMF-12": "4-1/2 inch thick at 4000 PSI, or 6-1/2 inch thick at 3000 PSI",
+      "TP-16": "5 inch thick at 4000 PSI, or 6-1/2 inch thick at 3250 PSI",
+      "TP-18": "5-1/2 inch thick at 4000 PSI, or 6-1/2 inch thick at 3500 PSI"
+    },
+    "concrete_slab_notes": "Continuous concrete slabs to be free of defects and cracks, provide proper anchor edge distance to seams, and have a minimum of 6x6 wire mesh reinforcement",
+    "special_instructions": "Connect spring to grenade switch at top of motor; Position screw such that the eye hole is inside the channel"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "part_number": "ZZ1454-A-011",
+    "title": "TALL (LMF/TP16/TP18) O/H Beam Assy (for 2-Post)",
+    "drawing_number": "ZZ1454-A-011",
+    "file_name": "ZZ1454-A-011",
+    "drawn_by": "ENGR",
+    "date": "6/16/2014",
+    "sheet_size": "C-Size",
+    "tolerances": {
+      "angular": "+/- 1.5 degrees",
+      "fractional": "+/- 0.030",
+      "decimal_XX": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "Tall overhead beam support connects the two posts at the top",
+    "Allows installation on lower specification concrete floors",
+    "Reduces minimum concrete thickness requirements",
+    "Includes overhead line shutoff cable assembly",
+    "Spring-loaded grenade switch safety system at top of motor"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {"item": 1, "part_number": "ZZ1454-A-010", "description": "Top Rail Connect Assy (1 Post), TALL (LMF/TP16/TP18)", "quantity": 2},
+    {"item": 2, "part_number": "ZZ1454-P-014", "description": "Top Rail Connector", "quantity": 1},
+    {"item": 3, "part_number": "ZZ1454-A-012", "description": "O/H Line Shutoff Cable Assy", "quantity": 1},
+    {"item": 4, "part_number": "600-840-028", "description": "Spring, Extension, 9/16 Dia x 4-1/8 Lg", "quantity": 1},
+    {"item": 5, "part_number": "600-640-070", "description": "Bolt, Hex Head, 1/2-13 NC x 5 inch (GR5)", "quantity": 4},
+    {"item": 6, "part_number": "600-710-008", "description": "Washer, Flat, 1/2", "quantity": 4},
+    {"item": 7, "part_number": "600-690-009", "description": "Nut, Nylon Lock, 1/2-13 NC", "quantity": 4},
+    {"item": 8, "part_number": "600-660-009", "description": "Eyebolt, 2-1/2 inch Full Length, 1/4-20 NC", "quantity": 1},
+    {"item": 9, "part_number": "600-710-011", "description": "Washer, Flat (SAE) 1/4", "quantity": 2},
+    {"item": 10, "part_number": "600-680-006", "description": "Nut, Plain, 1/4-20 NC", "quantity": 2}
+  ],
+  "certifications": [],
+  "safety_features": [
+    "O/H line shutoff cable assembly included",
+    "Spring-loaded grenade switch connection at top of motor",
+    "Extension spring (9/16 dia x 4-1/8 long) for safety switch activation",
+    "Concrete slabs must be continuous, free of defects and cracks",
+    "Minimum 6x6 wire mesh reinforcement required"
+  ],
+  "notes": [
+    "Position screw such that the eye hole is inside the channel",
+    "Connect spring to grenade switch at top of motor",
+    "This is the TALL version for LMF/TP16/TP18 2-post lifts",
+    "Information contained herein is confidential and property of Mohawk Resources Ltd."
+  ]
+}

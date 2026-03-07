@@ -1,0 +1,109 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/mobile-column-lifts/MP-24-AC_11-2017.pdf",
+  "category": "mobile-column-lift",
+  "document_type": "data_sheet_order_form",
+  "model": "MP-24",
+  "variant": "AC Series",
+  "product_type": "Mobile Column Lift - AC Powered",
+  "capacity": "24,000 lbs each (with 15\" forks) / 22,000 lbs each (with 22\" forks)",
+  "dimensions": {
+    "fully_raised_height": "142 1/4\"",
+    "lowered_height": "108 1/2\"",
+    "length_total": "60 1/2\"",
+    "width": "56 7/8\"",
+    "fork_width_min": "10 5/8\"",
+    "fork_width_max": "28 1/8\"",
+    "fork_length_options": "15\" or 22\"",
+    "fork_detail_height": "5 5/8\"",
+    "fork_detail_angle": "35 degrees",
+    "front_wheels": "6\" DIA spring loaded",
+    "tire_dimension_fields": {
+      "dim_a": "Tire OD Max Include Crown",
+      "dim_b": "Rim",
+      "dim_c": "Contact Width",
+      "dim_d": "Tire side view dimension",
+      "dim_w": "Fork width at tire end view"
+    }
+  },
+  "weight": null,
+  "installation_requirements": {
+    "power_options": [
+      {"supply": "208-240 VAC, 3 Phase, 60 Hz", "full_load_amps_per_post": "10 AMP", "note": "STANDARD"},
+      {"supply": "440-480 VAC, 3 Phase, 60 Hz", "full_load_amps_per_post": "5 AMP"},
+      {"supply": "550-600 VAC, 3 Phase, 60 Hz", "full_load_amps_per_post": "4 AMP"},
+      {"supply": "208-240 VAC, 1 Phase, 60 Hz", "full_load_amps_per_post": "10 AMP"}
+    ],
+    "circuit_breaker_recommendation": "1.5 to 2 times the sum of the full load amps for all posts in the system",
+    "final_electrical_connection": "Responsibility of the electrical contractor per local/national code",
+    "connection_notes": "More than one point of connection may be required. Disconnect switches, main fuses, and main power leads are NOT provided by Mohawk Resources Ltd.",
+    "shipping": "All MP-24 and MP-30 lifts ship on low-deck trailers assembled"
+  },
+  "specifications": {
+    "capacity_15_inch_forks": "24,000 lbs each",
+    "capacity_22_inch_forks": "22,000 lbs each",
+    "stroke": "67 inches",
+    "lifting_speed": "135 seconds, approx",
+    "power_required": "208-220 VAC, 3 Phase STD",
+    "amps": "Variable - see post quantity",
+    "post_quantity": "2, 4, 6, or 8",
+    "max_tire_size": "53 inch DIA",
+    "fork_length": "15 or 22 inch",
+    "fork_width": "10 5/8 inch min, 28 1/8 max",
+    "lock_positions": "3\" intervals starting @ 12\"",
+    "drawing_number": "ZZ958-03",
+    "date": "11/05",
+    "revision_c": "Added dimensions C and D to tire diagram, 11/28/17, G.Gore"
+  },
+  "features": [
+    "AC powered mobile column lift",
+    "Adjustable forks (15\" or 22\" length)",
+    "Fork width adjustable from 10 5/8\" min to 28 1/8\" max",
+    "Lock positions at 3\" intervals starting at 12\"",
+    "String potentiometer for position sensing",
+    "Communication port on each column",
+    "Power port on master column only",
+    "Wheeled jack for mobility",
+    "6\" DIA spring loaded front wheels",
+    "Available in 2, 4, 6, or 8 post configurations",
+    "Ships on low-deck trailers assembled"
+  ],
+  "optional_equipment": [
+    "#JS-3047-20, Jack Stand, 20,000 lb, 30\" to 47\"",
+    "#JS-4775-20, Jack Stand, 20,000 lb, 47\" to 77\"",
+    "#JS-3047-30, Jack Stand, 30,000 lb, 30\" to 47\"",
+    "#JS-4775-30, Jack Stand, 30,000 lb, 47\" to 77\"",
+    "#JS-3047-40, Jack Stand, 40,000 lb, 30\" to 47\"",
+    "#JS-4775-40, Jack Stand, 40,000 lb, 47\" to 77\"",
+    "#TD-1000-M, Tire Dolly, 1000 lb capacity, Hand Winch",
+    "#TD-1000-H, Tire Dolly, 1000 lb capacity, Foot Pump",
+    "#TD-1000-A, Tire Dolly, 1000 lb capacity, Air/Hyd",
+    "Chassis Beam, 40,000 lb capacity (Non-ALCTV)",
+    "Additional Power Cable (one standard 25' LG cable included per lift)",
+    "Longer Power Cable (one standard 25' LG cable included per lift)",
+    "Additional Communication Cable (one set of 30' LG cables included per lift)",
+    "Longer Communication Cable",
+    "Additional Dummy Plug Set (only one set included per lift)",
+    "Hand Pendant Control with 25' cord (Non-ALCTV)",
+    "Hand Pendant Control (CL I, DIV 2) with 25' cord (ALCTV Certified)",
+    "Slope Indicator (specify quantity of columns) DDLMODES",
+    "Wider forks (custom width)"
+  ],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [
+    "Lock positions at 3\" intervals starting at 12\"",
+    "String potentiometer for position sensing"
+  ],
+  "notes": [
+    "Some options are not compatible - consult Mohawk",
+    "Axle weight cannot exceed the capacity of the pair of MP columns selected/specified",
+    "Post capacity: 15\" = 24,000 LB, 22\" = 22,000 LB",
+    "All MP-24 and MP-30 lifts ship on low-deck trailers assembled",
+    "After all specifications have been selected and approved by customer (signed), make copy and return signed form to Mohawk",
+    "Standard power cable: 25' LG per lift",
+    "Standard communication cable: 30' LG per lift (one set)",
+    "Drawing number: ZZ958-03, Date: 11/05",
+    "Mohawk Resources Ltd., 65 Vrooman Avenue, P.O. Box 110, Amsterdam, NY 12010",
+    "Phone: 1-800-833-2006, FAX: 1-518-842-1289"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-20_UnderGround_Hydraulic_Lines.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TP-20",
+  "variant": "In-Ground Hydraulic Lines",
+  "product_type": "Two Post Inground Lift - Underground Hydraulic Lines Layout",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": null,
+  "dimensions": {
+    "overall_length_inches": 168,
+    "slot_length_inches": 84,
+    "slot_width_depth": "4\" wide x 2\" deep",
+    "slot_top_dimension_inches": "76 7/8 slot",
+    "slot_bottom_dimension_inches": "153 3/4 slot",
+    "base_plate_width_inches": 23.75,
+    "base_plate_length_ref_inches": "47 1/2 REF",
+    "center_line_note": "Center line of columns & slot"
+  },
+  "weight": null,
+  "installation_requirements": {
+    "in_ground_hydraulic_lines": true,
+    "slot_for_underground_hydraulic_lines": "4\" wide x 2\" deep",
+    "welding_specs": "AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified",
+    "recommended_layout_instructions": [
+      "1. Layout location of base plates with chalk line",
+      "2. Layout slot with chalk lines",
+      "3. Cut out slot",
+      "4. Locate columns",
+      "5. Anchoring lines and adjust before anchor columns",
+      "6. Anchor columns"
+    ]
+  },
+  "specifications": {
+    "drawing_number": "020-011-014",
+    "file_name": "T11014",
+    "next_assembly": "020-011-015",
+    "title": "For In-Ground Hydraulic Lines",
+    "date": "12/00",
+    "drawn_by": "dok",
+    "scale": "1/8",
+    "sheet_size": "C-SIZE",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_0XX": "+/- 0.030",
+      "decimal_0XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "In-ground hydraulic line routing through floor slot",
+    "4\" wide x 2\" deep floor slot for hydraulic lines",
+    "Centered between columns"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Notice of confidential information",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "Slot for underground hydraulic lines",
+    "Recommended layout instructions: 1) Layout location of base plates with chalk line, 2) Layout slot with chalk lines, 3) Cut out slot, 4) Locate columns, 5) Anchoring lines and adjust before anchor columns, 6) Anchor columns"
+  ]
+}

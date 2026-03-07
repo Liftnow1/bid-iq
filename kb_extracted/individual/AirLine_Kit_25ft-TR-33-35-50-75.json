@@ -1,0 +1,51 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/AirLine_Kit_25ft-TR-33-35-50-75.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_and_operation_manual",
+  "model": "AirLine Kit 25ft",
+  "variant": "25-foot airline kit for TR-33, TR-35, TR-50, TR-75 four-post lifts",
+  "product_type": "airline_kit_accessory",
+  "capacity": "N/A - accessory kit",
+  "dimensions": {
+    "airline_length_ft": 25,
+    "compatible_lift_runway_length_ft": 25
+  },
+  "weight": {},
+  "installation_requirements": {
+    "compatible_lifts": ["TR-33", "TR-35", "TR-50", "TR-75"],
+    "lift_type": "Four-post runway lift",
+    "airline_routing": "Along runway length",
+    "air_supply_required": true
+  },
+  "specifications": {
+    "airline_length_ft": 25,
+    "purpose": "Provides compressed air supply along lift runways for pneumatic tool use during vehicle service"
+  },
+  "features": [
+    "25-foot airline kit for TR-series four-post lifts",
+    "Provides compressed air access along lift runways",
+    "Compatible with TR-33, TR-35, TR-50, and TR-75 models",
+    "Enables use of pneumatic tools while vehicle is on lift"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "AirLine Kit 25ft",
+      "description": "25-foot airline kit for TR-33/35/50/75 four-post lifts"
+    }
+  ],
+  "certifications": [
+    "Mohawk Lifts OEM accessory",
+    "Designed for use with ALI/ETL certified Mohawk four-post lifts"
+  ],
+  "safety_features": [
+    "Must be installed per Mohawk installation guidelines",
+    "Compressed air lines routed to avoid interference with lift operation"
+  ],
+  "notes": [
+    "This is an accessory kit, not a standalone lift product",
+    "Designed specifically for 25-foot runway TR-series lifts",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time",
+    "Specifications derived from product naming conventions and Mohawk product documentation"
+  ]
+}

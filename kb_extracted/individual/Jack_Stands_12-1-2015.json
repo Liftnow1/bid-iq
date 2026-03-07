@@ -1,0 +1,59 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/Jack_Stands_12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "Jack Stands",
+  "variant": "Mohawk Mobile Jack Stands - 20,000 / 30,000 / 40,000 lb capacities",
+  "product_type": "jack_stand",
+  "capacity": "20,000 / 30,000 / 40,000 lbs (model dependent)",
+  "dimensions": {
+    "adjustable_height_range_1_inches": "47 to 77",
+    "adjustable_height_range_2_inches": "30 to 47",
+    "fine_thread_adjustment_inches": 7
+  },
+  "weight": {},
+  "installation_requirements": {
+    "surface": "Hard, level surface capable of sustaining the load",
+    "no_permanent_installation": true
+  },
+  "specifications": {
+    "capacity_options_lbs": [20000, 30000, 40000],
+    "height_range_tall_inches_min": 47,
+    "height_range_tall_inches_max": 77,
+    "height_range_short_inches_min": 30,
+    "height_range_short_inches_max": 47,
+    "fine_adjustment_inches": 7,
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "Available in 20,000, 30,000, and 40,000 lb capacities",
+    "Adjustable heights: 47-77 inches and 30-47 inches",
+    "7 inches of fine thread adjustment",
+    "Rubber topped flat pads standard",
+    "Mobile design for repositioning",
+    "Heavy-duty construction"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Axle Engaging Yoke Pads",
+      "description": "Optional yoke pads for axle engagement instead of flat rubber pads"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "Mohawk Lifts OEM product",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Mechanical locking at adjustable height positions",
+    "Fine thread adjustment for precise height setting",
+    "Stable base design for load distribution",
+    "Must be used on hard, level surfaces"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Jack stands are standalone support devices, not lifting devices",
+    "Used in conjunction with vehicle lifts for additional support",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

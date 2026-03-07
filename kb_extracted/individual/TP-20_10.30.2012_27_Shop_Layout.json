@@ -1,0 +1,49 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/TP-20 10.30.2012 27 Shop Layout.pdf",
+  "category": "two-post-lift",
+  "document_type": "shop_layout_drawing",
+  "model": "TP-20",
+  "variant": null,
+  "product_type": "Two Post Inground Lift - Bay Sight Layout",
+  "manufacturer": "Mohawk",
+  "capacity": null,
+  "dimensions": {
+    "bay_layout": {
+      "overall_bay_width_feet": "20' 0\"",
+      "overall_bay_length_feet": "25'",
+      "suggested_minimum_post_to_wall_feet": "10' 0\"",
+      "width_between_posts_feet": "9' 6\" (see note)",
+      "vehicle_length_feet": "19'",
+      "increase_for_specialized_vehicles_over_19ft": "12' 6\"",
+      "bay_depth_side_feet": "19' (see note)",
+      "between_adjacent_columns_multi_unit": "3'"
+    }
+  },
+  "weight": null,
+  "installation_requirements": {
+    "minimum_bay_width": "20' 0\"",
+    "minimum_bay_length": "25'",
+    "suggested_minimum_distance_post_to_wall": "10' 0\"",
+    "multi_unit_spacing_between_adjacent_columns": "3'",
+    "vehicle_clearance": "Designed for vehicles up to 19 feet in length",
+    "increase_clearance_for_longer_vehicles": "12' 6\" increase for specialized vehicles over 19 ft long"
+  },
+  "specifications": {
+    "file_name": "MAN2014",
+    "page": 20
+  },
+  "features": [
+    "Bay sight layout for shop planning",
+    "Multi-unit installation capability with 3 feet between adjacent columns",
+    "Accommodates vehicles up to 19 feet in length"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Most vehicles' center of gravity (C.O.G.) lie between wheel base centers, however, some vehicles C.O.G. may be offset. Verify the center of gravity on the vehicle fleet to insure rear and front access of the vehicle.",
+    "Increase bay dimensions for specialized vehicles over 19 ft long",
+    "3 feet between adjacent columns for multi-unit installation"
+  ]
+}

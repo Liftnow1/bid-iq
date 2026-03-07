@@ -1,0 +1,64 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/ZZ1454-A-100_System-LC12.pdf",
+  "category": "specialty-item",
+  "document_type": "engineering_drawing",
+  "model": "ZZ1454-A-100",
+  "variant": "System IA and LC-12 O/H Beam Option",
+  "product_type": "Overhead Beam Support Assembly for System IA-10 and LC-12 Series",
+  "capacity": null,
+  "dimensions": {},
+  "weight": "250 lbs",
+  "installation_requirements": {
+    "compatible_models": ["System IA-10", "LC-12", "LC-12-3SA"],
+    "purpose": "Permits installation of these lifts on lower specification concrete floors",
+    "system_IA-10": {
+      "standard_requirement_without_overhead_beam": "4-1/2 inch thick, 4000 PSI",
+      "requirement_with_overhead_beam": "4-1/2 inch thick, 3250 PSI"
+    },
+    "LC-12_and_LC-12-3SA": {
+      "standard_requirement_without_overhead_beam": "6-1/2 inch thick, 4000 PSI",
+      "requirement_with_overhead_beam": "6-1/2 inch thick, 3250 PSI or 4-1/2 inch thick, 4000 PSI"
+    },
+    "concrete_slab_notes": "Continuous concrete slabs to be free of defects and cracks, provide proper anchor edge distance to seams, and have a minimum of 6x6 wire mesh reinforcement"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "part_number": "ZZ1454-A-100",
+    "title": "System IA and LC-12 O/H Beam Option",
+    "drawing_number": "ZZ1454-Option-Lc12",
+    "drawn_by": "nwv7089",
+    "date": "10/2014",
+    "sheet_size": "D-Size",
+    "tolerances": {
+      "angular": "+/- 1.5 degrees",
+      "fractional": "+/- 0.030",
+      "decimal_XX": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "Overhead beam option connects the two posts at the top",
+    "Allows installation on lower specification concrete floors",
+    "Overhead shutoff cable connected to motor shutoff switch",
+    "Shows front view and side view of installed configuration",
+    "Reduces concrete PSI requirement for System IA-10 from 4000 to 3250 PSI",
+    "Reduces concrete thickness for LC-12 from 6-1/2 inch to 4-1/2 inch (at 4000 PSI)"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [
+    "Overhead shutoff cable connected to motor shutoff switch",
+    "Concrete slabs must be continuous, free of defects and cracks",
+    "Proper anchor edge distance to seams required",
+    "Minimum 6x6 wire mesh reinforcement required"
+  ],
+  "notes": [
+    "This is the general overview drawing showing the O/H Beam option installed on the lift",
+    "Companion drawing ZZ1454-A-100 (Short version) provides detailed parts list",
+    "Overhead shutoff cable clearly labeled connecting to motor shutoff switch",
+    "Information contained herein is confidential and property of Mohawk Resources Ltd."
+  ]
+}

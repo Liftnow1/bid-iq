@@ -1,0 +1,23 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/uslcylinder.pdf",
+  "category": "operation-manual",
+  "document_type": "operation-manual",
+  "model": "USL Cylinder",
+  "variant": null,
+  "product_type": "Cylinder component for underground service lift",
+  "capacity": null,
+  "dimensions": {},
+  "weight": null,
+  "installation_requirements": {},
+  "specifications": {},
+  "features": [],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "File stored as Git LFS pointer - actual PDF content unavailable for extraction",
+    "LFS OID: sha256:5b21c94bcdfce3e28c046c1503a400eef09076b2cbdad60cb20ff80bf37fc7d2",
+    "File size: 184381 bytes"
+  ]
+}

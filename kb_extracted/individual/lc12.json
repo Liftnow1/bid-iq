@@ -1,0 +1,125 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/lc12.pdf",
+  "category": "two-post-lift",
+  "document_type": "spec_sheet",
+  "model": "LC-12-3SA",
+  "variant": "3 Stage Arms",
+  "product_type": "Two Post Lift",
+  "manufacturer": "Mohawk Lifts, LLC.",
+  "capacity": "12,000 lbs (5,443.11 kg)",
+  "dimensions": {
+    "overall_width": "12' 7\" (3.84 m) adjustable",
+    "width_between_posts": "10' (3.05 m) adjustable",
+    "width_between_lifting_arms": "8' 10\" (2.69 m) adjustable",
+    "column_height": "8' 7\" (2.62 m)",
+    "overhead_hydraulic_line_height": "12' (3.66 m) standard, adjustable to accommodate any height ceiling or routed in-floor",
+    "arm_pad_height_min": "5\" (12.7 cm)",
+    "lifting_height_under_arm": "6' (1.83 m)",
+    "lift_pad_height_at_full_rise": "6' 5\" (1.96 m)",
+    "lift_pad_height_full_rise_with_adaptors": "7'3\" (2.21 m)",
+    "drawing_dimensions": {
+      "between_posts_inches": 120,
+      "between_posts_meters": 3.05,
+      "column_height_inches": 103,
+      "column_height_meters": 2.62,
+      "overall_width_inches": 151.5,
+      "overall_width_meters": 3.85,
+      "arm_reach_1_inches": 72.5,
+      "arm_reach_1_meters": 1.84,
+      "arm_reach_2_inches": 76.5,
+      "arm_reach_2_meters": 1.94,
+      "arm_reach_3_inches": 86.5,
+      "arm_reach_3_meters": 2.2,
+      "pad_height_3stage_inches": 4.5,
+      "pad_height_3stage_meters": 0.11,
+      "pad_height_2stage_inches": 5,
+      "pad_height_2stage_meters": 0.13,
+      "drive_through_clearance_inches": 144,
+      "drive_through_clearance_meters": 3.65,
+      "drive_through_note": "STD",
+      "top_view_arm_spread_inches": 65.2,
+      "top_view_arm_spread_meters": 1.66,
+      "top_view_arm_length_inches": 130.3,
+      "top_view_arm_length_meters": 3.31,
+      "top_view_width_between_arms_inches": 105.8,
+      "top_view_width_between_arms_meters": 2.69,
+      "arm_rotation_max_inches": 61,
+      "arm_rotation_max_meters": 1.69,
+      "arm_rotation_min_inches": 36.3,
+      "arm_rotation_min_meters": 0.92
+    }
+  },
+  "weight": "2900 lbs (1,315.42 kg)",
+  "installation_requirements": {
+    "concrete_floor": "4000 psi (27579.02 kPa) mix, 6 1/2\" (16.51 cm) depth",
+    "anchoring_system": "(16) 3/4\" x 6\" (1.9 x 15.2 cm) bolts, included",
+    "motor_rating": "2.5 HP / 208-230V, Single-phase (3-phase optional)",
+    "overhead_steel_hydraulic_lines": true,
+    "adjustable_height_overhead_lines": true
+  },
+  "specifications": {
+    "lifting_speed": "80 seconds at full load (faster with lighter vehicles)",
+    "motor_rating": "2.5 HP / 208-230V, Single-phase (3-phase optional)",
+    "synchronization": "Hydraulic fluid displacement using no chains, cables, or overhead obstructions",
+    "cylinders": "2 (1 per column)",
+    "drive_system": "#BL-848 leaf chain routed over cylinder",
+    "steel_carriage_bearings": "4\" diameter, 8 per carriage, double sealed, self-lubricating",
+    "floor_access_between_posts": "Clear and unobstructed",
+    "revision": "10/21",
+    "units": "inches [meters]"
+  },
+  "features": [
+    "3 Stage adjustable arms (3SA)",
+    "Hydraulic fluid displacement synchronization - no chains, cables, or overhead obstructions",
+    "#BL-848 leaf chain drive system routed over cylinder",
+    "Clear and unobstructed floor access between posts",
+    "Adjustable overall width",
+    "Adjustable width between posts",
+    "Adjustable width between lifting arms",
+    "Double sealed self-lubricating 4\" steel carriage bearings",
+    "Overhead hydraulic lines adjustable to any ceiling height or routed in-floor",
+    "Mechanical safety locks starting at ground level"
+  ],
+  "optional_equipment": [
+    "5\" Frame Adaptors (stackable) - 4 included as standard equipment",
+    "7.5\" Frame Adaptors (stackable) - 4 included as standard equipment",
+    "10\" Frame Adaptors (stackable) - 4 included as standard equipment",
+    "3-phase motor option"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member",
+    "ANSI",
+    "ASME",
+    "AISI",
+    "ASTM",
+    "ASA",
+    "NEC",
+    "AWG",
+    "NEMA",
+    "Meets current national ANSI code for lifts"
+  ],
+  "safety_features": [
+    "Mechanical Safety Locks: Automatic, all position starting ground level",
+    "Hydraulic Safety Systems: Automatic, all position",
+    "Swing Arm Restraints: Automatic upon ascent"
+  ],
+  "warranty": {
+    "structural": "25 years",
+    "mechanical": "10 years",
+    "cylinder_seal": "Limited lifetime"
+  },
+  "government_contracts": [
+    "GSA Contract # GS-07F-207AA",
+    "Sourcewell Contract # 013020-MRL",
+    "NASPO ValuePoint Supplier Partner",
+    "HGACBuy",
+    "Equalis Group",
+    "Available under discounted government contract in all 50 states"
+  ],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Shown with adjustable height over-head steel hydraulic lines",
+    "Dare to Compare 7,000-12,000 LB capacity lifts - mohawklifts.com/dare2compare12k"
+  ]
+}

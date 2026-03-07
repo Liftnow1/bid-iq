@@ -1,0 +1,123 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/parallelogram-lifts/rj50 (1).pdf",
+  "category": "parallelogram-lift",
+  "document_type": "product_specification_sheet",
+  "model": "RJ-50-AH Series",
+  "variant": "Multiple capacity variants for 4-Post and Parallelogram lifts",
+  "product_type": "Air/Hydraulic Rolling Jack Beam",
+  "capacity": "20,000 to 50,000 lbs (model dependent)",
+  "dimensions": {
+    "beam_length_4post": "54.5 inches (for TR-33/35/50/75)",
+    "beam_length_parallelogram": "51 inches",
+    "beam_depth": "28.5 inches",
+    "beam_height": "15.5 inches",
+    "beam_height_above_track_retracted_4post": "2.5 inches (TR-33/35/50/75)",
+    "beam_height_above_track_retracted_parallelogram": "3.875 inches",
+    "lifting_stroke": "8 inches"
+  },
+  "weight": "850 lbs (shipping weight)",
+  "installation_requirements": {
+    "air_supply_recommended": "100-120 PSI, 10 CFM minimum",
+    "compatible_lift_models_4post": ["TR-30", "TR-33", "TR-35", "TR-50", "TR-75"],
+    "compatible_lift_models_parallelogram": "Mohawk Parallelogram Lifts",
+    "operating_temperature_range": "50 to 130 degrees F",
+    "hydraulic_fluid": "Dexron III",
+    "sales_installation_training_service": "Only by experienced, factory authorized professionals"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Lifts",
+    "model_variants": {
+      "RJ-50-AH-50000": {
+        "rated_capacity": "50,000 lbs",
+        "compatible_lift": "75k lb Lifts (4 Post)"
+      },
+      "RJ-50-AH-37500-P": {
+        "rated_capacity": "37,500 lbs",
+        "compatible_lift": "75-100k lb Lifts (Parallel)"
+      },
+      "RJ-50-AH-35000": {
+        "rated_capacity": "35,000 lbs",
+        "compatible_lift": "50k lb Lifts (4 Post)"
+      },
+      "RJ-50-AH-35000-P": {
+        "rated_capacity": "35,000 lbs",
+        "compatible_lift": "50k lb Lifts (Parallel)"
+      },
+      "RJ-50-AH-31500-P": {
+        "rated_capacity": "31,500 lbs",
+        "compatible_lift": "45k lb Lifts (Parallel)"
+      },
+      "RJ-50-AH-28000-P": {
+        "rated_capacity": "28,000 lbs",
+        "compatible_lift": "40k lb Lifts (Parallel)"
+      },
+      "RJ-50-AH-25000-P": {
+        "rated_capacity": "25,000 lbs",
+        "compatible_lift": "36-38k lb Lifts (Parallel)"
+      },
+      "RJ-50-AH-24500": {
+        "rated_capacity": "24,500 lbs",
+        "compatible_lift": "35k lb Lifts (4-Post)"
+      },
+      "RJ-50-AH-23000": {
+        "rated_capacity": "23,000 lbs",
+        "compatible_lift": "33k lb Lifts (4-Post)"
+      },
+      "RJ-50-AH-20000": {
+        "rated_capacity": "20,000 lbs",
+        "compatible_lift": "30k lb Lifts (4-Post)"
+      }
+    },
+    "lifting_speed": "150 seconds (variable, dependent on load)",
+    "lowering_speed": "100 seconds (variable, dependent on load)",
+    "lifting_mechanism": "One hydraulic cylinder resting vertically between jacking beam upper and lower sections",
+    "pump_unit": "Air/Hydraulic self-contained modular design with pump submerged into reservoir",
+    "reservoir_capacity": "2 gallon steel reservoir",
+    "jack_frame_construction": "Two 1/2 inch wall high strength steel formed sections (upper and lower) reinforced with supporting steel braces, modular steel end plates",
+    "axles_bearings": "Four steel axles with 4 matching spring-loaded heat treated machined rollers with internal needle bearings",
+    "mechanical_locks": "Twin mechanical locks, 1.5 inch thick steel each, spring-engage in 3 positions within stroke",
+    "testing": "Each unit fully assembled and factory tested prior to shipment",
+    "made_in": "USA",
+    "file_reference": "RJ-50-AH Series Jack Beam.doc",
+    "revision": "10/4/2013 (r.v.)"
+  },
+  "features": [
+    "Air/Hydraulic operation for wheel free operations on four post track lifts and parallelogram lifts",
+    "No cables, chains or mechanical screws used in lifting",
+    "Scissoring mechanism provides synchronization for level platform lifting",
+    "Rolling axles compress under load for direct frame contact between jack beam frame and lift runways",
+    "Modular steel end plates adapt to different end attachments for modularity in design",
+    "Spring-loaded heat treated machined rollers with internal needle bearings",
+    "Self-contained modular pump design with submerged pump",
+    "Manual rocker lever controls for raise, lower, and lock release",
+    "Each unit fully assembled and factory tested prior to shipment",
+    "Made in the USA"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {"item": "Flat Lifting Pads", "quantity": 2, "included": "standard"},
+    {"item": "Axle Lifting Pads", "quantity": 2, "included": "standard"},
+    {"item": "5 inch Stackable Height Adapters", "quantity": 2, "included": "standard"},
+    {"item": "7.5 inch Stackable Height Adapters", "quantity": 2, "included": "standard"},
+    {"item": "10 inch Stackable Height Adapters", "quantity": 2, "included": "standard"}
+  ],
+  "certifications": [
+    "ANSI/ALI ALCTV-2011 Certified and Listed (when used with compatible Mohawk lifts)",
+    "ALI Certified by ETL",
+    "Meets or exceeds ANSI/ALI ALCTV-2011"
+  ],
+  "safety_features": [
+    "Load holding check valve integrated into hydraulic pumping unit",
+    "Flow regulating valves mounted in-line with cylinder minimize collapse speed in event of fluid leakage",
+    "Twin mechanical locks (1.5 inch thick steel each) spring-engage in 3 positions within stroke",
+    "Scissoring mechanism provides synchronization for level platform lifting",
+    "Rolling axles compress under load for direct frame contact between jack beam frame and lift runways",
+    "Manual lock release lever required to disengage locks for full lowering"
+  ],
+  "notes": [
+    "Total aggregate capacity of any combination of jacking beams cannot exceed rated capacity of lift",
+    "Per ANSI/ALI ALCTV-2011, individual jacking beams are limited to maximum rating of 70% of the capacity of the lift they are installed on",
+    "Lifting and lowering speeds are variable, dependent on load applied to jack beam",
+    "Mohawk Exclusive Extended Lifetime Cylinder Seal Warranty on hydraulic cylinders"
+  ]
+}
