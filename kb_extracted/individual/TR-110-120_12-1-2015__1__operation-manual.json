@@ -1,0 +1,80 @@
+{
+  "source_file": "/home/runner/work/bid-iq/bid-iq/data/product_data/mohawk/operation-manuals/TR-110-120 12-1-2015 (1).pdf",
+  "category": "operation-manual",
+  "document_type": "operation-manual",
+  "model": "TR-110 & TR-120",
+  "variant": "TR-110 (110,000 lbs) / TR-120 (120,000 lbs)",
+  "product_type": "Four Post Truck Lift",
+  "manufacturer": "Mohawk Lifts",
+  "capacity": "TR-110: 110,000 lbs / TR-120: 120,000 lbs",
+  "dimensions": {
+    "lifting_height": "5 ft (60 inch)",
+    "overall_width_without_console": "TR-110: 15 ft 9 in / TR-120: 18 ft 6 in",
+    "overall_length": "TR-110: 49 ft 6 in / TR-120: 59 ft 6 in",
+    "track_width": "3 ft (36 inch)",
+    "width_clearance_between_posts": "TR-110: 11 ft 2¾ in / TR-120: 13 ft 11¾ in",
+    "maximum_vehicle_wheelbase": "TR-110: 27 ft approx / TR-120: 37 ft approx",
+    "shipping_weight": "TR-110: 37,500 lbs / TR-120: 44,000 lbs",
+    "suggested_bay_size": "20 ft width x 60 ft depth x 20 ft height"
+  },
+  "specifications": {
+    "lift_speed_up_cycle": "2 min approx",
+    "motor": {
+      "voltage": "208-230/460 VAC",
+      "horsepower": "20 HP",
+      "phase": "Three",
+      "nameplate_amperage": "53-48/24",
+      "cycle_hertz": "60",
+      "speed": "1750 RPM"
+    },
+    "pump_flow": "10 GPM approx",
+    "relief_valve_setting": "TR-110: 2600 PSI / TR-120: 2850 PSI",
+    "reservoir_capacity": "30 U.S. gallons",
+    "power_unit": "T-style",
+    "hydraulic_fluid": "Dexron III",
+    "circuit_breaker_recommended": "100 AMP @ 208 VAC, 60 AMP @ 460 VAC",
+    "air_supply_required": "80 PSI minimum"
+  },
+  "features": [
+    "Four post design for heavy truck lifting",
+    "Auto-leveling system with track leveler",
+    "Pneumatic air locks for safety",
+    "Manual override controls for power loss situations",
+    "Equalizing chains for synchronized lifting",
+    "Wheel chocks included",
+    "Control console with multiple indicator lights"
+  ],
+  "safety_features": [
+    "Mechanical safety locks",
+    "Air lock system preventing lowering without air pressure",
+    "Out of parallel indicator light",
+    "Low air pressure indicator",
+    "Park button with illuminated yellow light",
+    "Manual lowering valves for emergency use",
+    "Equalizing chains for level lifting",
+    "Wheel chocks for vehicle security"
+  ],
+  "optional_equipment": [
+    "Drive on ramps (15' long included)",
+    "Transition plates (flip plates)",
+    "Tilt bars",
+    "Various lifting accessories"
+  ],
+  "certifications": [
+    "ALI (Automotive Lift Institute) Member"
+  ],
+  "maintenance": [
+    "Daily: Pre-operation check list, clean and lubricate moving parts",
+    "Weekly: Clean cylinder wiper seals, verify fluid level (Dexron III)",
+    "Monthly: Inspect hydraulic components, tighten fasteners, clean chains",
+    "Semi-annual: Re-qualify personnel training",
+    "Annually: Replace hydraulic fluid, replace/clean filter, inspect bearings"
+  ],
+  "notes": [
+    "Minimum concrete floor: 8 inches thick, 4000 PSI, 28 days aged",
+    "Must be installed by licensed electrician and registered within 30 days",
+    "Never use impact tools to tighten anchor bolts - use torque wrench only",
+    "Unit must not be anchored until fully assembled and tested",
+    "Read manual thoroughly before installation, operation, or maintenance"
+  ]
+}
