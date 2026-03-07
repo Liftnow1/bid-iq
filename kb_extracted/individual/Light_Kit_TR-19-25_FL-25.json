@@ -1,0 +1,44 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/Light_Kit_TR-19-25 FL-25.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_and_operation_manual",
+  "model": "Light Kit TR-19/25 FL-25",
+  "variant": "Track lighting kit for TR-19, TR-25, and FL-25 four-post lifts",
+  "product_type": "lighting_kit_accessory",
+  "capacity": "N/A - accessory kit",
+  "dimensions": {},
+  "weight": {},
+  "installation_requirements": {
+    "compatible_lifts": ["TR-19", "TR-25", "FL-25"],
+    "lift_type": "Four-post runway lift",
+    "electrical_supply_required": true
+  },
+  "specifications": {
+    "purpose": "Under-vehicle lighting for four-post lift runways",
+    "compatible_models": ["TR-19", "TR-25", "FL-25"]
+  },
+  "features": [
+    "Track-mounted lighting for under-vehicle illumination",
+    "Compatible with TR-19, TR-25, and FL-25 models",
+    "Mounts along lift runways for complete undercarriage visibility",
+    "Designed for lighter-duty four-post lift models"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "Light Kit TR-19/25 FL-25",
+      "description": "Track lighting kit for TR-19, TR-25, and FL-25 four-post lifts"
+    }
+  ],
+  "certifications": [
+    "Mohawk Lifts OEM accessory"
+  ],
+  "safety_features": [
+    "Electrical components rated for lift environment",
+    "Wiring routed to avoid interference with lift operation"
+  ],
+  "notes": [
+    "Designed for the TR-19/TR-25/FL-25 family of four-post lifts",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

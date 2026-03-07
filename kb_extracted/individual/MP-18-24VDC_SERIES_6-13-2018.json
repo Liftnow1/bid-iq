@@ -1,0 +1,80 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/MP-18-24VDC_SERIES_6-13-2018.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "MP-18-24VDC",
+  "variant": "18,000 lb per column 24V DC wireless mobile column lift - 2018 revision",
+  "product_type": "mobile_column_lift",
+  "capacity": "18,000 lbs per column; 32,000 to 144,000 lbs total (2-8 columns)",
+  "dimensions": {
+    "lifting_stroke_inches": 67,
+    "fork_length_options_inches": [15, 22],
+    "tire_diameter_max_inches": 48,
+    "wheel_diameter_range_inches": "13 to 24",
+    "column_mast_width_inches": 5.75,
+    "steering_wheel_diameter_inches": 6.625,
+    "rolling_wheel_diameter_inches": 6
+  },
+  "weight": {},
+  "installation_requirements": {
+    "no_permanent_installation": true,
+    "surface": "Level shop floor",
+    "power_source": "24V DC - twin 12-volt deep-cycle maintenance-free batteries",
+    "charger": "20-amp gel-filled 110V charger"
+  },
+  "specifications": {
+    "capacity_per_column_lbs": 18000,
+    "total_capacity_range_lbs": "32,000 to 144,000",
+    "lifting_stroke_inches": 67,
+    "locking_positions": 19,
+    "lock_spacing_inches": 3,
+    "power_type": "24V DC wireless",
+    "battery_configuration": "Twin 12-volt deep-cycle batteries",
+    "cycles_per_charge": 30,
+    "column_configurations": [2, 4, 6, 8],
+    "manual_revision_date": "6/13/2018"
+  },
+  "features": [
+    "24V DC wireless operation for complete portability",
+    "18,000 lb capacity per column",
+    "67-inch lifting stroke",
+    "19 locking positions spaced every 3 inches",
+    "Adjustable lifting forks: 15-inch or 22-inch lengths",
+    "Updated 2018 revision with potential improvements over 2015 version",
+    "Fits wheels from 13 to 24 inches, tires up to 48 inches diameter",
+    "Each column operates individually, in pairs, or synchronized",
+    "30+ full lift cycles per charge"
+  ],
+  "optional_equipment": [
+    {
+      "item": "22-inch Lifting Forks",
+      "description": "For flotation tires or super-singles"
+    },
+    {
+      "item": "Wider Carriages",
+      "description": "For expanded vehicle compatibility"
+    },
+    {
+      "item": "Auto Frame Adapter",
+      "description": "For passenger vehicle side-lifting"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets nationally recognized safety standard for vehicle lifts",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "19-position mechanical safety locks every 3 inches",
+    "Ability to park load on mechanical locks",
+    "Retractable rolling wheels",
+    "Synchronized operation across all columns"
+  ],
+  "notes": [
+    "Manual revision date: 6/13/2018",
+    "Updated version of the 12/1/2015 manual",
+    "24V DC version - fully wireless/portable operation",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

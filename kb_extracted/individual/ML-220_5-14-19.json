@@ -1,0 +1,75 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/ML-220_5-14-19.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "ML-220",
+  "variant": "20,000 lb capacity clear floor two-post heavy duty lift",
+  "product_type": "two_post_lift",
+  "capacity": "20,000 lbs",
+  "dimensions": {
+    "base_footprint_width_inches": 30,
+    "base_plate_thickness_inches": 0.75,
+    "lifting_height_ft": 6
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting": "Surface-mounted, bolts to concrete floor",
+    "column_material": "3/4 inch thick forklift mast steel",
+    "hydraulic_lines": "Overhead or in-floor stainless steel",
+    "indoor_use_only": true
+  },
+  "specifications": {
+    "capacity_lbs": 20000,
+    "cylinder_type": "Twin cylinder direct drive",
+    "number_of_cylinders": 2,
+    "column_material": "3/4 inch thick forklift mast steel",
+    "roller_bearing_type": "Sealed steel ball bearings - no greasing required",
+    "swing_arm_type": "Three-stage arms for medium-duty work trucks",
+    "synchronization": "Patented hydraulic synchronization - overhead or in-floor stainless steel lines",
+    "drive_system": "All-hydraulic, direct drive - no chains, cables, pulleys, or equalizer bars",
+    "manual_revision_date": "5/14/2019"
+  },
+  "features": [
+    "20,000 lb capacity for light and medium duty vehicles",
+    "Clear floor above ground design",
+    "Twin cylinder direct drive - no chains or cables",
+    "Three-stage arms for medium-duty work trucks",
+    "Arms retract for short wheelbase vehicles",
+    "Sealed steel ball bearing carriages - lifetime smooth performance, no greasing",
+    "3/4-inch thick forklift mast columns",
+    "No overhead cable covers - full height clearance",
+    "Full sets of truck adaptors included",
+    "Patented hydraulic synchronization",
+    "100% USA made"
+  ],
+  "optional_equipment": [
+    {
+      "item": "In-Floor Hydraulic Lines",
+      "description": "Alternative to overhead routing for stainless steel hydraulic lines"
+    },
+    {
+      "item": "Truck Adaptors",
+      "description": "Full sets included as standard"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets ANSI/ALI ALCTV safety standard",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "All-position mechanical locks on both carriages",
+    "Infinite-position internal hydraulic safeties",
+    "Pressure-compensated flow controls",
+    "Velocity fuse valving",
+    "Automatic swing arm restraints"
+  ],
+  "notes": [
+    "Manual revision date: 5/14/2019",
+    "Warranty: 25 years structural",
+    "Designed for passenger vehicles, fleet trucks, and commercial vans",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

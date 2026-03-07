@@ -1,0 +1,86 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/tp2630_datasheet.pdf",
+  "category": "two-post-lift",
+  "document_type": "data_verification_form",
+  "model": "TP-26A / TP-26A-WB / TP-30A / TP-30A-WB",
+  "variant": "Standard and Wide Base",
+  "product_type": "Two Post Inground Lift - Order Verification Form",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": "TP-26A/26A-WB: 26,000 lbs / TP-30A/30A-WB: 30,000 lbs",
+  "dimensions": {
+    "site_survey_fields": {
+      "overall_bay_length": "customer to specify",
+      "slope_in_floor_lengthwise": "customer to specify",
+      "overall_bay_width": "customer to specify",
+      "slope_in_floor_widthwise": "customer to specify",
+      "overall_bay_height": "customer to specify",
+      "overhead_obstructions": "yes or no, customer to specify"
+    }
+  },
+  "weight": "N/A",
+  "installation_requirements": {
+    "power_to_lift": "60 PSI pneumatic air (for air locks) to be brought to back of mainside column",
+    "concrete_floor_standard": "12\" floor thickness for standard lift",
+    "concrete_floor_wider_base": "8\" floor thickness for wider base version",
+    "electrical_standard": {
+      "voltage": "208-220 VAC",
+      "phase": "3 Phase",
+      "cycle": "60 Hz",
+      "type": "Standard"
+    },
+    "electrical_option_1": {
+      "voltage": "230-240 VAC"
+    },
+    "electrical_option_2": {
+      "voltage": "440-480 VAC"
+    },
+    "electrical_connection_note": "Final electrical connection to local/national code is the responsibility of the electrical contractor. More than one point of connection may be required. Disconnect switches, lock-out/tag-outs, main fuses, and main power leads, etc., are not provided by Mohawk Resources Ltd.",
+    "pneumatic_power_note": "Pneumatic power is the responsibility of the mechanical contractor to the final designated point or points at the vehicle lift unless otherwise specified by architect",
+    "construction_project_verification": "If construction project, verify production time with Mohawk"
+  },
+  "specifications": {
+    "drawing_number": "ZZ1178-A-001",
+    "date": "3/09",
+    "drawn_by": "R.V.",
+    "scale": "N/A",
+    "revision": "A - Initials requests added (09/16 by CHS)",
+    "lift_models_available": [
+      {"model": "TP-26A", "capacity": "26,000 lbs"},
+      {"model": "TP-26A-WB", "capacity": "26,000 lbs"},
+      {"model": "TP-30A", "capacity": "30,000 lbs"},
+      {"model": "TP-30A-WB", "capacity": "30,000 lbs"}
+    ]
+  },
+  "features": [
+    "WB represents wider base versions to accommodate thinner floors",
+    "Standard 3-phase power",
+    "Pneumatic air locks"
+  ],
+  "optional_equipment": [
+    "Underground hydraulic lines",
+    "Swivel pads (height adjustable lifting pads)",
+    "Weight indication pressure gauge",
+    "Low profile arms (reduce capacity to 20,000 lbs)",
+    "Other (special)"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL ALCTV certification (note: some options may invalidate this)"
+  ],
+  "safety_features": [
+    "Pneumatic air locks (60 PSI)",
+    "Disconnect switches required per electrical code"
+  ],
+  "notes": [
+    "WB represents wider base versions to accommodate thinner floors (see note 4)",
+    "Power to lift and 60 PSI pneumatic air (for air locks) to be brought to back of mainside column",
+    "Some option combinations are not available. Some options may invalidate ALI/ETL ALCTV certification of lift. Consult a Mohawk representative.",
+    "Final electrical connection to local/national code is the responsibility of the electrical contractor",
+    "Pneumatic power is the responsibility of the mechanical contractor",
+    "Standard lift requires 12\" floor thickness; wider base version requires 8\" floor thickness",
+    "After all specifications approved by customer, make copy and return signed form to Mohawk Resources Ltd.",
+    "All lift options checked for purchase must be listed on purchase order as separate line items",
+    "Low profile arms option reduces capacity to 20,000 lbs",
+    "This drawing has been reviewed and found to be acceptable to all customer's specifications indicated"
+  ]
+}

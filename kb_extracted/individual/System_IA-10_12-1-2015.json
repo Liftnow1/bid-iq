@@ -1,0 +1,98 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/System_IA-10_12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "System IA-10",
+  "variant": "10,000 lb capacity clear floor two-post lift",
+  "product_type": "two_post_lift",
+  "capacity": "10,000 lbs (2,500 lbs max per arm)",
+  "dimensions": {
+    "base_footprint_width_inches": 30,
+    "base_plate_thickness_inches": 0.75,
+    "column_width_inches": 5.75,
+    "lifting_height_ft": 6,
+    "arm_pad_height_min_inches": 3.5,
+    "min_ceiling_height_ft_in": "10 ft 6 in"
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting": "Surface-mounted, bolts to concrete floor",
+    "base_footprint": "30 in wide, constructed from 3/4 in thick plate",
+    "lag_bolts": 8,
+    "hydraulic_lines": "Adjustable overhead stainless steel (or in-floor option)",
+    "indoor_use_only": true,
+    "outdoor_prohibited": true,
+    "minimum_ceiling_height": "10 ft 6 in (to fully raise 4 ft tall car)"
+  },
+  "specifications": {
+    "capacity_lbs": 10000,
+    "max_capacity_per_arm_lbs": 2500,
+    "motor_hp": 2.5,
+    "motor_voltage": "220V single-phase (standard)",
+    "motor_fla_at_rated_capacity": 13.9,
+    "cylinder_type": "Twin cylinder with heavy duty #646 leaf chains and twin bearings",
+    "cylinder_diameter_inches": 4,
+    "cylinder_psi": 4000,
+    "column_material": "3/4 inch thick forklift mast steel, 5-3/4 inch wide",
+    "roller_bearings_per_carriage": 8,
+    "roller_bearing_diameter_inches": 5.75,
+    "roller_bearing_type": "Double-sealed self-lubricating steel ball bearing",
+    "swing_arm_profile_height_inches": 3.5,
+    "swing_arm_bolt_diameter_inches": 1.125,
+    "synchronization": "Patented hydraulic synchronization with overhead or in-floor stainless steel lines",
+    "lock_spacing_inches": 3,
+    "lock_engagement_start_inches": 5,
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "10,000 lb capacity for cars and light trucks",
+    "Clear floor design with patented hydraulic synchronization",
+    "3-1/2 inch low profile swing arms fit under lowest sports cars",
+    "Twin heavy duty cylinders with #646 leaf chains",
+    "Large 4-inch cylinders at 4,000 PSI",
+    "8 x 5-3/4 inch double-sealed self-lubricating steel ball bearing rollers per carriage",
+    "3/4-inch thick forklift mast columns, 5-3/4 inch wide",
+    "All-position mechanical locks every 3 inches starting at 5 inches off ground",
+    "No obstructive cable cover - fits 10 ft 6 in ceiling",
+    "Adjustable overhead stainless steel hydraulic lines",
+    "1-1/8 inch diameter swing arm bolts (10,000 through 30,000 lb models)",
+    "Standard 3-inch and 6-inch truck frame adaptors included",
+    "Automatic swing arm restraints"
+  ],
+  "optional_equipment": [
+    {
+      "item": "In-Floor Hydraulic Lines",
+      "description": "Alternative to overhead routing"
+    },
+    {
+      "item": "3-inch Truck Frame Adaptors",
+      "description": "Standard equipment for hard-to-reach frames"
+    },
+    {
+      "item": "6-inch Truck Frame Adaptors",
+      "description": "Standard equipment for hard-to-reach frames"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets nationally recognized safety standard for garage lifts",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "All-position mechanical locks engage every 3 inches in both columns",
+    "Locks start at 5 inches off ground and continue to full height",
+    "Patented infinite-position internal hydraulic safeties",
+    "External pressure-compensated flow controls",
+    "Velocity fuse valving",
+    "Automatic swing arm restraints engage upon lifting",
+    "Restraints disengage only when vehicle fully lowered"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Warranty: 25 years structural, 10 year mechanical, limited lifetime cylinder seal",
+    "Indoor use only - outdoor installation prohibited",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

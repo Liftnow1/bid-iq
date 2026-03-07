@@ -1,0 +1,93 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/Parallelogram-12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "Parallelogram",
+  "variant": "36,000 / 50,000 / 75,000 / 100,000 lb capacity parallelogram lifts",
+  "product_type": "parallelogram_lift",
+  "capacity": "36,000 / 50,000 / 75,000 / 100,000 lbs (model dependent)",
+  "dimensions": {
+    "lifting_height_inches": 63,
+    "track_length_range_ft": "26 to 48",
+    "cylinder_diameter_inches": 7.75
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting_options": ["Surface-mounted", "Flush-mounted", "Recessed pit"],
+    "flush_mount_note": "Installed recessed in a pit, lift invisible when not in use",
+    "concrete_requirements": "Heavy-duty floor capable of supporting load"
+  },
+  "specifications": {
+    "capacity_options_lbs": [36000, 50000, 75000, 100000],
+    "lifting_height_inches": 63,
+    "track_length_range_ft_min": 26,
+    "track_length_range_ft_max": 48,
+    "cylinder_diameter_inches": 7.75,
+    "bearing_type": "Self-lubricating composite bearings",
+    "pivot_pins": "Chrome-plated pivot pins with maintenance-free operation",
+    "synchronization": "Computer-controlled synchronization system",
+    "encoder_type": "Dual high-resolution chain-driven encoders",
+    "encoder_monitoring_rate_hz": 60,
+    "safety_latch_material": "Laser cut high strength T-1 steel",
+    "control": "Simple 3-button operation: Raise, Lower, Park (lock)",
+    "factory_plumbed_air_lines": true,
+    "factory_prewired_lighting": true,
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "63 inches of lifting height with completely unobstructed under-vehicle access",
+    "Available in 36,000, 50,000, 75,000, and 100,000 lb capacities",
+    "Track lengths from 26 to 48 feet",
+    "Heaviest-built parallelogram lift in the world",
+    "Large 7.75-inch hydraulic cylinders reduce operating pressure",
+    "Self-lubricating composite bearings - maintenance-free",
+    "Chrome-plated pivot pins",
+    "No obstructive tie bar between runways",
+    "Computer-controlled synchronization programmable for different lift heights",
+    "Dual high-resolution chain-driven encoders monitor 60 times per second",
+    "Simple 3-button operation: Raise, Lower, Park",
+    "Surface, flush, or recessed pit mounting",
+    "Available in fully galvanized steel for wash bay environments",
+    "Factory-plumbed for air lines",
+    "Pre-wired for fluorescent runway lighting",
+    "Laser cut high strength T-1 steel safety latch racks"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Air-Hydraulic Rolling Jacks - 25,000 lb",
+      "description": "Wheels-free service for brakes, tires, and axles"
+    },
+    {
+      "item": "Air-Hydraulic Rolling Jacks - 50,000 lb",
+      "description": "Heavy-duty wheels-free service"
+    },
+    {
+      "item": "Track Lighting",
+      "description": "Fluorescent runway lighting (pre-wired)"
+    },
+    {
+      "item": "Galvanized Steel Construction",
+      "description": "For corrosive wash bay environments"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Manufactured in compliance with ALI, ANSI, ASME, AISI, ASTM, ASA, NEC, AWG, NEMA",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Computer-controlled synchronization system",
+    "Dual high-resolution chain-driven encoders monitor lift 60 times per second",
+    "Hydraulic safeties with pressure-compensated flow control valves",
+    "Velocity fuses",
+    "Laser cut high strength T-1 steel safety latch racks",
+    "Programmable lift height limits"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Heaviest-built parallelogram lift in the world per manufacturer",
+    "Flush-mounted version is invisible when not in use",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

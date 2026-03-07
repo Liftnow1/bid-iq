@@ -1,0 +1,66 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/TL-7 12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "TL-7",
+  "variant": "7,000 lb capacity two-post turf vehicle lift",
+  "product_type": "two_post_lift",
+  "capacity": "7,000 lbs",
+  "dimensions": {
+    "lifting_height_ft": 6,
+    "column_material_thickness_inches": 0.75,
+    "column_width_inches": 4
+  },
+  "weight": {},
+  "installation_requirements": {
+    "mounting": "Surface-mounted, bolts to concrete floor",
+    "indoor_use_only": true
+  },
+  "specifications": {
+    "capacity_lbs": 7000,
+    "lifting_height_ft": 6,
+    "cylinder_type": "Twin heavy duty cylinders",
+    "number_of_cylinders": 2,
+    "column_material": "3/4 inch thick forklift mast, 4 inch wide sections",
+    "roller_bearings_per_carriage": 8,
+    "roller_bearing_type": "Double-sealed self-lubricating steel ball bearing",
+    "lifting_mechanism": "Adjustable lifting forks",
+    "rear_lifting": "Wheel trough design",
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "7,000 lb capacity specifically for turf maintenance equipment",
+    "Full 6-foot lifting height",
+    "Adjustable lifting forks for all wheelbase ranges",
+    "Forks expand and contract for different tire sizes",
+    "Rear trough design for flexible equipment accommodation",
+    "Twin heavy duty cylinders for safer, steadier lifting",
+    "3/4-inch thick forklift mast columns (4-inch wide)",
+    "8 double-sealed self-lubricating steel ball bearing rollers per carriage",
+    "Twin safety locking systems",
+    "Hydraulic locking safeties",
+    "Designed, welded, and manufactured in the USA"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Turf Pack Accessories",
+      "description": "Additional accessories for turf equipment service"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "Twin safety locking systems",
+    "Hydraulic locking safeties",
+    "Twin heavy duty cylinders for stability"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Warranty: 25 years structural, 10 year mechanical, limited lifetime hydraulic cylinder",
+    "Specifically designed for turf maintenance equipment (mowers, utility vehicles, etc.)",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}

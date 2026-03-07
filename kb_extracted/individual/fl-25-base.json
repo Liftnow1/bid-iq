@@ -1,0 +1,63 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/fl-25-base.pdf",
+  "category": "four-post-lift",
+  "document_type": "engineering_drawing_part",
+  "model": "TR-25, FL-25, TR-19",
+  "variant": "Bottom Plate (Leg Weldment)",
+  "product_type": "base_plate_component",
+  "capacity": null,
+  "dimensions": {
+    "plate_size_inches": "11.75 x 11.75",
+    "plate_thickness_inches": 0.5,
+    "anchor_hole_diameter_inches": 0.875,
+    "anchor_hole_type": "Burned thru",
+    "anchor_holes_quantity": 4,
+    "anchor_hole_spacing_inches": 10,
+    "gusset_radius_inches": 0.125,
+    "gusset_radius_quantity": 18,
+    "gusset_thickness_inches": 0.1875,
+    "gusset_quantity": 4,
+    "leg_tube_size_inches": "7/8 x 7/8",
+    "reference_dimension_inches": 0.5
+  },
+  "weight": {
+    "weight_lbs": 19.5
+  },
+  "installation_requirements": {
+    "compatible_models": ["TR-25", "FL-25", "TR-19"],
+    "material": "ASTM A-36 Plate, 1/2 inch thick x 11 3/4 x 11 3/4"
+  },
+  "specifications": {
+    "material": "ASTM A-36 Steel Plate",
+    "plate_dimensions": "1/2 inch x 11 3/4 inch x 11 3/4 inch",
+    "drawing_number": "025-000-170",
+    "file_name": "F00110",
+    "drawing_date": "10/92",
+    "drawing_scale": "Full",
+    "next_assembly_parts": ["025-000-003", "025-000-004"],
+    "related_assemblies": ["025-002-004", "025-002-007", "600-000-031"],
+    "revision": "Redrawn and replaced (10/92)"
+  },
+  "features": [
+    "Bottom plate for leg weldment assembly",
+    "Used on Mohawk models TR-25, FL-25, and TR-19",
+    "ASTM A-36 steel construction",
+    "4 burned-through 7/8-inch diameter anchor bolt holes",
+    "10-inch anchor bolt spacing",
+    "4 gusset reinforcements at 3/16-inch thickness"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "025-000-170",
+      "description": "Bottom Plate (Leg Weldment) for TR-25, FL-25, TR-19"
+    }
+  ],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Used on Mohawk models TR-25, FL-25, and TR-19",
+    "Confidential document - property of Mohawk Resources Ltd.",
+    "Drawn by dak, checked by R.V., dated 10/92"
+  ]
+}

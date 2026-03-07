@@ -1,0 +1,88 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/tp-20-base.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TP-20 / TP-18B",
+  "variant": "Standard Base Plate",
+  "product_type": "Two Post Inground Lift - Base Plate Drawing",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": null,
+  "dimensions": {
+    "base_plate_overall_length_inches": 47.5,
+    "base_plate_overall_width_inches": "31 1/2",
+    "base_plate_material_size": "1\" x 31 1/2 x 47 1/2",
+    "anchor_bolt_holes_diameter_inches": "7/8\" dia burn (9 places)",
+    "anchor_hole_radius_inches": "1 1/2 rad typ (8 places)",
+    "bolt_pattern_vertical_inches": "28 1/2 typ",
+    "bolt_pattern_horizontal_inches": "14 1/2 typ",
+    "inner_spacing_1_inches": "7 1/8",
+    "inner_spacing_2_inches": 4.5,
+    "inner_spacing_3_inches": 5.5,
+    "inner_spacing_4_inches": 2.75,
+    "center_slot_radius": "3/16 R typ",
+    "banked_opening": "4 1/2 x 5 1/2 banked opening",
+    "edge_spacing_1_inches": "14 3/4",
+    "edge_spacing_2_inches": "14 3/4",
+    "vertical_spacing_1_inches": "1 1/2 typ",
+    "horizontal_center_spacing_inches": "22.25 typ",
+    "inner_center_spacing_inches": "19 1/8 typ",
+    "outer_dimension_inches": "23 3/4",
+    "plate_reference_thickness_inches": "1\" REF",
+    "center_mark_spacing_inches": "35 typ",
+    "top_bolt_spacing_inches": "13\" typ",
+    "cathering_purposes_note": "For cathering purposes only (2 places) - see burning pattern"
+  },
+  "weight": "113 lbs",
+  "installation_requirements": {
+    "applicable_models": ["TP-20", "TP-18B"],
+    "note": "Used on Mohawk Model TP-20 & TP-18B",
+    "material": "ASTM A-36 Plate",
+    "plate_dimensions": "1\" x 31 1/2 x 47 1/2",
+    "anchor_bolt_holes": "9 places, 7/8\" diameter burn",
+    "welding_specs": "AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "specifications": {
+    "drawing_number": "020-000-1103",
+    "file_name": "T00105",
+    "part_number": "020-000-012",
+    "title": "Plate (TP-20)",
+    "date": "7/98",
+    "drawn_by": "dok",
+    "checked_by": "JV",
+    "scale": "1/4",
+    "sheet_size": "D-SIZE",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_0XX": "+/- 0.030",
+      "decimal_0XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "Standard base plate for TP-20 and TP-18B models",
+    "ASTM A-36 steel plate construction",
+    "9-point anchor bolt pattern"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "600-000-051",
+      "description": "Base Plate for TP-20",
+      "material": "ASTM A-36 Plate",
+      "thickness": "1\"",
+      "size": "31 1/2 x 47 1/2",
+      "weight": "113 lbs"
+    }
+  ],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Used on Mohawk Model TP-20 & TP-18B",
+    "Notice of confidential information",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "For cathering purposes only (2 places) - see burning pattern"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/Infloor-line-kit-Conduit-and-hoses-LC12-to-ML220-2024.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing_and_installation_guide",
+  "model": "In-Floor Line Kit",
+  "variant": "Conduit and Hoses for LC-12 to ML-220",
+  "product_type": "New Floor Installation for In-Ground Hydraulic Hoses",
+  "capacity": null,
+  "dimensions": {
+    "overall_length_ref": "168 inches REF",
+    "post_to_post_centerline": "119 inches",
+    "slab_width": "84 inches",
+    "offset_from_center": "59.5 inches",
+    "column_base_to_edge": "29.5 inches",
+    "base_plate_to_edge": "14.75 inches",
+    "base_plate_height": "36 inches",
+    "conduit_entry_offset": "8.25 inches",
+    "slab_thickness_ref": "12 inches REF",
+    "concrete_depth_for_conduit": "16 inches",
+    "baseplate_thickness_ref": "3/4 inch thick",
+    "pvc_tubing_diameter": "4 inches (by others)",
+    "column_base_width_ref": "72 inches REF",
+    "elbow_type": "Smooth 90 degree elbow, typical both ends"
+  },
+  "weight": null,
+  "installation_requirements": {
+    "compatible_models": ["LC-12", "LMF-12", "TP-15", "TP-16", "TP-18", "ML-220"],
+    "conduit_type": "4 inch diameter PVC tubing (by others)",
+    "elbow_type": "Smooth 90 degree elbow at both ends",
+    "slab_type": "Standard size new slab recommendation shown",
+    "hoses_routing": "Under slab",
+    "new_floor_surface_required": true,
+    "concrete_slab_required": true
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Lifts, LLC.",
+    "title": "New Floor Installation for In-Ground Hydraulic Hoses",
+    "drawing_number": "016-011-057",
+    "file_name": "016-011-057",
+    "next_assembly": "016-011-056",
+    "scale": "1/16",
+    "drawn_by": "RV",
+    "date": "9/2013",
+    "sheet_size": "C-Size",
+    "tolerances": {
+      "angular": "+/- 1.5 degrees",
+      "fractional": "+/- 0.030",
+      "decimal_XX": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "In-ground hydraulic hose routing between posts",
+    "Under-slab hose installation eliminates above-ground hose runs",
+    "Compatible with multiple 2-post lift models and ML-220",
+    "Uses standard 4 inch PVC tubing for conduit",
+    "Smooth 90 degree elbows at both ends for hose protection",
+    "Standard new slab recommendation size shown"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "4 inch diameter PVC tubing to be provided by others",
+    "Smooth 90 degree elbow typical at both ends",
+    "Compatible with LC-12, LMF-12, TP-15, TP-16, TP-18, ML-220",
+    "Hoses routed under slab between column bases",
+    "Standard size new slab recommendation shown in drawing",
+    "Some text on page 1 was corrupted/garbled in the PDF"
+  ]
+}

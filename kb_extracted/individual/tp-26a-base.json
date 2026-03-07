@@ -1,0 +1,89 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/tp-26a-base.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "TP-18A / TP-26A / TP-30A",
+  "variant": "Standard Base Plate",
+  "product_type": "Two Post Inground Lift - Base Plate Drawing",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": null,
+  "dimensions": {
+    "base_plate_overall_length_inches": 47.5,
+    "base_plate_overall_width_inches": "31 1/2",
+    "base_plate_material_size": "1\" x 31 1/2 x 47 1/2",
+    "anchor_bolt_holes_diameter_inches": "1 1/4 dia burn (7 places)",
+    "anchor_hole_radius_inches": "1 1/2 rad typ (8 places)",
+    "bolt_pattern_vertical_inches": "28 1/2",
+    "bolt_pattern_horizontal_inches": "14 1/2",
+    "inner_spacing_1_inches": "7 1/8",
+    "inner_spacing_2_inches": 4.5,
+    "inner_spacing_3_inches": 5.5,
+    "inner_spacing_4_inches": 2.75,
+    "center_slot_radius": "3/16 R typ",
+    "banked_opening": "4 1/2 x 5 1/2 banked opening",
+    "edge_spacing_inches": 17,
+    "side_edge_spacing_inches": 17,
+    "vertical_spacing_1_inches": "1 1/2",
+    "horizontal_center_spacing_inches": "22 1/4 typ",
+    "inner_center_spacing_inches": "19 1/8 typ",
+    "outer_dimension_inches": "23 3/4",
+    "plate_reference_thickness_inches": "1\" REF",
+    "center_mark_spacing_inches": "35 typ",
+    "angled_dimension_degrees": 30
+  },
+  "weight": "113.27 lbs",
+  "installation_requirements": {
+    "applicable_models": ["TP-18A", "TP-26A", "TP-30A"],
+    "note": "Used on Mohawk Model TP-18A, TP-26A & TP-30A",
+    "material": "ASTM A-36 Plate",
+    "plate_dimensions": "1\" x 31 1/2 x 47 1/2",
+    "anchor_bolt_holes": "7 places, 1 1/4\" diameter burn",
+    "welding_specs": "AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "specifications": {
+    "drawing_number": "026-000-143",
+    "file_name": "G00145",
+    "part_numbers": ["032-000-020", "018-000-001"],
+    "next_assembly_numbers": ["026-000-019"],
+    "title": "Plate (TP18 & TP26)",
+    "date": "3/93",
+    "drawn_by": "dok",
+    "checked_by": "JV",
+    "scale": "1/4",
+    "sheet_size": "D-SIZE",
+    "revision": "A - Front holes were 1 1/4 dia (3) places changed to 1 1/8 dia (3) places (2/09 by dok, approved RV/rv)",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_0XX": "+/- 0.030",
+      "decimal_0XXX": "+/- 0.005"
+    }
+  },
+  "features": [
+    "Standard base plate for TP-18A, TP-26A, and TP-30A models",
+    "ASTM A-36 steel plate construction",
+    "7-point anchor bolt pattern with 1 1/4\" diameter holes"
+  ],
+  "optional_equipment": [],
+  "parts_list": [
+    {
+      "part_number": "600-000-051",
+      "description": "Base Plate for TP-18A/TP-26A/TP-30A",
+      "material": "ASTM A-36 Plate",
+      "thickness": "1\"",
+      "size": "31 1/2 x 47 1/2",
+      "weight": "113.27 lbs"
+    }
+  ],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Used on Mohawk Model TP-18A, TP-26A & TP-30A",
+    "Notice of confidential information",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications to E-70XX electrodes or E-70T1 code 5.3 flux core wire only",
+    "Larger anchor bolt holes (1 1/4\" dia) compared to TP-16/TP-18 base plate (0.88\" dia)"
+  ]
+}

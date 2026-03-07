@@ -1,0 +1,82 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/fl-25.pdf",
+  "category": "four-post-lift",
+  "document_type": "lift_data_sheet_order_form",
+  "model": "FL-25",
+  "variant": null,
+  "product_type": "four_post_track_fork_truck_lift",
+  "capacity": "25,000 lbs",
+  "dimensions": {
+    "length_with_13ft_tracks_inches": 242.625,
+    "length_with_20ft_tracks_inches": 447.0625,
+    "width_inches": 150.1875,
+    "height_inches": 101.5,
+    "standard_inside_track_dimension_inches": 48
+  },
+  "weight": null,
+  "installation_requirements": {
+    "concrete_floor_minimum_thickness_inches": 4.5,
+    "concrete_floor_minimum_psi": 4000,
+    "power_supply_options": [
+      "208-220/230 VAC, 1 Phase, 60 Hz (Standard)",
+      "440-460/480 VAC, 3 Phase, 50 Hz",
+      "Other (custom voltage - may result in upcharge)"
+    ],
+    "electrical_connection": "Final electrical connection is responsibility of electrical contractor; disconnect switches, main fuses, main power leads NOT provided by Mohawk",
+    "pneumatic_power": "Responsibility of mechanical contractor to final designated point at vehicle lift"
+  },
+  "specifications": {
+    "track_length_standard_feet": 13,
+    "track_length_max_feet": 20,
+    "track_length_note": "Above is not tip-to-tip length",
+    "approach_ramp_standard_feet": 5,
+    "approach_ramp_note": "Other lengths available (special)",
+    "lift_orientations": ["A", "B", "C", "D"],
+    "orientation_note": "Power unit and toprail on same side",
+    "crossrail_options": {
+      "standard": "Standard length with tracks set at 48 inches inside",
+      "shorter_options": ["-12 inches", "-24 inches", "Other up to +18 inches max"],
+      "track_positioning": ["Centered", "Left", "Right"],
+      "custom_inside_dimension": "Set to minimum inside tire dimension of all vehicles"
+    },
+    "track_notes": {
+      "mainside": "Fixed for standard crossrails",
+      "offside": "Adjustable in field for standard crossrails",
+      "fixed_when": "Tracks become fixed when RJ-25, JS-25, third wheel option, or oil drain pan is used"
+    }
+  },
+  "features": [
+    "FL-25 fork truck lift data sheet / order configuration form",
+    "4 orientation options (A, B, C, D) for power unit placement",
+    "13-foot standard track length (up to 20 ft special)",
+    "5-foot standard approach ramp",
+    "48-inch standard inside track dimension",
+    "Adjustable crossrail options",
+    "Standard 1-phase or optional 3-phase power"
+  ],
+  "optional_equipment": [
+    { "item": "RJ-15 Electric/Hydraulic Jacking Beam", "capacity_lbs": 15000, "note": "48 inch inside tracks only" },
+    { "item": "RJ-25 Electric/Hydraulic Jacking Beam", "capacity_lbs": 25000, "note": "48 inch inside tracks only" },
+    { "item": "JP-15 Rolling Jacking Platform", "capacity_lbs": 15000, "note": "48 inch inside tracks only" },
+    { "item": "JP-25 Rolling Jacking Platform", "capacity_lbs": 25000, "note": "48 inch inside tracks only" },
+    { "item": "Special Width Jacking Platform", "note": "Min 18 inches, max 48 inches" },
+    { "item": "Drive Thru Ramps", "note": "Adds to standard length" },
+    { "item": "Lights in Tracks (LED)" },
+    { "item": "Oil Drain Pan", "note": "48 inch inside tracks only" },
+    { "item": "Extra Base Plates for Shimming (1/2 inch thick)", "note": "Priced per unit" },
+    { "item": "120 VAC Duplex Outlet at Power Unit" },
+    { "item": "Third Wheel Option", "options": ["18 inch wide", "24 inch wide"], "note": "Needed only when lifting fork trucks with center tires; requires inside track dimension specification" }
+  ],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Some option combinations are not compatible",
+    "Non-standard power options may result in an upcharge",
+    "All lift options checked for purchase must be listed on purchase order as separate line items",
+    "Vehicle data forms should be provided for all vehicles to be serviced",
+    "If no data sheets provided, Mohawk takes no responsibility for incompatibility and payment terms are 25% down, remainder before shipping",
+    "Inside track dimension determined by minimum inside tire dimension of all vehicles raised",
+    "Third wheel options needed only when lifting fork trucks with center tires"
+  ]
+}

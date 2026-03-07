@@ -1,0 +1,64 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/two-post-lifts/LMF-12-3SA.pdf",
+  "category": "two-post-lift",
+  "document_type": "engineering_drawing",
+  "model": "LMF-12",
+  "variant": "3 Stage Arms",
+  "product_type": "2-Post Lift with 3-Stage Arms",
+  "capacity": null,
+  "dimensions": {
+    "overall_width": "151.5 inches (3.85 m)",
+    "between_posts": "Adjustable from 114-120 inches",
+    "column_height_std": "180 inches (4.57 m) STD",
+    "carriage_height": "103 inches (2.62 m)",
+    "pad_height": "4.5 inches (0.11 m)",
+    "arm_width_inner": "72.5 inches (1.84 m)",
+    "arm_width_mid": "76.5 inches (1.94 m)",
+    "arm_width_outer": "86.5 inches (2.20 m)",
+    "arm_reach_min": "36.3 inches MIN (0.92 m)",
+    "arm_reach_max": "61 inches MAX (1.69 m)",
+    "arm_base_width": "65.2 inches (1.66 m)",
+    "overall_arm_span": "130.3 inches (3.31 m)"
+  },
+  "weight": "N/A",
+  "installation_requirements": {
+    "post_spacing": "Adjustable from 114-120 inches between posts",
+    "overhead_lines": "Shown with adjustable height over-head steel hydraulic lines"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "title": "LMF-12: 3 Stage Arms",
+    "drawing_number": "ZZ1336",
+    "file_name": "ZZ1336",
+    "drawn_by": "G. Gore",
+    "date": "08/11",
+    "sheet_size": "B-Size",
+    "units": "Inches [Meters]",
+    "tolerances": {
+      "angular": "+/- 1 degree",
+      "fractional": "+/- 0.030",
+      "decimal_XX": "+/- 0.030",
+      "decimal_XXX": "+/- 0.005"
+    },
+    "welding_specs": "AWS specifications to E-70xx electrodes or E-70T1 Code 5.3 flux core wire only",
+    "surface_finish": "125 RMS unless otherwise specified"
+  },
+  "features": [
+    "3-stage swing arm configuration for extended reach",
+    "Adjustable post spacing from 114-120 inches",
+    "Adjustable height over-head steel hydraulic lines",
+    "Symmetrical 2-post lift design",
+    "Greater arm reach than 2-stage variant (61 inches max vs 56 inches)"
+  ],
+  "optional_equipment": [],
+  "parts_list": [],
+  "certifications": [],
+  "safety_features": [],
+  "notes": [
+    "Specifications subject to change without notice",
+    "Remove all sharp corners & edges",
+    "Unless otherwise specified, surface finish to be 125 RMS",
+    "Welding medium shall conform to AWS specifications",
+    "Units: inches [meters]"
+  ]
+}

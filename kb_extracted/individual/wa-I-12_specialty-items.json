@@ -1,0 +1,80 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/specialty-items/wa-I-12.pdf",
+  "category": "specialty-item",
+  "document_type": "product_specification_sheet",
+  "model": "WA-I / WA-12",
+  "variant": "Wheel Engaging Adaptors",
+  "product_type": "Wheel Engaging Adaptors for 2-Post Lifts",
+  "capacity": "WA-I: 6,000 lbs (1,500 lbs per arm); WA-12: 9,000 lbs (2,250 lbs per arm)",
+  "dimensions": {
+    "top_view_system_IA_with_120_inch_between_posts": {
+      "max_width": "54.9 inches (1.39 m)",
+      "min_width": "36.3 inches (0.92 m)",
+      "length": "117.8 inches (2.99 m)",
+      "rear_measurement": "58.9 inches (1.50 m)"
+    },
+    "tire_accommodation": "13 inches through 16 inches tires",
+    "chart_1_standard_installation": {
+      "description": "Wheel Base vs Outside Tire Width for System I, LMF-12 & TP-15",
+      "wheel_base_range": "80 to 120 inches",
+      "tire_width_range": "0 to 100 inches",
+      "also_with_12_inch_posts": "Extended range available"
+    },
+    "chart_2_longer_arms": {
+      "description": "Wheel Base vs Outside Tire Width with 5 inch longer arms and 5 inch longer sliders for LMF-12 & TP-15",
+      "wheel_base_range": "80 to 140 inches",
+      "tire_width_range": "0 to 100 inches",
+      "also_with_12_inch_posts": "Extended range available"
+    }
+  },
+  "weight": null,
+  "installation_requirements": {
+    "WA-I_compatible_models": ["Mohawk System I Lifts"],
+    "WA-12_compatible_models": ["Mohawk LMF-12", "Mohawk TP-15"],
+    "attachment_method": "Quickly attach to the ends of the swing arms"
+  },
+  "specifications": {
+    "manufacturer": "Mohawk Resources Ltd.",
+    "address": "P.O. Box 110, Amsterdam, NY 12010",
+    "phone_toll_free": "1-800-833-2006",
+    "phone_local": "(518) 842-1431",
+    "fax": "(518) 842-1289",
+    "website": "www.mohawklifts.com",
+    "gsa_contract": "#GS07F-7099B",
+    "sin_numbers": "253-22, 253-23, 253-38",
+    "cage_code": "OC714",
+    "duns_number": "10-128-9916",
+    "revision": "REV. 4/98",
+    "WA-I": {
+      "capacity": "6,000 lbs total (1,500 lbs per arm)",
+      "designed_for": "Mohawk System I Lifts"
+    },
+    "WA-12": {
+      "capacity": "9,000 lbs total (2,250 lbs per arm)",
+      "designed_for": "All Mohawk LMF-12 or TP-15 Lifts"
+    }
+  },
+  "features": [
+    "Wheel engaging adaptors for quick and easy vehicle setup",
+    "Especially useful for vehicles with hard to reach frames",
+    "Accommodates 13 inch through 16 inch tires",
+    "Quickly attach to the ends of the swing arms",
+    "Compatible with standard installation width and longer arm configurations",
+    "Operating range charts provided for wheel base vs outside tire width"
+  ],
+  "optional_equipment": [
+    "5 inch longer arms and 5 inch longer sliders (extends wheel base range to 140 inches)"
+  ],
+  "parts_list": [],
+  "certifications": [
+    "GSA Contract (#GS07F-7099B)",
+    "ALI Member (note: WA-I and WA-12 are currently not ALI certified per REV 4/98)"
+  ],
+  "safety_features": [],
+  "notes": [
+    "WA-I and WA-12 are currently not ALI certified (as of REV 4/98)",
+    "Specifications subject to change without notice",
+    "Top view shown with System IA with 120 inches between posts",
+    "Shaded areas on charts indicate operating ranges of WA-I and WA-12"
+  ]
+}

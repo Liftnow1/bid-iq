@@ -1,0 +1,136 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/four-post-lifts/TR-SERIES.pdf",
+  "category": "four-post-lift",
+  "document_type": "lift_data_sheet_and_order_configuration",
+  "model": "TR-Series",
+  "variant": "All TR models (TR-33, TR-35, TR-50, TR-75, TR-50-H, TR-75-H, TR-50-W, TR-35-1, TR-33-1)",
+  "product_type": "four_post_track_lift",
+  "capacity": "33,000 to 75,000 lbs depending on model",
+  "dimensions": {
+    "standard_width_narrow_model_inches": 173.5,
+    "standard_width_narrow_model_feet": "14 ft 5.5 in",
+    "standard_width_wider_model_inches": null,
+    "track_width_narrow_inches": 24,
+    "track_width_wider_inches": 32,
+    "wider_tracks_note": "32 inch for wider models, 48 inch standard between tracks",
+    "overall_length_with_25ft_tracks_orientation_A_feet": "37 ft 0.25 in",
+    "overall_length_with_25ft_tracks_orientation_A_formula": "L + 12 ft 0.25 in",
+    "overall_length_with_25ft_tracks_orientation_B_feet": "27 ft 10.5 in",
+    "overall_length_with_25ft_tracks_orientation_B_formula": "L + 2 ft 10.5 in",
+    "overall_length_with_25ft_tracks_ref_feet": "25 ft 11 in",
+    "overall_length_with_25ft_tracks_ref_formula": "L + 11 in",
+    "approach_ramp_length_ref_inches": 109.75,
+    "approach_ramp_length_ref_feet": "9 ft 1.75 in"
+  },
+  "weight": null,
+  "installation_requirements": {
+    "power_note": "Power to lift and 60 PSI pneumatic air (for lift locks) to be brought into top back of lift control console",
+    "separate_120vac": "A separate 120 VAC power supply is required to be brought to Post #1 (Post #2 only) for track lights and airline outlet",
+    "air_supply": "60 PSI to be brought to Post #2 (Post #2 only) for track lights and airline option",
+    "electrical_connection": "Final electrical connection to local/national code is responsibility of electrical contractor; more than one point of connection may be required",
+    "electrical_not_provided": "Disconnect switches, main fuses, and main power leads are NOT provided by Mohawk",
+    "pneumatic_power": "Responsibility of mechanical contractor to final designated point at vehicle lift"
+  },
+  "specifications": {
+    "models_table": [
+      { "model": "TR-33", "capacity_lbs": 33000, "track_width_inches": 24 },
+      { "model": "TR-35", "capacity_lbs": 35000, "track_width_inches": 24 },
+      { "model": "TR-50", "capacity_lbs": 50000, "track_width_inches": 24 },
+      { "model": "TR-75", "capacity_lbs": 75000, "track_width_inches": 24 },
+      { "model": "TR-50-H", "capacity_lbs": 50000, "track_width_inches": 24 },
+      { "model": "TR-75-H", "capacity_lbs": 75000, "track_width_inches": 24 },
+      { "model": "TR-50-W", "capacity_lbs": 50000, "track_width_inches": 32 },
+      { "model": "TR-35-1", "capacity_lbs": 35000, "track_width_inches": 24 },
+      { "model": "TR-33-1", "capacity_lbs": 33000, "track_width_inches": 24 }
+    ],
+    "power_supply_options": [
+      { "voltage": "208-220 VAC", "phase": 3, "cycle": 60, "hp": null, "fl_amps": null },
+      { "voltage": "230-240 VAC", "phase": 3, "cycle": 60, "hp": null, "fl_amps": null },
+      { "voltage": "440-480 VAC", "phase": 3, "cycle": 60, "hp": 10, "fl_amps": 36.0 },
+      { "voltage": null, "phase": 1, "cycle": 10, "hp": 40.0, "fl_amps": null }
+    ],
+    "console_options": ["Stationary", "Portable"],
+    "console_caster_kit": "Available (added as option)",
+    "lift_orientations": ["A (recommended)", "B", "C", "D"],
+    "track_length_options_feet": [20, 25, 30],
+    "standard_track_length_feet": 25,
+    "approach_ramp_options": {
+      "standard_length_feet": 9,
+      "ramp_type": ["Fixed", "Pivoting"]
+    },
+    "control_console_mounting": "On castors (optional) or stationary",
+    "drawing_number": "ZZ708",
+    "drawing_date": "11/2023",
+    "revision": "A (4/17)"
+  },
+  "features": [
+    "TR-Series four-post track lift family covering 33,000 to 75,000 lb capacities",
+    "Multiple model variants including standard, heavy-duty (-H), wide (-W), and single-phase (-1)",
+    "4 console-lift orientation options (A, B, C, D); Mohawk recommends orientation A",
+    "Stationary or portable console with optional caster kit",
+    "20, 25, or 30-foot track length options (25-foot standard)",
+    "Fixed or pivoting approach ramps",
+    "9-foot standard approach ramp",
+    "24-inch or 32-inch track widths available",
+    "Lifts shown with standard 25-foot runways"
+  ],
+  "optional_equipment": [
+    {
+      "item": "RJ-50 Electric/Hydraulic Jacking Beam",
+      "variants": [
+        "For TR-33, rated 23,000 lbs (ALI certified)",
+        "For TR-35, rated 24,500 lbs (ALI certified)",
+        "For TR-50, rated 35,000 lbs (ALI certified)",
+        "For TR-75, rated 50,000 lbs (ALI certified)"
+      ]
+    },
+    {
+      "item": "Lights & 110 VAC Outlets in Tracks (See Note 2)"
+    },
+    {
+      "item": "Drive Thru Ramps"
+    },
+    {
+      "item": "Air x 1000 Tire Dolly"
+    },
+    {
+      "item": "Rolling Oil Drain Pan"
+    },
+    {
+      "item": "Alignment Cutouts (choose one below)",
+      "options": [
+        "1-1/2 inch x 4 inch ovals (Non-ALI)",
+        "Set of 25-27/32 inch turntables"
+      ]
+    },
+    {
+      "item": "Airlines Plumbed in Tracks (Non-ALI)"
+    },
+    {
+      "item": "Extra Base Plates (for inadequate floors)",
+      "note": "See Note 3; add to drivers side to pass spec"
+    },
+    {
+      "item": "Console Caster Kit"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL certification referenced for jacking beams",
+    "Some options may invalidate ALI/ETL certification - consult Mohawk representative"
+  ],
+  "safety_features": [],
+  "notes": [
+    "Power to lift and 60 PSI pneumatic air (for lift locks) to be brought into top back of lift control console",
+    "A separate 120 VAC power supply required to Post #1 for track lights and airline outlet",
+    "Air supply of 60 PSI to Post #2 for track and airline options",
+    "Some option combinations are NOT available",
+    "Some options may invalidate ALI/ETL certification of lift - consult a Mohawk representative",
+    "Vehicle data forms must be provided for vehicles intended for this lift",
+    "Fill out data forms for largest, smallest, and lowest underclearance vehicles",
+    "Lifts shown with standard 25-foot runways",
+    "Power unit location per customer's spec; Mohawk recommends orientation A",
+    "Manufacturer: Mohawk Lifts LLC",
+    "Drawing ZZ708, dated 11/2023, Rev A (4/17)"
+  ]
+}

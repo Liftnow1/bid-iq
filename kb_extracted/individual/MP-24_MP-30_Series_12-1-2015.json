@@ -1,0 +1,88 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/operation-manuals/MP-24_MP-30 Series_12-1-2015.pdf",
+  "category": "operation-manual",
+  "document_type": "installation_operation_maintenance_manual",
+  "model": "MP-24 / MP-30",
+  "variant": "24,000 and 30,000 lb per column mobile column lifts",
+  "product_type": "mobile_column_lift",
+  "capacity": "MP-24: 24,000 lbs per column; MP-30: 30,000 lbs per column; up to 240,000 lbs total",
+  "dimensions": {
+    "lifting_stroke_inches": 67,
+    "fork_length_options_inches": [15, 22],
+    "tire_diameter_max_inches": 48,
+    "wheel_diameter_range_inches": "13 to 24",
+    "column_mast_width_inches": 5.75,
+    "steering_wheel_diameter_inches": 6.625,
+    "rolling_wheel_diameter_inches": 6
+  },
+  "weight": {},
+  "installation_requirements": {
+    "no_permanent_installation": true,
+    "surface": "Level shop floor",
+    "power_options": "220V or 440V AC, or 24V DC"
+  },
+  "specifications": {
+    "mp24_capacity_per_column_lbs": 24000,
+    "mp30_capacity_per_column_lbs": 30000,
+    "max_total_capacity_8_columns_lbs": 240000,
+    "lifting_stroke_inches": 67,
+    "locking_positions": 19,
+    "lock_spacing_inches": 3,
+    "power_options": ["220V AC", "440V AC", "24V DC"],
+    "column_mast_material": "5-3/4 inch forklift mast sections",
+    "bearing_type": "Double sealed self-lubricating cylindrical roller bearings",
+    "column_configurations": [2, 4, 6, 8],
+    "manual_revision_date": "12/1/2015"
+  },
+  "features": [
+    "24,000 or 30,000 lb capacity per column",
+    "67-inch lifting stroke",
+    "19 locking positions spaced every 3 inches",
+    "Adjustable lifting forks: 15-inch or 22-inch lengths",
+    "Fits wheels from 13 to 24 inches, tires up to 48 inches diameter",
+    "Mix and match capacities for various axle weights",
+    "Available in AC or DC power configurations",
+    "Each column operates individually, in pairs, or synchronized",
+    "Available in sets of 2, 4, 6, or 8 columns",
+    "5-3/4 inch forklift mast column construction",
+    "6 inch rubber coated steel wheels (retractable)",
+    "Twin 6-5/8 inch rubber coated steering wheels",
+    "Total lift capacity up to 240,000 lbs with 8 columns"
+  ],
+  "optional_equipment": [
+    {
+      "item": "22-inch Lifting Forks",
+      "description": "For flotation tires or super-singles"
+    },
+    {
+      "item": "Wider Carriages",
+      "description": "For expanded vehicle compatibility"
+    },
+    {
+      "item": "Auto Frame Adapter",
+      "description": "For passenger vehicle side-lifting"
+    },
+    {
+      "item": "Touchscreen Control",
+      "description": "Advanced display with status, height, lock, inspection, and usage data"
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ALI/ETL Certified",
+    "Meets nationally recognized safety standard for vehicle lifts",
+    "Made in the USA"
+  ],
+  "safety_features": [
+    "19-position mechanical safety locks every 3 inches",
+    "Ability to park load on mechanical locks",
+    "Retractable rolling wheels",
+    "Synchronized operation across all columns"
+  ],
+  "notes": [
+    "Manual revision date: 12/1/2015",
+    "Combined manual covers MP-24 and MP-30 models",
+    "Higher capacity columns than MP-18 series",
+    "PDF stored as Git LFS pointer - actual binary content unavailable at extraction time"
+  ]
+}
