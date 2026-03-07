@@ -1,0 +1,91 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/parallelogram-lifts/RJ-50-AH-Parallel.pdf",
+  "category": "parallelogram-lift",
+  "document_type": "specification-drawing",
+  "model": "RJ-50-AH-37500-P",
+  "variant": "Parallelogram Version",
+  "product_type": "Track Assisted Jacking Beam (Air/Hydraulic)",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": "50,000 lbs (37,500 lbs max for parallelogram rated capacity)",
+  "dimensions": {
+    "max_height_in": 59.25,
+    "max_width_in": 32.00,
+    "min_length_in": 43.50,
+    "min_height_in": 12.00,
+    "cylinder_stroke_ref_in": 9.375,
+    "yoke_pad_height_in": 2.50,
+    "pad_spacing_lower_in": 4.375,
+    "pad_spacing_upper_in": 11.625,
+    "pad_spacing_mid_in": 11.625,
+    "base_height_in": 7.875,
+    "base_offset_in": 3.875,
+    "holes_per_side": 5
+  },
+  "weight": {
+    "weight_lbs": 854
+  },
+  "installation_requirements": {
+    "installation_type": "Track assisted - runs on parallelogram lift runway rails",
+    "compatible_with": "Mohawk parallelogram lifts (75K+ capacity lifts)"
+  },
+  "specifications": {
+    "maximum_load_capacity_lbs": 50000,
+    "parallelogram_rated_capacity_lbs": 37500,
+    "slider_arm_re_rated_capacity_lbs": 15000,
+    "capacity_note": "Capacity dependent on lift capacity",
+    "power_type": "Air/Hydraulic",
+    "drawing_number": "B",
+    "file_name": "RJ-50-AH-37500-P SPEC",
+    "title": "RJ Assy for Parallelogram",
+    "date": "07/12",
+    "revision_A": {"description": "Addition of ALCTV certification", "date": "04/01/2014"},
+    "revision_B": {"description": "ALI verification logo", "date": "12/1/2015"}
+  },
+  "standard_accessories": [
+    {"qty": 2, "description": "Yoke pads (standard)"},
+    {"qty": 2, "description": "Flat pads (standard)"},
+    {"qty": 2, "description": "5 inch height adapters (standard)"},
+    {"qty": 2, "description": "7 1/2 inch height adapters (standard)"},
+    {"qty": 2, "description": "10 inch height adapters (standard)"}
+  ],
+  "features": [
+    "Air/hydraulic powered jacking beam for parallelogram lifts",
+    "Track assisted - rolls along parallelogram lift runways",
+    "50,000 lb capacity (37,500 lb rated for parallelogram version)",
+    "5 holes per side for versatile pad positioning",
+    "Standard yoke pads and flat pads included",
+    "Height adapters in 3 sizes (5 inch, 7 1/2 inch, 10 inch) included",
+    "Optional slider arm attachment available (re-rated to 15,000 lbs)",
+    "ALI/ALCTV certified",
+    "UL Standard 201 certified for garage equipment"
+  ],
+  "optional_equipment": [
+    {
+      "name": "Slider Arm Attachment",
+      "description": "Re-rated to 15,000 lb capacity when slider arm attachment is used",
+      "capacity_lbs": 15000
+    }
+  ],
+  "parts_list": [],
+  "certifications": [
+    "ANSI/ALI ALCTV-2011 - Automotive Lift Construction",
+    "UL Standard 201 - Garage Equipment",
+    "Tested and certified by Nationally Recognized Testing Laboratory (NRTL)",
+    "ALI Certified and Validated"
+  ],
+  "safety_features": [
+    "Tested and certified by NRTL to UL 201 and ANSI/ALI ALCTV-2011",
+    "Capacity re-rating when optional slider arm used (15,000 lbs vs 50,000 lbs)",
+    "Capacity dependent on lift capacity"
+  ],
+  "notes": [
+    "RJ-50-AH-37500-P Series Air/Hydraulic Jacking Beam for parallelogram lifts",
+    "Parallelogram version rated at 37,500 lbs maximum capacity",
+    "Capacity dependent on the capacity of the lift it is installed on",
+    "For use with 75K+ capacity parallelogram lifts",
+    "Weight: 854 lbs",
+    "Drawing created 07/12, revised for ALCTV certification 04/01/2014 and ALI verification logo 12/1/2015",
+    "Single page large-format engineering drawing (D-size)",
+    "Standard accessories include yoke pads, flat pads, and height adapters in 3 sizes"
+  ]
+}

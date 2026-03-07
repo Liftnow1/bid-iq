@@ -1,0 +1,152 @@
+{
+  "source_file": "/home/user/bid-iq/data/product_data/mohawk/parallelogram-lifts/Parallelogram_L-Size.pdf",
+  "category": "parallelogram-lift",
+  "document_type": "data-verification-form",
+  "model": "Parallelogram Series (All Models)",
+  "variant": "Flush Mount (F) / Surface Mount (S)",
+  "product_type": "Parallelogram Lift",
+  "manufacturer": "Mohawk Resources Ltd.",
+  "capacity": "36,000 to 100,000 lbs (varies by model)",
+  "dimensions": {
+    "runway_width_in": 32.25,
+    "runway_spacing_in": 45,
+    "front_elevation_height_in": 13,
+    "front_elevation_max_width_in": 63,
+    "rear_translation_during_articulation_in": 36.125,
+    "rear_approach_ramp_in": 100,
+    "example_model_50_26_S_platform_length_in": 312,
+    "example_model_50_26_S_platform_length_ft": 26
+  },
+  "weight": null,
+  "available_models": [
+    {"model": "36-28-X", "capacity_lbs": 36000, "track_length_ft": 28},
+    {"model": "38-26-X", "capacity_lbs": 38000, "track_length_ft": 26},
+    {"model": "40-28-X", "capacity_lbs": 40000, "track_length_ft": 28},
+    {"model": "40-30-X", "capacity_lbs": 40000, "track_length_ft": 30},
+    {"model": "40-32-X", "capacity_lbs": 40000, "track_length_ft": 32},
+    {"model": "40-35-X", "capacity_lbs": 40000, "track_length_ft": 35},
+    {"model": "45-30-X", "capacity_lbs": 45000, "track_length_ft": 30},
+    {"model": "45-32-X", "capacity_lbs": 45000, "track_length_ft": 32},
+    {"model": "45-35-X", "capacity_lbs": 45000, "track_length_ft": 35},
+    {"model": "50-26-X", "capacity_lbs": 50000, "track_length_ft": 26},
+    {"model": "50-30-X", "capacity_lbs": 50000, "track_length_ft": 30},
+    {"model": "50-32-X", "capacity_lbs": 50000, "track_length_ft": 32},
+    {"model": "50-35-X", "capacity_lbs": 50000, "track_length_ft": 35},
+    {"model": "50-38-X", "capacity_lbs": 50000, "track_length_ft": 38},
+    {"model": "50-42-X", "capacity_lbs": 50000, "track_length_ft": 42},
+    {"model": "50-44-X", "capacity_lbs": 50000, "track_length_ft": 44},
+    {"model": "50-48-X", "capacity_lbs": 50000, "track_length_ft": 48},
+    {"model": "75-26-X", "capacity_lbs": 75000, "track_length_ft": 26},
+    {"model": "75-30-X", "capacity_lbs": 75000, "track_length_ft": 30},
+    {"model": "75-32-X", "capacity_lbs": 75000, "track_length_ft": 32},
+    {"model": "75-35-X", "capacity_lbs": 75000, "track_length_ft": 35},
+    {"model": "75-38-X", "capacity_lbs": 75000, "track_length_ft": 38},
+    {"model": "75-42-X", "capacity_lbs": 75000, "track_length_ft": 42},
+    {"model": "75-44-X", "capacity_lbs": 75000, "track_length_ft": 44},
+    {"model": "75-48-X", "capacity_lbs": 75000, "track_length_ft": 48},
+    {"model": "100-42-X", "capacity_lbs": 100000, "track_length_ft": 42},
+    {"model": "100-44-X", "capacity_lbs": 100000, "track_length_ft": 44},
+    {"model": "100-48-X", "capacity_lbs": 100000, "track_length_ft": 48}
+  ],
+  "installation_styles": {
+    "surface_mount": "Surface mounted with approach ramps",
+    "flush_mount_options": [
+      "Dual Pocket with Jack Cavity",
+      "Dual Pocket",
+      "Single Pocket",
+      "Single Pocket with Walkway"
+    ]
+  },
+  "power_supply_options": [
+    "208-220 VAC, 3 Phase, 60 Hz (Standard)",
+    "230-240 VAC, 3 Phase, 60 Hz",
+    "440-480 VAC, 3 Phase, 60 Hz",
+    "575 VAC (Special)"
+  ],
+  "specifications": {
+    "certification": "ALI Standard ALCTV (all models certified)",
+    "drawing_number": "ZZ730",
+    "date": "4/02",
+    "revision": "12/15"
+  },
+  "optional_equipment": [
+    {
+      "name": "RJ-50-AH-#-P Jacking Beam",
+      "capacity_variants": [
+        {"capacity_lbs": 25000, "for_lifts": "35K-38K lifts"},
+        {"capacity_lbs": 28000, "for_lifts": "40K lifts"},
+        {"capacity_lbs": 31500, "for_lifts": "45K lifts"},
+        {"capacity_lbs": 35000, "for_lifts": "50K lifts"},
+        {"capacity_lbs": 37500, "for_lifts": "75K+ lifts"}
+      ]
+    },
+    {"name": "Drive Thru Ramps"},
+    {"name": "TD-1000-P or TD-2000 Tire Dolly, Counterbalanced"},
+    {"name": "Track Lights"},
+    {"name": "Galvanized Option (consult Mohawk)"},
+    {"name": "Wash Bay Kit"},
+    {"name": "Tape Switch (consult Mohawk factory first)"}
+  ],
+  "replacement_parts": [
+    {"part_number": "P-800-A-022", "description": "Wash Bay Kit (4 Leg Lift)", "material": "Stainless Steel base & stringer plates, anchors & special paint"},
+    {"part_number": "P-800-A-023", "description": "Wash Bay Kit (6 Leg Lift)", "material": "Stainless Steel base & stringer plates, anchors & special paint"},
+    {"part_number": "P-800-A-024", "description": "Wash Bay Kit (8 Leg Lift)", "material": "Stainless Steel base & stringer plates, anchors & special paint"},
+    {"part_number": "P-800-A-025", "description": "Wash Bay Kit (4 Leg Lift) - Grouting Recommended", "material": "Stainless Steel base & stringer plates, anchors & special paint"},
+    {"part_number": "P-800-A-026", "description": "Wash Bay Kit (6 Leg Lift) - Grouting Recommended", "material": "Stainless Steel base & stringer plates, anchors & special paint"},
+    {"part_number": "P-800-A-027", "description": "Wash Bay Kit (8 Leg Lift) - Grouting Recommended", "material": "Stainless Steel base & stringer plates, anchors & special paint"},
+    {"part_number": "P-060-P-002", "description": "Base Plate, 1/2 inch Thick", "material": "Carbon Steel"},
+    {"part_number": "P-060-P-004", "description": "Stringer Plate, 1/2 inch Thick", "material": "Carbon Steel"},
+    {"part_number": "600-740-001", "description": "Horseshoe Shim, 1/16 inch Thick", "color": "Blue"},
+    {"part_number": "600-740-002", "description": "Horseshoe Shim, 1/8 inch Thick", "color": "Red"},
+    {"part_number": "600-740-003", "description": "Horseshoe Shim, 1/4 inch Thick", "color": "Black"},
+    {"part_number": "600-710-010", "description": "Steel Washer, 1 inch DIA x 3/16 inch Thick"},
+    {"part_number": "600-670-002", "description": "Anchor Bolt, 3/4 DIA x 5 inch LG (Standard)"},
+    {"part_number": "600-670-003", "description": "Anchor Bolt, 3/4 DIA x 6 inch LG"},
+    {"part_number": "600-670-004", "description": "Anchor Bolt, 3/4 DIA x 8 1/2 inch LG"},
+    {"part_number": "600-670-011", "description": "Anchor Bolt, 3/4 DIA x 5 1/2 inch LG", "material": "Stainless Steel"},
+    {"part_number": "P-060-P-006", "description": "Base Plate, 1/2 inch Thick", "material": "Stainless Steel"},
+    {"part_number": "P-060-P-007", "description": "Stringer Plate, 1/2 inch Thick", "material": "Stainless Steel"}
+  ],
+  "installation_requirements": {
+    "shimming_note": "If shimming exceeds 1/2 inch, base plates recommended (additional charge)",
+    "electrical_connection": "Final electrical connection is responsibility of electrical contractor; disconnect switches, main fuses, and main power leads not provided by Mohawk",
+    "pneumatic_power": "Responsibility of mechanical contractor to final designated point at vehicle lift"
+  },
+  "site_requirements": {
+    "data_needed": [
+      "Overall bay length",
+      "Slope in floor (lengthwise)",
+      "Overall bay width",
+      "Slope in floor (widthwise)",
+      "Overall bay height",
+      "Overhead obstructions",
+      "Maximum underground conduit length from console to lift",
+      "Concrete floor thickness and strength (PSI)",
+      "Vehicle data forms (weight, tire diameter, ground clearance, dimensions)"
+    ]
+  },
+  "features": [
+    "Full parallelogram lift product line data verification and order form",
+    "Covers 28 model configurations from 36,000 to 100,000 lbs capacity",
+    "Track lengths from 26 to 48 feet",
+    "Both flush mount and surface mount installation options",
+    "All models ALI/ALCTV certified",
+    "Multiple power supply voltage options",
+    "Wash bay kit available in stainless steel",
+    "Vehicle data form included for proper sizing verification"
+  ],
+  "certifications": [
+    "ALI Standard ALCTV (all models)"
+  ],
+  "safety_features": [],
+  "notes": [
+    "X in model number denotes F (Flush Mount) or S (Surface Mount)",
+    "Electrical and pneumatic power for lift to be brought into lift control console",
+    "Some option combinations are not available",
+    "Specifications subject to change without notice",
+    "All lift options checked for purchase must be listed on purchase order as separate line items",
+    "Mohawk Resources Ltd., PO Box 110, Amsterdam, NY 12010, Phone: 1-800-833-2006 or 518-842-1431, Fax: 518-842-1289",
+    "Consult Mohawk factory first for tape switch and other special options",
+    "Includes truck data form for dual axle rear vehicles for proper sizing"
+  ]
+}
