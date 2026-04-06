@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 
 interface Message {
   role: "user" | "assistant";
@@ -60,12 +61,20 @@ export default function Home() {
   return (
     <main className="flex flex-col h-screen max-w-4xl mx-auto">
       {/* Header */}
-      <div className="px-6 py-8 border-b border-gray-800">
-        <h1 className="text-3xl font-bold">Bid IQ</h1>
-        <p className="text-gray-400 mt-1">
-          Mohawk Lifts Knowledge Base — Ask anything about products, specs,
-          installation, and more
-        </p>
+      <div className="px-6 py-8 border-b border-gray-800 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Bid IQ</h1>
+          <p className="text-gray-400 mt-1">
+            Mohawk Lifts Knowledge Base — Ask anything about products, specs,
+            installation, and more
+          </p>
+        </div>
+        <Link
+          href="/knowledge-base"
+          className="text-sm text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-4 py-2 rounded-lg transition-colors"
+        >
+          Manage Knowledge Base
+        </Link>
       </div>
 
       {/* Messages */}
