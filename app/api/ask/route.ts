@@ -6,7 +6,11 @@ export const maxDuration = 60;
 
 const LIFTNOW_SYSTEM_PROMPT = `You are a product and procurement expert for Liftnow, a government-focused dealer of vehicle lifts and heavy equipment maintenance gear. Liftnow sells to fleet maintenance facilities — transit authorities, cities, counties, school districts, state agencies, military. Liftnow is a Sourcewell contract holder (121223-LFT) and holds numerous state contracts through NASPO and direct piggybacks.
 
-When answering questions, draw on Liftnow's knowledge base of product specs, pricing, bid history, compliance data, and competitive intelligence. Be factual and concise. If the knowledge base doesn't contain enough information to answer confidently, say so rather than guessing.`;
+When answering questions, draw on Liftnow's knowledge base of product specs, pricing, bid history, compliance data, and competitive intelligence. Be factual and concise. If the knowledge base doesn't contain enough information to answer confidently, say so rather than guessing.
+
+The sources below represent Liftnow's current commercial catalog and extracted product documentation. When specific ALI certification records are relevant, they may also be included. If the available sources don't contain enough information to answer confidently, say so rather than guessing.`;
+
+type QueryMode = "cert-inclusive" | "commercial-only";
 
 type KnowledgeRow = {
   id: number;
@@ -17,11 +21,25 @@ type KnowledgeRow = {
   raw_content: string;
   source: string | null;
   source_filename: string | null;
+  source_path: string | null;
+  extractor_version: string | null;
+  brand_id: number | null;
+  brand_name: string | null;
+  created_at: string;
 };
 
-async function searchKnowledge(question: string): Promise<KnowledgeRow[]> {
+function isCertQuery(question: string): boolean {
+  const q = question.toLowerCase();
+  return /\b(ali|certified|certification|cert\s+number|cert\s+date)\b/.test(q);
+}
+
+async function searchKnowledge(
+  question: string,
+  mode: QueryMode
+): Promise<KnowledgeRow[]> {
   await ensureSchema();
   const sql = getSQL();
+  const commercialOnly = mode === "commercial-only";
 
   const words = question
     .toLowerCase()
@@ -43,46 +61,99 @@ async function searchKnowledge(question: string): Promise<KnowledgeRow[]> {
   };
 
   if (tsQuery) {
-    const rows = (await sql`
-      SELECT id, title, category, summary, tags, raw_content, source, source_filename,
-             ts_rank(
-               to_tsvector('english', coalesce(title,'') || ' ' || coalesce(summary,'') || ' ' || coalesce(raw_content,'')),
-               to_tsquery('english', ${tsQuery})
-             ) AS rank
-      FROM knowledge_items
-      WHERE to_tsvector('english', coalesce(title,'') || ' ' || coalesce(summary,'') || ' ' || coalesce(raw_content,''))
-            @@ to_tsquery('english', ${tsQuery})
-      ORDER BY rank DESC
-      LIMIT 25
-    `) as unknown as KnowledgeRow[];
+    const rows = commercialOnly
+      ? ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.brand_id, b.name AS brand_name, ki.created_at,
+                 ts_rank(
+                   to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,'')),
+                   to_tsquery('english', ${tsQuery})
+                 ) AS rank
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,''))
+                @@ to_tsquery('english', ${tsQuery})
+            AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+          ORDER BY rank DESC
+          LIMIT 25
+        `) as unknown as KnowledgeRow[])
+      : ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.brand_id, b.name AS brand_name, ki.created_at,
+                 ts_rank(
+                   to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,'')),
+                   to_tsquery('english', ${tsQuery})
+                 ) AS rank
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,''))
+                @@ to_tsquery('english', ${tsQuery})
+          ORDER BY rank DESC
+          LIMIT 25
+        `) as unknown as KnowledgeRow[]);
     add(rows);
   }
 
   for (const pattern of modelPatterns.slice(0, 6)) {
     const like = `%${pattern.toLowerCase().replace(/\s+/g, "%")}%`;
-    const rows = (await sql`
-      SELECT id, title, category, summary, tags, raw_content, source, source_filename
-      FROM knowledge_items
-      WHERE EXISTS (
-              SELECT 1 FROM unnest(tags) t WHERE lower(t) LIKE ${like}
-            )
-         OR lower(title) LIKE ${like}
-      LIMIT 10
-    `) as unknown as KnowledgeRow[];
+    const rows = commercialOnly
+      ? ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.brand_id, b.name AS brand_name, ki.created_at
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE (EXISTS (
+                   SELECT 1 FROM unnest(ki.tags) t WHERE lower(t) LIKE ${like}
+                 )
+                 OR lower(ki.title) LIKE ${like})
+            AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+          LIMIT 10
+        `) as unknown as KnowledgeRow[])
+      : ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.brand_id, b.name AS brand_name, ki.created_at
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE EXISTS (
+                  SELECT 1 FROM unnest(ki.tags) t WHERE lower(t) LIKE ${like}
+                )
+             OR lower(ki.title) LIKE ${like}
+          LIMIT 10
+        `) as unknown as KnowledgeRow[]);
     add(rows);
   }
 
   if (collected.size === 0) {
     for (const word of words.filter((w) => w.length > 2).slice(0, 3)) {
       const like = `%${word}%`;
-      const rows = (await sql`
-        SELECT id, title, category, summary, tags, raw_content, source, source_filename
-        FROM knowledge_items
-        WHERE lower(title) LIKE ${like}
-           OR lower(summary) LIKE ${like}
-           OR lower(category) LIKE ${like}
-        LIMIT 10
-      `) as unknown as KnowledgeRow[];
+      const rows = commercialOnly
+        ? ((await sql`
+            SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                   ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                   ki.brand_id, b.name AS brand_name, ki.created_at
+            FROM knowledge_items ki
+            LEFT JOIN brands b ON b.id = ki.brand_id
+            WHERE (lower(ki.title) LIKE ${like}
+                   OR lower(ki.summary) LIKE ${like}
+                   OR lower(ki.category) LIKE ${like})
+              AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+            LIMIT 10
+          `) as unknown as KnowledgeRow[])
+        : ((await sql`
+            SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                   ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                   ki.brand_id, b.name AS brand_name, ki.created_at
+            FROM knowledge_items ki
+            LEFT JOIN brands b ON b.id = ki.brand_id
+            WHERE lower(ki.title) LIKE ${like}
+               OR lower(ki.summary) LIKE ${like}
+               OR lower(ki.category) LIKE ${like}
+            LIMIT 10
+          `) as unknown as KnowledgeRow[]);
       add(rows);
     }
   }
@@ -116,7 +187,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No question provided" }, { status: 400 });
     }
 
-    const rows = await searchKnowledge(question.trim());
+    const trimmed = question.trim();
+    const queryMode: QueryMode = isCertQuery(trimmed)
+      ? "cert-inclusive"
+      : "commercial-only";
+    const rows = await searchKnowledge(trimmed, queryMode);
 
     const client = new Anthropic();
     const response = await client.messages.create({
@@ -126,7 +201,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "user",
-          content: `Retrieved knowledge base entries:\n${buildContext(rows)}\n\nQuestion: ${question.trim()}`,
+          content: `Retrieved knowledge base entries:\n${buildContext(rows)}\n\nQuestion: ${trimmed}`,
         },
       ],
     });
@@ -138,11 +213,19 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       answer: textBlock.text,
+      query_mode: queryMode,
       sources: rows.map((r) => ({
         id: r.id,
         title: r.title,
         category: r.category,
+        summary: r.summary,
+        tags: r.tags,
         source_filename: r.source_filename,
+        source_path: r.source_path,
+        extractor_version: r.extractor_version,
+        brand_id: r.brand_id,
+        brand_name: r.brand_name,
+        created_at: r.created_at,
       })),
     });
   } catch (err: unknown) {

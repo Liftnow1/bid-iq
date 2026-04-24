@@ -3,9 +3,168 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
+interface Source {
+  id: number;
+  title: string;
+  category: string;
+  summary: string | null;
+  tags: string[] | null;
+  source_filename: string | null;
+  source_path: string | null;
+  extractor_version: string | null;
+  brand_id: number | null;
+  brand_name: string | null;
+  created_at: string;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
+  sources?: Source[];
+  queryMode?: "cert-inclusive" | "commercial-only";
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  "product-specifications": "Product Specs",
+  "competitive-intelligence": "Competitive Intel",
+  "pricing-data": "Pricing",
+  "bid-history": "Bid History",
+  "installation-guides": "Installation",
+  "manufacturer-info": "Manufacturer",
+  "service-procedures": "Service",
+  "compliance-certifications": "Compliance",
+  "customer-intelligence": "Customer Intel",
+  general: "General",
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  "product-specifications": "bg-blue-500/20 text-blue-300 border-blue-500/30",
+  "competitive-intelligence": "bg-red-500/20 text-red-300 border-red-500/30",
+  "pricing-data": "bg-green-500/20 text-green-300 border-green-500/30",
+  "bid-history": "bg-purple-500/20 text-purple-300 border-purple-500/30",
+  "installation-guides": "bg-orange-500/20 text-orange-300 border-orange-500/30",
+  "manufacturer-info": "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+  "service-procedures": "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+  "compliance-certifications": "bg-pink-500/20 text-pink-300 border-pink-500/30",
+  "customer-intelligence": "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
+  general: "bg-gray-500/20 text-gray-300 border-gray-500/30",
+};
+
+function SourceCard({ source, messageIdx, sourceIdx }: { source: Source; messageIdx: number; sourceIdx: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const contentId = `source-${messageIdx}-${sourceIdx}-content`;
+  const locator = source.source_filename || source.source_path;
+  const categoryClass = CATEGORY_COLORS[source.category] || CATEGORY_COLORS.general;
+  const categoryLabel = CATEGORY_LABELS[source.category] || source.category;
+
+  return (
+    <div className="bg-gray-900/60 border border-gray-700 rounded-lg hover:border-gray-500 transition-colors">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        aria-controls={contentId}
+        className="w-full text-left px-4 py-3 flex items-start gap-3 focus:outline-none focus:ring-2 focus:ring-blue-500/40 rounded-lg"
+      >
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className={`px-2 py-0.5 rounded text-xs font-medium border ${categoryClass}`}>
+              {categoryLabel}
+            </span>
+            {source.brand_name && (
+              <span className="text-xs text-gray-400">{source.brand_name}</span>
+            )}
+          </div>
+          <div className="text-sm text-gray-200 truncate">{source.title}</div>
+          {locator && (
+            <div className="text-xs text-gray-500 mt-0.5 truncate">{locator}</div>
+          )}
+        </div>
+        <span
+          aria-hidden="true"
+          className={`text-gray-500 text-sm mt-0.5 transition-transform ${expanded ? "rotate-45" : ""}`}
+        >
+          +
+        </span>
+      </button>
+
+      {expanded && (
+        <div
+          id={contentId}
+          className="px-4 pb-4 pt-1 border-t border-gray-800 space-y-3 text-xs"
+        >
+          {source.brand_name && (
+            <div>
+              <div className="text-gray-500 uppercase tracking-wide text-[10px] mb-0.5">Brand</div>
+              <div className="text-gray-200 text-sm font-medium">{source.brand_name}</div>
+            </div>
+          )}
+          <div>
+            <div className="text-gray-500 uppercase tracking-wide text-[10px] mb-0.5">Title</div>
+            <div className="text-gray-200">{source.title}</div>
+          </div>
+          <div>
+            <div className="text-gray-500 uppercase tracking-wide text-[10px] mb-0.5">Category</div>
+            <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium border ${categoryClass}`}>
+              {categoryLabel}
+            </span>
+          </div>
+          {source.summary && (
+            <div>
+              <div className="text-gray-500 uppercase tracking-wide text-[10px] mb-0.5">Summary</div>
+              <div className="text-gray-300 whitespace-pre-wrap">{source.summary}</div>
+            </div>
+          )}
+          {source.tags && source.tags.length > 0 && (
+            <div>
+              <div className="text-gray-500 uppercase tracking-wide text-[10px] mb-1">Tags</div>
+              <div className="flex flex-wrap gap-1">
+                {source.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 text-xs border border-gray-700"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {source.source_filename && (
+            <div>
+              <div className="text-gray-500 uppercase tracking-wide text-[10px] mb-0.5">Source File</div>
+              <div className="text-gray-300 break-all">{source.source_filename}</div>
+            </div>
+          )}
+          {source.source_path && (
+            <div>
+              <div className="text-gray-500 uppercase tracking-wide text-[10px] mb-0.5">Source Path</div>
+              <div className="text-gray-300 break-all">{source.source_path}</div>
+            </div>
+          )}
+          <div>
+            <div className="text-gray-500 uppercase tracking-wide text-[10px] mb-0.5">Created</div>
+            <div className="text-gray-400">
+              {new Date(source.created_at).toLocaleString()}
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-3 pt-2 border-t border-gray-800">
+            <span className="text-[10px] text-gray-600">
+              id #{source.id}
+              {source.extractor_version ? ` · ${source.extractor_version}` : ""}
+            </span>
+            <button
+              type="button"
+              onClick={() => setExpanded(false)}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              Collapse
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function Home() {
@@ -43,7 +202,12 @@ export default function Home() {
       }
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.answer },
+        {
+          role: "assistant",
+          content: data.answer,
+          sources: Array.isArray(data.sources) ? data.sources : [],
+          queryMode: data.query_mode,
+        },
       ]);
     } catch (err) {
       setMessages((prev) => [
@@ -110,13 +274,42 @@ export default function Home() {
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[85%] rounded-xl px-5 py-3 text-sm leading-relaxed ${
-                msg.role === "user"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-200 border border-gray-700"
-              }`}
+              className={`max-w-[85%] ${msg.role === "user" ? "" : "w-full"}`}
             >
-              <div className="whitespace-pre-wrap">{msg.content}</div>
+              <div
+                className={`rounded-xl px-5 py-3 text-sm leading-relaxed ${
+                  msg.role === "user"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-800 text-gray-200 border border-gray-700"
+                }`}
+              >
+                <div className="whitespace-pre-wrap">{msg.content}</div>
+              </div>
+
+              {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs uppercase tracking-wide text-gray-500">
+                      Sources ({msg.sources.length})
+                    </div>
+                    {msg.queryMode && (
+                      <div className="text-[10px] text-gray-600 font-mono">
+                        {msg.queryMode}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {msg.sources.map((src, sIdx) => (
+                      <SourceCard
+                        key={src.id}
+                        source={src}
+                        messageIdx={i}
+                        sourceIdx={sIdx}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         ))}
