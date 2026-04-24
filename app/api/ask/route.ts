@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSQL, ensureSchema } from "@/lib/db";
+import { runPythonUpgrade, isTierTwo } from "@/lib/upgrade";
 
-export const maxDuration = 60;
+// Auto-upgrade can take 30s-2min per Tier-1 source. Bump max duration so
+// the first query against a fresh Tier-1 row doesn't time out.
+export const maxDuration = 300;
 
 const LIFTNOW_SYSTEM_PROMPT = `You are a product and procurement expert for Liftnow, a government-focused dealer of vehicle lifts and heavy equipment maintenance gear. Liftnow sells to fleet maintenance facilities — transit authorities, cities, counties, school districts, state agencies, military. Liftnow is a Sourcewell contract holder (121223-LFT) and holds numerous state contracts through NASPO and direct piggybacks.
 
 When answering questions, draw on Liftnow's knowledge base of product specs, pricing, bid history, compliance data, and competitive intelligence. Be factual and concise. If the knowledge base doesn't contain enough information to answer confidently, say so rather than guessing.
 
-The sources below represent Liftnow's current commercial catalog and extracted product documentation. When specific ALI certification records are relevant, they may also be included. If the available sources don't contain enough information to answer confidently, say so rather than guessing.`;
+The sources below are numbered [1], [2], … When you use a fact from a source, cite it inline using its number, e.g. "the CL10A has a 10,000 lb capacity [3]." Cite every claim that depends on a source. Do not invent citations or cite sources you didn't actually use. If the available sources don't contain enough information to answer confidently, say so rather than guessing.`;
 
 type QueryMode = "cert-inclusive" | "commercial-only";
 
@@ -18,15 +21,21 @@ type KnowledgeRow = {
   category: string;
   summary: string | null;
   tags: string[] | null;
-  raw_content: string;
+  raw_content: string | null;
   source: string | null;
   source_filename: string | null;
   source_path: string | null;
   extractor_version: string | null;
+  extracted_data: Record<string, unknown> | null;
   brand_id: number | null;
   brand_name: string | null;
   created_at: string;
 };
+
+// Top N rows by retrieval rank that are eligible for auto-upgrade. If a
+// Tier-1 row makes it into this slice, we pay the upgrade cost before
+// answering.
+const AUTO_UPGRADE_TOP_N = 5;
 
 function isCertQuery(question: string): boolean {
   const q = question.toLowerCase();
@@ -65,6 +74,7 @@ async function searchKnowledge(
       ? ((await sql`
           SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
                  ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.extracted_data,
                  ki.brand_id, b.name AS brand_name, ki.created_at,
                  ts_rank(
                    to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,'')),
@@ -81,6 +91,7 @@ async function searchKnowledge(
       : ((await sql`
           SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
                  ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.extracted_data,
                  ki.brand_id, b.name AS brand_name, ki.created_at,
                  ts_rank(
                    to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,'')),
@@ -102,6 +113,7 @@ async function searchKnowledge(
       ? ((await sql`
           SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
                  ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.extracted_data,
                  ki.brand_id, b.name AS brand_name, ki.created_at
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
@@ -115,6 +127,7 @@ async function searchKnowledge(
       : ((await sql`
           SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
                  ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.extracted_data,
                  ki.brand_id, b.name AS brand_name, ki.created_at
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
@@ -134,6 +147,7 @@ async function searchKnowledge(
         ? ((await sql`
             SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
                    ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                   ki.extracted_data,
                    ki.brand_id, b.name AS brand_name, ki.created_at
             FROM knowledge_items ki
             LEFT JOIN brands b ON b.id = ki.brand_id
@@ -146,6 +160,7 @@ async function searchKnowledge(
         : ((await sql`
             SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
                    ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                   ki.extracted_data,
                    ki.brand_id, b.name AS brand_name, ki.created_at
             FROM knowledge_items ki
             LEFT JOIN brands b ON b.id = ki.brand_id
@@ -173,6 +188,43 @@ function buildContext(rows: KnowledgeRow[]): string {
     .join("\n\n---\n\n");
 }
 
+/**
+ * Pull every [N] citation marker out of the model's answer. Returns the
+ * unique 1-based source indices it referenced.
+ */
+function parseCitedIndices(answer: string): Set<number> {
+  const cited = new Set<number>();
+  const re = /\[(\d+)\]/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(answer)) !== null) {
+    const n = Number(m[1]);
+    if (Number.isInteger(n) && n > 0) cited.add(n);
+  }
+  return cited;
+}
+
+/**
+ * Identify Tier-1 rows in the top-N retrieval slice and upgrade them to
+ * Tier-2 in parallel. Returns the set of ids that were upgraded (or
+ * attempted) so the caller can re-fetch them.
+ */
+async function upgradeTier1Candidates(rows: KnowledgeRow[]): Promise<Set<number>> {
+  const candidates = rows
+    .slice(0, AUTO_UPGRADE_TOP_N)
+    .filter((r) => !isTierTwo({ id: r.id, raw_content: r.raw_content, extracted_data: r.extracted_data }));
+  if (candidates.length === 0) return new Set();
+
+  const upgraded = new Set<number>();
+  await Promise.all(
+    candidates.map(async (r) => {
+      const result = await runPythonUpgrade(r.id);
+      if (result.ok) upgraded.add(r.id);
+      else console.error(`auto-upgrade failed for id=${r.id}:`, result.error, result.stderr);
+    })
+  );
+  return upgraded;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const text = await request.text();
@@ -191,7 +243,15 @@ export async function POST(request: NextRequest) {
     const queryMode: QueryMode = isCertQuery(trimmed)
       ? "cert-inclusive"
       : "commercial-only";
-    const rows = await searchKnowledge(trimmed, queryMode);
+
+    // Initial retrieval. If any Tier-1 rows score into the top slice,
+    // upgrade them to Tier-2 in parallel and re-run retrieval so the now-
+    // populated raw_content participates in ranking.
+    let rows = await searchKnowledge(trimmed, queryMode);
+    const upgraded = await upgradeTier1Candidates(rows);
+    if (upgraded.size > 0) {
+      rows = await searchKnowledge(trimmed, queryMode);
+    }
 
     const client = new Anthropic();
     const response = await client.messages.create({
@@ -211,10 +271,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No response from AI" }, { status: 500 });
     }
 
-    return NextResponse.json({
-      answer: textBlock.text,
-      query_mode: queryMode,
-      sources: rows.map((r) => ({
+    // Filter the source-tile list down to only the [N] citations the model
+    // actually used. Indices are 1-based and map into `rows` by position.
+    const citedIndices = parseCitedIndices(textBlock.text);
+    const citedSources = Array.from(citedIndices)
+      .filter((n) => n >= 1 && n <= rows.length)
+      .sort((a, b) => a - b)
+      .map((n) => rows[n - 1])
+      .map((r) => ({
         id: r.id,
         title: r.title,
         category: r.category,
@@ -226,7 +290,13 @@ export async function POST(request: NextRequest) {
         brand_id: r.brand_id,
         brand_name: r.brand_name,
         created_at: r.created_at,
-      })),
+      }));
+
+    return NextResponse.json({
+      answer: textBlock.text,
+      query_mode: queryMode,
+      sources: citedSources,
+      upgraded_ids: Array.from(upgraded),
     });
   } catch (err: unknown) {
     console.error("Ask error:", err);

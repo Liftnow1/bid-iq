@@ -59,6 +59,9 @@ async function setup() {
   await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extracted_at TIMESTAMPTZ`;
   await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extractor_version TEXT`;
 
+  // Tier-1 ingestion leaves raw_content NULL until upgrade.
+  await sql`ALTER TABLE knowledge_items ALTER COLUMN raw_content DROP NOT NULL`;
+
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_category ON knowledge_items(category)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_search ON knowledge_items USING GIN(to_tsvector('english', coalesce(search_text, '')))`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_tags ON knowledge_items USING GIN(tags)`;

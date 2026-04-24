@@ -7,28 +7,52 @@ Two Python tools live in `bidiq/`. They are NOT interchangeable.
 | `bidiq/enrich.py` | Mohawk-only installation drawings and spec PDFs | JSON files in `kb_output/` | Historical / legacy. Do not extend. |
 | `bidiq/ingest.py` | Any brand, any document type under `data/product_data/<brand>/` | Rows in the Postgres `knowledge_items` table | Active. Use this for new work. |
 
+## Two-tier model
+
+`ingest.py` writes into a single `knowledge_items` table but in two distinct tiers:
+
+| Tier | Pages sent to Claude | `raw_content` | `extractor_version` | Cost / PDF | When to run |
+| --- | --- | --- | --- | --- | --- |
+| **1 — shallow** | first + last page only | `NULL` | `ingest.py-v1-tier1` | ~$0.01–$0.03 | Eager, run across the whole corpus once |
+| **2 — deep** | every page (existing behavior) | full markdown body | `ingest.py-v1-tier2` | ~$0.10–$2.00 | Lazy, on-demand or for a specific brand under active bid |
+
+A Tier-1 row is **upgraded in place** to Tier-2 by re-running on the same PDF — no row deletion, no second row. The row's id is stable across the upgrade.
+
+A row is considered Tier-2 if EITHER `raw_content` is non-empty OR `extracted_data->>'tier' = '2'`. This second-chance check intentionally treats legacy `ingest.py-v1` rows (3324–3326 from the pre-tier era) as Tier-2 without any backfill.
+
 ## When to run what
 
-- **New PDFs arrive under `data/product_data/<brand>/`** → `ingest.py`.
-- **You want a row that the Next.js app (`/api/ask`, `/api/knowledge-base/*`) can read** → `ingest.py`.
-- **You are re-reading old Mohawk JSONs** → those were already migrated into Postgres; no action needed.
+- **First contact with a new brand folder** → `ingest.py --tier 1`. Cheap surface scan.
+- **Brand actively in a bid** → `ingest.py --tier 2 --brand <name>`. Deep extraction.
+- **A query in `/api/ask` is hitting unwarmed Tier-1 docs** → no action needed; `/api/ask` auto-upgrades the top-5 candidates synchronously on first query.
 - **You are looking at `enrich.py`** → leave it alone. It is retained as a historical artifact.
 
-## What `ingest.py` does
+## What `ingest.py` does (Tier 1)
 
-1. Walks `data/product_data/` recursively (or just `data/product_data/<brand>/` if `--brand` is passed).
-2. Skips hidden files and non-PDFs (with a log line).
-3. For every distinct brand folder, looks up the brand row in `brands` by case-insensitive name. Inserts a new row only if no match exists, with `we_carry = FALSE`, `relationship_type = 'unknown'`, `notes = 'Auto-created by ingest.py'`. Never updates or deletes existing brand rows.
-4. For each PDF:
-   - Checks for an existing `knowledge_items` row with matching `source_path`. If `extracted_at` is newer than the PDF's mtime, skips.
-   - Rasterizes pages to JPEGs (respecting Claude's 5 MB / 8000 px limits), the same pattern as `enrich.py`.
-   - Calls Claude vision with a generalized classify + extract prompt (10-category vocabulary).
-   - UPSERTs a row in `knowledge_items` with: `title`, `category`, `tags`, `content_type='pdf'`, `source='ingested'`, `source_filename`, `source_path`, `source_pages_count`, `summary`, `raw_content` (= the extracted markdown body), `extracted_data` (JSONB containing `effective_date`, `supersedes_previous`, `pages_summary`), `search_text`, `brand_id`, `extracted_at = NOW()`, `extractor_version = 'ingest.py-v1'`.
-   - On failure, appends a line to `data/extraction-errors.log` and continues.
+1. Walks `data/product_data/` recursively (or just `data/product_data/<brand>/`).
+2. For each PDF:
+   - Skips if a row already exists at any tier (Tier-2 is a strict superset of Tier-1; never re-do or downgrade).
+   - Reads the page count via `pdfinfo` (no rasterization).
+   - Rasterizes ONLY page 1 and page N to JPEG.
+   - Calls Claude vision with a shallow classification prompt — extracts `title`, `category`, `summary`, `tags`, `effective_date`, `supersedes_previous`.
+   - UPSERTs a row with `raw_content = NULL`, `extracted_data.tier = 1`, `extractor_version = 'ingest.py-v1-tier1'`. `search_text` is `title + summary + tags`.
 
-## Schema notes (for future Claude sessions)
+## What `ingest.py` does (Tier 2)
 
-The build brief used a column name `content`; the actual schema (see `lib/db.ts`) uses `raw_content`. The ingester writes to `raw_content`. Structured side-data (effective date, supersedes flag, per-page descriptions) goes into the existing `extracted_data` JSONB column rather than new columns. `search_text` is a NOT NULL column and is built the same way `app/api/knowledge-base/ingest/route.ts` builds it: `title + summary + tags + first 5000 chars of content`.
+1. Same walk and brand-registry behavior.
+2. For each PDF:
+   - Skips if a Tier-2 row already exists AND `extracted_at` is newer than the PDF's mtime.
+   - Rasterizes ALL pages.
+   - Calls Claude vision with the full extraction prompt — the same prompt the previous single-tier ingester used.
+   - UPSERTs (UPDATEs an existing Tier-1 row in place) with `raw_content` populated, `extracted_data.tier = 2`, `extractor_version = 'ingest.py-v1-tier2'`. `search_text` includes the first 5 000 chars of `raw_content`.
+
+On failure (either tier), a line is appended to `data/extraction-errors.log` and the run continues.
+
+## Schema notes
+
+The build brief used a column named `content`; the actual schema uses `raw_content`. Tier-1 sets `raw_content = NULL`, so the column was relaxed to nullable in `lib/db.ts` / `scripts/setup-db.mjs`. Existing legacy rows (with `raw_content` already populated) are unaffected by the relaxation.
+
+`extracted_data` JSONB carries: `tier` (1 or 2), `effective_date`, `supersedes_previous`, and (Tier 2 only) `pages_summary`.
 
 ## CLI
 
@@ -40,56 +64,96 @@ Or directly: `python -m bidiq.ingest [OPTIONS]`.
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
+| `--tier {1,2}` | `1` | Shallow vs deep. |
 | `--brand <name>` | (none) | Restrict the walker to `data/product_data/<name>/` only. Folder names are lowercase (`challenger`, `mohawk`, `bendpak`, etc.). |
-| `--limit <n>` | (none) | Only process the first N PDFs that are NOT already up-to-date. Use for testing. |
-| `--dry-run` | off | List what would be processed and skipped. No API calls, no DB writes. Does not require `ANTHROPIC_API_KEY`, and only uses `DATABASE_URL` if it's set (to report already-processed PDFs accurately). |
-| `--concurrency <n>` | 3 | Number of parallel workers (each holds its own DB connection + Anthropic client). |
-| `--dpi <n>` | 150 | DPI passed to `pdf2image`. Matches `enrich.py`. |
-| `--model <id>` | `claude-sonnet-4-20250514` | Anthropic model for vision extraction. |
+| `--id <int>` | (none) | Process a single `knowledge_items` row by id. The row's `source_path` is resolved to the on-disk PDF. Used by the `/api/knowledge-base/upgrade` endpoint. Mutually exclusive with `--brand`/`--limit` (those are ignored when `--id` is set). |
+| `--limit <n>` | (none) | Only process the first N PDFs that are NOT already at the requested tier. Use for testing. |
+| `--dry-run` | off | List what would be processed and skipped. No API calls, no DB writes. |
+| `--concurrency <n>` | `3` | Parallel workers (each holds its own DB connection + Anthropic client). |
+| `--dpi <n>` | `150` | DPI passed to `pdf2image`. |
+| `--model <id>` | `claude-sonnet-4-20250514` | Anthropic model. |
 
 ## Required env vars
 
-- `DATABASE_URL` — Postgres connection string (the same one the Next.js app uses).
+- `DATABASE_URL` — Postgres connection string.
 - `ANTHROPIC_API_KEY` — Anthropic API key.
 
-Both are required for real runs. `--dry-run` only needs `DATABASE_URL` if you want accurate "already processed" reporting.
+Both required for real runs. `--dry-run` only needs `DATABASE_URL` if you want accurate "already at target tier" reporting.
 
-## Running it locally
+## Running locally
 
 ```bash
-# Install Python deps once
 pip install -e .
 
-# Export env
 export DATABASE_URL="postgres://…"
 export ANTHROPIC_API_KEY="sk-ant-…"
 
-# Dry run (verify plan)
-bidiq kb ingest --brand challenger --limit 3 --dry-run
+# Plan a Tier-1 sample
+bidiq kb ingest --brand challenger --tier 1 --limit 5 --dry-run
 
-# Real test run (3 PDFs, 1 worker for easier debugging)
-bidiq kb ingest --brand challenger --limit 3 --concurrency 1
+# Tier-1 sample (5 PDFs, real)
+bidiq kb ingest --brand challenger --tier 1 --limit 5
 
-# Full brand (after sanity-checking on the small sample)
-bidiq kb ingest --brand challenger
+# Full Tier-1 across one brand (~$1–$3 for ~100 PDFs)
+bidiq kb ingest --brand challenger --tier 1
+
+# Manual Tier-2 upgrade for a specific row (this is what /api/knowledge-base/upgrade does)
+bidiq kb ingest --tier 2 --id 3326
+
+# Tier-2 across a brand (expensive — only for actively-bid brands)
+bidiq kb ingest --brand challenger --tier 2
 ```
 
-Do not run across all 2,982 PDFs casually — that's a paid, long-running job. Do it in controlled batches.
+Do not run Tier-1 across the full 3 058-PDF corpus casually — it's a paid, ~$30–$90 one-time job. Do it in controlled batches.
+
+## On-demand upgrade flow
+
+`POST /api/knowledge-base/upgrade` with body `{ "knowledge_item_id": 3326 }`:
+
+1. Looks up the row.
+2. If already Tier-2, returns `{ status: "already_tier_2", item }`.
+3. Otherwise spawns `python3 -m bidiq.ingest --tier 2 --id <id>` and waits.
+4. On success, returns the upgraded row.
+5. Synchronous; caller waits 30 s – 2 min depending on PDF size.
+
+`/api/ask` calls this same Python helper (via `lib/upgrade.ts`) for any Tier-1 row in the top-5 retrieval slice, in parallel, then re-runs retrieval before answering.
+
+### Runtime requirement
+
+Both the `/api/knowledge-base/upgrade` endpoint and the auto-upgrade in `/api/ask` shell out to `python3 -m bidiq.ingest`. The runtime host therefore needs:
+
+- Python 3.10+
+- the `bidiq` package importable (`pip install -e .` in the repo)
+- `poppler-utils` (for `pdf2image` / `pdfinfo`)
+
+This **does not work on Vercel serverless** — there is no Python runtime there. Either self-host the Next.js app on a node with Python installed, or move the upgrade work to a separate worker. The Tier-1 batch ingestion is unaffected; it always runs from the CLI on a machine you control.
 
 ## Verifying output
 
-After a real run:
-
 ```sql
-SELECT id, title, category, brand_id, source_path, source_pages_count,
-       extracted_at, extractor_version, jsonb_pretty(extracted_data)
+-- Summary of tiers in the corpus
+SELECT
+  CASE
+    WHEN raw_content IS NOT NULL AND length(raw_content) > 0 THEN 'tier-2'
+    WHEN extracted_data->>'tier' = '1' THEN 'tier-1'
+    ELSE 'unknown'
+  END AS tier,
+  count(*)
 FROM knowledge_items
-WHERE extractor_version = 'ingest.py-v1'
+GROUP BY 1;
+
+-- Recently ingested
+SELECT id, title, category, brand_id, source_pages_count,
+       extractor_version, extracted_at,
+       extracted_data->>'tier' AS tier,
+       raw_content IS NOT NULL AND length(raw_content) > 0 AS has_raw
+FROM knowledge_items
+WHERE extractor_version IN ('ingest.py-v1-tier1', 'ingest.py-v1-tier2', 'ingest.py-v1')
 ORDER BY extracted_at DESC
 LIMIT 10;
 ```
 
-You can also hit the running Next.js app's `/api/ask` endpoint with a question like `"what Challenger lifts do we have"` — ingested rows should show up in the `sources` array.
+You can also hit the running Next.js app's `/api/ask` with a question targeting the brand. The first query against a Tier-1 row will spend 30 s – 2 min upgrading; subsequent queries return immediately. Source tiles in the response only show documents Claude actually cited in the answer (parsed from `[N]` markers).
 
 ## Errors
 
@@ -107,6 +171,6 @@ One bad PDF never stops the run.
 - Does not modify `data/product_data/` (source PDFs are read-only).
 - Does not DELETE rows. Re-processing is an UPDATE.
 - Does not update `brands` rows beyond inserting new ones. `we_carry` and `relationship_type` are Paul's to manage.
-- Does not deep-parse service manuals page-by-page — the full text goes into `raw_content`, category is `service-procedures` (or `installation-guides`), and that's it. Page-level parts extraction is Phase 2.
 - Does not handle non-PDF files (`.xlsx`, `.md`, etc.). It logs a skip line and moves on.
 - Does not touch `bidiq/enrich.py`.
+- Does not migrate or relabel the legacy `ingest.py-v1` rows (3324–3326). Those are treated as Tier-2 by virtue of having `raw_content` populated.

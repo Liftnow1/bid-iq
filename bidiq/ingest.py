@@ -25,12 +25,16 @@ from typing import Optional
 import anthropic
 import click
 import psycopg
-from pdf2image import convert_from_path
+from pdf2image import convert_from_path, pdfinfo_from_path
 from PIL import Image
 
 Image.MAX_IMAGE_PIXELS = 500_000_000
 
-EXTRACTOR_VERSION = "ingest.py-v1"
+# Legacy version tag from the single-tier era. Rows still carrying this
+# version are treated as Tier-2 (raw_content populated).
+EXTRACTOR_VERSION_LEGACY = "ingest.py-v1"
+EXTRACTOR_VERSION_TIER1 = "ingest.py-v1-tier1"
+EXTRACTOR_VERSION_TIER2 = "ingest.py-v1-tier2"
 
 VALID_CATEGORIES = {
     "product-specifications",
@@ -48,6 +52,43 @@ VALID_CATEGORIES = {
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PRODUCT_DATA_ROOT = REPO_ROOT / "data" / "product_data"
 ERROR_LOG = REPO_ROOT / "data" / "extraction-errors.log"
+
+
+def build_shallow_extraction_prompt(brand_name: str) -> str:
+    """Tier-1 prompt: cover + last page only, no body extraction."""
+    return f"""You are doing a SHALLOW classification of a PDF from Liftnow's knowledge base. The PDF is from manufacturer/brand: {brand_name}.
+
+You are seeing only the FIRST and LAST page of the document — usually the cover and a revision/back page. Do not attempt to extract the full document body; that's a separate pass.
+
+First, classify this document into exactly ONE of these 10 categories:
+
+- product-specifications: catalogs, brochures, spec sheets — describes what products exist and their technical specs
+- competitive-intelligence: content about competitor products or market positioning (rare from vendor PDFs; more common in internal notes)
+- pricing-data: price books, dealer discount sheets, promotional pricing flyers
+- bid-history: past bid documents, awards, pricing submissions (rare from vendor PDFs)
+- installation-guides: install manuals, anchor/pit/slab specs, drawings
+- manufacturer-info: about-the-company content, corporate brochures, dealer program info
+- service-procedures: service manuals, PM procedures, troubleshooting, parts diagrams
+- compliance-certifications: ALI cert records, Buy America letters, warranty documents, ANSI compliance matrices
+- customer-intelligence: notes about specific customers (rare from vendor PDFs)
+- general: truly doesn't fit any of the above, or too mixed to classify
+
+Then extract:
+- title: the document title as it appears on the cover (else a short descriptive title)
+- summary: 2-3 sentences describing what the document is and what it covers, based on the cover and last page only
+- tags: up to 15 short keyword tags surfaced from the cover (model numbers, product family, capacities, certifications, etc.). Always include the brand name as one tag.
+- effective_date: ISO date (YYYY-MM-DD) if visible on cover or revision block, else null
+- supersedes_previous: boolean inferred from any revision/version note visible on these pages
+
+Return ONLY valid JSON in this exact shape:
+{{
+  "category": "<one of the 10>",
+  "title": "<string>",
+  "summary": "<string>",
+  "tags": ["<string>", ...],
+  "effective_date": "<ISO date or null>",
+  "supersedes_previous": <boolean>
+}}"""
 
 
 def build_extraction_prompt(brand_name: str) -> str:
@@ -176,16 +217,47 @@ def ensure_brand(conn: psycopg.Connection, brand_name: str) -> int:
 
 def find_existing_row(
     conn: psycopg.Connection, source_path: str
-) -> Optional[tuple[int, Optional[datetime]]]:
+) -> Optional[tuple[int, Optional[datetime], Optional[str], bool]]:
+    """Return (id, extracted_at, extractor_version, has_raw_content) or None.
+
+    `has_raw_content` is True when the row's raw_content is non-empty — the
+    canonical "this row is Tier-2" signal, including legacy rows written by
+    the pre-tier-aware ingester.
+    """
     with conn.cursor() as cur:
         cur.execute(
-            "SELECT id, extracted_at FROM knowledge_items WHERE source_path = %s LIMIT 1",
+            """
+            SELECT id, extracted_at, extractor_version,
+                   raw_content IS NOT NULL AND length(raw_content) > 0
+              FROM knowledge_items
+             WHERE source_path = %s
+             LIMIT 1
+            """,
             (source_path,),
         )
         row = cur.fetchone()
         if not row:
             return None
-        return row[0], row[1]
+        return row[0], row[1], row[2], bool(row[3])
+
+
+def existing_tier(
+    extractor_version: Optional[str], has_raw_content: bool
+) -> int:
+    """Infer the effective tier of an existing row.
+
+    Tier-2 if raw_content is populated OR the version tag explicitly says
+    tier2. Otherwise Tier-1.
+    """
+    if has_raw_content:
+        return 2
+    if extractor_version == EXTRACTOR_VERSION_TIER2:
+        return 2
+    if extractor_version == EXTRACTOR_VERSION_LEGACY:
+        # Legacy ingester always wrote raw_content; if it's empty here,
+        # something odd happened — fall through to tier 1.
+        return 1
+    return 1
 
 
 def is_up_to_date(
@@ -199,9 +271,71 @@ def is_up_to_date(
     return extracted_at > mtime
 
 
+def count_pdf_pages(pdf_path: Path) -> int:
+    """Page count via pdfinfo (no rasterization). Returns 0 on failure."""
+    try:
+        info = pdfinfo_from_path(str(pdf_path))
+        return int(info.get("Pages") or 0)
+    except Exception:
+        return 0
+
+
 # ---------------------------------------------------------------------------
 # Vision extraction (pattern from enrich.py)
 # ---------------------------------------------------------------------------
+
+
+def _encode_page(page: "Image.Image") -> str:
+    max_bytes = 4_500_000
+    max_dim = 7900
+    w, h = page.size
+    if w > max_dim or h > max_dim:
+        ratio = min(max_dim / w, max_dim / h)
+        page = page.resize((int(w * ratio), int(h * ratio)), Image.LANCZOS)
+    buf = io.BytesIO()
+    page.save(buf, format="JPEG", quality=80)
+    if buf.tell() > max_bytes:
+        scale = 0.5
+        w, h = page.size
+        while buf.tell() > max_bytes and scale > 0.1:
+            resized = page.resize(
+                (int(w * scale), int(h * scale)), Image.LANCZOS
+            )
+            buf = io.BytesIO()
+            resized.save(buf, format="JPEG", quality=70)
+            scale *= 0.75
+    return base64.standard_b64encode(buf.getvalue()).decode("ascii")
+
+
+def render_first_and_last_pages(
+    pdf_path: Path, total_pages: int, dpi: int = 150
+) -> list[tuple[int, str]]:
+    """Tier-1 helper: render only page 1 and the final page.
+
+    Renders pages 1 and N separately so a 200-page manual costs the same as
+    a 2-page flyer. If the PDF is single-page, returns just that page.
+    """
+    if total_pages <= 0:
+        return []
+    encoded: list[tuple[int, str]] = []
+
+    first = convert_from_path(
+        str(pdf_path), dpi=dpi, fmt="jpeg", first_page=1, last_page=1
+    )
+    if first:
+        encoded.append((1, _encode_page(first[0])))
+
+    if total_pages > 1:
+        last = convert_from_path(
+            str(pdf_path),
+            dpi=dpi,
+            fmt="jpeg",
+            first_page=total_pages,
+            last_page=total_pages,
+        )
+        if last:
+            encoded.append((total_pages, _encode_page(last[0])))
+    return encoded
 
 
 def render_pdf_pages(pdf_path: str, dpi: int = 150) -> list[tuple[int, str]]:
@@ -317,6 +451,69 @@ def extract_with_vision(
     return merged
 
 
+def extract_shallow_with_vision(
+    client: anthropic.Anthropic,
+    pdf_name: str,
+    brand_name: str,
+    pages: list[tuple[int, str]],
+    model: str,
+) -> dict:
+    """Tier-1 vision call: a single message with cover + last page only."""
+    prompt = build_shallow_extraction_prompt(brand_name)
+    content: list[dict] = [
+        {
+            "type": "text",
+            "text": (
+                f"Shallow classification for: {pdf_name}. "
+                f"You will see {len(pages)} sample page(s) (first and last)."
+            ),
+        }
+    ]
+    for page_num, b64_data in pages:
+        content.append(
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/jpeg",
+                    "data": b64_data,
+                },
+            }
+        )
+        content.append({"type": "text", "text": f"(Page {page_num})"})
+    content.append({"type": "text", "text": prompt})
+
+    max_retries = 5
+    response = None
+    for attempt in range(max_retries):
+        try:
+            response = client.messages.create(
+                model=model,
+                max_tokens=1024,
+                messages=[{"role": "user", "content": content}],
+            )
+            break
+        except anthropic.RateLimitError:
+            if attempt == max_retries - 1:
+                raise
+            wait = 2 ** (attempt + 1) * 15
+            click.echo(
+                f"    Rate limited on {pdf_name}, waiting {wait}s..."
+            )
+            time.sleep(wait)
+    assert response is not None
+
+    response_text = response.content[0].text
+    try:
+        start = response_text.find("{")
+        end = response_text.rfind("}") + 1
+        if start >= 0 and end > start:
+            return json.loads(response_text[start:end])
+    except json.JSONDecodeError:
+        pass
+    return {"raw_response": response_text}
+
+
 # ---------------------------------------------------------------------------
 # Row writing
 # ---------------------------------------------------------------------------
@@ -353,7 +550,18 @@ def upsert_knowledge_item(
     source_pages_count: int,
     brand_id: int,
     extraction: dict,
+    tier: int,
 ) -> int:
+    """Insert or update a knowledge_items row for the given tier.
+
+    Tier 1: raw_content NULL, search_text from title+summary+tags only,
+        extracted_data carries `tier=1` plus effective_date / supersedes flag.
+    Tier 2: raw_content = full markdown body, search_text includes the first
+        5000 chars of body, extracted_data adds pages_summary and `tier=2`.
+    """
+    if tier not in (1, 2):
+        raise ValueError(f"tier must be 1 or 2, got {tier}")
+
     category = _coerce_category(extraction.get("category"))
     title = (
         str(extraction.get("title") or source_filename).strip()[:500]
@@ -361,16 +569,23 @@ def upsert_knowledge_item(
     )
     summary = str(extraction.get("summary") or "").strip()
     tags = _coerce_tags(extraction.get("tags"))
-    raw_content = str(extraction.get("content_markdown") or "")
-    search_text = _build_search_text(title, summary, tags, raw_content)
 
-    extracted_data = {
+    supersedes = extraction.get("supersedes_previous")
+    extracted_data: dict = {
+        "tier": tier,
         "effective_date": extraction.get("effective_date"),
-        "supersedes_previous": bool(extraction.get("supersedes_previous"))
-        if extraction.get("supersedes_previous") is not None
-        else None,
-        "pages_summary": extraction.get("pages_summary") or [],
+        "supersedes_previous": bool(supersedes) if supersedes is not None else None,
     }
+
+    if tier == 2:
+        raw_content: Optional[str] = str(extraction.get("content_markdown") or "")
+        extracted_data["pages_summary"] = extraction.get("pages_summary") or []
+        search_text = _build_search_text(title, summary, tags, raw_content or "")
+        version = EXTRACTOR_VERSION_TIER2
+    else:
+        raw_content = None
+        search_text = " ".join(p for p in (title, summary, " ".join(tags)) if p)
+        version = EXTRACTOR_VERSION_TIER1
 
     existing = find_existing_row(conn, source_path)
     with conn.cursor() as cur:
@@ -409,7 +624,7 @@ def upsert_knowledge_item(
                     json.dumps(extracted_data),
                     search_text,
                     brand_id,
-                    EXTRACTOR_VERSION,
+                    version,
                     row_id,
                 ),
             )
@@ -443,7 +658,7 @@ def upsert_knowledge_item(
                 summary,
                 search_text,
                 brand_id,
-                EXTRACTOR_VERSION,
+                version,
             ),
         )
         new_id = cur.fetchone()[0]
@@ -482,6 +697,7 @@ def process_single_pdf(
     api_key: str,
     model: str,
     dpi: int,
+    tier: int,
 ) -> str:
     source_path = repo_relative_path(pdf_path)
     try:
@@ -496,29 +712,50 @@ def process_single_pdf(
         brand_id = ensure_brand(conn, brand_name)
 
         existing = find_existing_row(conn, source_path)
-        if existing and is_up_to_date(pdf_path, existing[1]):
-            return f"  SKIP  {source_path} (already processed)"
-
-        pages = render_pdf_pages(str(pdf_path), dpi=dpi)
-        if not pages:
-            return f"  FAIL  {source_path} - 0 pages rendered"
+        if existing:
+            _, extracted_at, ext_version, has_raw = existing
+            current_tier = existing_tier(ext_version, has_raw)
+            # Tier-1 never overwrites a Tier-2 row.
+            if tier == 1 and current_tier >= 1:
+                return f"  SKIP  {source_path} (already tier-{current_tier})"
+            # Tier-2 over Tier-2 only re-runs if PDF mtime is newer.
+            if tier == 2 and current_tier >= 2 and is_up_to_date(pdf_path, extracted_at):
+                return f"  SKIP  {source_path} (already tier-2, up-to-date)"
 
         client = anthropic.Anthropic(api_key=api_key)
-        extraction = extract_with_vision(
-            client, pdf_path.name, brand_name, pages, model
-        )
+
+        if tier == 1:
+            total_pages = count_pdf_pages(pdf_path)
+            sample_pages = render_first_and_last_pages(
+                pdf_path, total_pages=total_pages, dpi=dpi
+            )
+            if not sample_pages:
+                return f"  FAIL  {source_path} - 0 pages rendered"
+            extraction = extract_shallow_with_vision(
+                client, pdf_path.name, brand_name, sample_pages, model
+            )
+            pages_count = total_pages or len(sample_pages)
+        else:
+            pages = render_pdf_pages(str(pdf_path), dpi=dpi)
+            if not pages:
+                return f"  FAIL  {source_path} - 0 pages rendered"
+            extraction = extract_with_vision(
+                client, pdf_path.name, brand_name, pages, model
+            )
+            pages_count = len(pages)
 
         row_id = upsert_knowledge_item(
             conn,
             source_path=source_path,
             source_filename=pdf_path.name,
-            source_pages_count=len(pages),
+            source_pages_count=pages_count,
             brand_id=brand_id,
             extraction=extraction,
+            tier=tier,
         )
         action = "UPDATE" if existing else "INSERT"
         return (
-            f"  OK    {source_path} ({len(pages)}p, brand={brand_name}) "
+            f"  OK    {source_path} ({pages_count}p, brand={brand_name}, tier={tier}) "
             f"-> knowledge_items.id={row_id} [{action}]"
         )
     except Exception as e:
@@ -530,17 +767,43 @@ def process_single_pdf(
             conn.close()
 
 
+def lookup_pdf_path_for_id(
+    database_url: str, knowledge_item_id: int
+) -> Path:
+    """Resolve a knowledge_items.id to the absolute path of its source PDF."""
+    with _connect(database_url) as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT source_path FROM knowledge_items WHERE id = %s",
+            (knowledge_item_id,),
+        )
+        row = cur.fetchone()
+        if not row or not row[0]:
+            raise click.ClickException(
+                f"knowledge_items.id={knowledge_item_id}: row not found or has no source_path"
+            )
+        rel = row[0]
+    abs_path = (REPO_ROOT / rel).resolve()
+    if not abs_path.exists():
+        raise click.ClickException(f"PDF missing on disk: {abs_path}")
+    return abs_path
+
+
 # ---------------------------------------------------------------------------
 # Dry-run planner
 # ---------------------------------------------------------------------------
 
 
 def plan_pdfs(
-    pdfs: list[Path], database_url: Optional[str], limit: Optional[int]
+    pdfs: list[Path],
+    database_url: Optional[str],
+    limit: Optional[int],
+    tier: int,
 ) -> list[tuple[Path, str]]:
-    """Return [(pdf, status)] pairs. status in {'process', 'skip-up-to-date'}.
+    """Return [(pdf, status)] pairs.
 
-    Stops adding 'process' entries once `limit` is hit.
+    Status values: 'process' (will run), 'skip-up-to-date' (target tier
+    already satisfied for this PDF). Stops adding 'process' entries once
+    `limit` is hit.
     """
     conn = _connect(database_url) if database_url else None
     plan: list[tuple[Path, str]] = []
@@ -551,8 +814,17 @@ def plan_pdfs(
             status = "process"
             if conn is not None:
                 existing = find_existing_row(conn, source_path)
-                if existing and is_up_to_date(pdf, existing[1]):
-                    status = "skip-up-to-date"
+                if existing:
+                    _, extracted_at, ext_version, has_raw = existing
+                    current_tier = existing_tier(ext_version, has_raw)
+                    if tier == 1 and current_tier >= 1:
+                        status = "skip-up-to-date"
+                    elif (
+                        tier == 2
+                        and current_tier >= 2
+                        and is_up_to_date(pdf, extracted_at)
+                    ):
+                        status = "skip-up-to-date"
             if status == "process":
                 if limit is not None and to_process >= limit:
                     continue
@@ -571,10 +843,28 @@ def plan_pdfs(
 
 @click.command()
 @click.option(
+    "--tier",
+    type=click.IntRange(1, 2),
+    default=1,
+    show_default=True,
+    help="1 = shallow (cover + last page), 2 = deep (all pages).",
+)
+@click.option(
     "--brand",
     "brand_filter",
     default=None,
     help="Restrict to PDFs under data/product_data/<brand>/ only.",
+)
+@click.option(
+    "--id",
+    "knowledge_item_id",
+    type=int,
+    default=None,
+    help=(
+        "Run on a single knowledge_items row by id. Resolves the row's "
+        "source_path to the on-disk PDF and processes only that PDF. "
+        "Used by the on-demand upgrade endpoint."
+    ),
 )
 @click.option(
     "--limit",
@@ -606,7 +896,9 @@ def plan_pdfs(
     help="Claude model to use for vision extraction.",
 )
 def ingest(
+    tier: int,
     brand_filter: Optional[str],
+    knowledge_item_id: Optional[int],
     limit: Optional[int],
     dry_run: bool,
     concurrency: int,
@@ -630,6 +922,36 @@ def ingest(
             )
             sys.exit(1)
 
+    if knowledge_item_id is not None:
+        if brand_filter or limit is not None:
+            click.echo(
+                "Warning: --brand and --limit are ignored when --id is set.",
+                err=True,
+            )
+        if dry_run:
+            click.echo(
+                f"Dry run: would process knowledge_items.id={knowledge_item_id} "
+                f"at tier={tier}. No API calls, no DB writes."
+            )
+            return
+        assert database_url is not None and api_key is not None
+        pdf_path = lookup_pdf_path_for_id(database_url, knowledge_item_id)
+        click.echo(
+            f"Single-row mode: id={knowledge_item_id} -> {repo_relative_path(pdf_path)} "
+            f"(tier={tier})"
+        )
+        # Pre-register brand so workers don't race; not strictly needed for
+        # single-row but keeps the code paths uniform.
+        with _connect(database_url) as conn:
+            ensure_brand(conn, derive_brand(pdf_path))
+        line = process_single_pdf(
+            pdf_path, database_url, api_key, model, dpi, tier
+        )
+        click.echo(line)
+        if line.lstrip().startswith("FAIL"):
+            sys.exit(1)
+        return
+
     pdfs = discover_pdfs(brand_filter)
     if not pdfs:
         click.echo(
@@ -640,20 +962,31 @@ def ingest(
 
     brands_seen = sorted({derive_brand(p) for p in pdfs})
     click.echo(f"Discovered {len(pdfs)} PDFs across brands: {', '.join(brands_seen)}")
-    click.echo(f"Model: {model}  DPI: {dpi}  Concurrency: {concurrency}")
+    click.echo(f"Tier: {tier}  Model: {model}  DPI: {dpi}  Concurrency: {concurrency}")
     if limit is not None:
         click.echo(f"Limit: {limit}")
     click.echo("-" * 60)
 
-    plan = plan_pdfs(pdfs, database_url if not dry_run or database_url else None, limit)
+    plan = plan_pdfs(
+        pdfs,
+        database_url if not dry_run or database_url else None,
+        limit,
+        tier=tier,
+    )
 
     if dry_run:
         processable = [p for p, s in plan if s == "process"]
         skippable = [p for p, s in plan if s == "skip-up-to-date"]
         for pdf in processable:
-            click.echo(f"  PLAN  process  {repo_relative_path(pdf)}  (brand={derive_brand(pdf)})")
+            click.echo(
+                f"  PLAN  process  {repo_relative_path(pdf)}  "
+                f"(brand={derive_brand(pdf)}, tier={tier})"
+            )
         for pdf in skippable:
-            click.echo(f"  PLAN  skip     {repo_relative_path(pdf)}  (already up-to-date)")
+            click.echo(
+                f"  PLAN  skip     {repo_relative_path(pdf)}  "
+                f"(target tier-{tier} already satisfied)"
+            )
         click.echo("-" * 60)
         click.echo(
             f"Dry run: {len(processable)} would be processed, "
@@ -670,7 +1003,7 @@ def ingest(
     to_process = [pdf for pdf, status in plan if status == "process"]
     skipped_upfront = [pdf for pdf, status in plan if status == "skip-up-to-date"]
     for pdf in skipped_upfront:
-        click.echo(f"  SKIP  {repo_relative_path(pdf)} (already processed)")
+        click.echo(f"  SKIP  {repo_relative_path(pdf)} (target tier already satisfied)")
 
     results: list[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as pool:
@@ -682,6 +1015,7 @@ def ingest(
                 api_key,
                 model,
                 dpi,
+                tier,
             ): pdf
             for pdf in to_process
         }
