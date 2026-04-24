@@ -4,137 +4,233 @@ import { getSQL, ensureSchema } from "@/lib/db";
 
 export const maxDuration = 60;
 
-async function searchProducts(question: string) {
+const LIFTNOW_SYSTEM_PROMPT = `You are a product and procurement expert for Liftnow, a government-focused dealer of vehicle lifts and heavy equipment maintenance gear. Liftnow sells to fleet maintenance facilities — transit authorities, cities, counties, school districts, state agencies, military. Liftnow is a Sourcewell contract holder (121223-LFT) and holds numerous state contracts through NASPO and direct piggybacks.
+
+When answering questions, draw on Liftnow's knowledge base of product specs, pricing, bid history, compliance data, and competitive intelligence. Be factual and concise. If the knowledge base doesn't contain enough information to answer confidently, say so rather than guessing.
+
+The sources below represent Liftnow's current commercial catalog and extracted product documentation. When specific ALI certification records are relevant, they may also be included. If the available sources don't contain enough information to answer confidently, say so rather than guessing.`;
+
+type QueryMode = "cert-inclusive" | "commercial-only";
+
+type KnowledgeRow = {
+  id: number;
+  title: string;
+  category: string;
+  summary: string | null;
+  tags: string[] | null;
+  raw_content: string;
+  source: string | null;
+  source_filename: string | null;
+  source_path: string | null;
+  extractor_version: string | null;
+  brand_id: number | null;
+  brand_name: string | null;
+  created_at: string;
+};
+
+function isCertQuery(question: string): boolean {
+  const q = question.toLowerCase();
+  return /\b(ali|certified|certification|cert\s+number|cert\s+date)\b/.test(q);
+}
+
+async function searchKnowledge(
+  question: string,
+  mode: QueryMode
+): Promise<KnowledgeRow[]> {
   await ensureSchema();
   const sql = getSQL();
+  const commercialOnly = mode === "commercial-only";
 
-  // Extract potential model numbers and keywords from the question
   const words = question
     .toLowerCase()
     .replace(/[^a-z0-9\s\-\/]/g, " ")
     .split(/\s+/)
     .filter((w) => w.length > 1);
 
-  // 1. Try exact model match first
-  const modelPatterns = question.match(
-    /\b[A-Za-z]{1,4}[\s-]?\d{1,3}[A-Za-z]?(?:[\s-]\d{1,3}[A-Za-z]*)?\b/g
-  );
-
-  let results: Record<string, unknown>[] = [];
-
-  if (modelPatterns && modelPatterns.length > 0) {
-    // Search by model patterns
-    for (const pattern of modelPatterns.slice(0, 5)) {
-      const modelResults = await sql`
-        SELECT DISTINCT ON (model, variant) data
-        FROM products
-        WHERE model ILIKE ${"%" + pattern + "%"}
-           OR variant ILIKE ${"%" + pattern + "%"}
-           OR search_text ILIKE ${"%" + pattern + "%"}
-        ORDER BY model, variant,
-          CASE WHEN document_type IN ('spec-sheet', 'data-sheet') THEN 0 ELSE 1 END
-        LIMIT 10
-      `;
-      results.push(...modelResults.map((r) => r.data as Record<string, unknown>));
-    }
-  }
-
-  // 2. Full-text search for broader queries
   const tsQuery = words
     .filter((w) => w.length > 2)
-    .slice(0, 8)
+    .slice(0, 12)
     .join(" | ");
 
+  const modelPatterns =
+    question.match(/\b[A-Za-z]{1,4}[\s-]?\d{1,3}[A-Za-z]?(?:[\s-]\d{1,3}[A-Za-z]*)?\b/g) || [];
+
+  const collected = new Map<number, KnowledgeRow>();
+  const add = (rows: KnowledgeRow[]) => {
+    for (const r of rows) if (!collected.has(r.id)) collected.set(r.id, r);
+  };
+
   if (tsQuery) {
-    const textResults = await sql`
-      SELECT data, ts_rank(to_tsvector('english', search_text), to_tsquery('english', ${tsQuery})) as rank
-      FROM products
-      WHERE to_tsvector('english', search_text) @@ to_tsquery('english', ${tsQuery})
-      ORDER BY rank DESC
-      LIMIT 15
-    `;
-    results.push(...textResults.map((r) => r.data as Record<string, unknown>));
+    const rows = commercialOnly
+      ? ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.brand_id, b.name AS brand_name, ki.created_at,
+                 ts_rank(
+                   to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,'')),
+                   to_tsquery('english', ${tsQuery})
+                 ) AS rank
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,''))
+                @@ to_tsquery('english', ${tsQuery})
+            AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+          ORDER BY rank DESC
+          LIMIT 25
+        `) as unknown as KnowledgeRow[])
+      : ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.brand_id, b.name AS brand_name, ki.created_at,
+                 ts_rank(
+                   to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,'')),
+                   to_tsquery('english', ${tsQuery})
+                 ) AS rank
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,''))
+                @@ to_tsquery('english', ${tsQuery})
+          ORDER BY rank DESC
+          LIMIT 25
+        `) as unknown as KnowledgeRow[]);
+    add(rows);
   }
 
-  // 3. If still no results, try ILIKE on key fields
-  if (results.length === 0) {
+  for (const pattern of modelPatterns.slice(0, 6)) {
+    const like = `%${pattern.toLowerCase().replace(/\s+/g, "%")}%`;
+    const rows = commercialOnly
+      ? ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.brand_id, b.name AS brand_name, ki.created_at
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE (EXISTS (
+                   SELECT 1 FROM unnest(ki.tags) t WHERE lower(t) LIKE ${like}
+                 )
+                 OR lower(ki.title) LIKE ${like})
+            AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+          LIMIT 10
+        `) as unknown as KnowledgeRow[])
+      : ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                 ki.brand_id, b.name AS brand_name, ki.created_at
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE EXISTS (
+                  SELECT 1 FROM unnest(ki.tags) t WHERE lower(t) LIKE ${like}
+                )
+             OR lower(ki.title) LIKE ${like}
+          LIMIT 10
+        `) as unknown as KnowledgeRow[]);
+    add(rows);
+  }
+
+  if (collected.size === 0) {
     for (const word of words.filter((w) => w.length > 2).slice(0, 3)) {
-      const likeResults = await sql`
-        SELECT data FROM products
-        WHERE model ILIKE ${"%" + word + "%"}
-           OR product_type ILIKE ${"%" + word + "%"}
-           OR category ILIKE ${"%" + word + "%"}
-           OR capacity ILIKE ${"%" + word + "%"}
-        LIMIT 10
-      `;
-      results.push(...likeResults.map((r) => r.data as Record<string, unknown>));
+      const like = `%${word}%`;
+      const rows = commercialOnly
+        ? ((await sql`
+            SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                   ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                   ki.brand_id, b.name AS brand_name, ki.created_at
+            FROM knowledge_items ki
+            LEFT JOIN brands b ON b.id = ki.brand_id
+            WHERE (lower(ki.title) LIKE ${like}
+                   OR lower(ki.summary) LIKE ${like}
+                   OR lower(ki.category) LIKE ${like})
+              AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+            LIMIT 10
+          `) as unknown as KnowledgeRow[])
+        : ((await sql`
+            SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                   ki.source, ki.source_filename, ki.source_path, ki.extractor_version,
+                   ki.brand_id, b.name AS brand_name, ki.created_at
+            FROM knowledge_items ki
+            LEFT JOIN brands b ON b.id = ki.brand_id
+            WHERE lower(ki.title) LIKE ${like}
+               OR lower(ki.summary) LIKE ${like}
+               OR lower(ki.category) LIKE ${like}
+            LIMIT 10
+          `) as unknown as KnowledgeRow[]);
+      add(rows);
     }
   }
 
-  // Deduplicate by source_file
-  const seen = new Set<string>();
-  const unique: Record<string, unknown>[] = [];
-  for (const r of results) {
-    const key = (r.source_file as string) || JSON.stringify(r).slice(0, 100);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    unique.push(r);
-  }
+  return Array.from(collected.values()).slice(0, 25);
+}
 
-  return unique.slice(0, 25); // Cap at 25 entries for context
+function buildContext(rows: KnowledgeRow[]): string {
+  if (rows.length === 0) return "No relevant entries found in the knowledge base.";
+  return rows
+    .map((r, i) => {
+      const head = `[${i + 1}] ${r.title}  (category=${r.category}${r.source_filename ? `, file=${r.source_filename}` : ""})`;
+      const body = r.raw_content ? String(r.raw_content).slice(0, 2500) : "";
+      const summary = r.summary ? `Summary: ${r.summary}` : "";
+      return [head, summary, body].filter(Boolean).join("\n");
+    })
+    .join("\n\n---\n\n");
 }
 
 export async function POST(request: NextRequest) {
   try {
     const text = await request.text();
     let question = "";
-
     try {
       const body = JSON.parse(text);
       question = body?.question || "";
     } catch {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
-
     if (!question || typeof question !== "string" || !question.trim()) {
       return NextResponse.json({ error: "No question provided" }, { status: 400 });
     }
 
-    // Search for relevant products
-    const relevant = await searchProducts(question.trim());
-
-    const contextText =
-      relevant.length > 0
-        ? JSON.stringify(relevant)
-        : "No matching products found in the database.";
+    const trimmed = question.trim();
+    const queryMode: QueryMode = isCertQuery(trimmed)
+      ? "cert-inclusive"
+      : "commercial-only";
+    const rows = await searchKnowledge(trimmed, queryMode);
 
     const client = new Anthropic();
-
     const response = await client.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 4096,
-      system: `You are a Mohawk Lifts product expert. Answer questions using the product data retrieved from the database below. Be precise with numbers, units, and model numbers. If comparing models, organize clearly. If the data doesn't contain the answer, say so.`,
+      system: LIFTNOW_SYSTEM_PROMPT,
       messages: [
         {
           role: "user",
-          content: `Retrieved product data:\n${contextText}\n\nQuestion: ${question.trim()}`,
+          content: `Retrieved knowledge base entries:\n${buildContext(rows)}\n\nQuestion: ${trimmed}`,
         },
       ],
     });
 
-    const textBlock = response.content.find((block) => block.type === "text");
+    const textBlock = response.content.find((b) => b.type === "text");
     if (!textBlock || textBlock.type !== "text") {
       return NextResponse.json({ error: "No response from AI" }, { status: 500 });
     }
 
     return NextResponse.json({
       answer: textBlock.text,
-      sources: relevant.length,
+      query_mode: queryMode,
+      sources: rows.map((r) => ({
+        id: r.id,
+        title: r.title,
+        category: r.category,
+        summary: r.summary,
+        tags: r.tags,
+        source_filename: r.source_filename,
+        source_path: r.source_path,
+        extractor_version: r.extractor_version,
+        brand_id: r.brand_id,
+        brand_name: r.brand_name,
+        created_at: r.created_at,
+      })),
     });
   } catch (err: unknown) {
     console.error("Ask error:", err);
-    let message = "Failed to answer question";
-    if (err instanceof Error) message = err.message;
+    const message = err instanceof Error ? err.message : "Failed to answer question";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -143,17 +239,17 @@ export async function GET() {
   try {
     await ensureSchema();
     const sql = getSQL();
-    const result = await sql`
-      SELECT
-        count(*) as total,
-        count(DISTINCT model) as models,
-        count(DISTINCT category) as categories,
-        count(DISTINCT manufacturer) as manufacturers
-      FROM products
+    const counts = await sql`
+      SELECT category, count(*)::int as count
+      FROM knowledge_items
+      GROUP BY category
+      ORDER BY count DESC
     `;
+    const total = await sql`SELECT count(*)::int as total FROM knowledge_items`;
     return NextResponse.json({
       status: "ok",
-      ...result[0],
+      total: total[0].total,
+      by_category: counts,
       has_api_key: !!process.env.ANTHROPIC_API_KEY,
       has_db: !!process.env.DATABASE_URL,
     });

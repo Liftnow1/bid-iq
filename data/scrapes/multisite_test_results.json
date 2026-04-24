@@ -1,0 +1,263 @@
+[
+  {
+    "input": {
+      "model": "ST 1085",
+      "manufacturer": "Stertil-Koni",
+      "site": "stertil-koni",
+      "url": "https://www.stertil-koni.com/vehicle-lifts/mobile-column-lifts/wireless-mobile-column-lifts",
+      "notes": "Wireless mobile column category page \u2014 should find specs/models"
+    },
+    "output": {
+      "error": "empty result"
+    }
+  },
+  {
+    "input": {
+      "model": "DIAMONDLIFT",
+      "manufacturer": "Stertil-Koni",
+      "site": "stertil-koni",
+      "url": "https://www.stertil-koni.com/vehicle-lifts/inground-lifts/diamondlift",
+      "notes": "In-ground piston lift product page"
+    },
+    "output": {
+      "error": "empty result"
+    }
+  },
+  {
+    "input": {
+      "model": "ECOLIFT",
+      "manufacturer": "Stertil-Koni",
+      "site": "stertil-koni",
+      "url": "https://www.stertil-koni.com/vehicle-lifts/inground-lifts/ecolift",
+      "notes": "In-ground scissor lift product page"
+    },
+    "output": {
+      "error": "empty result"
+    }
+  },
+  {
+    "input": {
+      "model": "PLATFORM LIFT",
+      "manufacturer": "Stertil-Koni",
+      "site": "stertil-koni",
+      "url": "https://www.stertil-koni.com/vehicle-lifts/platform-lifts",
+      "notes": "Platform lift product page"
+    },
+    "output": {
+      "error": "empty result"
+    }
+  },
+  {
+    "input": {
+      "model": "2-POST",
+      "manufacturer": "Stertil-Koni",
+      "site": "stertil-koni",
+      "url": "https://www.stertil-koni.com/vehicle-lifts/2-post-lift",
+      "notes": "Two-post lift product page"
+    },
+    "output": {
+      "error": "empty result"
+    }
+  },
+  {
+    "input": {
+      "model": "4-POST",
+      "manufacturer": "Stertil-Koni",
+      "site": "stertil-koni",
+      "url": "https://www.stertil-koni.com/vehicle-lifts/4-post-lifts",
+      "notes": "Four-post lift product page"
+    },
+    "output": {
+      "error": "empty result"
+    }
+  },
+  {
+    "input": {
+      "model": "CL10V3",
+      "manufacturer": "Challenger",
+      "site": "challenger",
+      "url": "https://www.challengerlifts.com/car_lift/cl10v3/",
+      "notes": "Two-post lift on manufacturer site"
+    },
+    "output": {
+      "manufacturer": "Challenger Lifts",
+      "brand": "Challenger Lifts",
+      "model": "404",
+      "category": "",
+      "product_page_url": "https://www.challengerlifts.com/car_lift/cl10v3/",
+      "description": "404",
+      "capacity_lbs": null,
+      "msrp": 0.0,
+      "weight_lbs": null,
+      "power_requirements": "",
+      "max_rise_in": null,
+      "overall_height_in": null,
+      "overall_width_in": null,
+      "spec_sheet_url": "",
+      "accessories": [],
+      "specs_raw": {},
+      "features": [],
+      "scraped_at": "2026-03-06T13:45:14.997267",
+      "source_site": "challenger"
+    }
+  },
+  {
+    "input": {
+      "model": "CL12",
+      "manufacturer": "Challenger",
+      "site": "challenger",
+      "url": "https://www.challengerlifts.com/car_lift/cl12/",
+      "notes": "12K two-post on manufacturer site"
+    },
+    "output": {
+      "manufacturer": "Challenger Lifts",
+      "brand": "Challenger Lifts",
+      "model": "404",
+      "category": "",
+      "product_page_url": "https://www.challengerlifts.com/car_lift/cl12/",
+      "description": "404",
+      "capacity_lbs": null,
+      "msrp": 0.0,
+      "weight_lbs": null,
+      "power_requirements": "",
+      "max_rise_in": null,
+      "overall_height_in": null,
+      "overall_width_in": null,
+      "spec_sheet_url": "",
+      "accessories": [],
+      "specs_raw": {},
+      "features": [],
+      "scraped_at": "2026-03-06T13:45:22.733187",
+      "source_site": "challenger"
+    }
+  },
+  {
+    "input": {
+      "model": "XPR-10AXLS",
+      "manufacturer": "BendPak",
+      "site": "bendpak",
+      "url": "https://www.bendpak.com/car-lifts/two-post-lifts/xpr-10axls/",
+      "notes": "10K asymmetric two-post on bendpak.com"
+    },
+    "output": {
+      "manufacturer": "BendPak",
+      "brand": "BendPak",
+      "model": "Whoops",
+      "category": "two-post lift",
+      "product_page_url": "https://www.bendpak.com/car-lifts/two-post-lifts/xpr-10axls/",
+      "description": "Whoops, our bad...",
+      "capacity_lbs": null,
+      "msrp": 0.0,
+      "weight_lbs": null,
+      "power_requirements": "",
+      "max_rise_in": null,
+      "overall_height_in": null,
+      "overall_width_in": null,
+      "spec_sheet_url": "https://www.bendpak.com/media/wysiwyg/GrandPrix-Brochure-2020.pdf",
+      "accessories": [],
+      "specs_raw": {
+        "The page you requested was not found, and we have a fine guess why.": "If you typed the URL directly, please make sure the spelling is correct.\nIf you clicked on a link to get here, the link is outdated.",
+        "What can you do?": "Have no fear, help is near! There are many ways you can get back on track with Magento Store."
+      },
+      "features": [],
+      "scraped_at": "2026-03-06T13:45:27.724191",
+      "source_site": "bendpak"
+    }
+  },
+  {
+    "input": {
+      "model": "SPO12",
+      "manufacturer": "Rotary",
+      "site": "rotary",
+      "url": "https://www.rotarylift.com/product/spo12/",
+      "notes": "12K two-post on rotarylift.com"
+    },
+    "output": {
+      "manufacturer": "Rotary Lift",
+      "brand": "Rotary Lift",
+      "model": "SPO12-AV",
+      "category": "",
+      "product_page_url": "https://www.rotarylift.com/product/spo12/",
+      "description": "SPO12-AV\n              Two-Post Lift | Symmetric Lift | Shockwave\u2122 Available",
+      "capacity_lbs": 12000,
+      "msrp": 0.0,
+      "weight_lbs": null,
+      "power_requirements": "2 HP / 208-230V",
+      "max_rise_in": 60.0,
+      "overall_height_in": 13.0,
+      "overall_width_in": null,
+      "spec_sheet_url": "https://vsgdover.bynder.com/m/708322c4931fdf7d/original/SPO12AV-CUTSHEET-2025-12.pdf",
+      "accessories": [],
+      "specs_raw": {
+        "Capacity": "12,000 lbs.",
+        "Rise": "75 3/4\u201d \u2013 78 1/8\u201d",
+        "Overall Height": "Standard 13\u2032 8\u2033 | Low 11' 8\"",
+        "Base Required Ceiling Height": "102 3/8\"",
+        "Drive-Thru": "8\u2032 6 3/8\u2033",
+        "Inside Columns": "114 7/8\"",
+        "Arm Reach Min/Max": "27 3/8\" / 59 1/8\"",
+        "Min. Adapter Height": "4 5/8\u2033",
+        "Min. Bay Size": "12\u2019x26\u2032",
+        "Min. Ceiling Height": "Standard 13' 9\" | Standard 11' 10 3/4\"",
+        "Motor / Voltage 1\u00d8": "2 HP / 208-230V",
+        "Time of Full Rise": "60 secs."
+      },
+      "features": [],
+      "scraped_at": "2026-03-06T13:45:33.029746",
+      "source_site": "rotary"
+    }
+  },
+  {
+    "input": {
+      "model": "CL10V3",
+      "manufacturer": "Challenger",
+      "site": "liftnow",
+      "url": "https://liftnow.com/product/challenger-cl10v3-two-post-vehicle-lift/",
+      "notes": "Same product on our site \u2014 compare data richness"
+    },
+    "output": {
+      "manufacturer": "Liftnow",
+      "brand": "Liftnow",
+      "model": "CL10V3",
+      "category": "two-post lift",
+      "product_page_url": "https://liftnow.com/product/challenger-cl10v3-two-post-vehicle-lift/",
+      "description": "Challenger CL10V3 Two Post Vehicle Lift",
+      "capacity_lbs": 10000,
+      "msrp": 0.0,
+      "weight_lbs": null,
+      "power_requirements": "2HP, 208v-230v, 60Hz, 1Ph",
+      "max_rise_in": 38.0,
+      "overall_height_in": 143.0,
+      "overall_width_in": 138.5,
+      "spec_sheet_url": "",
+      "accessories": [],
+      "specs_raw": {
+        "Lifting Capacity": "10,000 lbs.",
+        "Lifting Configuration": "Versymmetric (Symmetric & Asymmetric)",
+        "Arms": "3-stage front/3-stage rear",
+        "Rise Height": "74.125\u201d",
+        "Overall Height": "134\u201d / 140\u201d",
+        "Overall Height (Cylinder Extended)": "143\u201d",
+        "2\u2019 Height Extension Available": "Yes",
+        "3\u2019 Height Extension Available": "Yes",
+        "Overall Width": "138.5\u201d / 143\u201d",
+        "Drive-Thru Clearance": "100\u201d / 104.5\u201d",
+        "Floor to Overhead Switch": "128.5\u201d / 134.5\u201d",
+        "Front Arm Reach": "20\u201d \u2013 42\u201d",
+        "Rear Arm Reach": "37.625\u201d \u2013 60\u201d",
+        "Screw Pad Height": "3.875\u201d \u2013 6.125\u201d",
+        "Inside Columns": "110\u201d / 114.5\u201d",
+        "Motor / Voltage": "2HP, 208v-230v, 60Hz, 1Ph",
+        "Speed of Rise": "38 s",
+        "Ceiling Height Required": "12\u2032",
+        "ALI/ETL Certified": "Yes",
+        "Quick Cycle": "\u2013",
+        "Dual Pendant Controls": "\u2013",
+        "Colors Available": "Red, Blue, Black"
+      },
+      "features": [],
+      "scraped_at": "2026-03-06T13:45:41.430579",
+      "source_site": "liftnow"
+    }
+  }
+]

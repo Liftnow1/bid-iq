@@ -1,5 +1,27 @@
 # bid-iq
-Bid IQ is going to be a tool meant to ingest bids across formats (pdfs, links, bid portals) and develop complete bids, strategies, pricing, and completed documentation. The goal is one-click bid completion, but may need some user input.
+
+Bid IQ is Liftnow's internal tool for ingesting government bid packages and developing complete bids — pricing, strategy, specification analysis, and submittal documentation. The goal is one-click bid completion, with user input only where judgement is required.
+
+## Orientation for Claude
+
+Read this before making changes:
+
+- The product is **Liftnow** — lowercase `n`, one word. Never "LiftNow" or "LIFTNOW". This is a strict voice rule enforced throughout the codebase.
+- Postgres (Neon serverless) is the single source of truth. The two tables that matter are `brands` and `knowledge_items`. Schema lives in `lib/db.ts` (and mirrored in `scripts/setup-db.mjs`).
+- `data/catalog.db` is a SQLite **historical artifact** that has already been migrated into Postgres. The running app does not read it. Do not add code that queries it.
+- Legacy JSON extractions in `kb_extracted/` and `kb_output/` are Mohawk-only and have been migrated into `knowledge_items`. They stay on disk temporarily; do not re-wire the old `/api/db-seed` loader (it was deleted).
+- The previous `products` table is retired. All product data lives in `knowledge_items` under `category = 'product-specifications'`, with an optional `brand_id` FK to `brands`.
+- Q&A goes through `/api/ask`, which queries `knowledge_items` and calls Claude with the Liftnow system prompt. Do not branch out a parallel Q&A route.
+- Classification uses the 10-category vocabulary defined in `app/knowledge-base/page.tsx`: `product-specifications`, `competitive-intelligence`, `pricing-data`, `bid-history`, `installation-guides`, `manufacturer-info`, `service-procedures`, `compliance-certifications`, `customer-intelligence`, `general`.
+- A new PDF ingestion pipeline that reads from `data/product_data/<brand>/…` is planned but **not yet built.** `bidiq/enrich.py` is retained as a historical Mohawk-only extractor; do not extend it.
+- `.github/workflows/extract-lfs-pdfs.yml.disabled` is intentionally disabled (suffix-renamed). Do not re-enable.
+
+See `README.md` for route, env-var, and local-run details.
+
+---
+
+## Bid intake playbook
+
 Here are some notes for bid intake:
 o	Intake
 	Read the title and description – does this fit within the scope of what our company does or is capable of supplying on a very surface level look?

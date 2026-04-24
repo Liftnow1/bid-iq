@@ -1,38 +1,76 @@
-import { neon } from '@neondatabase/serverless';
+#!/usr/bin/env node
+// Bootstrap Postgres schema for bid-iq.
+// Mirrors the DDL defined in lib/db.ts ensureSchema().
+//
+// Usage: DATABASE_URL=postgres://... node scripts/setup-db.mjs
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_CVPZOwiW6gU0@ep-gentle-shadow-adw4fmoz-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require';
+import { neon } from "@neondatabase/serverless";
 
-const sql = neon(DATABASE_URL);
+if (!process.env.DATABASE_URL) {
+  console.error("DATABASE_URL not set. Aborting.");
+  process.exit(1);
+}
+
+const sql = neon(process.env.DATABASE_URL);
 
 async function setup() {
-  console.log('Creating schema...');
-
-  await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+  console.log("Creating schema...");
 
   await sql`
-    CREATE TABLE IF NOT EXISTS products (
+    CREATE TABLE IF NOT EXISTS brands (
       id SERIAL PRIMARY KEY,
-      manufacturer TEXT NOT NULL DEFAULT 'mohawk',
-      category TEXT,
-      model TEXT,
-      variant TEXT,
-      product_type TEXT,
-      capacity TEXT,
-      document_type TEXT,
-      source_file TEXT,
-      data JSONB NOT NULL,
-      search_text TEXT,
+      name TEXT NOT NULL UNIQUE,
+      manufacturer_name TEXT,
+      we_carry BOOLEAN DEFAULT FALSE,
+      relationship_type TEXT DEFAULT 'unknown',
+      notes TEXT,
+      website TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      CONSTRAINT brands_relationship_type_check CHECK (
+        relationship_type IN ('own_vendor', 'competitor', 'reference', 'unknown')
+      )
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_brands_name ON brands(name)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_brands_we_carry ON brands(we_carry)`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS knowledge_items (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      category TEXT NOT NULL,
+      subcategory TEXT,
+      tags TEXT[] DEFAULT '{}',
+      content_type TEXT NOT NULL DEFAULT 'text',
+      source TEXT NOT NULL DEFAULT 'typed',
+      source_filename TEXT,
+      raw_content TEXT NOT NULL,
+      extracted_data JSONB,
+      summary TEXT,
+      search_text TEXT NOT NULL DEFAULT '',
       created_at TIMESTAMPTZ DEFAULT NOW()
     )
   `;
 
-  await sql`CREATE INDEX IF NOT EXISTS idx_products_manufacturer ON products(manufacturer)`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_products_model ON products(model)`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_products_search ON products USING GIN(to_tsvector('english', coalesce(search_text, '')))`;
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS brand_id INTEGER REFERENCES brands(id)`;
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS source_path TEXT`;
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS source_pages_count INTEGER`;
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extracted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extractor_version TEXT`;
 
-  const result = await sql`SELECT count(*) FROM products`;
-  console.log('Schema created. Current rows:', result[0].count);
+  await sql`CREATE INDEX IF NOT EXISTS idx_ki_category ON knowledge_items(category)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ki_search ON knowledge_items USING GIN(to_tsvector('english', coalesce(search_text, '')))`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ki_tags ON knowledge_items USING GIN(tags)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ki_brand_id ON knowledge_items(brand_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ki_source ON knowledge_items(source)`;
+
+  const b = await sql`SELECT count(*)::int AS c FROM brands`;
+  const k = await sql`SELECT count(*)::int AS c FROM knowledge_items`;
+  console.log(`Schema ensured. brands=${b[0].c}  knowledge_items=${k[0].c}`);
 }
 
-setup().catch(e => { console.error(e); process.exit(1); });
+setup().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
