@@ -1,6 +1,7 @@
 import click
 
 from bidiq.enrich import enrich_pdfs
+from bidiq.ingest import ingest as ingest_command
 
 
 @click.group()
@@ -54,6 +55,9 @@ def enrich(input_dir, output_dir, model, max_concurrent, dpi):
         max_concurrent=max_concurrent,
         dpi=dpi,
     )
+
+
+kb.add_command(ingest_command, name="ingest")
 
 
 @main.command()
