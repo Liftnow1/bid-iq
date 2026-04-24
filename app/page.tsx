@@ -65,7 +65,7 @@ export default function Home() {
         <div>
           <h1 className="text-3xl font-bold">Bid IQ</h1>
           <p className="text-gray-400 mt-1">
-            Mohawk Lifts Knowledge Base — Ask anything about products, specs,
+            Liftnow Knowledge Base — Ask anything about products, specs,
             installation, and more
           </p>
         </div>
@@ -84,10 +84,10 @@ export default function Home() {
             <p className="text-lg mb-6">Try asking something like:</p>
             <div className="space-y-3 max-w-md mx-auto">
               {[
-                "What are the slab requirements for a Mohawk lift?",
+                "What are the slab requirements for a two-post lift?",
                 "Compare the 50-32-F and 75-35-S models",
                 "What capacity options are available for parallelogram lifts?",
-                "What certifications do Mohawk lifts have?",
+                "Which lifts in our catalog are ALI-certified?",
                 "What are the pit dimensions for a flush mount 75-42?",
               ].map((suggestion) => (
                 <button
@@ -140,7 +140,7 @@ export default function Home() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask about Mohawk Lifts products, specs, installation..."
+            placeholder="Ask about Liftnow products, specs, installation..."
             className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
             disabled={loading}
           />

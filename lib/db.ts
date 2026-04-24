@@ -13,26 +13,24 @@ export async function ensureSchema() {
   const sql = getSQL();
 
   await sql`
-    CREATE TABLE IF NOT EXISTS products (
+    CREATE TABLE IF NOT EXISTS brands (
       id SERIAL PRIMARY KEY,
-      manufacturer TEXT NOT NULL DEFAULT 'mohawk',
-      category TEXT,
-      model TEXT,
-      variant TEXT,
-      product_type TEXT,
-      capacity TEXT,
-      document_type TEXT,
-      source_file TEXT,
-      data JSONB NOT NULL,
-      search_text TEXT NOT NULL DEFAULT '',
-      created_at TIMESTAMPTZ DEFAULT NOW()
+      name TEXT NOT NULL UNIQUE,
+      manufacturer_name TEXT,
+      we_carry BOOLEAN DEFAULT FALSE,
+      relationship_type TEXT DEFAULT 'unknown',
+      notes TEXT,
+      website TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      CONSTRAINT brands_relationship_type_check CHECK (
+        relationship_type IN ('own_vendor', 'competitor', 'reference', 'unknown')
+      )
     )
   `;
 
-  await sql`CREATE INDEX IF NOT EXISTS idx_products_manufacturer ON products(manufacturer)`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_products_model ON products(model)`;
-  await sql`CREATE INDEX IF NOT EXISTS idx_products_search ON products USING GIN(to_tsvector('english', coalesce(search_text, '')))`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_brands_name ON brands(name)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_brands_we_carry ON brands(we_carry)`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS knowledge_items (
@@ -52,9 +50,17 @@ export async function ensureSchema() {
     )
   `;
 
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS brand_id INTEGER REFERENCES brands(id)`;
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS source_path TEXT`;
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS source_pages_count INTEGER`;
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extracted_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extractor_version TEXT`;
+
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_category ON knowledge_items(category)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_search ON knowledge_items USING GIN(to_tsvector('english', coalesce(search_text, '')))`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_tags ON knowledge_items USING GIN(tags)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ki_brand_id ON knowledge_items(brand_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ki_source ON knowledge_items(source)`;
 
   schemaReady = true;
 }
