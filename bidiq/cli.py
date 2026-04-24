@@ -1,6 +1,7 @@
 import click
 
 from bidiq.enrich import enrich_pdfs
+from bidiq.ingest import ingest_cmd
 
 
 @click.group()
@@ -13,6 +14,9 @@ def main():
 def kb():
     """Knowledge base commands."""
     pass
+
+
+kb.add_command(ingest_cmd)
 
 
 @kb.command()
