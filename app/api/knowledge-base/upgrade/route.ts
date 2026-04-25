@@ -54,6 +54,21 @@ export async function POST(request: NextRequest) {
 
     const result = await runPythonUpgrade(id);
     if (!result.ok) {
+      // The upgrade flow shells out to Python; on hosts without it (e.g.
+      // Vercel serverless), surface a 503 rather than a 500 so callers can
+      // distinguish "feature unavailable here" from "real failure".
+      if (result.error === "upgrade_unavailable") {
+        return NextResponse.json(
+          {
+            status: "upgrade_unavailable",
+            error:
+              "This runtime does not have python3 + bidiq available. " +
+              "Run the upgrade from a host with the bidiq package installed " +
+              "(see bidiq/INGEST.md, 'Production behavior on Vercel').",
+          },
+          { status: 503 }
+        );
+      }
       return NextResponse.json(
         {
           status: "upgrade_failed",

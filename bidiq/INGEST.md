@@ -126,7 +126,19 @@ Both the `/api/knowledge-base/upgrade` endpoint and the auto-upgrade in `/api/as
 - the `bidiq` package importable (`pip install -e .` in the repo)
 - `poppler-utils` (for `pdf2image` / `pdfinfo`)
 
-This **does not work on Vercel serverless** — there is no Python runtime there. Either self-host the Next.js app on a node with Python installed, or move the upgrade work to a separate worker. The Tier-1 batch ingestion is unaffected; it always runs from the CLI on a machine you control.
+The Tier-1 batch ingestion is unaffected; it always runs from the CLI on a machine you control.
+
+## Production behavior on Vercel
+
+Vercel's Node serverless runtime does not include Python and cannot install OS packages, so the upgrade-via-subprocess flow won't run there. Rather than letting that 500 the request, the app **detects** the situation once at startup and **degrades gracefully**:
+
+- On the first call to `lib/upgrade.ts`, we run `python3 -c "import bidiq"` once. If it succeeds, the upgrade flow is enabled. If it fails (Python missing, `bidiq` missing, or any spawn error), it's disabled. The result is cached in a module-level promise for the lifetime of the runtime — we never re-probe per request.
+- **Local dev / self-host** (probe succeeds): unchanged behavior. `/api/ask` upgrades any Tier-1 row in the top-5 retrieval slice in parallel, re-runs retrieval, and answers with full Tier-2 content. `/api/knowledge-base/upgrade` runs the subprocess and returns the upgraded row.
+- **Vercel production** (probe fails): `/api/ask` returns **200** with a thinner answer generated from `title + summary + tags + extracted_data` for the Tier-1 candidates. The shell-out is never attempted. The response includes `tier1_unupgraded_ids` so the client can see which sources were answered from metadata only, and `upgrade_available: false`. `/api/knowledge-base/upgrade` returns **503** with `{ status: "upgrade_unavailable", … }` — a clean signal callers can branch on, distinct from a real failure.
+
+Each entry in `sources` carries a `tier: 1 | 2` field regardless of environment. The UI doesn't render this differently today, but the data is there to surface (e.g., a "shallow result — full content not yet extracted" badge) once we want to.
+
+A future migration ("Option C") will move the upgrade work to a separate Python worker (queue + worker, or Lambda + container, or a long-running Fly/Railway box). Once that lands the Vercel app will dispatch to the worker instead of shelling out, and the degrade path here becomes obsolete. Until then, this behavior is the contract.
 
 ## Verifying output
 

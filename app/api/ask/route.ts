@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { getSQL, ensureSchema } from "@/lib/db";
-import { runPythonUpgrade, isTierTwo } from "@/lib/upgrade";
+import {
+  runPythonUpgrade,
+  isTierTwo,
+  isUpgradeAvailable,
+  tierOf,
+} from "@/lib/upgrade";
 
 // Auto-upgrade can take 30s-2min per Tier-1 source. Bump max duration so
 // the first query against a fresh Tier-1 row doesn't time out.
@@ -203,26 +208,53 @@ function parseCitedIndices(answer: string): Set<number> {
   return cited;
 }
 
+type UpgradeOutcome = {
+  upgraded: Set<number>;
+  skippedDueToUnavailable: number[];
+};
+
 /**
- * Identify Tier-1 rows in the top-N retrieval slice and upgrade them to
- * Tier-2 in parallel. Returns the set of ids that were upgraded (or
- * attempted) so the caller can re-fetch them.
+ * Identify Tier-1 rows in the top-N retrieval slice. If the runtime
+ * supports the Python upgrade flow, upgrade them in parallel. Otherwise
+ * leave them as Tier-1 and let the caller answer from metadata only —
+ * never throw, never block the response.
  */
-async function upgradeTier1Candidates(rows: KnowledgeRow[]): Promise<Set<number>> {
+async function upgradeTier1Candidates(rows: KnowledgeRow[]): Promise<UpgradeOutcome> {
   const candidates = rows
     .slice(0, AUTO_UPGRADE_TOP_N)
-    .filter((r) => !isTierTwo({ id: r.id, raw_content: r.raw_content, extracted_data: r.extracted_data }));
-  if (candidates.length === 0) return new Set();
+    .filter(
+      (r) =>
+        !isTierTwo({
+          id: r.id,
+          raw_content: r.raw_content,
+          extracted_data: r.extracted_data,
+        })
+    );
+  if (candidates.length === 0) {
+    return { upgraded: new Set(), skippedDueToUnavailable: [] };
+  }
+
+  if (!(await isUpgradeAvailable())) {
+    return {
+      upgraded: new Set(),
+      skippedDueToUnavailable: candidates.map((r) => r.id),
+    };
+  }
 
   const upgraded = new Set<number>();
   await Promise.all(
     candidates.map(async (r) => {
       const result = await runPythonUpgrade(r.id);
       if (result.ok) upgraded.add(r.id);
-      else console.error(`auto-upgrade failed for id=${r.id}:`, result.error, result.stderr);
+      else
+        console.error(
+          `auto-upgrade failed for id=${r.id}:`,
+          result.error,
+          "stderr" in result ? result.stderr : ""
+        );
     })
   );
-  return upgraded;
+  return { upgraded, skippedDueToUnavailable: [] };
 }
 
 export async function POST(request: NextRequest) {
@@ -246,10 +278,12 @@ export async function POST(request: NextRequest) {
 
     // Initial retrieval. If any Tier-1 rows score into the top slice,
     // upgrade them to Tier-2 in parallel and re-run retrieval so the now-
-    // populated raw_content participates in ranking.
+    // populated raw_content participates in ranking. On hosts without the
+    // Python upgrade flow (e.g. Vercel serverless), the upgrade step is
+    // skipped and the answer is generated from Tier-1 metadata only.
     let rows = await searchKnowledge(trimmed, queryMode);
-    const upgraded = await upgradeTier1Candidates(rows);
-    if (upgraded.size > 0) {
+    const outcome = await upgradeTier1Candidates(rows);
+    if (outcome.upgraded.size > 0) {
       rows = await searchKnowledge(trimmed, queryMode);
     }
 
@@ -282,6 +316,11 @@ export async function POST(request: NextRequest) {
         id: r.id,
         title: r.title,
         category: r.category,
+        tier: tierOf({
+          id: r.id,
+          raw_content: r.raw_content,
+          extracted_data: r.extracted_data,
+        }),
         summary: r.summary,
         tags: r.tags,
         source_filename: r.source_filename,
@@ -296,7 +335,11 @@ export async function POST(request: NextRequest) {
       answer: textBlock.text,
       query_mode: queryMode,
       sources: citedSources,
-      upgraded_ids: Array.from(upgraded),
+      upgraded_ids: Array.from(outcome.upgraded),
+      tier1_unupgraded_ids: outcome.skippedDueToUnavailable,
+      upgrade_available: outcome.skippedDueToUnavailable.length === 0
+        ? undefined
+        : false,
     });
   } catch (err: unknown) {
     console.error("Ask error:", err);

@@ -22,18 +22,92 @@ export function isTierTwo(row: KnowledgeRowMinimal): boolean {
   return tier === 2;
 }
 
+export function tierOf(row: KnowledgeRowMinimal): 1 | 2 {
+  return isTierTwo(row) ? 2 : 1;
+}
+
+// ---------------------------------------------------------------------------
+// Python-availability probe (cached for the lifetime of the runtime)
+// ---------------------------------------------------------------------------
+//
+// The upgrade flow shells out to `python3 -m bidiq.ingest`. On Vercel
+// serverless there is no Python runtime, and the package isn't installed, so
+// the shell-out would fail. We probe once and cache the result; callers
+// degrade gracefully when the probe says it's unavailable.
+
+let availabilityProbe: Promise<boolean> | null = null;
+
+function probePythonUpgrade(): Promise<boolean> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      resolve(ok);
+    };
+
+    let child: ReturnType<typeof spawn>;
+    try {
+      child = spawn("python3", ["-c", "import bidiq"], {
+        cwd: path.resolve(process.cwd()),
+        env: { ...process.env },
+        stdio: ["ignore", "ignore", "ignore"],
+      });
+    } catch {
+      finish(false);
+      return;
+    }
+
+    // Hard ceiling so a stuck environment can't hang the first request.
+    const timer = setTimeout(() => {
+      try {
+        child.kill();
+      } catch {}
+      finish(false);
+    }, 5_000);
+
+    child.on("error", () => {
+      clearTimeout(timer);
+      finish(false);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      finish(code === 0);
+    });
+  });
+}
+
+/**
+ * Returns true when `python3 -c "import bidiq"` succeeds in the current
+ * runtime. Cached after the first call.
+ */
+export function isUpgradeAvailable(): Promise<boolean> {
+  if (availabilityProbe === null) availabilityProbe = probePythonUpgrade();
+  return availabilityProbe;
+}
+
+/** Test-only. Forces the next call to re-probe. */
+export function _resetUpgradeAvailabilityForTests(): void {
+  availabilityProbe = null;
+}
+
 export type UpgradeResult =
   | { ok: true; stdout: string }
-  | { ok: false; error: string; stdout: string; stderr: string };
+  | { ok: false; error: string; stdout: string; stderr: string }
+  | { ok: false; error: "upgrade_unavailable"; stdout: ""; stderr: "" };
 
 /**
  * Shell out to `python -m bidiq.ingest --tier 2 --id <n>`.
  *
- * NOTE: This requires the runtime host to have Python 3, the `bidiq` package
- * importable, and Poppler installed. It does not work on Vercel serverless
- * (no Python runtime). Self-host or run on a worker for this to function.
+ * Returns `{ ok: false, error: "upgrade_unavailable" }` immediately when the
+ * runtime probe says Python + bidiq aren't available — never crashes the
+ * caller. Otherwise spawns the subprocess and waits for it to exit.
  */
-export function runPythonUpgrade(knowledgeItemId: number): Promise<UpgradeResult> {
+export async function runPythonUpgrade(knowledgeItemId: number): Promise<UpgradeResult> {
+  if (!(await isUpgradeAvailable())) {
+    return { ok: false, error: "upgrade_unavailable", stdout: "", stderr: "" };
+  }
+
   return new Promise((resolve) => {
     const cwd = path.resolve(process.cwd());
     const child = spawn(
@@ -72,7 +146,8 @@ export function runPythonUpgrade(knowledgeItemId: number): Promise<UpgradeResult
 
 /**
  * Upgrade a single knowledge_items row in-place. Returns true on success
- * (or already-Tier-2), false if the upgrade attempt failed.
+ * (or already-Tier-2), false if the upgrade attempt failed or Python is
+ * unavailable on this host.
  */
 export async function upgradeRowInPlace(id: number): Promise<boolean> {
   const sql = getSQL();
