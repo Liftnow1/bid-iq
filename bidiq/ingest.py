@@ -699,31 +699,50 @@ def process_single_pdf(
     dpi: int,
     tier: int,
 ) -> str:
+    """Process one PDF in three phases so we never hold a Postgres
+    connection across the long Claude vision call.
+
+    Phase 1: open conn, register brand, decide whether to skip, close.
+    Phase 2: rasterize + Claude vision with NO DB connection open.
+             (Tier-2 manuals can spend 10+ min here, well past Neon's
+             idle-in-transaction timeout.)
+    Phase 3: fresh conn, upsert, commit, close.
+
+    Between phases another worker may have written the same source_path —
+    that's fine, upsert_knowledge_item is keyed on source_path and will
+    UPDATE in place.
+    """
     source_path = repo_relative_path(pdf_path)
     try:
         brand_name = derive_brand(pdf_path)
     except ValueError:
         return f"  SKIP  {source_path} (not under data/product_data/)"
 
-    conn = None
+    # ---- Phase 1: read state, decide, release connection ----
     try:
-        conn = _connect(database_url)
+        with _connect(database_url) as conn:
+            brand_id = ensure_brand(conn, brand_name)
+            existing = find_existing_row(conn, source_path)
+            if existing:
+                _, extracted_at, ext_version, has_raw = existing
+                current_tier = existing_tier(ext_version, has_raw)
+                if tier == 1 and current_tier >= 1:
+                    return f"  SKIP  {source_path} (already tier-{current_tier})"
+                if (
+                    tier == 2
+                    and current_tier >= 2
+                    and is_up_to_date(pdf_path, extracted_at)
+                ):
+                    return f"  SKIP  {source_path} (already tier-2, up-to-date)"
+            existed_before = existing is not None
+    except Exception as e:
+        log_error(pdf_path, e)
+        tb = traceback.format_exc(limit=2).strip().splitlines()[-1]
+        return f"  FAIL  {source_path} - {type(e).__name__}: {tb}"
 
-        brand_id = ensure_brand(conn, brand_name)
-
-        existing = find_existing_row(conn, source_path)
-        if existing:
-            _, extracted_at, ext_version, has_raw = existing
-            current_tier = existing_tier(ext_version, has_raw)
-            # Tier-1 never overwrites a Tier-2 row.
-            if tier == 1 and current_tier >= 1:
-                return f"  SKIP  {source_path} (already tier-{current_tier})"
-            # Tier-2 over Tier-2 only re-runs if PDF mtime is newer.
-            if tier == 2 and current_tier >= 2 and is_up_to_date(pdf_path, extracted_at):
-                return f"  SKIP  {source_path} (already tier-2, up-to-date)"
-
+    # ---- Phase 2: long-running work, no DB connection held ----
+    try:
         client = anthropic.Anthropic(api_key=api_key)
-
         if tier == 1:
             total_pages = count_pdf_pages(pdf_path)
             sample_pages = render_first_and_last_pages(
@@ -743,28 +762,33 @@ def process_single_pdf(
                 client, pdf_path.name, brand_name, pages, model
             )
             pages_count = len(pages)
-
-        row_id = upsert_knowledge_item(
-            conn,
-            source_path=source_path,
-            source_filename=pdf_path.name,
-            source_pages_count=pages_count,
-            brand_id=brand_id,
-            extraction=extraction,
-            tier=tier,
-        )
-        action = "UPDATE" if existing else "INSERT"
-        return (
-            f"  OK    {source_path} ({pages_count}p, brand={brand_name}, tier={tier}) "
-            f"-> knowledge_items.id={row_id} [{action}]"
-        )
     except Exception as e:
         log_error(pdf_path, e)
         tb = traceback.format_exc(limit=2).strip().splitlines()[-1]
         return f"  FAIL  {source_path} - {type(e).__name__}: {tb}"
-    finally:
-        if conn is not None:
-            conn.close()
+
+    # ---- Phase 3: fresh connection, write, commit, close ----
+    try:
+        with _connect(database_url) as conn:
+            row_id = upsert_knowledge_item(
+                conn,
+                source_path=source_path,
+                source_filename=pdf_path.name,
+                source_pages_count=pages_count,
+                brand_id=brand_id,
+                extraction=extraction,
+                tier=tier,
+            )
+    except Exception as e:
+        log_error(pdf_path, e)
+        tb = traceback.format_exc(limit=2).strip().splitlines()[-1]
+        return f"  FAIL  {source_path} - {type(e).__name__}: {tb}"
+
+    action = "UPDATE" if existed_before else "INSERT"
+    return (
+        f"  OK    {source_path} ({pages_count}p, brand={brand_name}, tier={tier}) "
+        f"-> knowledge_items.id={row_id} [{action}]"
+    )
 
 
 def lookup_pdf_path_for_id(
