@@ -43,16 +43,25 @@ A row is considered Tier-2 if EITHER `raw_content` is non-empty OR `extracted_da
 2. For each PDF:
    - Skips if a Tier-2 row already exists AND `extracted_at` is newer than the PDF's mtime.
    - Rasterizes ALL pages.
-   - Calls Claude vision with the full extraction prompt — the same prompt the previous single-tier ingester used.
+   - Runs **one classification pass** (cover + last page) for `title`, `category`, `summary`, `tags`, `effective_date`, `supersedes_previous`.
+   - Splits the page list into chunks of `--chunk-size` (default 5) and **fans out body extraction in parallel** (up to `--chunk-concurrency`, default 5). Each chunk returns just `content_markdown` for those pages.
+   - Stitches the chunk markdown back together in page order to form the final `raw_content`.
+   - Per-page descriptions (`pages_summary`) are off by default; pass `--include-page-summaries` to have each chunk also emit them.
    - UPSERTs (UPDATEs an existing Tier-1 row in place) with `raw_content` populated, `extracted_data.tier = 2`, `extractor_version = 'ingest.py-v1-tier2'`. `search_text` includes the first 5 000 chars of `raw_content`.
 
+Connections are NOT held during the long Claude calls — the worker reads what it needs from Postgres, closes the connection, runs the vision pass, then opens a fresh connection to write the result. This keeps Neon from killing the transaction with `IdleInTransactionSessionTimeout` on long manuals.
+
 On failure (either tier), a line is appended to `data/extraction-errors.log` and the run continues.
+
+### Performance
+
+Pre-chunking, a 75-page Tier-2 ingest spent ~10 minutes in a single Claude call. With `chunk_size=5` and `chunk_concurrency=5` (defaults) the same 75-page PDF runs as 15 chunks × 5 pages with up to 5 in flight at once — target wall-clock under 2 minutes. DPI default is **130**, the quality-vs-speed sweet spot for Claude vision; bump to 150–200 for very dense engineering drawings if needed.
 
 ## Schema notes
 
 The build brief used a column named `content`; the actual schema uses `raw_content`. Tier-1 sets `raw_content = NULL`, so the column was relaxed to nullable in `lib/db.ts` / `scripts/setup-db.mjs`. Existing legacy rows (with `raw_content` already populated) are unaffected by the relaxation.
 
-`extracted_data` JSONB carries: `tier` (1 or 2), `effective_date`, `supersedes_previous`, and (Tier 2 only) `pages_summary`.
+`extracted_data` JSONB carries: `tier` (1 or 2), `effective_date`, `supersedes_previous`, and (Tier 2 only, when `--include-page-summaries` was passed) `pages_summary`.
 
 ## CLI
 
@@ -69,9 +78,12 @@ Or directly: `python -m bidiq.ingest [OPTIONS]`.
 | `--id <int>` | (none) | Process a single `knowledge_items` row by id. The row's `source_path` is resolved to the on-disk PDF. Used by the `/api/knowledge-base/upgrade` endpoint. Mutually exclusive with `--brand`/`--limit` (those are ignored when `--id` is set). |
 | `--limit <n>` | (none) | Only process the first N PDFs that are NOT already at the requested tier. Use for testing. |
 | `--dry-run` | off | List what would be processed and skipped. No API calls, no DB writes. |
-| `--concurrency <n>` | `3` | Parallel workers (each holds its own DB connection + Anthropic client). |
-| `--dpi <n>` | `150` | DPI passed to `pdf2image`. |
+| `--concurrency <n>` | `3` | Parallel PDF workers (each holds its own DB connection + Anthropic client). |
+| `--dpi <n>` | `130` | DPI passed to `pdf2image`. 130 is the quality / speed sweet spot for Claude vision. |
 | `--model <id>` | `claude-sonnet-4-20250514` | Anthropic model. |
+| `--chunk-size <n>` | `5` | **Tier 2 only.** Pages per parallel body-extraction chunk. Smaller = more parallelism but more API calls. |
+| `--chunk-concurrency <n>` | `5` | **Tier 2 only.** Max in-flight chunk requests per PDF. Combined with `--concurrency`, total in-flight = `concurrency × chunk-concurrency`. |
+| `--include-page-summaries` | off | **Tier 2 only.** Also emit per-page descriptions into `extracted_data.pages_summary`. The full body is in `raw_content` regardless; this is purely additive metadata. |
 
 ## Required env vars
 
@@ -102,6 +114,12 @@ bidiq kb ingest --tier 2 --id 3326
 
 # Tier-2 across a brand (expensive — only for actively-bid brands)
 bidiq kb ingest --brand challenger --tier 2
+
+# Tier-2 with denser drawings — bigger chunks, more parallelism, higher DPI
+bidiq kb ingest --tier 2 --id 3340 --chunk-size 8 --chunk-concurrency 6 --dpi 150
+
+# Tier-2 with per-page descriptions saved alongside the body
+bidiq kb ingest --tier 2 --id 3326 --include-page-summaries
 ```
 
 Do not run Tier-1 across the full 3 058-PDF corpus casually — it's a paid, ~$30–$90 one-time job. Do it in controlled batches.
@@ -114,7 +132,7 @@ Do not run Tier-1 across the full 3 058-PDF corpus casually — it's a paid, ~$3
 2. If already Tier-2, returns `{ status: "already_tier_2", item }`.
 3. Otherwise spawns `python3 -m bidiq.ingest --tier 2 --id <id>` and waits.
 4. On success, returns the upgraded row.
-5. Synchronous; caller waits 30 s – 2 min depending on PDF size.
+5. Synchronous; caller waits ~30 s – 2 min depending on PDF size (chunked extraction means a 75-page manual targets <2 min wall-clock, not 10 min).
 
 `/api/ask` calls this same Python helper (via `lib/upgrade.ts`) for any Tier-1 row in the top-5 retrieval slice, in parallel, then re-runs retrieval before answering.
 

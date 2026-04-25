@@ -91,50 +91,6 @@ Return ONLY valid JSON in this exact shape:
 }}"""
 
 
-def build_extraction_prompt(brand_name: str) -> str:
-    return f"""You are analyzing a PDF from Liftnow's knowledge base. The PDF is from manufacturer/brand: {brand_name}.
-
-First, classify this document into exactly ONE of these 10 categories:
-
-- product-specifications: catalogs, brochures, spec sheets — describes what products exist and their technical specs
-- competitive-intelligence: content about competitor products or market positioning (rare from vendor PDFs; more common in internal notes)
-- pricing-data: price books, dealer discount sheets, promotional pricing flyers
-- bid-history: past bid documents, awards, pricing submissions (rare from vendor PDFs)
-- installation-guides: install manuals, anchor/pit/slab specs, drawings
-- manufacturer-info: about-the-company content, corporate brochures, dealer program info
-- service-procedures: service manuals, PM procedures, troubleshooting, parts diagrams
-- compliance-certifications: ALI cert records, Buy America letters, warranty documents, ANSI compliance matrices
-- customer-intelligence: notes about specific customers (rare from vendor PDFs)
-- general: truly doesn't fit any of the above, or too mixed to classify
-
-Then extract:
-- A short descriptive title (what is this document?)
-- A 2-3 sentence summary of the document's purpose and content
-- An effective date in ISO format if visible, else null
-- Whether the document explicitly indicates it supersedes a previous version (boolean)
-- Up to 15 tags capturing: product categories mentioned, model numbers, certifications mentioned, capacity ratings, any other filter-worthy attributes. Always include the brand name as one tag.
-
-Then extract the document body:
-- All substantive text from the document, page by page
-- Every model number, specification, price, part number, dimension visible
-- Retain structure (tables, lists) as markdown where feasible
-- Do NOT summarize — capture completeness, we'll summarize separately
-
-Return as JSON:
-{{
-  "category": "<one of the 10>",
-  "title": "<string>",
-  "summary": "<string>",
-  "effective_date": "<ISO date or null>",
-  "supersedes_previous": <boolean>,
-  "tags": ["<string>", ...],
-  "content_markdown": "<full document body as markdown>",
-  "pages_summary": [
-    {{"page": 1, "description": "<what this page shows>"}}
-  ]
-}}"""
-
-
 # ---------------------------------------------------------------------------
 # File discovery
 # ---------------------------------------------------------------------------
@@ -308,7 +264,7 @@ def _encode_page(page: "Image.Image") -> str:
 
 
 def render_first_and_last_pages(
-    pdf_path: Path, total_pages: int, dpi: int = 150
+    pdf_path: Path, total_pages: int, dpi: int = 130
 ) -> list[tuple[int, str]]:
     """Tier-1 helper: render only page 1 and the final page.
 
@@ -338,7 +294,7 @@ def render_first_and_last_pages(
     return encoded
 
 
-def render_pdf_pages(pdf_path: str, dpi: int = 150) -> list[tuple[int, str]]:
+def render_pdf_pages(pdf_path: str, dpi: int = 130) -> list[tuple[int, str]]:
     pages = convert_from_path(pdf_path, dpi=dpi, fmt="jpeg")
     encoded: list[tuple[int, str]] = []
     max_bytes = 4_500_000
@@ -365,90 +321,6 @@ def render_pdf_pages(pdf_path: str, dpi: int = 150) -> list[tuple[int, str]]:
         b64 = base64.standard_b64encode(buf.getvalue()).decode("ascii")
         encoded.append((i + 1, b64))
     return encoded
-
-
-def extract_with_vision(
-    client: anthropic.Anthropic,
-    pdf_name: str,
-    brand_name: str,
-    pages: list[tuple[int, str]],
-    model: str,
-) -> dict:
-    batch_size = 20
-    all_results: list[dict] = []
-    prompt = build_extraction_prompt(brand_name)
-
-    for batch_start in range(0, len(pages), batch_size):
-        batch = pages[batch_start : batch_start + batch_size]
-        content: list[dict] = [
-            {
-                "type": "text",
-                "text": f"Analyzing PDF: {pdf_name} (pages {batch[0][0]}-{batch[-1][0]} of {len(pages)} total)",
-            }
-        ]
-        for page_num, b64_data in batch:
-            content.append(
-                {
-                    "type": "image",
-                    "source": {
-                        "type": "base64",
-                        "media_type": "image/jpeg",
-                        "data": b64_data,
-                    },
-                }
-            )
-            content.append({"type": "text", "text": f"(Page {page_num})"})
-        content.append({"type": "text", "text": prompt})
-
-        max_retries = 5
-        response = None
-        for attempt in range(max_retries):
-            try:
-                response = client.messages.create(
-                    model=model,
-                    max_tokens=8192,
-                    messages=[{"role": "user", "content": content}],
-                )
-                break
-            except anthropic.RateLimitError:
-                if attempt == max_retries - 1:
-                    raise
-                wait = 2 ** (attempt + 1) * 15
-                click.echo(
-                    f"    Rate limited on {pdf_name}, waiting {wait}s..."
-                )
-                time.sleep(wait)
-        assert response is not None
-
-        response_text = response.content[0].text
-        try:
-            start = response_text.find("{")
-            end = response_text.rfind("}") + 1
-            if start >= 0 and end > start:
-                all_results.append(json.loads(response_text[start:end]))
-            else:
-                all_results.append({"raw_response": response_text})
-        except json.JSONDecodeError:
-            all_results.append({"raw_response": response_text})
-
-    if len(all_results) == 1:
-        return all_results[0]
-
-    # Merge multi-batch: concatenate content, dedupe tags, take first title/category.
-    merged = dict(all_results[0])
-    merged_tags = list(merged.get("tags") or [])
-    merged_pages: list = list(merged.get("pages_summary") or [])
-    content_parts = [merged.get("content_markdown", "") or ""]
-    for extra in all_results[1:]:
-        content_parts.append(extra.get("content_markdown", "") or "")
-        for t in extra.get("tags") or []:
-            if t not in merged_tags:
-                merged_tags.append(t)
-        merged_pages.extend(extra.get("pages_summary") or [])
-    merged["content_markdown"] = "\n\n".join(p for p in content_parts if p)
-    merged["tags"] = merged_tags
-    merged["pages_summary"] = merged_pages
-    return merged
 
 
 def extract_shallow_with_vision(
@@ -512,6 +384,217 @@ def extract_shallow_with_vision(
     except json.JSONDecodeError:
         pass
     return {"raw_response": response_text}
+
+
+# ---------------------------------------------------------------------------
+# Tier-2 chunked body extraction
+# ---------------------------------------------------------------------------
+#
+# A 75-page manual sent in one mega-request takes ~10 minutes. Split into
+# small page chunks, fan out to Claude in parallel, stitch the markdown
+# back together in page order. Classification (title / category / tags /
+# summary) is a separate single shallow pass on cover + last page so we
+# don't pay for it N times.
+
+
+def build_chunk_body_prompt(
+    brand_name: str,
+    chunk_pages: list[int],
+    total_pages: int,
+    include_page_summaries: bool,
+) -> str:
+    page_label = (
+        f"pages {chunk_pages[0]}-{chunk_pages[-1]}"
+        if len(chunk_pages) > 1
+        else f"page {chunk_pages[0]}"
+    )
+    if include_page_summaries:
+        json_shape = (
+            '{\n'
+            '  "content_markdown": "<full text of these pages as markdown>",\n'
+            '  "pages_summary": [{"page": <int>, "description": "<string>"}]\n'
+            '}'
+        )
+        page_summary_line = (
+            "Also include a short description for each page in pages_summary."
+        )
+    else:
+        json_shape = (
+            '{\n'
+            '  "content_markdown": "<full text of these pages as markdown>"\n'
+            '}'
+        )
+        page_summary_line = "Do NOT include any pages_summary array."
+
+    return f"""You are extracting the BODY content of a PDF in Liftnow's knowledge base. Brand: {brand_name}. You are seeing {page_label} of {total_pages} total.
+
+Capture every substantive piece of text visible on these pages:
+- All paragraphs, captions, table cells, headings
+- Every model number, specification, price, part number, dimension visible
+- Retain structure (tables, lists, headings) as markdown where feasible
+- DO NOT classify the document, produce a title, or summarize the document. A separate pass handles that.
+- DO NOT collapse or summarize content; we need completeness.
+- {page_summary_line}
+
+Return ONLY valid JSON in this exact shape:
+{json_shape}"""
+
+
+def extract_chunk_body_with_vision(
+    client: anthropic.Anthropic,
+    pdf_name: str,
+    brand_name: str,
+    chunk: list[tuple[int, str]],
+    total_pages: int,
+    model: str,
+    include_page_summaries: bool,
+) -> dict:
+    """Run body-only extraction on one chunk of pages."""
+    chunk_page_numbers = [p for p, _ in chunk]
+    prompt = build_chunk_body_prompt(
+        brand_name, chunk_page_numbers, total_pages, include_page_summaries
+    )
+
+    content: list[dict] = [
+        {
+            "type": "text",
+            "text": (
+                f"Body extraction for {pdf_name}, "
+                f"pages {chunk_page_numbers[0]}-{chunk_page_numbers[-1]} "
+                f"of {total_pages}."
+            ),
+        }
+    ]
+    for page_num, b64_data in chunk:
+        content.append(
+            {
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/jpeg",
+                    "data": b64_data,
+                },
+            }
+        )
+        content.append({"type": "text", "text": f"(Page {page_num})"})
+    content.append({"type": "text", "text": prompt})
+
+    max_retries = 5
+    response = None
+    for attempt in range(max_retries):
+        try:
+            response = client.messages.create(
+                model=model,
+                max_tokens=8192,
+                messages=[{"role": "user", "content": content}],
+            )
+            break
+        except anthropic.RateLimitError:
+            if attempt == max_retries - 1:
+                raise
+            wait = 2 ** (attempt + 1) * 15
+            click.echo(
+                f"    Rate limited on {pdf_name} chunk "
+                f"{chunk_page_numbers[0]}-{chunk_page_numbers[-1]}, "
+                f"waiting {wait}s..."
+            )
+            time.sleep(wait)
+    assert response is not None
+
+    response_text = response.content[0].text
+    try:
+        start = response_text.find("{")
+        end = response_text.rfind("}") + 1
+        if start >= 0 and end > start:
+            return json.loads(response_text[start:end])
+    except json.JSONDecodeError:
+        pass
+    # Fall back: keep whatever the model returned so we don't drop a chunk.
+    return {"content_markdown": response_text}
+
+
+def extract_deep_with_vision_chunked(
+    client: anthropic.Anthropic,
+    pdf_name: str,
+    brand_name: str,
+    pages: list[tuple[int, str]],
+    model: str,
+    chunk_size: int,
+    chunk_concurrency: int,
+    include_page_summaries: bool,
+) -> dict:
+    """Tier-2 deep extraction via parallel chunks + a single classify pass.
+
+    Steps:
+      1. Run the shallow classifier on cover + last page (one API call).
+      2. Split pages into chunks of `chunk_size` and dispatch body-only
+         extraction in parallel (up to `chunk_concurrency` in flight).
+      3. Stitch chunk markdown in page order.
+      4. Combine classification + stitched body into the dict shape the
+         row writer expects.
+    """
+    if not pages:
+        return {}
+
+    if chunk_size <= 0:
+        raise ValueError("chunk_size must be >= 1")
+    chunk_concurrency = max(1, chunk_concurrency)
+
+    # 1) Classification pass on first + last page.
+    classify_inputs = [pages[0]]
+    if len(pages) > 1:
+        classify_inputs.append(pages[-1])
+    classification = extract_shallow_with_vision(
+        client, pdf_name, brand_name, classify_inputs, model
+    )
+
+    # 2) Body chunks in parallel.
+    chunks: list[list[tuple[int, str]]] = [
+        pages[i : i + chunk_size] for i in range(0, len(pages), chunk_size)
+    ]
+    chunk_results: list[Optional[dict]] = [None] * len(chunks)
+
+    def run_chunk(idx: int) -> tuple[int, dict]:
+        return idx, extract_chunk_body_with_vision(
+            client,
+            pdf_name,
+            brand_name,
+            chunks[idx],
+            len(pages),
+            model,
+            include_page_summaries,
+        )
+
+    with ThreadPoolExecutor(max_workers=chunk_concurrency) as pool:
+        futures = [pool.submit(run_chunk, i) for i in range(len(chunks))]
+        for future in as_completed(futures):
+            idx, result = future.result()
+            chunk_results[idx] = result
+
+    # 3) Stitch in page order.
+    body_parts: list[str] = []
+    pages_summary: list[dict] = []
+    for idx, result in enumerate(chunk_results):
+        if result is None:
+            continue
+        body = result.get("content_markdown") or ""
+        if isinstance(body, str) and body.strip():
+            body_parts.append(body.strip())
+        if include_page_summaries:
+            ps = result.get("pages_summary") or []
+            if isinstance(ps, list):
+                pages_summary.extend(ps)
+
+    return {
+        "category": classification.get("category"),
+        "title": classification.get("title"),
+        "summary": classification.get("summary"),
+        "tags": classification.get("tags"),
+        "effective_date": classification.get("effective_date"),
+        "supersedes_previous": classification.get("supersedes_previous"),
+        "content_markdown": "\n\n".join(body_parts),
+        "pages_summary": pages_summary,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -698,6 +781,9 @@ def process_single_pdf(
     model: str,
     dpi: int,
     tier: int,
+    chunk_size: int = 5,
+    chunk_concurrency: int = 5,
+    include_page_summaries: bool = False,
 ) -> str:
     """Process one PDF in three phases so we never hold a Postgres
     connection across the long Claude vision call.
@@ -758,8 +844,15 @@ def process_single_pdf(
             pages = render_pdf_pages(str(pdf_path), dpi=dpi)
             if not pages:
                 return f"  FAIL  {source_path} - 0 pages rendered"
-            extraction = extract_with_vision(
-                client, pdf_path.name, brand_name, pages, model
+            extraction = extract_deep_with_vision_chunked(
+                client,
+                pdf_path.name,
+                brand_name,
+                pages,
+                model,
+                chunk_size=chunk_size,
+                chunk_concurrency=chunk_concurrency,
+                include_page_summaries=include_page_summaries,
             )
             pages_count = len(pages)
     except Exception as e:
@@ -910,14 +1003,42 @@ def plan_pdfs(
 )
 @click.option(
     "--dpi",
-    default=150,
+    default=130,
     type=int,
-    help="DPI for rasterizing PDF pages (default 150).",
+    help="DPI for rasterizing PDF pages (default 130 — quality / speed sweet spot).",
 )
 @click.option(
     "--model",
     default="claude-sonnet-4-20250514",
     help="Claude model to use for vision extraction.",
+)
+@click.option(
+    "--chunk-size",
+    default=5,
+    type=int,
+    help=(
+        "Tier-2 only: pages per parallel body-extraction chunk (default 5). "
+        "Smaller = more parallelism, more API calls."
+    ),
+)
+@click.option(
+    "--chunk-concurrency",
+    default=5,
+    type=int,
+    help=(
+        "Tier-2 only: max parallel chunk requests per PDF (default 5). "
+        "Combined with --concurrency this caps total in-flight Claude calls."
+    ),
+)
+@click.option(
+    "--include-page-summaries",
+    is_flag=True,
+    default=False,
+    help=(
+        "Tier-2 only: also emit per-page descriptions into "
+        "extracted_data.pages_summary. Off by default — slower without "
+        "adding to raw_content."
+    ),
 )
 def ingest(
     tier: int,
@@ -928,6 +1049,9 @@ def ingest(
     concurrency: int,
     dpi: int,
     model: str,
+    chunk_size: int,
+    chunk_concurrency: int,
+    include_page_summaries: bool,
 ) -> None:
     """Ingest PDFs from data/product_data/ into knowledge_items (Postgres)."""
     database_url = os.environ.get("DATABASE_URL")
@@ -969,7 +1093,15 @@ def ingest(
         with _connect(database_url) as conn:
             ensure_brand(conn, derive_brand(pdf_path))
         line = process_single_pdf(
-            pdf_path, database_url, api_key, model, dpi, tier
+            pdf_path,
+            database_url,
+            api_key,
+            model,
+            dpi,
+            tier,
+            chunk_size=chunk_size,
+            chunk_concurrency=chunk_concurrency,
+            include_page_summaries=include_page_summaries,
         )
         click.echo(line)
         if line.lstrip().startswith("FAIL"):
@@ -987,6 +1119,11 @@ def ingest(
     brands_seen = sorted({derive_brand(p) for p in pdfs})
     click.echo(f"Discovered {len(pdfs)} PDFs across brands: {', '.join(brands_seen)}")
     click.echo(f"Tier: {tier}  Model: {model}  DPI: {dpi}  Concurrency: {concurrency}")
+    if tier == 2:
+        click.echo(
+            f"Chunk size: {chunk_size}  Chunk concurrency: {chunk_concurrency}  "
+            f"Page summaries: {'on' if include_page_summaries else 'off'}"
+        )
     if limit is not None:
         click.echo(f"Limit: {limit}")
     click.echo("-" * 60)
@@ -1040,6 +1177,9 @@ def ingest(
                 model,
                 dpi,
                 tier,
+                chunk_size,
+                chunk_concurrency,
+                include_page_summaries,
             ): pdf
             for pdf in to_process
         }
