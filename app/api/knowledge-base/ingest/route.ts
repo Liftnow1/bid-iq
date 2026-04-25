@@ -151,13 +151,16 @@ export async function POST(request: NextRequest) {
       ? classification.category
       : "general";
 
-    // Build search text
+    // Build search text. Use the full raw_content — Postgres FTS handles
+    // multi-MB tsvectors fine, and truncating to 5000 chars caused long
+    // install manuals to only have ~6% of their body indexed (queries
+    // about anchor patterns, concrete depth, etc. couldn't find them).
     const searchText = [
       classification.title,
       classification.summary,
       classification.subcategory,
       ...(classification.tags || []),
-      rawContent.slice(0, 5000),
+      rawContent,
     ]
       .filter(Boolean)
       .join(" ");

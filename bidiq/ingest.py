@@ -621,7 +621,11 @@ def _coerce_tags(raw) -> list[str]:
 def _build_search_text(
     title: str, summary: str, tags: list[str], content: str
 ) -> str:
-    parts = [title, summary, " ".join(tags), content[:5000]]
+    # Postgres FTS handles multi-megabyte tsvectors fine; truncating
+    # raw_content here means long install manuals only get ~6% of their
+    # body indexed and queries about specific specs (anchor pattern,
+    # concrete depth, etc.) miss the right document.
+    parts = [title, summary, " ".join(tags), content]
     return " ".join(p for p in parts if p)
 
 
@@ -639,8 +643,9 @@ def upsert_knowledge_item(
 
     Tier 1: raw_content NULL, search_text from title+summary+tags only,
         extracted_data carries `tier=1` plus effective_date / supersedes flag.
-    Tier 2: raw_content = full markdown body, search_text includes the first
-        5000 chars of body, extracted_data adds pages_summary and `tier=2`.
+    Tier 2: raw_content = full markdown body, search_text covers the FULL
+        body (no truncation — Postgres FTS handles multi-MB documents),
+        extracted_data adds pages_summary and `tier=2`.
     """
     if tier not in (1, 2):
         raise ValueError(f"tier must be 1 or 2, got {tier}")

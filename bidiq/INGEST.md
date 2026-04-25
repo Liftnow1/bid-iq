@@ -47,7 +47,7 @@ A row is considered Tier-2 if EITHER `raw_content` is non-empty OR `extracted_da
    - Splits the page list into chunks of `--chunk-size` (default 5) and **fans out body extraction in parallel** (up to `--chunk-concurrency`, default 5). Each chunk returns just `content_markdown` for those pages.
    - Stitches the chunk markdown back together in page order to form the final `raw_content`.
    - Per-page descriptions (`pages_summary`) are off by default; pass `--include-page-summaries` to have each chunk also emit them.
-   - UPSERTs (UPDATEs an existing Tier-1 row in place) with `raw_content` populated, `extracted_data.tier = 2`, `extractor_version = 'ingest.py-v1-tier2'`. `search_text` includes the first 5 000 chars of `raw_content`.
+   - UPSERTs (UPDATEs an existing Tier-1 row in place) with `raw_content` populated, `extracted_data.tier = 2`, `extractor_version = 'ingest.py-v1-tier2'`. `search_text` covers the **full** `raw_content` plus title, summary, and tags — no truncation. Postgres FTS handles multi-MB tsvectors fine, and truncating to 5 000 chars meant long install manuals only had ~6 % of their body indexed.
 
 Connections are NOT held during the long Claude calls — the worker reads what it needs from Postgres, closes the connection, runs the vision pass, then opens a fresh connection to write the result. This keeps Neon from killing the transaction with `IdleInTransactionSessionTimeout` on long manuals.
 
@@ -184,6 +184,24 @@ LIMIT 10;
 ```
 
 You can also hit the running Next.js app's `/api/ask` with a question targeting the brand. The first query against a Tier-1 row will spend 30 s – 2 min upgrading; subsequent queries return immediately. Source tiles in the response only show documents Claude actually cited in the answer (parsed from `[N]` markers).
+
+### Backfilling search_text on existing rows
+
+Earlier ingester versions truncated `search_text` to the first 5 000 characters of `raw_content`. New rows written by the current code use the full body, but rows already in the table need a one-time rebuild:
+
+```bash
+psql "$DATABASE_URL" -f scripts/migrations/2026-04-25-rebuild-search-text.sql
+```
+
+The script is idempotent and safe to re-run. Tier-1 rows (`raw_content` NULL) are unaffected — their `search_text` stays title + summary + tags. After running, spot-check a known-long row, e.g.:
+
+```sql
+SELECT id, length(search_text) AS st_len, length(raw_content) AS rc_len,
+       search_text ILIKE '%anchor%' AS has_anchor
+  FROM knowledge_items
+ WHERE id = 3336;
+-- Expect st_len ~84,000+, has_anchor = true.
+```
 
 ## Errors
 
