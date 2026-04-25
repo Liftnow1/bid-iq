@@ -56,6 +56,10 @@ export async function ensureSchema() {
   await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extracted_at TIMESTAMPTZ`;
   await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extractor_version TEXT`;
 
+  // Tier-1 (shallow) ingestion writes rows with raw_content NULL until a
+  // Tier-2 upgrade fills in the full body.
+  await sql`ALTER TABLE knowledge_items ALTER COLUMN raw_content DROP NOT NULL`;
+
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_category ON knowledge_items(category)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_search ON knowledge_items USING GIN(to_tsvector('english', coalesce(search_text, '')))`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_tags ON knowledge_items USING GIN(tags)`;
