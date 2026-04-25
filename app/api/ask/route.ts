@@ -181,16 +181,52 @@ async function searchKnowledge(
   return Array.from(collected.values()).slice(0, 25);
 }
 
+// Per-candidate body sent to the answering model.
+//   - The top FULL_CONTENT_TOP_N candidates by rank get their FULL raw_content
+//     (no truncation). Long install manuals — anchor patterns, concrete depth,
+//     electrical specs — live mid-document past any small slice.
+//   - Lower-ranked candidates are truncated to TRUNCATED_BODY_CHARS to cap
+//     cost on borderline hits.
+//   - The total payload (heads + summaries + bodies + separators) is capped at
+//     TOTAL_PAYLOAD_CAP_CHARS by dropping the lowest-ranked candidate first.
+const FULL_CONTENT_TOP_N = (() => {
+  const raw = process.env.FULL_CONTENT_TOP_N;
+  if (!raw) return 5;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : 5;
+})();
+const TRUNCATED_BODY_CHARS = 5_000;
+const TOTAL_PAYLOAD_CAP_CHARS = 200_000;
+const CONTEXT_SEPARATOR = "\n\n---\n\n";
+
 function buildContext(rows: KnowledgeRow[]): string {
   if (rows.length === 0) return "No relevant entries found in the knowledge base.";
-  return rows
-    .map((r, i) => {
-      const head = `[${i + 1}] ${r.title}  (category=${r.category}${r.source_filename ? `, file=${r.source_filename}` : ""})`;
-      const body = r.raw_content ? String(r.raw_content).slice(0, 2500) : "";
-      const summary = r.summary ? `Summary: ${r.summary}` : "";
-      return [head, summary, body].filter(Boolean).join("\n");
-    })
-    .join("\n\n---\n\n");
+
+  const candidates = rows.map((r, i) => {
+    const head = `[${i + 1}] ${r.title}  (category=${r.category}${
+      r.source_filename ? `, file=${r.source_filename}` : ""
+    })`;
+    const summary = r.summary ? `Summary: ${r.summary}` : "";
+    const fullBody = r.raw_content ? String(r.raw_content) : "";
+    const body =
+      i < FULL_CONTENT_TOP_N ? fullBody : fullBody.slice(0, TRUNCATED_BODY_CHARS);
+    const text = [head, summary, body].filter(Boolean).join("\n");
+    return { text, length: text.length };
+  });
+
+  // Drop the lowest-ranked candidate(s) until we're under the global cap.
+  // Always keep at least one candidate even if it exceeds the cap on its own —
+  // a truncated long top hit is still better than an empty context.
+  let total = candidates.reduce(
+    (acc, c, idx) => acc + c.length + (idx > 0 ? CONTEXT_SEPARATOR.length : 0),
+    0
+  );
+  while (total > TOTAL_PAYLOAD_CAP_CHARS && candidates.length > 1) {
+    const dropped = candidates.pop()!;
+    total -= dropped.length + CONTEXT_SEPARATOR.length;
+  }
+
+  return candidates.map((c) => c.text).join(CONTEXT_SEPARATOR);
 }
 
 /**
