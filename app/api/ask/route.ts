@@ -42,6 +42,16 @@ type KnowledgeRow = {
 // answering.
 const AUTO_UPGRADE_TOP_N = 5;
 
+// Multiplicative boost applied to ts_rank for rows whose source_type is
+// 'ingested_pdf'. Real PDF extractions outrank ALI cert metadata when both
+// match the query. Tune via SOURCE_TYPE_PDF_BOOST env var (positive number).
+const SOURCE_TYPE_PDF_BOOST = (() => {
+  const raw = process.env.SOURCE_TYPE_PDF_BOOST;
+  if (!raw) return 1.5;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : 1.5;
+})();
+
 function isCertQuery(question: string): boolean {
   const q = question.toLowerCase();
   return /\b(ali|certified|certification|cert\s+number|cert\s+date)\b/.test(q);
@@ -84,13 +94,13 @@ async function searchKnowledge(
                  ts_rank(
                    to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,'')),
                    to_tsquery('english', ${tsQuery})
-                 ) AS rank
+                 ) * CASE WHEN ki.source_type = 'ingested_pdf' THEN ${SOURCE_TYPE_PDF_BOOST}::float ELSE 1.0 END AS rank_score
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
           WHERE to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,''))
                 @@ to_tsquery('english', ${tsQuery})
             AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
-          ORDER BY rank DESC
+          ORDER BY rank_score DESC
           LIMIT 25
         `) as unknown as KnowledgeRow[])
       : ((await sql`
@@ -101,12 +111,12 @@ async function searchKnowledge(
                  ts_rank(
                    to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,'')),
                    to_tsquery('english', ${tsQuery})
-                 ) AS rank
+                 ) * CASE WHEN ki.source_type = 'ingested_pdf' THEN ${SOURCE_TYPE_PDF_BOOST}::float ELSE 1.0 END AS rank_score
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
           WHERE to_tsvector('english', coalesce(ki.title,'') || ' ' || coalesce(ki.summary,'') || ' ' || coalesce(ki.raw_content,''))
                 @@ to_tsquery('english', ${tsQuery})
-          ORDER BY rank DESC
+          ORDER BY rank_score DESC
           LIMIT 25
         `) as unknown as KnowledgeRow[]);
     add(rows);
