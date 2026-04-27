@@ -204,6 +204,22 @@ async function getBrandInfo(args: { brand_name: string }) {
     SELECT count(*)::int AS n FROM knowledge_items WHERE brand_id = ${brand.id}
   `) as unknown as Array<{ n: number }>;
 
+  // Category breakdown via unnest — a 4-tag doc contributes 1 to each of
+  // its 4 buckets. Falls back gracefully if category is still TEXT (the
+  // multi-tag migration hasn't been applied yet).
+  let categoryBreakdown: Array<{ category: string; n: number }> = [];
+  try {
+    categoryBreakdown = (await sql`
+      SELECT cat AS category, count(*)::int AS n
+        FROM knowledge_items, unnest(category) AS cat
+       WHERE brand_id = ${brand.id}
+       GROUP BY cat
+       ORDER BY n DESC
+    `) as unknown as Array<{ category: string; n: number }>;
+  } catch {
+    categoryBreakdown = [{ category: "(category not yet TEXT[])", n: 0 }];
+  }
+
   const recent = (await sql`
     SELECT id, title, category, source_filename, extracted_at, extractor_version
       FROM knowledge_items
@@ -221,6 +237,7 @@ async function getBrandInfo(args: { brand_name: string }) {
             brand,
             doc_count: totalRows[0]?.n ?? 0,
             source_type_breakdown: sourceTypeBreakdown,
+            category_breakdown: categoryBreakdown,
             recent_documents: recent,
           },
           null,

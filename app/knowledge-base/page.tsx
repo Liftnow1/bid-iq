@@ -6,7 +6,8 @@ import Link from "next/link";
 interface KnowledgeItem {
   id: number;
   title: string;
-  category: string;
+  // TEXT[] of v4-trimmed vocabulary tags. Multi-tag.
+  category: string[];
   subcategory: string | null;
   tags: string[];
   content_type: string;
@@ -14,6 +15,13 @@ interface KnowledgeItem {
   source_filename: string | null;
   summary: string;
   created_at: string;
+}
+
+/** First tag in the array (for legacy single-tag UI affordances). */
+function primaryCategory(item: KnowledgeItem): string {
+  return Array.isArray(item.category) && item.category.length > 0
+    ? item.category[0]
+    : "uncategorized";
 }
 
 interface CategoryCount {
@@ -459,15 +467,17 @@ export default function KnowledgeBase() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span
-                            className={`px-2 py-0.5 rounded text-xs font-medium border ${
-                              CATEGORY_COLORS[item.category] ||
-                              CATEGORY_COLORS.general
-                            }`}
-                          >
-                            {CATEGORY_LABELS[item.category] || item.category}
-                          </span>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          {(Array.isArray(item.category) ? item.category : [primaryCategory(item)]).map((cat) => (
+                            <span
+                              key={cat}
+                              className={`px-2 py-0.5 rounded text-xs font-medium border ${
+                                CATEGORY_COLORS[cat] || CATEGORY_COLORS.general
+                              }`}
+                            >
+                              {CATEGORY_LABELS[cat] || cat}
+                            </span>
+                          ))}
                           {item.subcategory && (
                             <span className="text-xs text-gray-500">
                               / {item.subcategory}

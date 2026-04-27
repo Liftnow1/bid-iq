@@ -31,11 +31,12 @@ export async function GET(request: NextRequest) {
         LIMIT ${limit} OFFSET ${offset}
       `;
     } else if (category) {
+      // category is TEXT[]; match rows that include the requested tag.
       items = await sql`
         SELECT id, title, category, subcategory, tags, content_type, source,
                source_filename, summary, created_at
         FROM knowledge_items
-        WHERE category = ${category}
+        WHERE ${category} = ANY(category)
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
@@ -49,12 +50,13 @@ export async function GET(request: NextRequest) {
       `;
     }
 
-    // Get category counts
+    // Per-tag counts. category is TEXT[] (multi-tag) so unnest first;
+    // a 4-tag document contributes 1 to each of its 4 tag buckets.
     const counts = await sql`
-      SELECT category, count(*)::int as count
-      FROM knowledge_items
-      GROUP BY category
-      ORDER BY count DESC
+      SELECT cat AS category, count(*)::int AS count
+        FROM knowledge_items, unnest(category) AS cat
+       GROUP BY cat
+       ORDER BY count DESC
     `;
 
     const total = await sql`SELECT count(*)::int as total FROM knowledge_items`;

@@ -39,7 +39,7 @@ async function setup() {
     CREATE TABLE IF NOT EXISTS knowledge_items (
       id SERIAL PRIMARY KEY,
       title TEXT NOT NULL,
-      category TEXT NOT NULL,
+      category TEXT[] NOT NULL DEFAULT '{}',
       subcategory TEXT,
       tags TEXT[] DEFAULT '{}',
       content_type TEXT NOT NULL DEFAULT 'text',
@@ -62,7 +62,10 @@ async function setup() {
   // Tier-1 ingestion leaves raw_content NULL until upgrade.
   await sql`ALTER TABLE knowledge_items ALTER COLUMN raw_content DROP NOT NULL`;
 
-  await sql`CREATE INDEX IF NOT EXISTS idx_ki_category ON knowledge_items(category)`;
+  // Old btree index on the (now TEXT[]) category column; replaced by the GIN
+  // index below.
+  await sql`DROP INDEX IF EXISTS idx_ki_category`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_ki_category_gin ON knowledge_items USING GIN(category)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_search ON knowledge_items USING GIN(to_tsvector('english', coalesce(search_text, '')))`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_tags ON knowledge_items USING GIN(tags)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_ki_brand_id ON knowledge_items(brand_id)`;

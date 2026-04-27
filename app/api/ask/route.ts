@@ -23,7 +23,8 @@ type QueryMode = "cert-inclusive" | "commercial-only";
 type KnowledgeRow = {
   id: number;
   title: string;
-  category: string;
+  // TEXT[] of v4-trimmed vocabulary tags (see docs/classifier-system-prompt-v1.md).
+  category: string[];
   summary: string | null;
   tags: string[] | null;
   raw_content: string | null;
@@ -168,7 +169,7 @@ async function searchKnowledge(
             LEFT JOIN brands b ON b.id = ki.brand_id
             WHERE (lower(ki.title) LIKE ${like}
                    OR lower(ki.summary) LIKE ${like}
-                   OR lower(ki.category) LIKE ${like})
+                   OR EXISTS (SELECT 1 FROM unnest(ki.category) c WHERE lower(c) LIKE ${like}))
               AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
             LIMIT 10
           `) as unknown as KnowledgeRow[])
@@ -181,7 +182,7 @@ async function searchKnowledge(
             LEFT JOIN brands b ON b.id = ki.brand_id
             WHERE lower(ki.title) LIKE ${like}
                OR lower(ki.summary) LIKE ${like}
-               OR lower(ki.category) LIKE ${like}
+               OR EXISTS (SELECT 1 FROM unnest(ki.category) c WHERE lower(c) LIKE ${like})
             LIMIT 10
           `) as unknown as KnowledgeRow[]);
       add(rows);
@@ -213,7 +214,8 @@ function buildContext(rows: KnowledgeRow[]): string {
   if (rows.length === 0) return "No relevant entries found in the knowledge base.";
 
   const candidates = rows.map((r, i) => {
-    const head = `[${i + 1}] ${r.title}  (category=${r.category}${
+    const cats = Array.isArray(r.category) ? r.category.join(",") : String(r.category ?? "");
+    const head = `[${i + 1}] ${r.title}  (category=${cats}${
       r.source_filename ? `, file=${r.source_filename}` : ""
     })`;
     const summary = r.summary ? `Summary: ${r.summary}` : "";
@@ -398,11 +400,13 @@ export async function GET() {
   try {
     await ensureSchema();
     const sql = getSQL();
+    // category is TEXT[] (multi-tag); unnest so the count is per-tag.
+    // A 4-tag document contributes 1 to each of its 4 tag buckets.
     const counts = await sql`
-      SELECT category, count(*)::int as count
-      FROM knowledge_items
-      GROUP BY category
-      ORDER BY count DESC
+      SELECT cat AS category, count(*)::int AS count
+        FROM knowledge_items, unnest(category) AS cat
+       GROUP BY cat
+       ORDER BY count DESC
     `;
     const total = await sql`SELECT count(*)::int as total FROM knowledge_items`;
     return NextResponse.json({

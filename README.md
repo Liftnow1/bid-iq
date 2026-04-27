@@ -6,24 +6,21 @@ Bid IQ is Liftnow's internal tool for ingesting government bid packages and asse
 
 - **Postgres (Neon serverless)** is the single source of truth. Two tables matter:
   - `brands` — every manufacturer/brand we track (Liftnow, Mohawk, BendPak, Rotary, Challenger, Stertil-Koni, Hunter, etc.), with `we_carry` and `relationship_type` flags.
-  - `knowledge_items` — every queryable piece of knowledge: product specs, pricing, bid history, installation guides, compliance data, competitive intel, customer intel. Each row is classified into one of ten categories.
+  - `knowledge_items` — every queryable piece of knowledge: product specs, pricing, bid history, installation guides, compliance data, competitive intel, customer intel. Each row is classified with **one or more** tags from the 56-category v4-trimmed vocabulary; `category` is `TEXT[]`.
 - **Next.js 16 app** (`app/`) serves the UI and API routes. Deployed via Vercel.
 - **Anthropic Claude** handles classification (`/api/knowledge-base/ingest`) and Q&A (`/api/ask`).
 
-### Classification categories
+### Classification vocabulary
 
-Defined in `app/knowledge-base/page.tsx`:
+The authoritative classifier system prompt — including the full 56-tag list, decision cues, multi-tag heuristics, and 20 worked examples — lives at [`docs/classifier-system-prompt-v1.md`](docs/classifier-system-prompt-v1.md). The ingester loads it at module import time; updating that file is how you change classifier behavior.
 
-- `product-specifications`
-- `competitive-intelligence`
-- `pricing-data`
-- `bid-history`
-- `installation-guides`
-- `manufacturer-info`
-- `service-procedures`
-- `compliance-certifications`
-- `customer-intelligence`
-- `general`
+A document typically receives 1–4 tags. Examples:
+
+- A Challenger 4018 IOM PDF covering install + operation + service + parts → `[installation-guides, operation-manuals, service-procedures, parts-catalog]`.
+- A Sourcewell-published price sheet → `[procurement-process, list-pricing]`.
+- A filled NJ PWCR form → `[certified-payroll]`.
+
+Agent-tier filtering constants (Paul-only, email-agent excludes, content-engine allow-list) are defined in [`lib/category-tiers.ts`](lib/category-tiers.ts) for future use; `/api/ask` doesn't enforce them today.
 
 ## Key routes
 
