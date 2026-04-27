@@ -146,10 +146,16 @@ export async function POST(request: NextRequest) {
     // Classify with Claude
     const classification = await classifyWithClaude(rawContent, sourceFilename);
 
-    // Validate category
-    const category = CATEGORIES.includes(classification.category)
+    // Validate category. Post-multitag migration the column is TEXT[]; this
+    // route's classifier still emits a single string under the old 10-tag
+    // vocabulary, so wrap it in a one-element array for the INSERT below.
+    // Re-classifying typed/uploaded content under the v4-trimmed vocabulary
+    // is tracked separately — for now this keeps the route alive without
+    // schema mismatch errors.
+    const categoryStr = CATEGORIES.includes(classification.category)
       ? classification.category
       : "general";
+    const category: string[] = [categoryStr];
 
     // Build search text. Use the full raw_content — Postgres FTS handles
     // multi-MB tsvectors fine, and truncating to 5000 chars caused long

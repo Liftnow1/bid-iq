@@ -36,44 +36,104 @@ EXTRACTOR_VERSION_LEGACY = "ingest.py-v1"
 EXTRACTOR_VERSION_TIER1 = "ingest.py-v1-tier1"
 EXTRACTOR_VERSION_TIER2 = "ingest.py-v1-tier2"
 
+# v4-trimmed vocabulary. Authoritative list lives in
+# docs/classifier-system-prompt-v1.md (Appendix A). The classifier may
+# also emit `uncategorized` for documents it can't confidently tag.
 VALID_CATEGORIES = {
-    "product-specifications",
-    "competitive-intelligence",
-    "pricing-data",
-    "bid-history",
     "installation-guides",
-    "manufacturer-info",
     "service-procedures",
-    "compliance-certifications",
-    "customer-intelligence",
-    "general",
+    "parts-catalog",
+    "specifications",
+    "operation-manuals",
+    "safety-warnings",
+    "warranty-documentation",
+    "marketing-brochure",
+    "manufacturer-training",
+    "technical-bulletin",
+    "site-survey",
+    "compliance-regulations",
+    "procurement-process",
+    "industry-reference",
+    "rfp-received",
+    "compliance-template",
+    "install-handoff-sop",
+    "service-workflow-sop",
+    "contract-reporting-sop",
+    "sales-playbook",
+    "capability-statement",
+    "cold-outreach-template",
+    "voice-samples",
+    "sales-collateral",
+    "case-study",
+    "liftnow-internal-training",
+    "liftnow-credentials",
+    "insurance-policy",
+    "bond-instrument",
+    "rfp-response",
+    "customer-quote-history",
+    "customer-po",
+    "customer-invoice",
+    "customer-contract",
+    "customer-account-setup",
+    "vendor-onboarding-completed",
+    "vendor-po",
+    "vendor-invoice",
+    "vendor-agreement",
+    "subcontract-agreement",
+    "vendor-cost-pricing",
+    "list-pricing",
+    "service-record",
+    "install-record",
+    "payment-record",
+    "damage-claim",
+    "certified-payroll",
+    "contract-reporting-record",
+    "bid-protest",
+    "change-order",
+    "competitive-intelligence",
+    "win-loss-debrief",
+    "financial-statement",
+    "commission-report",
+    "employment-document",
+    "regulatory-update",
+    "uncategorized",
 }
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PRODUCT_DATA_ROOT = REPO_ROOT / "data" / "product_data"
 ERROR_LOG = REPO_ROOT / "data" / "extraction-errors.log"
 
+# The classifier system prompt is authored in docs/ and loaded at module
+# import time. We don't inline its 500+ lines here — single source of
+# truth, and the file is what ships in the PR diff.
+CLASSIFIER_PROMPT_PATH = REPO_ROOT / "docs" / "classifier-system-prompt-v1.md"
+
+
+def _load_classifier_prompt() -> str:
+    try:
+        return CLASSIFIER_PROMPT_PATH.read_text(encoding="utf-8")
+    except FileNotFoundError as e:
+        raise RuntimeError(
+            f"Classifier prompt missing: {CLASSIFIER_PROMPT_PATH}. "
+            "This file is required for the v4-trimmed multi-tag classifier."
+        ) from e
+
+
+CLASSIFIER_SYSTEM_PROMPT_V1 = _load_classifier_prompt()
+
 
 def build_shallow_extraction_prompt(brand_name: str) -> str:
-    """Tier-1 prompt: cover + last page only, no body extraction."""
-    return f"""You are doing a SHALLOW classification of a PDF from Liftnow's knowledge base. The PDF is from manufacturer/brand: {brand_name}.
+    """Tier-1 prompt: cover + last page only, body extraction not in scope.
 
-You are seeing only the FIRST and LAST page of the document — usually the cover and a revision/back page. Do not attempt to extract the full document body; that's a separate pass.
+    Categorization is now handled by a separate classify_document() pass
+    against the v4-trimmed vocabulary (see docs/classifier-system-prompt-v1.md).
+    This prompt only collects the scaffolding fields.
+    """
+    return f"""You are extracting cover-page metadata from a PDF in Liftnow's knowledge base. The PDF is from manufacturer/brand: {brand_name}.
 
-First, classify this document into exactly ONE of these 10 categories:
+You are seeing only the FIRST and LAST page of the document — usually the cover and a revision/back page. Do not attempt to extract the full document body; that's a separate pass. Do NOT classify the document; a separate pass handles classification.
 
-- product-specifications: catalogs, brochures, spec sheets — describes what products exist and their technical specs
-- competitive-intelligence: content about competitor products or market positioning (rare from vendor PDFs; more common in internal notes)
-- pricing-data: price books, dealer discount sheets, promotional pricing flyers
-- bid-history: past bid documents, awards, pricing submissions (rare from vendor PDFs)
-- installation-guides: install manuals, anchor/pit/slab specs, drawings
-- manufacturer-info: about-the-company content, corporate brochures, dealer program info
-- service-procedures: service manuals, PM procedures, troubleshooting, parts diagrams
-- compliance-certifications: ALI cert records, Buy America letters, warranty documents, ANSI compliance matrices
-- customer-intelligence: notes about specific customers (rare from vendor PDFs)
-- general: truly doesn't fit any of the above, or too mixed to classify
-
-Then extract:
+Extract:
 - title: the document title as it appears on the cover (else a short descriptive title)
 - summary: 2-3 sentences describing what the document is and what it covers, based on the cover and last page only
 - tags: up to 15 short keyword tags surfaced from the cover (model numbers, product family, capacities, certifications, etc.). Always include the brand name as one tag.
@@ -82,7 +142,6 @@ Then extract:
 
 Return ONLY valid JSON in this exact shape:
 {{
-  "category": "<one of the 10>",
   "title": "<string>",
   "summary": "<string>",
   "tags": ["<string>", ...],
@@ -598,14 +657,112 @@ def extract_deep_with_vision_chunked(
 
 
 # ---------------------------------------------------------------------------
+# Document classifier (v4-trimmed multi-tag vocabulary)
+# ---------------------------------------------------------------------------
+
+
+def _truncate_for_classifier(text: str, max_chars: int = 50_000) -> str:
+    """Match the retag script's truncation strategy.
+
+    The classifier doesn't need full text — head + tail captures cover,
+    table of contents, and the back matter where most signal lives. For
+    docs longer than max_chars we keep the first 25k + last 25k.
+    """
+    if not text:
+        return ""
+    if len(text) <= max_chars:
+        return text
+    half = max_chars // 2
+    return text[:half] + "\n\n[...truncated...]\n\n" + text[-half:]
+
+
+def classify_document(
+    client: anthropic.Anthropic,
+    *,
+    title: str,
+    summary: str,
+    body_text: str,
+    model: str,
+) -> list[str]:
+    """Run the v4-trimmed classifier prompt and return validated tags.
+
+    Always returns a non-empty list. On any error or unparseable response
+    the row is tagged ['uncategorized'] so it gets surfaced for review.
+    """
+    head = title or ""
+    if summary:
+        head = head + "\n\n" + summary if head else summary
+    body = _truncate_for_classifier(body_text or "")
+    document_text = (head + "\n\n" + body).strip() if body else head
+    if not document_text:
+        return ["uncategorized"]
+
+    max_retries = 5
+    response = None
+    for attempt in range(max_retries):
+        try:
+            response = client.messages.create(
+                model=model,
+                max_tokens=200,
+                system=CLASSIFIER_SYSTEM_PROMPT_V1,
+                messages=[{"role": "user", "content": document_text}],
+            )
+            break
+        except anthropic.RateLimitError:
+            if attempt == max_retries - 1:
+                raise
+            wait = 2 ** (attempt + 1) * 15
+            click.echo(
+                f"    Rate limited classifying {title!r}, waiting {wait}s..."
+            )
+            time.sleep(wait)
+        except anthropic.APIError:
+            return ["uncategorized"]
+    if response is None:
+        return ["uncategorized"]
+
+    raw_text = response.content[0].text.strip() if response.content else ""
+    # Find the first bracketed JSON array in the response.
+    start = raw_text.find("[")
+    end = raw_text.rfind("]") + 1
+    if start < 0 or end <= start:
+        return ["uncategorized"]
+    try:
+        parsed = json.loads(raw_text[start:end])
+    except json.JSONDecodeError:
+        return ["uncategorized"]
+    return _coerce_categories(parsed)
+
+
+# ---------------------------------------------------------------------------
 # Row writing
 # ---------------------------------------------------------------------------
 
 
-def _coerce_category(raw: Optional[str]) -> str:
-    if raw and raw in VALID_CATEGORIES:
-        return raw
-    return "general"
+def _coerce_categories(raw) -> list[str]:
+    """Validate a classifier output against the v4-trimmed vocabulary.
+
+    Accepts a list of strings (the canonical shape) or a single string
+    (defensive — old single-tag callers, raw classifier responses that
+    forgot the array). Returns a validated list with at least one entry;
+    falls back to ['uncategorized'] when nothing matches the vocabulary.
+    """
+    if isinstance(raw, str):
+        raw = [raw]
+    if not isinstance(raw, list):
+        return ["uncategorized"]
+    cleaned: list[str] = []
+    seen: set[str] = set()
+    for item in raw:
+        if not isinstance(item, str):
+            continue
+        c = item.strip()
+        if c in VALID_CATEGORIES and c not in seen:
+            cleaned.append(c)
+            seen.add(c)
+    if not cleaned:
+        return ["uncategorized"]
+    return cleaned
 
 
 def _coerce_tags(raw) -> list[str]:
@@ -650,7 +807,11 @@ def upsert_knowledge_item(
     if tier not in (1, 2):
         raise ValueError(f"tier must be 1 or 2, got {tier}")
 
-    category = _coerce_category(extraction.get("category"))
+    # `category` is a TEXT[] of v4-trimmed vocabulary tags (multi-tag).
+    # The extraction dict carries it as a list of strings under
+    # extraction['category']; psycopg3 maps Python list -> Postgres
+    # TEXT[] natively.
+    category = _coerce_categories(extraction.get("category"))
     title = (
         str(extraction.get("title") or source_filename).strip()[:500]
         or source_filename
@@ -845,6 +1006,7 @@ def process_single_pdf(
                 client, pdf_path.name, brand_name, sample_pages, model
             )
             pages_count = total_pages or len(sample_pages)
+            classifier_body = ""  # No body at tier-1; classify on title+summary only.
         else:
             pages = render_pdf_pages(str(pdf_path), dpi=dpi)
             if not pages:
@@ -860,6 +1022,19 @@ def process_single_pdf(
                 include_page_summaries=include_page_summaries,
             )
             pages_count = len(pages)
+            classifier_body = str(extraction.get("content_markdown") or "")
+
+        # Multi-tag classification against the v4-trimmed vocabulary. This
+        # is a separate Claude call from the extraction pass — its output
+        # overwrites whatever `category` the extraction prompt may have
+        # produced.
+        extraction["category"] = classify_document(
+            client,
+            title=str(extraction.get("title") or pdf_path.name),
+            summary=str(extraction.get("summary") or ""),
+            body_text=classifier_body,
+            model=model,
+        )
     except Exception as e:
         log_error(pdf_path, e)
         tb = traceback.format_exc(limit=2).strip().splitlines()[-1]
