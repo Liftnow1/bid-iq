@@ -111,8 +111,11 @@ Claude API.
 A second list, `BIDIQ_SKIP_PATTERNS` (pipe-delimited shell globs), short-
 circuits known-noise filenames (e.g. OCR-split page-fragments of a
 single project) to `tier=uncategorized` with no extraction and no API
-call. Combinable with the repeatable `--skip-pattern GLOB` CLI flag.
-Match is case-insensitive against the bare filename.
+call. Matched files are *moved* into `98-SKIPPED-PATTERN/` so they
+leave the active priority/secondary buckets and don't get re-processed
+on subsequent runs. Recoverable — delete that folder when satisfied.
+Combinable with the repeatable `--skip-pattern GLOB` CLI flag. Match
+is case-insensitive against the bare filename.
 
 The classifier system prompt loaded by `bidiq.ingest` is
 `docs/classifier-system-prompt-v2.1.md`. The sort-report runner

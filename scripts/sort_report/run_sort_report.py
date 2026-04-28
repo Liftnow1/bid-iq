@@ -45,6 +45,7 @@ DEFAULT_STAGING_ROOT = Path(r"C:\Users\Paul\Desktop\bidiq-phase2-staging")
 PRIORITY_SUBDIR = "02-PRIORITY-INGEST"
 SECONDARY_SUBDIR = "03-SECONDARY-INGEST"
 EXCLUDED_SUBDIR = "99-EXCLUDED-PERSONAL"
+SKIPPED_PATTERN_SUBDIR = "98-SKIPPED-PATTERN"
 SORT_REPORT_NAME = "SORT-REPORT.csv"
 
 # Pinned to the same Sonnet 4 snapshot the rest of the bid-iq codebase
@@ -464,6 +465,7 @@ def process_file(
     client: Any,
     system_prompt: Any,
     excluded_dir: Path,
+    skipped_pattern_dir: Path,
     model: str,
     staging_root: Path,
     skip_patterns: list[str],
@@ -474,10 +476,31 @@ def process_file(
 
     # Skip-pattern check FIRST — saves the body extraction and the
     # API call for files that match a known-noise pattern (e.g. an
-    # OCR-split-by-page project). Runs before exclusion to keep
-    # extraction cost off the patterns Paul has already labelled.
+    # OCR-split-by-page project). Matched files are MOVED out of the
+    # active buckets into 98-SKIPPED-PATTERN/ so they don't keep
+    # showing up in subsequent runs (collect_files only walks the
+    # 02-/03- directories). Recoverable — Paul can mass-delete the
+    # folder when satisfied.
     skipped, matched_pattern = is_skipped(file_path.name, skip_patterns)
     if skipped:
+        skipped_pattern_dir.mkdir(exist_ok=True)
+        target = skipped_pattern_dir / file_path.name
+        suffix = 1
+        while target.exists():
+            target = (
+                skipped_pattern_dir
+                / f"{file_path.stem}__{suffix}{file_path.suffix}"
+            )
+            suffix += 1
+        try:
+            shutil.move(str(file_path), str(target))
+        except Exception as e:  # noqa: BLE001
+            return _error_row(
+                file_path,
+                source_bucket,
+                ext,
+                f"move-to-skipped failed: {e}",
+            )
         return {
             "filename": file_path.name,
             "source_bucket": source_bucket,
@@ -486,7 +509,7 @@ def process_file(
             "tier": "uncategorized",
             "confidence": "skip-pattern",
             "reason": f"filename-pattern: {matched_pattern!r}",
-            "moved_to": "",
+            "moved_to": str(target),
         }
 
     try:
@@ -624,6 +647,7 @@ def main() -> int:
     priority_dir = staging_root / PRIORITY_SUBDIR
     secondary_dir = staging_root / SECONDARY_SUBDIR
     excluded_dir = staging_root / EXCLUDED_SUBDIR
+    skipped_pattern_dir = staging_root / SKIPPED_PATTERN_SUBDIR
     sort_report_csv = staging_root / SORT_REPORT_NAME
 
     if not staging_root.exists():
@@ -683,6 +707,7 @@ def main() -> int:
     print(f"  priority bucket : {priority_dir}")
     print(f"  secondary bucket: {secondary_dir}")
     print(f"  excluded target : {excluded_dir}")
+    print(f"  skipped target  : {skipped_pattern_dir}")
     print(f"  sort report     : {sort_report_csv}")
     print(f"  model           : {args.model}")
     print(f"  dry-run         : {args.dry_run}")
@@ -786,6 +811,7 @@ def main() -> int:
             client=client,
             system_prompt=classifier_system_prompt,
             excluded_dir=excluded_dir,
+            skipped_pattern_dir=skipped_pattern_dir,
             model=args.model,
             staging_root=staging_root,
             skip_patterns=skip_patterns,
