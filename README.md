@@ -108,6 +108,18 @@ first-pages text contains any exclusion string are moved to
 `99-EXCLUDED-PERSONAL/` before classification, so they never reach the
 Claude API.
 
+A second list, `BIDIQ_SKIP_PATTERNS` (pipe-delimited shell globs), short-
+circuits known-noise filenames (e.g. OCR-split page-fragments of a
+single project) to `tier=uncategorized` with no extraction and no API
+call. Combinable with the repeatable `--skip-pattern GLOB` CLI flag.
+Match is case-insensitive against the bare filename.
+
+The classifier system prompt loaded by `bidiq.ingest` is
+`docs/classifier-system-prompt-v2.1.md`. The sort-report runner
+additionally injects a few-shot block of Paul's hand-corrected verdicts
+on a 30-file spot-check, with prompt caching so the extra tokens are
+charged at the cached rate.
+
 ## Deployment notes
 
 - `.github/workflows/extract-lfs-pdfs.yml.disabled` — the old Mohawk-only PDF extraction workflow, disabled by filename suffix. Do not re-enable; it will be replaced by the new ingester.

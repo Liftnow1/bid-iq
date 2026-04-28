@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import fnmatch
 import os
 import re
 import shutil
@@ -114,6 +115,84 @@ PLAINTEXT_EXTS = {
 }
 PDF_EXTS = {".pdf"}
 
+# Few-shot examples derived from Paul's hand-corrections of the
+# 2026-04-28 spot-check (--limit 30 --shuffle --seed 42). Treated as
+# ground truth — overrides v2.1 when they conflict. Three meta-rules
+# that v2.1 alone misses are stated explicitly:
+#
+#   1. OCR-split fragments of one larger document are uncategorized,
+#      not their underlying tier — each fragment is meaningless out
+#      of context.
+#   2. Internal Liftnow administrative paperwork with no bid-intel
+#      value (meeting room agreements, generic NDA templates) is
+#      uncategorized, not tier-2-internal.
+#   3. The tier reflects access sensitivity, not operational value
+#      for bidding. Don't downgrade a tier just because the document
+#      isn't useful for bid intelligence.
+#
+# Wrapped in cache_control on every call so the ~3k extra input
+# tokens are charged at the cached-rate (~10x cheaper) after the
+# first hit.
+PAUL_FEWSHOT_GUIDANCE = """\
+PAUL'S VERDICTS ON A 30-FILE SPOT-CHECK (TREAT AS GROUND TRUTH; THESE
+OVERRIDE v2.1 RULES IF THEY CONFLICT):
+
+Three meta-rules from Paul's labels:
+
+(1) OCR-split page fragments from a single larger document are
+    `uncategorized`, not their underlying tier. If the filename
+    contains a project ID followed by a page-range or section name
+    (e.g. `20260127-00-3yqkjv_<section>_<page-range> - Page <n>.pdf`),
+    return `uncategorized` — each fragment is meaningless out of
+    context.
+
+(2) Internal Liftnow administrative paperwork with no bid-intelligence
+    value is `uncategorized`, not `tier-2-internal`. Examples: meeting
+    room agreements, generic NDA templates Liftnow signs as a third
+    party, internal housekeeping forms.
+
+(3) The tier reflects access sensitivity, not operational value for
+    bidding. Customer POs, RFPs, invoices, contracts → tier-2-internal.
+    Personal financial / banking documents → tier-3-paul-only.
+
+Worked examples from the spot-check:
+
+  Capabilities Statement Liftnow.pdf                           → tier-1-public
+  Parts list - 820 RHS.xlsx                                    → tier-1-public
+  670-90758-ctr-20.pdf                                         → tier-1-public
+  OMER Chassis Lifting Beam for MCO.pdf                        → tier-1-public
+
+  POGSD_GSD0014660_0.pdf                                       → tier-2-internal
+  jpwcreditapp.pdf                                             → tier-2-internal
+  IFB 2024-007 Replace Air Compressor.pdf                      → tier-2-internal
+  City of Baton Rouge - Lift Inspections - 121223-LFT.pdf      → tier-2-internal
+  City of Cleveland Inspections - Sourcewell 013020-LFT.pdf    → tier-2-internal
+  Addendum_3_Vehicle_Lifts_with_Garage_and_Fleet_Maintenance_Equipment_RFP013020.pdf → tier-2-internal
+  Combined - IFB 2024-013.pdf                                  → tier-2-internal
+  7917 Sample of Services Contract 5.13.19.pdf                 → tier-2-internal
+  Invoice Sample-Invoice.pdf                                   → tier-2-internal
+  2025-11-13_Fw_ Invoice from Keen Contracting_Invoice-466.pdf → tier-2-internal
+  2024-10-11_Fw_ Open Invoices_Estimate # 2331.pdf             → tier-2-internal
+  Post - Sale Process Nicole and Sherry.docx                   → tier-2-internal
+  City of Tulsa Supplier Registration Form.pdf                 → tier-2-internal
+  Copy of BLANK AIA.xlsx                                       → tier-2-internal
+  DMP957710R1 Submission Instructions.pdf                      → tier-2-internal
+  2024-11 Lift Now Pricing (11-01-24).pdf                      → tier-2-internal
+
+  20240430-statements-2834-.pdf                                → tier-3-paul-only
+
+  Liftnow Meeting Room Agreement 2-1-22.pdf                    → uncategorized
+  LESP - Confidentiality and NDA Agreement - For Third Party Use (v. 2019.06.10).pdf → uncategorized
+
+  20260127-00-3yqkjv_285319 Emergency Responders Radio System Errs_1742_1755 - Page 1747.pdf → uncategorized
+  20260127-00-3yqkjv_083613 Sectional Doors_658_677 - Page 658.pdf                          → uncategorized
+  20260127-00-3yqkjv_028220 Hazardous Materials Abatement_420_443 - Page 434.pdf            → uncategorized
+  20260127-00-3yqkjv_Geotechnical Report_121_128 - Page 125.pdf                             → uncategorized
+  20260127-00-3yqkjv_312500 Erosion and Sediment Control_1789_1808 - Page 1795.pdf          → uncategorized
+  20260127-00-3yqkjv_OM-S-600 Schedules - Office maintenance Building - Page 84.pdf         → uncategorized
+  20260127-00-3yqkjv_262713 Electricity Metering_1511_1513 - Page 1511.pdf                  → uncategorized
+"""
+
 CSV_FIELDS = [
     "filename",
     "source_bucket",
@@ -204,6 +283,35 @@ def is_excluded(filename: str, content_preview: str) -> tuple[bool, str]:
         n = _normalize_for_match(needle)
         if n and n in haystack:
             return True, needle
+    return False, ""
+
+
+def load_skip_patterns_from_env() -> list[str]:
+    """Pipe-delimited glob patterns from BIDIQ_SKIP_PATTERNS.
+
+    Combined at runtime with patterns from --skip-pattern CLI flags.
+    Files whose name matches any pattern (case-insensitive) get
+    short-circuited to tier=uncategorized with no API call.
+    """
+    return [
+        s.strip()
+        for s in os.environ.get("BIDIQ_SKIP_PATTERNS", "").split("|")
+        if s.strip()
+    ]
+
+
+def is_skipped(filename: str, patterns: list[str]) -> tuple[bool, str]:
+    """Return (skipped, matched_pattern). fnmatch glob, case-insensitive.
+
+    Patterns use shell-style globs (`*`, `?`, `[abc]`). Match is run
+    against the bare filename, not the full path.
+    """
+    if not patterns:
+        return False, ""
+    name_lower = filename.lower()
+    for pattern in patterns:
+        if fnmatch.fnmatch(name_lower, pattern.lower()):
+            return True, pattern
     return False, ""
 
 
@@ -354,14 +462,32 @@ def process_file(
     source_bucket: str,
     *,
     client: Any,
-    system_prompt: str,
+    system_prompt: Any,
     excluded_dir: Path,
     model: str,
     staging_root: Path,
+    skip_patterns: list[str],
 ) -> dict:
     """Classify one file. Returns a CSV row dict. No DB writes."""
     ext = file_path.suffix.lower()
     is_pdf = ext in PDF_EXTS
+
+    # Skip-pattern check FIRST — saves the body extraction and the
+    # API call for files that match a known-noise pattern (e.g. an
+    # OCR-split-by-page project). Runs before exclusion to keep
+    # extraction cost off the patterns Paul has already labelled.
+    skipped, matched_pattern = is_skipped(file_path.name, skip_patterns)
+    if skipped:
+        return {
+            "filename": file_path.name,
+            "source_bucket": source_bucket,
+            "source_path": str(file_path),
+            "extension": ext,
+            "tier": "uncategorized",
+            "confidence": "skip-pattern",
+            "reason": f"filename-pattern: {matched_pattern!r}",
+            "moved_to": "",
+        }
 
     try:
         if is_pdf:
@@ -478,7 +604,21 @@ def main() -> int:
         default=None,
         help="seed for --shuffle (omit for non-reproducible shuffle)",
     )
+    parser.add_argument(
+        "--skip-pattern",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help=(
+            "shell-glob pattern matched against filenames (case-"
+            "insensitive); matched files get tier=uncategorized with "
+            "no API call. Repeatable. Combined with BIDIQ_SKIP_PATTERNS "
+            "env var (pipe-delimited)."
+        ),
+    )
     args = parser.parse_args()
+
+    skip_patterns = load_skip_patterns_from_env() + list(args.skip_pattern or [])
 
     staging_root: Path = args.staging_root
     priority_dir = staging_root / PRIORITY_SUBDIR
@@ -522,6 +662,14 @@ def main() -> int:
             "(pipe-delimited) before a real run."
         )
 
+    if skip_patterns:
+        print(
+            f"  skip-patterns   : {len(skip_patterns)} pattern(s) — files "
+            f"matching go to uncategorized with no API call"
+        )
+        for p in skip_patterns:
+            print(f"                    {p!r}")
+
     files = collect_files(priority_dir, secondary_dir)
     if args.shuffle:
         import random  # noqa: PLC0415
@@ -560,6 +708,19 @@ def main() -> int:
     from bidiq.ingest import CLASSIFIER_SYSTEM_PROMPT_V2  # noqa: PLC0415
 
     client = anthropic.Anthropic(api_key=api_key)
+
+    # Build the cached system prompt once. v2.1's text + Paul's
+    # spot-check verdicts as few-shot guidance, wrapped in
+    # cache_control so the ~3k extra tokens are charged at the
+    # cached-rate (~10x cheaper) on every call after the first.
+    # Cache TTL is 5 min — well under our typical inter-call gap.
+    classifier_system_prompt = [
+        {
+            "type": "text",
+            "text": CLASSIFIER_SYSTEM_PROMPT_V2 + "\n\n" + PAUL_FEWSHOT_GUIDANCE,
+            "cache_control": {"type": "ephemeral"},
+        }
+    ]
 
     # Preflight: verify auth + model with one tiny call BEFORE we burn
     # money on 30+ classifications. Bail out clearly if anything is
@@ -623,10 +784,11 @@ def main() -> int:
             file_path,
             bucket,
             client=client,
-            system_prompt=CLASSIFIER_SYSTEM_PROMPT_V2,
+            system_prompt=classifier_system_prompt,
             excluded_dir=excluded_dir,
             model=args.model,
             staging_root=staging_root,
+            skip_patterns=skip_patterns,
         )
         rows.append(row)
 
