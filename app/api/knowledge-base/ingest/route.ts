@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     // Validate category. Post-multitag migration the column is TEXT[]; this
     // route's classifier still emits a single string under the old 10-tag
     // vocabulary, so wrap it in a one-element array for the INSERT below.
-    // Re-classifying typed/uploaded content under the v4-trimmed vocabulary
+    // Re-classifying typed/uploaded content under the v2 3-tier vocabulary
     // is tracked separately — for now this keeps the route alive without
     // schema mismatch errors.
     const categoryStr = CATEGORIES.includes(classification.category)
