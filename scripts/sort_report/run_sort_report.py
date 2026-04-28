@@ -496,7 +496,8 @@ def main() -> int:
 
     # Preflight: verify auth + model with one tiny call BEFORE we burn
     # money on 30+ classifications. Bail out clearly if anything is
-    # misconfigured (bad API key, retired model id, network blocked).
+    # misconfigured (bad API key, retired model id, account spending
+    # cap reached, network blocked).
     print("  preflight       : verifying API key + model …")
     try:
         client.messages.create(
@@ -507,12 +508,34 @@ def main() -> int:
         )
         print("  preflight       : OK")
     except anthropic.APIError as e:
-        print(f"\nERROR: preflight API call failed: {e}", file=sys.stderr)
-        print(
+        msg = str(e).lower()
+        diagnosis = (
             "  Likely causes: invalid ANTHROPIC_API_KEY, retired model id "
-            f"({args.model!r}), or no network egress to api.anthropic.com.",
-            file=sys.stderr,
+            f"({args.model!r}), or no network egress to api.anthropic.com."
         )
+        if "usage limit" in msg or "spending" in msg:
+            diagnosis = (
+                "  Cause: your Anthropic account has hit its configured "
+                "spending cap.\n"
+                "  Fix: wait until the reset date in the error above, or "
+                "raise the cap at\n  https://console.anthropic.com/ → "
+                "Settings → Plans & Billing → Usage limits."
+            )
+        elif "authentication" in msg or "api key" in msg or "401" in msg:
+            diagnosis = (
+                "  Cause: ANTHROPIC_API_KEY is missing, malformed, or "
+                "revoked.\n  Fix: confirm the key in .env.local (or your "
+                "shell session) matches the\n  active key in "
+                "https://console.anthropic.com/settings/keys."
+            )
+        elif "not_found" in msg or "model" in msg and "404" in msg:
+            diagnosis = (
+                f"  Cause: model id {args.model!r} is not available to your "
+                "account.\n  Fix: pass --model with a current id "
+                "(e.g. claude-sonnet-4-20250514)."
+            )
+        print(f"\nERROR: preflight API call failed: {e}", file=sys.stderr)
+        print(diagnosis, file=sys.stderr)
         return 3
     except Exception as e:  # noqa: BLE001
         print(f"\nERROR: preflight failed: {e}", file=sys.stderr)
