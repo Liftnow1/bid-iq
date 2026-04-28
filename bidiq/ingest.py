@@ -607,7 +607,7 @@ def extract_deep_with_vision_chunked(
 
 
 # ---------------------------------------------------------------------------
-# Document classifier (v4-trimmed multi-tag vocabulary)
+# Document classifier (v2 3-tier access model)
 # ---------------------------------------------------------------------------
 
 
@@ -634,7 +634,7 @@ def classify_document(
     body_text: str,
     model: str,
 ) -> list[str]:
-    """Run the v4-trimmed classifier prompt and return validated tags.
+    """Run the v2 3-tier classifier prompt and return validated tags.
 
     Always returns a non-empty list. On any error or unparseable response
     the row is tagged ['uncategorized'] so it gets surfaced for review.
@@ -690,7 +690,7 @@ def classify_document(
 
 
 def _coerce_categories(raw) -> list[str]:
-    """Validate a classifier output against the v4-trimmed vocabulary.
+    """Validate a classifier output against the v2 3-tier vocabulary.
 
     Accepts a list of strings (the canonical shape) or a single string
     (defensive — old single-tag callers, raw classifier responses that
@@ -757,7 +757,7 @@ def upsert_knowledge_item(
     if tier not in (1, 2):
         raise ValueError(f"tier must be 1 or 2, got {tier}")
 
-    # `category` is a TEXT[] of v4-trimmed vocabulary tags (multi-tag).
+    # `category` is a TEXT[] (v2 always emits a single-element array).
     # The extraction dict carries it as a list of strings under
     # extraction['category']; psycopg3 maps Python list -> Postgres
     # TEXT[] natively.
@@ -974,10 +974,9 @@ def process_single_pdf(
             pages_count = len(pages)
             classifier_body = str(extraction.get("content_markdown") or "")
 
-        # Multi-tag classification against the v4-trimmed vocabulary. This
-        # is a separate Claude call from the extraction pass — its output
-        # overwrites whatever `category` the extraction prompt may have
-        # produced.
+        # 3-tier access-model classification (v2) — a separate Claude
+        # call from the extraction pass; its output overwrites whatever
+        # `category` the extraction prompt may have produced.
         extraction["category"] = classify_document(
             client,
             title=str(extraction.get("title") or pdf_path.name),
