@@ -251,15 +251,27 @@ def classify_with_diagnostics(
     if not document_text:
         return "uncategorized", "no title or extractable text"
 
+    # Prefill technique: by starting the assistant turn with `[`, the
+    # model is locked into completing a JSON array. It cannot emit
+    # "Looking at this document, I need to..." prose because the
+    # response is already mid-bracket. Pair with stop_sequences=["]"]
+    # so generation stops cold after the closing bracket — keeps the
+    # response under ~20 tokens and removes any "max_tokens cut off
+    # mid-reasoning" failure mode that v2.1's worked-examples prompt
+    # was triggering on Sonnet.
     response = None
     last_err = ""
     for attempt in range(CLASSIFIER_MAX_RETRIES):
         try:
             response = client.messages.create(
                 model=model,
-                max_tokens=200,
+                max_tokens=64,
                 system=system_prompt,
-                messages=[{"role": "user", "content": document_text}],
+                stop_sequences=["]"],
+                messages=[
+                    {"role": "user", "content": document_text},
+                    {"role": "assistant", "content": "["},
+                ],
             )
             break
         except anthropic.RateLimitError as e:
@@ -277,19 +289,18 @@ def classify_with_diagnostics(
     if response is None:
         return "ERROR", last_err[:200] or "classifier returned no response"
 
-    raw_text = response.content[0].text.strip() if response.content else ""
-    if not raw_text:
+    # With prefill + stop sequence, response.content[0].text is just the
+    # body of the array (e.g., '"tier-1-public"'). Reconstruct the full
+    # array for json.loads.
+    raw_body = response.content[0].text.strip() if response.content else ""
+    if not raw_body:
         return "uncategorized", "empty model response"
-
-    start = raw_text.find("[")
-    end = raw_text.rfind("]") + 1
-    if start < 0 or end <= start:
-        return "uncategorized", f"no JSON array in response: {raw_text[:80]!r}"
+    raw_array = "[" + raw_body + "]"
 
     try:
-        parsed = json.loads(raw_text[start:end])
+        parsed = json.loads(raw_array)
     except json.JSONDecodeError as e:
-        return "uncategorized", f"json decode: {e}"[:200]
+        return "uncategorized", f"json decode: {e}; got {raw_body[:80]!r}"[:200]
 
     if not isinstance(parsed, list) or not parsed:
         return "uncategorized", f"unexpected shape: {parsed!r}"[:200]
@@ -542,7 +553,13 @@ def main() -> int:
         return 3
 
     rows: list[dict] = []
-    last_csv_path = sort_report_csv
+    # Once a flush hits PermissionError on `sort_report_csv` (Excel
+    # lock), write_csv falls back to a timestamped sibling and returns
+    # it. We then write to THAT path for the rest of the run instead
+    # of retrying the locked target every flush — otherwise each flush
+    # creates a brand-new SORT-REPORT-{ts}.csv and the user ends up
+    # with ten partial files instead of one cumulative one.
+    csv_target = sort_report_csv
     first_error_printed = False
     started = time.time()
     for i, (file_path, bucket) in enumerate(files, 1):
@@ -582,9 +599,9 @@ def main() -> int:
             )
 
         if i % INCREMENTAL_FLUSH_EVERY == 0:
-            last_csv_path = write_csv(sort_report_csv, rows)
+            csv_target = write_csv(csv_target, rows)
 
-    last_csv_path = write_csv(sort_report_csv, rows)
+    last_csv_path = write_csv(csv_target, rows)
 
     print("\n=== TIER SUMMARY ===")
     tier_counts = Counter(r["tier"] for r in rows)
