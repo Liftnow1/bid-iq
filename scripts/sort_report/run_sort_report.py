@@ -1,15 +1,16 @@
 """Classify-only pass over the Phase 2 staging buckets.
 
-Walks the priority + secondary staging dirs, runs each PDF (or other
-text-bearing file) through the v2.1 classifier in `bidiq.ingest`, and
-writes a CSV sort report at the staging root. **No database writes.**
-Excluded-personal files are moved to 99-EXCLUDED-PERSONAL/ before
-classification so they never reach the Claude API.
+Walks the priority + secondary staging dirs, classifies each file with
+the v2.1 prompt, and writes a CSV sort report at the staging root.
+**No database writes.** Excluded-personal files are moved to
+99-EXCLUDED-PERSONAL/ before classification so they never reach the
+Claude API.
 
 Usage:
   python scripts/sort_report/run_sort_report.py [--dry-run] [--limit N]
                                                 [--staging-root DIR]
                                                 [--model MODEL]
+                                                [--shuffle [--seed N]]
 
 Required env:
   ANTHROPIC_API_KEY            — used for the classifier call
@@ -20,7 +21,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import os
+import re
 import shutil
 import sys
 import time
@@ -33,27 +36,51 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.sort_report.exclusion_config import EXCLUSION_STRINGS  # noqa: E402
 
-# `bidiq.ingest` and `anthropic` are imported lazily inside main() so
-# `--dry-run` works in environments that don't have the Anthropic SDK
-# installed (e.g., a code-review sandbox).
+# `bidiq.ingest`, `anthropic`, and `pypdf` are imported lazily inside
+# main() / extract_pdf_text() so `--dry-run` works in environments that
+# don't have those installed (e.g., a code-review sandbox).
 
-# Default staging root targets Paul's local Windows path. Override with
-# --staging-root when running anywhere else.
 DEFAULT_STAGING_ROOT = Path(r"C:\Users\Paul\Desktop\bidiq-phase2-staging")
 PRIORITY_SUBDIR = "02-PRIORITY-INGEST"
 SECONDARY_SUBDIR = "03-SECONDARY-INGEST"
 EXCLUDED_SUBDIR = "99-EXCLUDED-PERSONAL"
 SORT_REPORT_NAME = "SORT-REPORT.csv"
 
-DEFAULT_MODEL = "claude-sonnet-4-5"
+# Pinned to the same Sonnet 4 snapshot the rest of the bid-iq codebase
+# uses (bidiq/ingest.py, retag-existing-documents.py, /api/ask, /api/
+# knowledge-base/ingest). Override with --model.
+DEFAULT_MODEL = "claude-sonnet-4-20250514"
+
+# Valid 4-tier vocabulary the v2.1 prompt is supposed to emit. Mirrored
+# locally so this script can validate classifier output without
+# depending on bidiq.ingest's set.
+VALID_TIERS = {
+    "tier-1-public",
+    "tier-2-internal",
+    "tier-3-paul-only",
+    "uncategorized",
+}
+
 EXCLUSION_PREVIEW_PAGES = 5
 CLASSIFIER_BODY_MAX_PAGES = 40
+CLASSIFIER_MAX_CHARS = 50_000
+CLASSIFIER_MAX_RETRIES = 5
 INCREMENTAL_FLUSH_EVERY = 50
+
+# File-extension policy for body extraction. Anything not matched here
+# falls back to filename-only classification (no I/O on the bytes).
+PLAINTEXT_EXTS = {
+    ".txt", ".md", ".markdown", ".rst", ".log",
+    ".csv", ".tsv", ".json", ".xml", ".yaml", ".yml",
+    ".html", ".htm", ".eml",
+}
+PDF_EXTS = {".pdf"}
 
 CSV_FIELDS = [
     "filename",
     "source_bucket",
     "source_path",
+    "extension",
     "tier",
     "confidence",
     "reason",
@@ -67,7 +94,7 @@ def extract_pdf_text(pdf_path: Path, max_pages: Optional[int] = None) -> str:
     Scanned/image-only PDFs typically yield empty text — those will land
     in `uncategorized` downstream, which is fine for a sort pass.
     """
-    from pypdf import PdfReader  # noqa: PLC0415  (lazy import — see top)
+    from pypdf import PdfReader  # noqa: PLC0415  (lazy — see top of module)
 
     try:
         reader = PdfReader(str(pdf_path))
@@ -87,13 +114,57 @@ def extract_pdf_text(pdf_path: Path, max_pages: Optional[int] = None) -> str:
     return "\n\n".join(chunks)
 
 
+def extract_plaintext(path: Path, max_chars: int = 200_000) -> str:
+    """Read a text-shaped file with permissive decoding. "" on failure."""
+    try:
+        with open(path, "rb") as f:
+            raw = f.read(max_chars)
+    except Exception:
+        return ""
+    for enc in ("utf-8", "utf-16", "cp1252", "latin-1"):
+        try:
+            return raw.decode(enc, errors="strict")
+        except UnicodeDecodeError:
+            continue
+    return raw.decode("utf-8", errors="ignore")
+
+
+def extract_text_for_file(path: Path, *, max_pages: int) -> str:
+    """Best-effort extraction across file types.
+
+    PDFs use pypdf; common text formats are read directly; everything
+    else returns "" so the classifier sees the filename only via the
+    title field.
+    """
+    ext = path.suffix.lower()
+    if ext in PDF_EXTS:
+        return extract_pdf_text(path, max_pages=max_pages)
+    if ext in PLAINTEXT_EXTS:
+        return extract_plaintext(path)
+    return ""
+
+
+_NORMALIZE_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _normalize_for_match(s: str) -> str:
+    """Lowercase + collapse non-alphanumeric runs to single spaces.
+
+    Lets `"77 Mercer"` match `"77_Mercer_Lease.pdf"`, `"77-mercer"`,
+    `"77.Mercer.Lease"`, etc. Same normalization is applied to needle
+    and haystack so the comparison is symmetric.
+    """
+    return _NORMALIZE_RE.sub(" ", s.lower()).strip()
+
+
 def is_excluded(filename: str, content_preview: str) -> tuple[bool, str]:
-    """Return (excluded, matched_string). Case-insensitive substring match."""
+    """Return (excluded, matched_string). Separator-normalized substring match."""
     if not EXCLUSION_STRINGS:
         return False, ""
-    haystack = f"{filename}\n{content_preview}".lower()
+    haystack = _normalize_for_match(f"{filename} {content_preview}")
     for needle in EXCLUSION_STRINGS:
-        if needle.lower() in haystack:
+        n = _normalize_for_match(needle)
+        if n and n in haystack:
             return True, needle
     return False, ""
 
@@ -121,36 +192,120 @@ def write_csv(path: Path, rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
+def _truncate_for_classifier(text: str, max_chars: int = CLASSIFIER_MAX_CHARS) -> str:
+    """Head + tail kept; middle dropped. Mirrors bidiq.ingest's strategy."""
+    if not text:
+        return ""
+    if len(text) <= max_chars:
+        return text
+    half = max_chars // 2
+    return text[:half] + "\n\n[...truncated...]\n\n" + text[-half:]
+
+
+def classify_with_diagnostics(
+    *,
+    client: Any,
+    system_prompt: str,
+    title: str,
+    body_text: str,
+    model: str,
+    relative_path: str,
+) -> tuple[str, str]:
+    """Run the v2.1 classifier. Returns (tier, reason).
+
+    Unlike `bidiq.ingest.classify_document` (which silently coerces
+    every error to ["uncategorized"]), this surfaces the real reason
+    in the CSV so misclassifications and API errors are debuggable.
+    """
+    import anthropic  # noqa: PLC0415
+
+    head = title or ""
+    if relative_path and relative_path != title:
+        head = f"{head}\n[path] {relative_path}" if head else f"[path] {relative_path}"
+    body = _truncate_for_classifier(body_text or "")
+    document_text = (head + "\n\n" + body).strip() if body else head
+    if not document_text:
+        return "uncategorized", "no title or extractable text"
+
+    response = None
+    last_err = ""
+    for attempt in range(CLASSIFIER_MAX_RETRIES):
+        try:
+            response = client.messages.create(
+                model=model,
+                max_tokens=200,
+                system=system_prompt,
+                messages=[{"role": "user", "content": document_text}],
+            )
+            break
+        except anthropic.RateLimitError as e:
+            last_err = f"rate-limited: {e}"
+            if attempt == CLASSIFIER_MAX_RETRIES - 1:
+                return "ERROR", last_err[:200]
+            wait = 2 ** (attempt + 1) * 15
+            print(f"    rate-limited, sleeping {wait}s …")
+            time.sleep(wait)
+        except anthropic.APIError as e:
+            return "ERROR", f"api-error: {e}"[:200]
+        except Exception as e:  # noqa: BLE001
+            return "ERROR", f"classify: {e}"[:200]
+
+    if response is None:
+        return "ERROR", last_err[:200] or "classifier returned no response"
+
+    raw_text = response.content[0].text.strip() if response.content else ""
+    if not raw_text:
+        return "uncategorized", "empty model response"
+
+    start = raw_text.find("[")
+    end = raw_text.rfind("]") + 1
+    if start < 0 or end <= start:
+        return "uncategorized", f"no JSON array in response: {raw_text[:80]!r}"
+
+    try:
+        parsed = json.loads(raw_text[start:end])
+    except json.JSONDecodeError as e:
+        return "uncategorized", f"json decode: {e}"[:200]
+
+    if not isinstance(parsed, list) or not parsed:
+        return "uncategorized", f"unexpected shape: {parsed!r}"[:200]
+
+    raw_tier = str(parsed[0]).strip()
+    if raw_tier in VALID_TIERS:
+        return raw_tier, ""
+    return "uncategorized", f"unrecognized tier: {raw_tier!r}"
+
+
 def process_file(
     file_path: Path,
     source_bucket: str,
     *,
     client: Any,
-    classify_fn: Any,
+    system_prompt: str,
     excluded_dir: Path,
     model: str,
+    staging_root: Path,
 ) -> dict:
     """Classify one file. Returns a CSV row dict. No DB writes."""
-    is_pdf = file_path.suffix.lower() == ".pdf"
+    ext = file_path.suffix.lower()
+    is_pdf = ext in PDF_EXTS
 
-    if is_pdf:
-        try:
+    try:
+        if is_pdf:
             content_preview = extract_pdf_text(
                 file_path, max_pages=EXCLUSION_PREVIEW_PAGES
             )
-        except Exception as e:  # noqa: BLE001
-            return _error_row(file_path, source_bucket, f"preview-extract: {e}")
-    else:
-        # Non-PDFs: use the filename for exclusion matching only; we
-        # don't try to extract text from arbitrary file types in this
-        # pass.
-        content_preview = ""
+        elif ext in PLAINTEXT_EXTS:
+            content_preview = extract_plaintext(file_path)[:8000]
+        else:
+            content_preview = ""
+    except Exception as e:  # noqa: BLE001
+        return _error_row(file_path, source_bucket, ext, f"preview-extract: {e}")
 
-    excluded, matched = is_excluded(file_path.name, content_preview)
+    excluded, _matched = is_excluded(file_path.name, content_preview)
     if excluded:
         excluded_dir.mkdir(exist_ok=True)
         target = excluded_dir / file_path.name
-        # Disambiguate name collisions inside 99-EXCLUDED-PERSONAL/
         suffix = 1
         while target.exists():
             target = excluded_dir / f"{file_path.stem}__{suffix}{file_path.suffix}"
@@ -159,77 +314,60 @@ def process_file(
             shutil.move(str(file_path), str(target))
         except Exception as e:  # noqa: BLE001
             return _error_row(
-                file_path, source_bucket, f"move-to-excluded failed: {e}"
+                file_path, source_bucket, ext, f"move-to-excluded failed: {e}"
             )
         return {
             "filename": file_path.name,
             "source_bucket": source_bucket,
             "source_path": str(file_path),
+            "extension": ext,
             "tier": "EXCLUDED-PERSONAL",
             "confidence": "N/A",
             "reason": "matched exclusion string (redacted)",
             "moved_to": str(target),
         }
 
-    if not is_pdf:
-        # Brief is PDF-focused; non-PDFs (e.g., .docx, .xlsx, .msg) get
-        # flagged but not classified, so Paul can decide manually.
-        return {
-            "filename": file_path.name,
-            "source_bucket": source_bucket,
-            "source_path": str(file_path),
-            "tier": "SKIPPED-NON-PDF",
-            "confidence": "N/A",
-            "reason": f"non-PDF extension: {file_path.suffix or '(none)'}",
-            "moved_to": "",
-        }
-
     try:
-        body_text = extract_pdf_text(
+        body_text = extract_text_for_file(
             file_path, max_pages=CLASSIFIER_BODY_MAX_PAGES
         )
     except Exception as e:  # noqa: BLE001
-        return _error_row(file_path, source_bucket, f"body-extract: {e}")
-
-    if not body_text.strip():
-        return {
-            "filename": file_path.name,
-            "source_bucket": source_bucket,
-            "source_path": str(file_path),
-            "tier": "uncategorized",
-            "confidence": "auto",
-            "reason": "no extractable text (likely image-only / scanned)",
-            "moved_to": "",
-        }
+        return _error_row(file_path, source_bucket, ext, f"body-extract: {e}")
 
     try:
-        tags = classify_fn(
-            client,
-            title=file_path.stem,
-            summary="",
-            body_text=body_text,
-            model=model,
-        )
-    except Exception as e:  # noqa: BLE001
-        return _error_row(file_path, source_bucket, f"classify: {e}")
+        relative_path = str(file_path.relative_to(staging_root))
+    except ValueError:
+        relative_path = str(file_path)
 
-    tier = tags[0] if tags else "uncategorized"
+    tier, reason = classify_with_diagnostics(
+        client=client,
+        system_prompt=system_prompt,
+        title=file_path.stem,
+        body_text=body_text,
+        model=model,
+        relative_path=relative_path,
+    )
+
     return {
         "filename": file_path.name,
         "source_bucket": source_bucket,
         "source_path": str(file_path),
+        "extension": ext,
         "tier": tier,
         "confidence": "auto",
-        "reason": "",
+        "reason": reason,
         "moved_to": "",
     }
 
 
-def _error_row(file_path: Path, source_bucket: str, msg: str) -> dict:
+def _error_row(
+    file_path: Path, source_bucket: str, ext: str, msg: str
+) -> dict:
     return {
         "filename": file_path.name,
         "source_bucket": source_bucket,
         "source_path": str(file_path),
+        "extension": ext,
         "tier": "ERROR",
         "confidence": "N/A",
         "reason": msg[:200],
@@ -279,10 +417,18 @@ def main() -> int:
         print(f"ERROR: staging root does not exist: {staging_root}")
         return 2
 
-    if not EXCLUSION_STRINGS:
+    if EXCLUSION_STRINGS:
         print(
-            "WARNING: BIDIQ_EXCLUSION_STRINGS is empty. No PII exclusions "
-            "will be applied. Set it in .env.local before a real run."
+            f"  exclusions      : {len(EXCLUSION_STRINGS)} string(s) loaded "
+            f"from BIDIQ_EXCLUSION_STRINGS"
+        )
+    else:
+        print(
+            "  !! WARNING !!   : BIDIQ_EXCLUSION_STRINGS is empty.\n"
+            "                    No PII exclusions will be applied. Files "
+            "containing personal\n                    data will go to the "
+            "classifier. Set the env var in .env.local\n                    "
+            "(pipe-delimited) before a real run."
         )
 
     files = collect_files(priority_dir, secondary_dir)
@@ -303,8 +449,12 @@ def main() -> int:
     print(f"  dry-run         : {args.dry_run}")
 
     if args.dry_run:
+        ext_counts: Counter[str] = Counter(p.suffix.lower() for p, _ in files)
         for i, (file_path, bucket) in enumerate(files, 1):
             print(f"  [DRY] {i:>5}/{len(files)} [{bucket}] {file_path}")
+        print("\nExtension breakdown:")
+        for ext, count in ext_counts.most_common():
+            print(f"  {ext or '(none)':<10} {count:>6}")
         print("\nDry run complete. No files were moved or classified.")
         return 0
 
@@ -313,11 +463,10 @@ def main() -> int:
         print("ERROR: ANTHROPIC_API_KEY is not set.")
         return 2
 
-    # Defer heavy imports until we know we're really classifying. Keeps
-    # --dry-run usable without anthropic / pdf2image in the env.
+    # Defer heavy imports until we know we're really classifying.
     import anthropic  # noqa: PLC0415
 
-    from bidiq.ingest import classify_document  # noqa: PLC0415
+    from bidiq.ingest import CLASSIFIER_SYSTEM_PROMPT_V2  # noqa: PLC0415
 
     client = anthropic.Anthropic(api_key=api_key)
 
@@ -328,18 +477,19 @@ def main() -> int:
             file_path,
             bucket,
             client=client,
-            classify_fn=classify_document,
+            system_prompt=CLASSIFIER_SYSTEM_PROMPT_V2,
             excluded_dir=excluded_dir,
             model=args.model,
+            staging_root=staging_root,
         )
         rows.append(row)
 
-        if i % 10 == 0 or i == len(files):
+        if i % 5 == 0 or i == len(files):
             elapsed = time.time() - started
             rate = i / elapsed if elapsed else 0
             print(
                 f"  {i:>5}/{len(files)}  ({100 * i / len(files):5.1f}%)  "
-                f"{rate:.1f} files/sec  last: {row['tier']:<22} "
+                f"{rate:.2f} files/sec  last: {row['tier']:<22} "
                 f"{file_path.name}"
             )
 
@@ -348,10 +498,15 @@ def main() -> int:
 
     write_csv(sort_report_csv, rows)
 
-    print("\n=== SUMMARY ===")
+    print("\n=== TIER SUMMARY ===")
     tier_counts = Counter(r["tier"] for r in rows)
     for tier, count in tier_counts.most_common():
         print(f"  {tier:<24} {count:>6}")
+    err_rows = [r for r in rows if r["tier"] == "ERROR"]
+    if err_rows:
+        print("\n=== ERROR SAMPLE (first 5) ===")
+        for r in err_rows[:5]:
+            print(f"  {r['filename']}: {r['reason']}")
     print(f"\nReport written to: {sort_report_csv}")
     return 0
 
