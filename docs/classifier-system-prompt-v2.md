@@ -1,3 +1,5 @@
+> **DEPRECATED 2026-04-27** — superseded by v2.1 (tighter Liftnow-document gate + aggressive uncategorized fallback for non-Liftnow content).
+
 # Liftnow Knowledge Base — Document Classifier System Prompt v2
 
 **Vocabulary:** 3-tier access model (replaces v1's 56-category vocabulary)
