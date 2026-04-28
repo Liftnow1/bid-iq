@@ -87,6 +87,27 @@ node scripts/drop-products-table.mjs
 
 All scripts are idempotent — re-running them inserts nothing new and skips existing rows.
 
+## Sort Report Mode
+
+For pre-ingest review of the Phase 2 staging corpus, run:
+
+```bash
+python scripts/sort_report/run_sort_report.py [--dry-run] [--limit N]
+```
+
+This walks the priority + secondary buckets under
+`bidiq-phase2-staging/`, applies a local exclusion list, classifies each
+remaining file with the v2.1 prompt, and writes `SORT-REPORT.csv` at the
+staging root. **No database writes** — Paul reviews the CSV in Excel
+before deciding what to actually ingest.
+
+The exclusion list lives in the `BIDIQ_EXCLUSION_STRINGS` env var
+(pipe-delimited, e.g. `BIDIQ_EXCLUSION_STRINGS=string-a|string-b`). Set
+it in `.env.local` (gitignored — never committed). Files whose name or
+first-pages text contains any exclusion string are moved to
+`99-EXCLUDED-PERSONAL/` before classification, so they never reach the
+Claude API.
+
 ## Deployment notes
 
 - `.github/workflows/extract-lfs-pdfs.yml.disabled` — the old Mohawk-only PDF extraction workflow, disabled by filename suffix. Do not re-enable; it will be replaced by the new ingester.
