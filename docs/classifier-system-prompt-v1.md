@@ -1,3 +1,5 @@
+> **DEPRECATED 2026-04-27** — superseded by v2.1 (tighter Liftnow-document gate + aggressive uncategorized fallback for non-Liftnow content).
+
 # Liftnow Knowledge Base — Document Classifier System Prompt v1
 
 **Purpose:** This is the system prompt embedded in the bid-iq ingester. Every document that enters the KB is shown this prompt + the document content, and the classifier returns one or more category tags from the controlled vocabulary.

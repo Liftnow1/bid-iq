@@ -106,7 +106,7 @@ ERROR_LOG = REPO_ROOT / "data" / "extraction-errors.log"
 # The classifier system prompt is authored in docs/ and loaded at module
 # import time. We don't inline its 500+ lines here — single source of
 # truth, and the file is what ships in the PR diff.
-CLASSIFIER_PROMPT_PATH = REPO_ROOT / "docs" / "classifier-system-prompt-v1.md"
+CLASSIFIER_PROMPT_PATH = REPO_ROOT / "docs" / "classifier-system-prompt-v2.1.md"
 
 
 def _load_classifier_prompt() -> str:
