@@ -28,6 +28,7 @@ import shutil
 import sys
 import time
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -65,7 +66,9 @@ EXCLUSION_PREVIEW_PAGES = 5
 CLASSIFIER_BODY_MAX_PAGES = 40
 CLASSIFIER_MAX_CHARS = 50_000
 CLASSIFIER_MAX_RETRIES = 5
-INCREMENTAL_FLUSH_EVERY = 50
+# Flush often; even small spot-check runs (--limit 5/30) survive a
+# crash or final-write PermissionError this way. Disk writes are cheap.
+INCREMENTAL_FLUSH_EVERY = 5
 
 # File-extension policy for body extraction. Anything not matched here
 # falls back to filename-only classification (no I/O on the bytes).
@@ -185,11 +188,32 @@ def collect_files(priority_dir: Path, secondary_dir: Path) -> list[tuple[Path, s
     return out
 
 
-def write_csv(path: Path, rows: list[dict]) -> None:
+def _write_csv_to(path: Path, rows: list[dict]) -> None:
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def write_csv(path: Path, rows: list[dict]) -> Path:
+    """Write rows to `path`; on PermissionError fall back to a timestamped
+    sibling so an Excel lock on the target never costs us the run.
+
+    Returns the path that was actually written.
+    """
+    try:
+        _write_csv_to(path, rows)
+        return path
+    except PermissionError:
+        ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+        fallback = path.with_name(f"{path.stem}-{ts}{path.suffix}")
+        _write_csv_to(fallback, rows)
+        print(
+            f"  !! WARN: {path.name} is locked (likely open in Excel). "
+            f"Wrote {fallback.name} instead.",
+            file=sys.stderr,
+        )
+        return fallback
 
 
 def _truncate_for_classifier(text: str, max_chars: int = CLASSIFIER_MAX_CHARS) -> str:
@@ -470,7 +494,33 @@ def main() -> int:
 
     client = anthropic.Anthropic(api_key=api_key)
 
+    # Preflight: verify auth + model with one tiny call BEFORE we burn
+    # money on 30+ classifications. Bail out clearly if anything is
+    # misconfigured (bad API key, retired model id, network blocked).
+    print("  preflight       : verifying API key + model …")
+    try:
+        client.messages.create(
+            model=args.model,
+            max_tokens=10,
+            system="Reply with the single word: OK",
+            messages=[{"role": "user", "content": "preflight"}],
+        )
+        print("  preflight       : OK")
+    except anthropic.APIError as e:
+        print(f"\nERROR: preflight API call failed: {e}", file=sys.stderr)
+        print(
+            "  Likely causes: invalid ANTHROPIC_API_KEY, retired model id "
+            f"({args.model!r}), or no network egress to api.anthropic.com.",
+            file=sys.stderr,
+        )
+        return 3
+    except Exception as e:  # noqa: BLE001
+        print(f"\nERROR: preflight failed: {e}", file=sys.stderr)
+        return 3
+
     rows: list[dict] = []
+    last_csv_path = sort_report_csv
+    first_error_printed = False
     started = time.time()
     for i, (file_path, bucket) in enumerate(files, 1):
         row = process_file(
@@ -484,19 +534,34 @@ def main() -> int:
         )
         rows.append(row)
 
+        # Surface the first ERROR's reason loudly. Everything else lives
+        # in the CSV, but if every file is failing the same way the user
+        # needs to see it BEFORE the run finishes (and before the CSV
+        # write potentially fails too).
+        if row["tier"] == "ERROR" and not first_error_printed:
+            print(
+                f"  !! first ERROR  : {row['filename']}\n"
+                f"     reason       : {row['reason']}",
+                file=sys.stderr,
+            )
+            first_error_printed = True
+
         if i % 5 == 0 or i == len(files):
             elapsed = time.time() - started
             rate = i / elapsed if elapsed else 0
+            reason_hint = ""
+            if row["tier"] in ("ERROR", "uncategorized") and row.get("reason"):
+                reason_hint = f"  ({row['reason'][:60]})"
             print(
                 f"  {i:>5}/{len(files)}  ({100 * i / len(files):5.1f}%)  "
                 f"{rate:.2f} files/sec  last: {row['tier']:<22} "
-                f"{file_path.name}"
+                f"{file_path.name}{reason_hint}"
             )
 
         if i % INCREMENTAL_FLUSH_EVERY == 0:
-            write_csv(sort_report_csv, rows)
+            last_csv_path = write_csv(sort_report_csv, rows)
 
-    write_csv(sort_report_csv, rows)
+    last_csv_path = write_csv(sort_report_csv, rows)
 
     print("\n=== TIER SUMMARY ===")
     tier_counts = Counter(r["tier"] for r in rows)
@@ -507,7 +572,7 @@ def main() -> int:
         print("\n=== ERROR SAMPLE (first 5) ===")
         for r in err_rows[:5]:
             print(f"  {r['filename']}: {r['reason']}")
-    print(f"\nReport written to: {sort_report_csv}")
+    print(f"\nReport written to: {last_csv_path}")
     return 0
 
 
