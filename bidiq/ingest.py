@@ -36,66 +36,16 @@ EXTRACTOR_VERSION_LEGACY = "ingest.py-v1"
 EXTRACTOR_VERSION_TIER1 = "ingest.py-v1-tier1"
 EXTRACTOR_VERSION_TIER2 = "ingest.py-v1-tier2"
 
-# v4-trimmed vocabulary. Authoritative list lives in
-# docs/classifier-system-prompt-v1.md (Appendix A). The classifier may
-# also emit `uncategorized` for documents it can't confidently tag.
+# v2 3-tier access-model vocabulary. Authoritative classifier prompt
+# lives in docs/classifier-system-prompt-v2.md. Replaces the old
+# 56-category v4-trimmed set; existing rows that still carry old-vocab
+# values are unaffected by this change but will be re-tagged in waves
+# during Phase 2 corpus ingest. The classifier may also emit
+# `uncategorized` for documents it can't confidently tag.
 VALID_CATEGORIES = {
-    "installation-guides",
-    "service-procedures",
-    "parts-catalog",
-    "specifications",
-    "operation-manuals",
-    "safety-warnings",
-    "warranty-documentation",
-    "marketing-brochure",
-    "manufacturer-training",
-    "technical-bulletin",
-    "site-survey",
-    "compliance-regulations",
-    "procurement-process",
-    "industry-reference",
-    "rfp-received",
-    "compliance-template",
-    "install-handoff-sop",
-    "service-workflow-sop",
-    "contract-reporting-sop",
-    "sales-playbook",
-    "capability-statement",
-    "cold-outreach-template",
-    "voice-samples",
-    "sales-collateral",
-    "case-study",
-    "liftnow-internal-training",
-    "liftnow-credentials",
-    "insurance-policy",
-    "bond-instrument",
-    "rfp-response",
-    "customer-quote-history",
-    "customer-po",
-    "customer-invoice",
-    "customer-contract",
-    "customer-account-setup",
-    "vendor-onboarding-completed",
-    "vendor-po",
-    "vendor-invoice",
-    "vendor-agreement",
-    "subcontract-agreement",
-    "vendor-cost-pricing",
-    "list-pricing",
-    "service-record",
-    "install-record",
-    "payment-record",
-    "damage-claim",
-    "certified-payroll",
-    "contract-reporting-record",
-    "bid-protest",
-    "change-order",
-    "competitive-intelligence",
-    "win-loss-debrief",
-    "financial-statement",
-    "commission-report",
-    "employment-document",
-    "regulatory-update",
+    "tier-1-public",
+    "tier-2-internal",
+    "tier-3-paul-only",
     "uncategorized",
 }
 
@@ -104,9 +54,9 @@ PRODUCT_DATA_ROOT = REPO_ROOT / "data" / "product_data"
 ERROR_LOG = REPO_ROOT / "data" / "extraction-errors.log"
 
 # The classifier system prompt is authored in docs/ and loaded at module
-# import time. We don't inline its 500+ lines here — single source of
-# truth, and the file is what ships in the PR diff.
-CLASSIFIER_PROMPT_PATH = REPO_ROOT / "docs" / "classifier-system-prompt-v1.md"
+# import time. We don't inline it here — single source of truth, and the
+# file is what ships in the PR diff.
+CLASSIFIER_PROMPT_PATH = REPO_ROOT / "docs" / "classifier-system-prompt-v2.md"
 
 
 def _load_classifier_prompt() -> str:
@@ -115,18 +65,18 @@ def _load_classifier_prompt() -> str:
     except FileNotFoundError as e:
         raise RuntimeError(
             f"Classifier prompt missing: {CLASSIFIER_PROMPT_PATH}. "
-            "This file is required for the v4-trimmed multi-tag classifier."
+            "This file is required for the v2 3-tier access-model classifier."
         ) from e
 
 
-CLASSIFIER_SYSTEM_PROMPT_V1 = _load_classifier_prompt()
+CLASSIFIER_SYSTEM_PROMPT_V2 = _load_classifier_prompt()
 
 
 def build_shallow_extraction_prompt(brand_name: str) -> str:
     """Tier-1 prompt: cover + last page only, body extraction not in scope.
 
     Categorization is now handled by a separate classify_document() pass
-    against the v4-trimmed vocabulary (see docs/classifier-system-prompt-v1.md).
+    against the v2 3-tier vocabulary (see docs/classifier-system-prompt-v2.md).
     This prompt only collects the scaffolding fields.
     """
     return f"""You are extracting cover-page metadata from a PDF in Liftnow's knowledge base. The PDF is from manufacturer/brand: {brand_name}.
@@ -704,7 +654,7 @@ def classify_document(
             response = client.messages.create(
                 model=model,
                 max_tokens=200,
-                system=CLASSIFIER_SYSTEM_PROMPT_V1,
+                system=CLASSIFIER_SYSTEM_PROMPT_V2,
                 messages=[{"role": "user", "content": document_text}],
             )
             break
