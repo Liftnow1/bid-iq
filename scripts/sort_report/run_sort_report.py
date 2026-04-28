@@ -252,6 +252,21 @@ def main() -> int:
         default=DEFAULT_MODEL,
         help=f"Anthropic model id (default: {DEFAULT_MODEL})",
     )
+    parser.add_argument(
+        "--shuffle",
+        action="store_true",
+        help=(
+            "randomize file order before applying --limit, so a small "
+            "sample is drawn from across both buckets (use for spot-check "
+            "runs; default order is deterministic alphabetical)"
+        ),
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="seed for --shuffle (omit for non-reproducible shuffle)",
+    )
     args = parser.parse_args()
 
     staging_root: Path = args.staging_root
@@ -271,6 +286,11 @@ def main() -> int:
         )
 
     files = collect_files(priority_dir, secondary_dir)
+    if args.shuffle:
+        import random  # noqa: PLC0415
+
+        rng = random.Random(args.seed) if args.seed is not None else random.Random()
+        rng.shuffle(files)
     if args.limit is not None:
         files = files[: args.limit]
 
