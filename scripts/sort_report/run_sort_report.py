@@ -452,6 +452,24 @@ def main() -> int:
         print(f"ERROR: staging root does not exist: {staging_root}")
         return 2
 
+    # Probe SORT-REPORT.csv before any API spend. If Excel has it open,
+    # Windows refuses overwrites — better to bail right now and tell the
+    # user to close Excel than to run for 30 minutes and dump the output
+    # into a timestamped sibling they have to hunt down.
+    if sort_report_csv.exists():
+        try:
+            with open(sort_report_csv, "r+b"):
+                pass
+        except PermissionError:
+            print(
+                f"\nERROR: {sort_report_csv} is locked (likely open in Excel).\n"
+                "  Close it and rerun so output lands in SORT-REPORT.csv.\n"
+                "  (If you want to keep the old CSV open for reference, "
+                "rename it first.)",
+                file=sys.stderr,
+            )
+            return 4
+
     if EXCLUSION_STRINGS:
         print(
             f"  exclusions      : {len(EXCLUSION_STRINGS)} string(s) loaded "
