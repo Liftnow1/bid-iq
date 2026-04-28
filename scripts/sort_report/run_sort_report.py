@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 import os
 import re
 import shutil
@@ -60,6 +59,42 @@ VALID_TIERS = {
     "tier-2-internal",
     "tier-3-paul-only",
     "uncategorized",
+}
+
+# Forced-tool-use schema. The model is required to call this tool with
+# `tier` set to one of the four enum values. Replaces the older
+# "ask the model for JSON in a text response" approach, which Sonnet
+# kept derailing into prose ("Looking at this document, I need to…",
+# "Step 1: Is this a Liftnow document?"). Tool use guarantees
+# structured output regardless of how chatty the system prompt makes
+# the model want to be.
+CLASSIFY_TOOL = {
+    "name": "classify_document",
+    "description": (
+        "Record the access-tier classification for the document. "
+        "Apply the rules in the system prompt and pass exactly one "
+        "value from the enum."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "tier": {
+                "type": "string",
+                "enum": [
+                    "tier-1-public",
+                    "tier-2-internal",
+                    "tier-3-paul-only",
+                    "uncategorized",
+                ],
+                "description": (
+                    "Access tier per the system-prompt classifier rules. "
+                    "Use 'uncategorized' for non-Liftnow content per "
+                    "v2.1's Step 1 gate."
+                ),
+            }
+        },
+        "required": ["tier"],
+    },
 }
 
 EXCLUSION_PREVIEW_PAGES = 5
@@ -251,64 +286,67 @@ def classify_with_diagnostics(
     if not document_text:
         return "uncategorized", "no title or extractable text"
 
-    # Prefill technique: by starting the assistant turn with `[`, the
-    # model is locked into completing a JSON array. It cannot emit
-    # "Looking at this document, I need to..." prose because the
-    # response is already mid-bracket. Pair with stop_sequences=["]"]
-    # so generation stops cold after the closing bracket — keeps the
-    # response under ~20 tokens and removes any "max_tokens cut off
-    # mid-reasoning" failure mode that v2.1's worked-examples prompt
-    # was triggering on Sonnet.
+    # Forced tool use: the model is required to call classify_document
+    # with `tier` set to one of the four enum values. We don't parse
+    # text output — the tool block carries the answer in structured
+    # form. max_tokens covers any preamble text the model emits before
+    # the tool call (we ignore that text).
     response = None
     last_err = ""
     for attempt in range(CLASSIFIER_MAX_RETRIES):
         try:
             response = client.messages.create(
                 model=model,
-                max_tokens=64,
+                max_tokens=1024,
                 system=system_prompt,
-                stop_sequences=["]"],
-                messages=[
-                    {"role": "user", "content": document_text},
-                    {"role": "assistant", "content": "["},
-                ],
+                tools=[CLASSIFY_TOOL],
+                tool_choice={"type": "tool", "name": "classify_document"},
+                messages=[{"role": "user", "content": document_text}],
             )
             break
         except anthropic.RateLimitError as e:
             last_err = f"rate-limited: {e}"
             if attempt == CLASSIFIER_MAX_RETRIES - 1:
-                return "ERROR", last_err[:200]
+                return "ERROR", last_err[:300]
             wait = 2 ** (attempt + 1) * 15
             print(f"    rate-limited, sleeping {wait}s …")
             time.sleep(wait)
         except anthropic.APIError as e:
-            return "ERROR", f"api-error: {e}"[:200]
+            return "ERROR", f"api-error: {e}"[:300]
         except Exception as e:  # noqa: BLE001
-            return "ERROR", f"classify: {e}"[:200]
+            return "ERROR", f"classify: {e}"[:300]
 
     if response is None:
-        return "ERROR", last_err[:200] or "classifier returned no response"
+        return "ERROR", last_err[:300] or "classifier returned no response"
 
-    # With prefill + stop sequence, response.content[0].text is just the
-    # body of the array (e.g., '"tier-1-public"'). Reconstruct the full
-    # array for json.loads.
-    raw_body = response.content[0].text.strip() if response.content else ""
-    if not raw_body:
-        return "uncategorized", "empty model response"
-    raw_array = "[" + raw_body + "]"
+    # Walk content blocks for the tool_use block. The model may emit a
+    # text block first (its reasoning); we ignore it. Tool-choice
+    # guarantees a tool_use block named classify_document is present.
+    for block in response.content or []:
+        if getattr(block, "type", None) != "tool_use":
+            continue
+        if getattr(block, "name", None) != "classify_document":
+            continue
+        tool_input = getattr(block, "input", {}) or {}
+        tier = str(tool_input.get("tier", "")).strip()
+        if tier in VALID_TIERS:
+            return tier, ""
+        return "uncategorized", (
+            f"tool returned unknown tier: {tier!r}"
+        )[:300]
 
-    try:
-        parsed = json.loads(raw_array)
-    except json.JSONDecodeError as e:
-        return "uncategorized", f"json decode: {e}; got {raw_body[:80]!r}"[:200]
-
-    if not isinstance(parsed, list) or not parsed:
-        return "uncategorized", f"unexpected shape: {parsed!r}"[:200]
-
-    raw_tier = str(parsed[0]).strip()
-    if raw_tier in VALID_TIERS:
-        return raw_tier, ""
-    return "uncategorized", f"unrecognized tier: {raw_tier!r}"
+    # No tool_use block found — shouldn't happen with forced tool_choice
+    # but capture diagnostics if it does.
+    text_blocks = [
+        getattr(b, "text", "")
+        for b in (response.content or [])
+        if getattr(b, "type", None) == "text"
+    ]
+    preview = (text_blocks[0] if text_blocks else "")[:150]
+    stop_reason = getattr(response, "stop_reason", "?")
+    return "ERROR", (
+        f"no tool_use block (stop_reason={stop_reason}); text={preview!r}"
+    )[:300]
 
 
 def process_file(
@@ -405,7 +443,7 @@ def _error_row(
         "extension": ext,
         "tier": "ERROR",
         "confidence": "N/A",
-        "reason": msg[:200],
+        "reason": msg[:300],
         "moved_to": "",
     }
 
