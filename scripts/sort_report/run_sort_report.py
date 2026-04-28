@@ -35,6 +35,45 @@ from typing import Any, Optional
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+
+def _load_env_local(path: Path) -> int:
+    """Tiny KEY=VALUE loader for .env.local. No deps. Existing env wins.
+
+    Matches python-dotenv's default behavior closely enough for our
+    needs: skips comments and blanks, strips surrounding quotes, does
+    not override variables already present in os.environ. Returns the
+    count of new variables actually set.
+    """
+    if not path.exists():
+        return 0
+    set_count = 0
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip()
+        if not key:
+            continue
+        # Strip a single pair of surrounding quotes if present
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+            value = value[1:-1]
+        if key in os.environ:
+            continue
+        os.environ[key] = value
+        set_count += 1
+    return set_count
+
+
+# Load .env.local from the repo root BEFORE we read any env vars
+# (BIDIQ_EXCLUSION_STRINGS, BIDIQ_SKIP_PATTERNS, ANTHROPIC_API_KEY).
+# Existing process env wins so a one-off override on the command line
+# still works as expected.
+_load_env_local(REPO_ROOT / ".env.local")
+
 from scripts.sort_report.exclusion_config import EXCLUSION_STRINGS  # noqa: E402
 
 # `bidiq.ingest`, `anthropic`, and `pypdf` are imported lazily inside
@@ -288,17 +327,30 @@ def is_excluded(filename: str, content_preview: str) -> tuple[bool, str]:
 
 
 def load_skip_patterns_from_env() -> list[str]:
-    """Pipe-delimited glob patterns from BIDIQ_SKIP_PATTERNS.
+    """Pipe-delimited glob patterns from BIDIQ_SKIP_PATTERNS, plus the
+    built-in defaults below.
 
     Combined at runtime with patterns from --skip-pattern CLI flags.
     Files whose name matches any pattern (case-insensitive) get
     short-circuited to tier=uncategorized with no API call.
     """
-    return [
+    user_patterns = [
         s.strip()
         for s in os.environ.get("BIDIQ_SKIP_PATTERNS", "").split("|")
         if s.strip()
     ]
+    return DEFAULT_SKIP_PATTERNS + user_patterns
+
+
+# Known-noise filename patterns that are ALWAYS skipped, regardless of
+# .env.local config. These represent specific corpus events Paul has
+# already labelled as junk; baking them as defaults means the user
+# doesn't have to remember to set BIDIQ_SKIP_PATTERNS for them.
+DEFAULT_SKIP_PATTERNS: list[str] = [
+    # 2026-01 RFP that got OCR-split into hundreds of single-page
+    # fragments. Paul confirmed every file with this prefix is junk.
+    "20260127-00-3yqkjv_*",
+]
 
 
 def is_skipped(filename: str, patterns: list[str]) -> tuple[bool, str]:
