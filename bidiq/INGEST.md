@@ -63,7 +63,7 @@ The build brief used a column named `content`; the actual schema uses `raw_conte
 
 `extracted_data` JSONB carries: `tier` (1 or 2), `effective_date`, `supersedes_previous`, and (Tier 2 only, when `--include-page-summaries` was passed) `pages_summary`.
 
-`category` is `TEXT[]` — multi-tag from the v4-trimmed 56-category vocabulary. See `docs/classifier-system-prompt-v1.md` for the authoritative prompt; the ingester loads it at import time and runs `classify_document()` as a separate Claude call after extraction. Migration path for existing DBs lives in `scripts/migrations/2026-04-27-multitag-categories/`.
+`category` is `TEXT[]` — under the v2 3-tier access model the classifier always emits a single-element array (`tier-1-public`, `tier-2-internal`, `tier-3-paul-only`, or `uncategorized`). See `docs/classifier-system-prompt-v2.md` for the authoritative prompt; the ingester loads it at import time and runs `classify_document()` as a separate Claude call after extraction. The retired v4-trimmed 56-category prompt is preserved at `docs/classifier-system-prompt-v1-DEPRECATED.md`. Migration path for existing DBs lives in `scripts/migrations/2026-04-27-multitag-categories/`.
 
 ## CLI
 

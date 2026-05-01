@@ -23,7 +23,7 @@ type QueryMode = "cert-inclusive" | "commercial-only";
 type KnowledgeRow = {
   id: number;
   title: string;
-  // TEXT[] of v4-trimmed vocabulary tags (see docs/classifier-system-prompt-v1.md).
+  // TEXT[] of v2 3-tier access-model values (see docs/classifier-system-prompt-v2.md).
   category: string[];
   summary: string | null;
   tags: string[] | null;

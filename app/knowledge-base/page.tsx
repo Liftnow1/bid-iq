@@ -6,7 +6,7 @@ import Link from "next/link";
 interface KnowledgeItem {
   id: number;
   title: string;
-  // TEXT[] of v4-trimmed vocabulary tags. Multi-tag.
+  // TEXT[] of v2 3-tier access-model values (single-element under v2).
   category: string[];
   subcategory: string | null;
   tags: string[];

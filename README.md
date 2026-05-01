@@ -6,21 +6,25 @@ Bid IQ is Liftnow's internal tool for ingesting government bid packages and asse
 
 - **Postgres (Neon serverless)** is the single source of truth. Two tables matter:
   - `brands` — every manufacturer/brand we track (Liftnow, Mohawk, BendPak, Rotary, Challenger, Stertil-Koni, Hunter, etc.), with `we_carry` and `relationship_type` flags.
-  - `knowledge_items` — every queryable piece of knowledge: product specs, pricing, bid history, installation guides, compliance data, competitive intel, customer intel. Each row is classified with **one or more** tags from the 56-category v4-trimmed vocabulary; `category` is `TEXT[]`.
+  - `knowledge_items` — every queryable piece of knowledge: product specs, pricing, bid history, installation guides, compliance data, competitive intel, customer intel. Each row is classified into one of three access tiers (`tier-1-public`, `tier-2-internal`, `tier-3-paul-only`, plus `uncategorized` for documents that can't be classified confidently). `category` is `TEXT[]` — the schema supports multi-tagging for future use, but the v2 classifier always returns a single-element array.
 - **Next.js 16 app** (`app/`) serves the UI and API routes. Deployed via Vercel.
 - **Anthropic Claude** handles classification (`/api/knowledge-base/ingest`) and Q&A (`/api/ask`).
 
-### Classification vocabulary
+### Classification vocabulary — 3-tier access model
 
-The authoritative classifier system prompt — including the full 56-tag list, decision cues, multi-tag heuristics, and 20 worked examples — lives at [`docs/classifier-system-prompt-v1.md`](docs/classifier-system-prompt-v1.md). The ingester loads it at module import time; updating that file is how you change classifier behavior.
+The authoritative classifier system prompt lives at [`docs/classifier-system-prompt-v2.md`](docs/classifier-system-prompt-v2.md) and is loaded by the ingester at module import time; updating that file is how you change classifier behavior. The retired 56-category v4-trimmed prompt is preserved at [`docs/classifier-system-prompt-v1-DEPRECATED.md`](docs/classifier-system-prompt-v1-DEPRECATED.md) for historical reference only.
 
-A document typically receives 1–4 tags. Examples:
+The three tiers map directly to the agent architecture:
 
-- A Challenger 4018 IOM PDF covering install + operation + service + parts → `[installation-guides, operation-manuals, service-procedures, parts-catalog]`.
-- A Sourcewell-published price sheet → `[procurement-process, list-pricing]`.
-- A filled NJ PWCR form → `[certified-payroll]`.
+| Tier | Who can see it | Examples |
+| --- | --- | --- |
+| `tier-1-public` | Content Engine, Email Agent, future Bid Tracker, Paul | manufacturer product docs, industry references, government regulations, Sourcewell published pricing, Liftnow capability statements / case studies / sales collateral, Paul's voice samples |
+| `tier-2-internal` | Email Agent, future Bid Tracker, Paul (no Content Engine) | customer quotes / POs / contracts, service & install records, vendor & subcontract agreements, Liftnow credentials (W-9, COIs), internal SOPs, compliance templates, RFPs received and responses |
+| `tier-3-paul-only` | Paul only (no agent ever) | vendor cost pricing, customer invoices, payment / banking records, insurance policies & bonds, certified payroll, bid protests, change orders, competitive intelligence, win/loss debriefs, financials, commission reports, employment docs, M&A / legal correspondence |
 
-Agent-tier filtering constants (Paul-only, email-agent excludes, content-engine allow-list) are defined in [`lib/category-tiers.ts`](lib/category-tiers.ts) for future use; `/api/ask` doesn't enforce them today.
+When a document straddles tiers the most-restrictive tier wins. See `docs/classifier-system-prompt-v2.md` for the full decision rule and worked examples.
+
+Agent-tier filtering constants are defined in [`lib/category-tiers.ts`](lib/category-tiers.ts) for future use; `/api/ask` doesn't enforce them today.
 
 ## Key routes
 

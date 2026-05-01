@@ -1,14 +1,21 @@
-"""Re-tag existing ingested_pdf rows under the v4-trimmed vocabulary.
+"""Re-tag existing ingested_pdf rows under the v2 3-tier vocabulary.
 
-The old single-tag classifier wrote one of 10 categories per row. After
-migration 0007 those values were wrapped into a one-element TEXT[] (e.g.
-'installation-guides' -> {installation-guides}). This script replays each
-ingested_pdf row through the new multi-tag classifier and rewrites the
-category array.
+The original single-tag classifier wrote one of 10 categories per row;
+the v4-trimmed pass briefly added 56 multi-tag categories before being
+superseded by the v2 3-tier access model
+(`tier-1-public` / `tier-2-internal` / `tier-3-paul-only` / `uncategorized`).
+After migration 0007 those values are wrapped TEXT[]; this script replays
+each ingested_pdf row through the current classifier prompt
+(see `docs/classifier-system-prompt-v2.md`) and rewrites the category
+array.
 
 Run from a host with both DATABASE_URL and ANTHROPIC_API_KEY available
 (the Claude Code sandbox can't reach Neon — egress to *.neon.tech and
 to TCP/5432 is blocked there).
+
+NOTE: The classifier-v2 swap PR explicitly defers running this script
+across the existing 272 ingested_pdf rows. Re-tagging will happen in
+waves keyed to specific corpus-ingest needs.
 
 Usage:
   DATABASE_URL=postgres://... \\
@@ -32,7 +39,7 @@ import anthropic  # noqa: E402
 import psycopg  # noqa: E402
 
 from bidiq.ingest import (  # noqa: E402
-    CLASSIFIER_SYSTEM_PROMPT_V1,
+    CLASSIFIER_SYSTEM_PROMPT_V2,
     VALID_CATEGORIES,
     _coerce_categories,
     classify_document,
@@ -115,8 +122,8 @@ def main() -> int:
         print(f"Error: missing env var(s): {', '.join(missing)}", file=sys.stderr)
         return 2
 
-    print(f"Vocabulary: v4-trimmed ({len(VALID_CATEGORIES)} valid tags)")
-    print(f"Classifier prompt chars: {len(CLASSIFIER_SYSTEM_PROMPT_V1)}")
+    print(f"Vocabulary: v2 3-tier ({len(VALID_CATEGORIES)} valid tags)")
+    print(f"Classifier prompt chars: {len(CLASSIFIER_SYSTEM_PROMPT_V2)}")
     print(f"Model: {args.model}")
     print(f"Dry-run: {args.dry_run}")
 
