@@ -10,3 +10,14 @@ node_modules/
 out/
 *.tsbuildinfo
 next-env.d.ts
+
+# Dedup artifacts (local-only, not source of truth)
+**/_DUPLICATES/
+**/_DEDUP-REPORT.csv
+**/_DEDUP-EXECUTION-LOG.csv
+data/product_data/_DEDUP-REPORT-ALL.csv
+data/product_data/_DEDUP-EXECUTION-LOG-ALL.csv
+
+# Ingest logs (local-only run artifacts)
+logs/
+data/extraction-errors.log

@@ -133,7 +133,9 @@ def discover_pdfs(brand_filter: Optional[str]) -> list[Path]:
     for p in root.rglob("*"):
         if not p.is_file():
             continue
-        if any(part.startswith(".") for part in p.parts):
+        # Skip hidden (.-prefixed) and administrative (_-prefixed) entries.
+        # _DUPLICATES/ folders and _DEDUP-*.csv artifacts must not be ingested.
+        if any(part.startswith((".", "_")) for part in p.parts):
             continue
         if p.suffix.lower() == ".pdf":
             results.append(p)
@@ -799,6 +801,7 @@ def upsert_knowledge_item(
                     tags = %s,
                     content_type = 'pdf',
                     source = 'ingested',
+                    source_type = 'ingested_pdf',
                     source_filename = %s,
                     source_path = %s,
                     source_pages_count = %s,
@@ -834,14 +837,14 @@ def upsert_knowledge_item(
             """
             INSERT INTO knowledge_items (
                 title, category, subcategory, tags, content_type, source,
-                source_filename, source_path, source_pages_count,
-                raw_content, extracted_data, summary, search_text,
-                brand_id, extracted_at, extractor_version
+                source_type, source_filename, source_path,
+                source_pages_count, raw_content, extracted_data, summary,
+                search_text, brand_id, extracted_at, extractor_version
             ) VALUES (
                 %s, %s, NULL, %s, 'pdf', 'ingested',
-                %s, %s, %s,
+                'ingested_pdf', %s, %s,
                 %s, %s, %s, %s,
-                %s, NOW(), %s
+                %s, %s, NOW(), %s
             )
             RETURNING id
             """,
