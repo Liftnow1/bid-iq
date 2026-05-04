@@ -66,19 +66,35 @@ async function searchKnowledge(
   const sql = getSQL();
   const commercialOnly = mode === "commercial-only";
 
+  // Split on hyphens and slashes too so compound model strings like
+  // "CL10A-DPC" or "PK10/B" become separate tokens; otherwise to_tsquery
+  // sees "cl10a-dpc" as one tsquery term and either parses oddly or
+  // misses indexed tokens that were tokenized differently.
   const words = question
     .toLowerCase()
-    .replace(/[^a-z0-9\s\-\/]/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
     .filter((w) => w.length > 1);
 
+  // Tokens with digits typically refer to model numbers, part codes, or
+  // contract numbers that get tokenized together with their suffix in
+  // the index — e.g. "4018XFX" indexes as the single token "4018xfx", so
+  // a query for "4018" never matches without prefix expansion. Append
+  // `:*` to digit-bearing tokens to enable prefix matching.
   const tsQuery = words
     .filter((w) => w.length > 2)
     .slice(0, 12)
+    .map((w) => (/\d/.test(w) ? `${w}:*` : w))
     .join(" | ");
 
+  // Catch both "<letters><digits>" model strings (CL10, RJ45) AND
+  // standalone digit runs of 3+ chars (4018, 121223) that the alpha-led
+  // pattern misses. The standalone branch covers contract numbers and
+  // bare model numbers used in casual reference.
   const modelPatterns =
-    question.match(/\b[A-Za-z]{1,4}[\s-]?\d{1,3}[A-Za-z]?(?:[\s-]\d{1,3}[A-Za-z]*)?\b/g) || [];
+    question.match(
+      /\b[A-Za-z]{1,4}[\s-]?\d{1,3}[A-Za-z]?(?:[\s-]\d{1,3}[A-Za-z]*)?\b|\b\d{3,6}[A-Za-z]{0,3}\b/g
+    ) || [];
 
   const collected = new Map<number, KnowledgeRow>();
   const add = (rows: KnowledgeRow[]) => {
