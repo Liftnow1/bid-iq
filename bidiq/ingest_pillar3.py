@@ -425,6 +425,38 @@ def _process_chunks_parallel(
     return body_parts, failed
 
 
+def _read_pdf_bytes(path: Path) -> Optional[bytes]:
+    """Read PDF bytes, defensively unwrapping HTTP multipart/form-data envelopes.
+
+    A handful of staged files turned out to be raw multipart uploads that got
+    saved with a `.pdf` extension — they start with `--<boundary>` and a
+    Content-Disposition header before the real `%PDF-` magic. Strict parsers
+    bail with "no /Root object". Slicing from the magic + cutting at the
+    closing boundary recovers the real PDF.
+    """
+    try:
+        data = path.read_bytes()
+    except Exception as e:
+        log_error(path, e)
+        return None
+    if data.startswith(b"%PDF-"):
+        return data
+    # Multipart sniff
+    import re as _re
+    m = _re.match(rb"(--[\w-]+)\r\n", data)
+    if not m:
+        return data  # not multipart; let the parser try and fail
+    boundary = m.group(1)
+    pdf_start = data.find(b"%PDF-")
+    if pdf_start < 0:
+        return data
+    closer = b"\r\n" + boundary + b"--"
+    pdf_end = data.find(closer)
+    if pdf_end < 0:
+        pdf_end = data.find(b"\r\n" + boundary)
+    return data[pdf_start:pdf_end] if pdf_end > 0 else data[pdf_start:]
+
+
 def extract_pdf_native_text(
     path: Path, *, min_chars_per_page: int = 200
 ) -> Optional[dict]:
@@ -436,6 +468,8 @@ def extract_pdf_native_text(
     and routinely loses the long-form answer-box content. This function
     returns rich text in milliseconds, no API cost.
 
+    Defensively handles multipart-wrapped PDFs (see _read_pdf_bytes).
+
     Returns {"content_markdown", "page_count", "cost_estimate_usd": 0,
     "method": "pypdf"} only if the text layer averages at least
     min_chars_per_page chars across the whole document; otherwise
@@ -443,10 +477,14 @@ def extract_pdf_native_text(
     """
     try:
         import pypdf
+        import io
     except ImportError:
         return None
+    pdf_bytes = _read_pdf_bytes(path)
+    if not pdf_bytes:
+        return None
     try:
-        reader = pypdf.PdfReader(str(path))
+        reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
         page_count = len(reader.pages)
         if page_count == 0:
             return None
