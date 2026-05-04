@@ -6,15 +6,34 @@ import Link from "next/link";
 interface Source {
   id: number;
   title: string;
-  category: string;
+  // TEXT[] of v2 3-tier values (tier-1-public, tier-2-internal, tier-3-paul-only,
+  // uncategorized). Server returns the full array — pick the most relevant
+  // entry for display (skip uncategorized if a real tier is present).
+  category: string[] | string;
+  authority?: "authoritative" | "operational" | "illustrative";
+  tier?: 1 | 2 | 3 | null;
+  cited?: boolean;
+  index?: number;
   summary: string | null;
   tags: string[] | null;
+  source_type?: string | null;
   source_filename: string | null;
   source_path: string | null;
   extractor_version: string | null;
   brand_id: number | null;
   brand_name: string | null;
   created_at: string;
+}
+
+// Pick the primary category string from the TEXT[] returned by the API.
+// Prefers a concrete tier over `uncategorized`; falls back to the first
+// element. Handles legacy string-typed responses for safety.
+function primaryCategory(cat: string[] | string | null | undefined): string {
+  if (!cat) return "general";
+  if (typeof cat === "string") return cat;
+  if (!Array.isArray(cat) || cat.length === 0) return "general";
+  const concrete = cat.find((c) => c && c !== "uncategorized");
+  return concrete || cat[0] || "general";
 }
 
 interface Message {
@@ -25,6 +44,12 @@ interface Message {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
+  // v2 3-tier access-model vocabulary (current).
+  "tier-1-public": "Tier 1 — Public",
+  "tier-2-internal": "Tier 2 — Internal",
+  "tier-3-paul-only": "Tier 3 — Paul Only",
+  uncategorized: "Uncategorized",
+  // Legacy 10-tag vocabulary (still in some older rows).
   "product-specifications": "Product Specs",
   "competitive-intelligence": "Competitive Intel",
   "pricing-data": "Pricing",
@@ -38,6 +63,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
+  // v2 tier colors — green/yellow/red ramp for access sensitivity.
+  "tier-1-public": "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+  "tier-2-internal": "bg-amber-500/20 text-amber-300 border-amber-500/30",
+  "tier-3-paul-only": "bg-rose-500/20 text-rose-300 border-rose-500/30",
+  uncategorized: "bg-gray-500/20 text-gray-300 border-gray-500/30",
+  // Legacy 10-tag.
   "product-specifications": "bg-blue-500/20 text-blue-300 border-blue-500/30",
   "competitive-intelligence": "bg-red-500/20 text-red-300 border-red-500/30",
   "pricing-data": "bg-green-500/20 text-green-300 border-green-500/30",
@@ -50,15 +81,44 @@ const CATEGORY_COLORS: Record<string, string> = {
   general: "bg-gray-500/20 text-gray-300 border-gray-500/30",
 };
 
+const AUTHORITY_LABELS: Record<string, string> = {
+  authoritative: "Authoritative",
+  operational: "Internal/Ops",
+  illustrative: "Illustrative",
+};
+const AUTHORITY_COLORS: Record<string, string> = {
+  authoritative: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
+  operational: "bg-blue-500/10 text-blue-300 border-blue-500/20",
+  illustrative: "bg-amber-500/10 text-amber-300 border-amber-500/20",
+};
+
 function SourceCard({ source, messageIdx, sourceIdx }: { source: Source; messageIdx: number; sourceIdx: number }) {
   const [expanded, setExpanded] = useState(false);
   const contentId = `source-${messageIdx}-${sourceIdx}-content`;
   const locator = source.source_filename || source.source_path;
-  const categoryClass = CATEGORY_COLORS[source.category] || CATEGORY_COLORS.general;
-  const categoryLabel = CATEGORY_LABELS[source.category] || source.category;
+  const primaryCat = primaryCategory(source.category);
+  const categoryClass = CATEGORY_COLORS[primaryCat] || CATEGORY_COLORS.general;
+  const categoryLabel = CATEGORY_LABELS[primaryCat] || primaryCat;
+  const authorityClass = source.authority
+    ? AUTHORITY_COLORS[source.authority] || ""
+    : "";
+  const authorityLabel = source.authority
+    ? AUTHORITY_LABELS[source.authority] || source.authority
+    : null;
+  // Visually distinguish whether the LLM cited this chunk in its answer
+  // vs whether it was retrieved-but-not-cited. Both are useful: cited
+  // sources back the answer; uncited sources show what was retrieved
+  // (and may indicate a leaked-but-unsourced hallucination).
+  const wasCited = source.cited !== false;  // legacy responses lack `cited`; assume true
 
   return (
-    <div className="bg-gray-900/60 border border-gray-700 rounded-lg hover:border-gray-500 transition-colors">
+    <div
+      className={`bg-gray-900/60 border rounded-lg transition-colors ${
+        wasCited
+          ? "border-gray-700 hover:border-gray-500"
+          : "border-gray-800 hover:border-gray-700 opacity-70"
+      }`}
+    >
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
@@ -68,9 +128,27 @@ function SourceCard({ source, messageIdx, sourceIdx }: { source: Source; message
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
+            {source.index !== undefined && (
+              <span className="text-xs text-gray-500 tabular-nums">
+                [{source.index}]
+              </span>
+            )}
             <span className={`px-2 py-0.5 rounded text-xs font-medium border ${categoryClass}`}>
               {categoryLabel}
             </span>
+            {authorityLabel && (
+              <span className={`px-2 py-0.5 rounded text-xs font-medium border ${authorityClass}`}>
+                {authorityLabel}
+              </span>
+            )}
+            {!wasCited && (
+              <span
+                title="Retrieved but not cited in the answer"
+                className="px-2 py-0.5 rounded text-xs font-medium border bg-gray-800/40 text-gray-400 border-gray-700"
+              >
+                retrieved · not cited
+              </span>
+            )}
             {source.brand_name && (
               <span className="text-xs text-gray-400">{source.brand_name}</span>
             )}
