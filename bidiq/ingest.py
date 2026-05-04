@@ -133,7 +133,9 @@ def discover_pdfs(brand_filter: Optional[str]) -> list[Path]:
     for p in root.rglob("*"):
         if not p.is_file():
             continue
-        if any(part.startswith(".") for part in p.parts):
+        # Skip hidden (.-prefixed) and administrative (_-prefixed) entries.
+        # _DUPLICATES/ folders and _DEDUP-*.csv artifacts must not be ingested.
+        if any(part.startswith((".", "_")) for part in p.parts):
             continue
         if p.suffix.lower() == ".pdf":
             results.append(p)
@@ -745,6 +747,9 @@ def upsert_knowledge_item(
     brand_id: int,
     extraction: dict,
     tier: int,
+    source_type: str = "ingested_pdf",
+    content_type: str = "pdf",
+    extractor_version_override: Optional[str] = None,
 ) -> int:
     """Insert or update a knowledge_items row for the given tier.
 
@@ -753,6 +758,10 @@ def upsert_knowledge_item(
     Tier 2: raw_content = full markdown body, search_text covers the FULL
         body (no truncation — Postgres FTS handles multi-MB documents),
         extracted_data adds pages_summary and `tier=2`.
+
+    Pillar 3 callers pass tier=2 (so they get the full-body storage path)
+    plus overrides for source_type/content_type/extractor_version_override
+    to distinguish their rows from Wave 1's tier-1 PDF rows.
     """
     if tier not in (1, 2):
         raise ValueError(f"tier must be 1 or 2, got {tier}")
@@ -785,6 +794,8 @@ def upsert_knowledge_item(
         raw_content = None
         search_text = " ".join(p for p in (title, summary, " ".join(tags)) if p)
         version = EXTRACTOR_VERSION_TIER1
+    if extractor_version_override:
+        version = extractor_version_override
 
     existing = find_existing_row(conn, source_path)
     with conn.cursor() as cur:
@@ -797,8 +808,9 @@ def upsert_knowledge_item(
                     category = %s,
                     subcategory = NULL,
                     tags = %s,
-                    content_type = 'pdf',
+                    content_type = %s,
                     source = 'ingested',
+                    source_type = %s,
                     source_filename = %s,
                     source_path = %s,
                     source_pages_count = %s,
@@ -815,6 +827,8 @@ def upsert_knowledge_item(
                     title,
                     category,
                     tags,
+                    content_type,
+                    source_type,
                     source_filename,
                     source_path,
                     source_pages_count,
@@ -834,14 +848,14 @@ def upsert_knowledge_item(
             """
             INSERT INTO knowledge_items (
                 title, category, subcategory, tags, content_type, source,
-                source_filename, source_path, source_pages_count,
-                raw_content, extracted_data, summary, search_text,
-                brand_id, extracted_at, extractor_version
+                source_type, source_filename, source_path,
+                source_pages_count, raw_content, extracted_data, summary,
+                search_text, brand_id, extracted_at, extractor_version
             ) VALUES (
-                %s, %s, NULL, %s, 'pdf', 'ingested',
+                %s, %s, NULL, %s, %s, 'ingested',
                 %s, %s, %s,
                 %s, %s, %s, %s,
-                %s, NOW(), %s
+                %s, %s, NOW(), %s
             )
             RETURNING id
             """,
@@ -849,6 +863,8 @@ def upsert_knowledge_item(
                 title,
                 category,
                 tags,
+                content_type,
+                source_type,
                 source_filename,
                 source_path,
                 source_pages_count,
