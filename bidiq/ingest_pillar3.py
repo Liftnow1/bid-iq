@@ -457,6 +457,27 @@ def _read_pdf_bytes(path: Path) -> Optional[bytes]:
     return data[pdf_start:pdf_end] if pdf_end > 0 else data[pdf_start:]
 
 
+_GLYPH_JUNK_PAT = re.compile(r"/\d+/\d+")
+_I255_PAT = re.compile(r"/i\d+")
+
+
+def _looks_like_glyph_junk(text: str) -> bool:
+    """Detect pypdf output that's all raw glyph IDs, not real characters.
+
+    Some PDFs embed fonts with custom encodings and no /ToUnicode map.
+    pypdf can't decode glyph IDs back to Unicode for these, so it dumps
+    strings like '/0/1/0/1/1/2/3/4/5/6/i255' that look like text but are
+    actually unreadable. Detect this by sampling the head of the body
+    and checking the ratio of glyph-index syntax to total chars.
+    """
+    if not text:
+        return False
+    sample = text[:5000]
+    glyph_chars = sum(len(m.group()) for m in _GLYPH_JUNK_PAT.finditer(sample))
+    i255_count = len(_I255_PAT.findall(sample))
+    return (glyph_chars / max(len(sample), 1)) > 0.30 or i255_count > 50
+
+
 def extract_pdf_native_text(
     path: Path, *, min_chars_per_page: int = 200
 ) -> Optional[dict]:
@@ -471,9 +492,13 @@ def extract_pdf_native_text(
     Defensively handles multipart-wrapped PDFs (see _read_pdf_bytes).
 
     Returns {"content_markdown", "page_count", "cost_estimate_usd": 0,
-    "method": "pypdf"} only if the text layer averages at least
-    min_chars_per_page chars across the whole document; otherwise
-    returns None so the caller falls back to vision.
+    "method": "pypdf"} only if:
+      - the text layer averages at least min_chars_per_page chars/page
+      - the output isn't glyph-index junk (custom-encoded fonts with no
+        /ToUnicode map produce strings like "/0/1/0/i255" that look
+        like text but are actually unreadable)
+
+    Otherwise returns None so the caller falls back to vision.
     """
     try:
         import pypdf
@@ -500,6 +525,11 @@ def extract_pdf_native_text(
         body = "\n\n".join(
             f"## Page {i+1}\n\n{t}" for i, t in enumerate(page_texts) if t
         )
+        # Final guard: if pypdf "succeeded" but spat out glyph-index junk
+        # (a font with custom encoding and no /ToUnicode map), reject and
+        # fall back to vision.
+        if _looks_like_glyph_junk(body):
+            return None
         return {
             "content_markdown": body,
             "page_count": page_count,
