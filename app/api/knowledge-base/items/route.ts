@@ -19,17 +19,37 @@ export async function GET(request: NextRequest) {
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, " ")
         .split(/\s+/)
-        .filter((w) => w.length > 1)
+        .filter((w) => w.length > 2)
+        // Match the /api/ask query builder: prefix-match digit-bearing
+        // tokens so model numbers like "4018" match "4018xfx".
+        .map((w) => (/\d/.test(w) ? `${w}:*` : w))
         .join(" | ");
 
-      items = await sql`
-        SELECT id, title, category, subcategory, tags, content_type, source,
-               source_filename, summary, created_at
-        FROM knowledge_items
-        WHERE to_tsvector('english', search_text) @@ to_tsquery('english', ${tsQuery})
-        ORDER BY created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `;
+      // `to_tsquery('english', '')` raises a syntax error in Postgres; if
+      // the user typed only stopwords or short tokens, fall back to a
+      // plain title/summary ILIKE rather than throwing 500.
+      if (tsQuery) {
+        items = await sql`
+          SELECT id, title, category, subcategory, tags, content_type, source,
+                 source_filename, summary, created_at
+          FROM knowledge_items
+          WHERE to_tsvector('english', coalesce(search_text, ''))
+                @@ to_tsquery('english', ${tsQuery})
+          ORDER BY created_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else {
+        const like = `%${search.toLowerCase().trim()}%`;
+        items = await sql`
+          SELECT id, title, category, subcategory, tags, content_type, source,
+                 source_filename, summary, created_at
+          FROM knowledge_items
+          WHERE lower(coalesce(title, '')) LIKE ${like}
+             OR lower(coalesce(summary, '')) LIKE ${like}
+          ORDER BY created_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `;
+      }
     } else if (category) {
       // category is TEXT[]; match rows that include the requested tag.
       items = await sql`
