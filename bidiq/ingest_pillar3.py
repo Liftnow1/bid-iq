@@ -425,6 +425,54 @@ def _process_chunks_parallel(
     return body_parts, failed
 
 
+def extract_pdf_native_text(
+    path: Path, *, min_chars_per_page: int = 200
+) -> Optional[dict]:
+    """Try pypdf's native text-layer extraction.
+
+    Many Pillar 3 PDFs are HTML-to-PDF conversions (state RFPs, contract
+    drafts, web exports) with a clean text layer. Vision extraction on
+    these is wasteful AND lossy — vision re-OCRs already-perfect text
+    and routinely loses the long-form answer-box content. This function
+    returns rich text in milliseconds, no API cost.
+
+    Returns {"content_markdown", "page_count", "cost_estimate_usd": 0,
+    "method": "pypdf"} only if the text layer averages at least
+    min_chars_per_page chars across the whole document; otherwise
+    returns None so the caller falls back to vision.
+    """
+    try:
+        import pypdf
+    except ImportError:
+        return None
+    try:
+        reader = pypdf.PdfReader(str(path))
+        page_count = len(reader.pages)
+        if page_count == 0:
+            return None
+        page_texts: list[str] = []
+        for page in reader.pages:
+            t = (page.extract_text() or "").strip()
+            page_texts.append(t)
+        total = sum(len(t) for t in page_texts)
+        avg = total / page_count
+        if avg < min_chars_per_page:
+            return None  # text layer is thin/missing — fall back to vision
+        # Stitch pages with explicit page breaks so retrieval can use them.
+        body = "\n\n".join(
+            f"## Page {i+1}\n\n{t}" for i, t in enumerate(page_texts) if t
+        )
+        return {
+            "content_markdown": body,
+            "page_count": page_count,
+            "cost_estimate_usd": 0.0,
+            "method": "pypdf",
+        }
+    except Exception as e:
+        log_error(path, e)
+        return None
+
+
 def extract_pdf_full_body(
     client: anthropic.Anthropic,
     path: Path,
@@ -434,6 +482,7 @@ def extract_pdf_full_body(
     chunk_size: int = 5,
     chunk_concurrency: int = 4,
     max_outer_retries: int = 2,
+    prefer_native_text: bool = True,
 ) -> Optional[dict]:
     """Full-body extraction with parallel chunks and outer retry.
 
@@ -453,8 +502,21 @@ def extract_pdf_full_body(
        we have so far is returned.
 
     Returns {"content_markdown", "page_count", "cost_estimate_usd",
-    "cost_capped", "chunks_failed", "outer_retries_used"} or None.
+    "cost_capped", "chunks_failed", "outer_retries_used", "method"}
+    or None.
     """
+    # Native text first — RFPs / HTML-to-PDF exports / contract drafts
+    # often have a clean text layer that vision would otherwise re-OCR
+    # and lose detail. extract_pdf_native_text returns None if the layer
+    # is too sparse; in that case we fall through to vision.
+    if prefer_native_text:
+        native = extract_pdf_native_text(path)
+        if native is not None:
+            native["cost_capped"] = False
+            native["chunks_failed"] = 0
+            native["outer_retries_used"] = 0
+            return native
+
     try:
         pages = render_pdf_pages(str(path), dpi=dpi)
     except Exception as e:
@@ -516,6 +578,7 @@ def extract_pdf_full_body(
         "cost_capped": capped,
         "chunks_failed": chunks_failed_total,
         "outer_retries_used": outer_retries_used,
+        "method": "vision",
     }
 
 
