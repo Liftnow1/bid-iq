@@ -20,11 +20,21 @@ When answering questions, draw on Liftnow's knowledge base of product specs, pri
 
 Each source below is tagged with an \`authority\` field:
 
-- **authoritative** — product spec sheets, manufacturer manuals, signed contracts, certification documents, RFP responses. Treat these as canonical for facts about pricing, capacities, dimensions, model numbers, contract terms, and warranties.
-- **operational** — internal procedures, sales process docs, customer profile decks. Treat as canonical for HOW Liftnow does things.
-- **illustrative** — voice/style guides, content plans, sample-email templates. These contain *examples* of how Paul writes, including illustrative pricing in sample customer emails. **Never quote pricing, specs, or contract terms from illustrative sources.** Use them only when the question is about communication style or content strategy.
+- **authoritative** — product spec sheets, manufacturer manuals, signed contracts, certification documents, RFP responses. Canonical for pricing, capacities, dimensions, model numbers, contract terms, and warranties.
+- **operational** — internal procedures, sales process docs, customer profile decks. Canonical for HOW Liftnow does things.
+- **illustrative** — voice/style guides, content plans, sample-email templates. Contain *examples* of how Paul writes, including illustrative pricing inside sample customer emails. Useful when the question is about communication style or content strategy. The pricing inside these examples is not authoritative — see the Pricing rule below.
 
-If the question asks about pricing, list price, MSRP, discounts, or contract terms, and no \`authoritative\` source in the retrieved set covers it, say so explicitly — for example: "Pricing for the Coats Maxx70 is not in the available knowledge base; check the current Sourcewell pricing sheet." Do NOT extract numbers from illustrative sample emails.
+## Pricing rule (HARD)
+
+Prefer authoritative sources for pricing, MSRP, discount %, or contract terms whenever they're in the retrieved set.
+
+If you quote any pricing, MSRP, list price, discount %, or contract term from an \`illustrative\` source, you MUST prefix the figure with this exact disclaimer line on its own line:
+
+> ⚠️ **Illustrative example only — sourced from a sample email or voice guide, not authoritative pricing.** Confirm against the current pricing sheet before using.
+
+Then quote the figure with its citation. Example: "⚠️ **Illustrative example only — sourced from a sample email or voice guide, not authoritative pricing.** Confirm against the current pricing sheet before using.\n\nThe sample email mentions the Coats Maxx70 at \\$11,500–\\$12,000 [3]."
+
+If neither authoritative nor illustrative sources cover the question's pricing/contract term, say so plainly (e.g., "Pricing for the Coats Maxx70 is not in the available knowledge base — check the current Sourcewell pricing sheet").
 
 ## Citations
 
@@ -81,23 +91,23 @@ const TIER_WEIGHT_TIER_3 = 0.65;
 const TIER_WEIGHT_UNCATEGORIZED = 0.55;
 
 // Files that contain illustrative content — sample emails with example
-// pricing, voice/style examples, content plans. These should rank below
-// authoritative product docs on most queries even though they may
-// surface higher in raw FTS due to length and product-name density.
-// Pattern matched against lower-case source_filename.
+// pricing, voice/style examples, content plans. Used by `authorityFor()`
+// to set the row's `authority` label so the synthesis prompt can
+// require an explicit disclaimer when quoting pricing from these.
+//
+// Note: we previously demoted these via a CASE multiplier in ts_rank
+// (0.30 → 0.50) to keep them out of the top 5 on product queries. That
+// also kept them out for queries that legitimately want them. The
+// trade-off is now solved at the synthesis layer instead — illustrative
+// content can rank wherever, but pricing extracted from it must be
+// flagged as "illustrative example only" with a disclaimer. See the
+// Pricing rule in LIFTNOW_SYSTEM_PROMPT.
 const ILLUSTRATIVE_FILENAME_PATTERNS = [
   "voice-style-guide",
   "voice%20style%20guide",
   "content-master-plan",
   "content%20master%20plan",
 ];
-// Bumped from 0.30 → 0.50 after the first prod run. The tighter
-// demotion crushed voice-guide retrieval below the top 25 even for
-// queries that legitimately want it ("How does Paul write to
-// procurement officers?"). 0.5 still demotes voice guide on product
-// queries (where tier-1 specs naturally outrank it) but lets it
-// surface on its native topic.
-const ILLUSTRATIVE_DEMOTION = 0.50;
 
 // Authoritativeness label sent to the synthesis LLM. See LIFTNOW_SYSTEM_PROMPT.
 type AuthorityLabel = "authoritative" | "operational" | "illustrative";
@@ -186,14 +196,17 @@ async function searchKnowledge(
     // concat. Tags become searchable too.
     //
     // Rank score combines:
-    //   1. ts_rank — base FTS relevance.
-    //   2. SOURCE_TYPE_PDF_BOOST — real PDF extractions outrank ALI cert
-    //      metadata when both match.
+    //   1. ts_rank — base FTS relevance (with normalization=32 so long
+    //      docs don't dominate short focused ones).
+    //   2. SOURCE_TYPE_PDF_BOOST — real extractions (ingested_pdf and
+    //      pillar3_staging) outrank legacy ALI cert metadata.
     //   3. tier weight — authoritative public spec/contract content
     //      outranks internal/Paul-only content.
-    //   4. illustrative demotion — voice guides and content plans are
-    //      explicitly deprioritized so their sample-email pricing
-    //      examples don't outrank actual spec sheets on product queries.
+    //
+    // No illustrative-content demotion. Voice/style guides can rank
+    // wherever; the synthesis prompt requires a disclaimer when
+    // quoting pricing or contract terms from illustrative sources
+    // (see LIFTNOW_SYSTEM_PROMPT — Pricing rule).
     const rows = commercialOnly
       ? ((await sql`
           SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
@@ -205,18 +218,26 @@ async function searchKnowledge(
                    to_tsquery('english', ${tsQuery}),
                    32  -- normalization: 32 = divide by 1+log(length); prevents long docs dominating short focused ones
                  )
-                 * CASE WHEN ki.source_type = 'ingested_pdf' THEN ${SOURCE_TYPE_PDF_BOOST}::float ELSE 1.0 END
+                 -- Both ingested_pdf (Wave 1 carry-brand PDFs) and pillar3_staging
+                 -- (Pillar 3 contracts, manuals, voice guide) are real extractions
+                 -- that should outrank legacy ALI cert metadata when both match.
+                 -- Treating only ingested_pdf as boost-eligible structurally
+                 -- disadvantaged Pillar 3 retrieval; including both fixes that.
+                 * CASE WHEN ki.source_type IN ('ingested_pdf', 'pillar3_staging')
+                          THEN ${SOURCE_TYPE_PDF_BOOST}::float
+                          ELSE 1.0
+                   END
                  * CASE
                      WHEN 'tier-1-public' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_1}::float
                      WHEN 'tier-2-internal' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_2}::float
                      WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
                      ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
                    END
-                 * CASE
-                     WHEN lower(coalesce(ki.source_filename, '')) ~ '(voice.style.guide|content.master.plan)'
-                     THEN ${ILLUSTRATIVE_DEMOTION}::float
-                     ELSE 1.0
-                   END
+                 -- Illustrative demotion removed — was suppressing voice guide
+                 -- below the top 25 even on voice queries that legitimately
+                 -- want it. Hallucinated-pricing protection now lives in the
+                 -- synthesis prompt's Pricing rule (require disclaimer when
+                 -- quoting illustrative pricing).
                  AS rank_score
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
@@ -236,18 +257,26 @@ async function searchKnowledge(
                    to_tsquery('english', ${tsQuery}),
                    32  -- normalization: 32 = divide by 1+log(length); prevents long docs dominating short focused ones
                  )
-                 * CASE WHEN ki.source_type = 'ingested_pdf' THEN ${SOURCE_TYPE_PDF_BOOST}::float ELSE 1.0 END
+                 -- Both ingested_pdf (Wave 1 carry-brand PDFs) and pillar3_staging
+                 -- (Pillar 3 contracts, manuals, voice guide) are real extractions
+                 -- that should outrank legacy ALI cert metadata when both match.
+                 -- Treating only ingested_pdf as boost-eligible structurally
+                 -- disadvantaged Pillar 3 retrieval; including both fixes that.
+                 * CASE WHEN ki.source_type IN ('ingested_pdf', 'pillar3_staging')
+                          THEN ${SOURCE_TYPE_PDF_BOOST}::float
+                          ELSE 1.0
+                   END
                  * CASE
                      WHEN 'tier-1-public' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_1}::float
                      WHEN 'tier-2-internal' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_2}::float
                      WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
                      ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
                    END
-                 * CASE
-                     WHEN lower(coalesce(ki.source_filename, '')) ~ '(voice.style.guide|content.master.plan)'
-                     THEN ${ILLUSTRATIVE_DEMOTION}::float
-                     ELSE 1.0
-                   END
+                 -- Illustrative demotion removed — was suppressing voice guide
+                 -- below the top 25 even on voice queries that legitimately
+                 -- want it. Hallucinated-pricing protection now lives in the
+                 -- synthesis prompt's Pricing rule (require disclaimer when
+                 -- quoting illustrative pricing).
                  AS rank_score
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
