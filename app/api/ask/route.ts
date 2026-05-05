@@ -29,6 +29,19 @@ For each retrieved source, judge: is this document PRIMARILY ABOUT that exact su
 
 A clean refusal looks like: "The available knowledge base doesn't contain documentation specifically about <subject>. The closest matches are <list of titles> but they cover different products / topics."
 
+**Don't refuse just because the answer is in a table or list.** Contracts, spec sheets, and parts catalogs put their key facts in tables, line items, or bullet lists, not in summary paragraphs. If Paul asks "Stertil-Koni Sourcewell discount" and the Stertil-Koni Contract 121223 doc is in the retrieval set, the discount is in the pricing tables — extract it. If Paul asks "BendPak HD-9 capacity" and the spec sheet is retrieved, the capacity is in the specs table — extract it. Refuse only when no retrieved doc is primarily about the subject, NOT when the doc IS about the subject but the fact is in a table.
+
+## Anti-fabrication — HARD RULE
+
+Never invent model numbers, part numbers, SKUs, dimensions, capacities, voltages, pressures, percentages, prices, or contract terms. If a specific fact is not LITERALLY present in the retrieved source body text, do NOT include it in your answer. When in doubt, quote the source verbatim with a citation, or omit that fact.
+
+This applies especially to:
+- **Parts diagrams / exploded views** — these PDFs are mostly visual; the extracted text has only a part list. Do not invent surrounding specs (capacity, dimensions, voltage) from product memory.
+- **Spec sheets** — extract only the values that are literally on the sheet. Do not interpolate from "similar models" you may have memorized.
+- **Series with multiple variants** — when a doc covers "the X-series", do not list specific submodels (X1, X2, X3) unless those exact names appear in the body.
+
+If the body is sparse or the fact isn't present, refuse for that specific fact: "I don't see <fact> in the retrieved sources."
+
 ### Examples of WRONG behavior to AVOID
 
 - Paul asks "Champion 10HP compressor options". KB has the Champion CRN 2500 air dryer manual which mentions a "10HP refrigeration compressor" as an internal component. **WRONG:** presenting CRN 2500 as a 10HP compressor option. **RIGHT:** "I don't have documentation for standalone 10HP Champion compressors. The CRN 2500 doc mentions a 10HP component but it's a 2500 SCFM air dryer, not a standalone compressor."
@@ -57,13 +70,9 @@ Do NOT sign answers as Paul. Do NOT include email signatures or sign-offs ("Best
 
 ## Contact information — HARD RULE
 
-Do NOT include phone numbers, email addresses, fax numbers, or mailing addresses in your answer text — even if a retrieved source contains them — unless:
-1. Paul explicitly asked for a contact (e.g. "what's the contact for X?", "who do I email at Y?"), AND
-2. The contact comes from the dedicated service map ("New Service Map - Subcontractor Coverage") OR a future contacts file.
+Source bodies are server-side redacted: emails appear as [EMAIL REDACTED], phones as [PHONE REDACTED], and street addresses as [ADDRESS REDACTED]. These markers are intentional — do NOT include phone numbers, email addresses, fax numbers, or mailing addresses in your answer text under any circumstances. Do NOT invent contact info to replace the redacted placeholders. Do NOT pad answers with "contact vendor at..." or "email support@..." closing lines.
 
-This means: do NOT recommend "contact <vendor> at 800-XXX-XXXX" or "email support@vendor.com" or "visit vendor.com/support" as a closing line on a regular content question. If Paul asked about a product spec or process and you don't have the answer, refuse cleanly — do not pad with vendor contact info from a manual.
-
-Phone numbers and emails inside service map placemarks ARE fair game when the user explicitly asked for service providers in a city/state.
+If Paul explicitly asks for a contact ("what's the contact for X?", "who do I email at Y?"), tell him the relevant source contains contact details and direct him to the source by index, e.g. "Service map source [3] lists providers in Florida — see the source file for phone/email." Do not try to reconstruct redacted values.
 
 ## Citations and refusal
 
@@ -555,6 +564,56 @@ function looksLikeLocationQuery(question: string): boolean {
   return LOCATION_KEYWORDS.some((k) => q.includes(k));
 }
 
+// PII redactor — strips emails / phones / fax / street-addresses from source
+// bodies BEFORE they reach the synthesis model. The "no contact info" rule
+// in the system prompt is consistently ignored when the source body literally
+// contains the email/phone in plain text. The robust fix is at the source:
+// if the model never sees the PII, it can't emit it. Per Paul's directive:
+// "no content driven answers or questions are given with contact information
+// unless we draw SPECIFICALLY from a contacts file later on that we may produce."
+//
+// Service-map / placemark phone+email entries are the legitimate "contacts file"
+// today, but Paul still wants them gated behind explicit contacts-file plumbing
+// rather than leaking through every product-manual answer. So we redact
+// universally and let the synthesis model say "see source [N] for contact details."
+const PII_PATTERNS: { re: RegExp; replacement: string }[] = [
+  // Email
+  {
+    re: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g,
+    replacement: "[EMAIL REDACTED]",
+  },
+  // US-style phone with area code: (800) 555-1234, 800-555-1234, 800.555.1234,
+  // 1-800-555-1234, +1 (800) 555-1234, etc. Tight enough that ALI-12345 / 5260096 / etc.
+  // (model numbers and SKUs) don't get clobbered.
+  {
+    re: /(?:\+?1[\s.\-]?)?\(?\b[2-9]\d{2}\)?[\s.\-]\d{3}[\s.\-]\d{4}\b/g,
+    replacement: "[PHONE REDACTED]",
+  },
+  // Fax: explicit "fax" prefix followed by a phone-like sequence
+  {
+    re: /\bfax(?:\s*number)?\s*:?\s*(?:\+?1[\s.\-]?)?\(?\b[2-9]\d{2}\)?[\s.\-]\d{3}[\s.\-]\d{4}\b/gi,
+    replacement: "[FAX REDACTED]",
+  },
+  // Street address (lightweight heuristic — number + street name + suffix)
+  {
+    re: /\b\d{1,6}\s+(?:[NSEW]\.?\s+)?[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)?\s+(?:Street|St|Road|Rd|Avenue|Ave|Boulevard|Blvd|Lane|Ln|Drive|Dr|Way|Court|Ct|Place|Pl|Parkway|Pkwy|Highway|Hwy|Circle|Cir)\b\.?/g,
+    replacement: "[ADDRESS REDACTED]",
+  },
+];
+
+function redactPII(text: string): string {
+  let out = text;
+  for (const { re, replacement } of PII_PATTERNS) {
+    out = out.replace(re, replacement);
+  }
+  return out;
+}
+
+// Sparse-body threshold. Below this many chars, the source likely came from
+// a parts-diagram PDF or a visual-only document where the model has nothing
+// to extract. We append a note telling the model not to invent details.
+const SPARSE_BODY_THRESHOLD = 500;
+
 function buildContext(rows: KnowledgeRow[], question: string): string {
   if (rows.length === 0) return "No relevant entries found in the knowledge base.";
 
@@ -595,8 +654,20 @@ function buildContext(rows: KnowledgeRow[], question: string): string {
     const rankCap =
       i < FULL_CONTENT_TOP_N ? PER_ROW_BODY_CAP_CHARS : TRUNCATED_BODY_CHARS;
     const bodyTruncated = fullBody.slice(0, rankCap);
-    const body = bodyTruncated
-      ? `<<<SOURCE_BODY id=${i + 1}>>>\n${bodyTruncated}\n<<<END_SOURCE_BODY id=${i + 1}>>>`
+    // PII redaction. See PII_PATTERNS for the rationale — the "no contact
+    // info" prompt rule is unreliable; redacting at the source guarantees
+    // emails/phones/addresses never reach the model.
+    const bodyRedacted = redactPII(bodyTruncated);
+    // Sparse-body refusal note. When the body is essentially empty (parts
+    // diagrams, visual-only PDFs), the model tends to invent specs to fill
+    // the gap. Appending an explicit "do not invent" note in the body cuts
+    // that off.
+    const sparseNote =
+      bodyRedacted.length > 0 && bodyRedacted.length < SPARSE_BODY_THRESHOLD
+        ? "\n\n[NOTE: this source has minimal extractable text — likely a parts diagram, exploded view, or image-only PDF. Do not infer specs, model numbers, dimensions, or part numbers that aren't literally present in the text above. If Paul's question requires details not visible here, refuse and direct him to the source file.]"
+        : "";
+    const body = bodyRedacted
+      ? `<<<SOURCE_BODY id=${i + 1}>>>\n${bodyRedacted}${sparseNote}\n<<<END_SOURCE_BODY id=${i + 1}>>>`
       : "";
     const text = [head, summary, body].filter(Boolean).join("\n");
     return { text, length: text.length };
