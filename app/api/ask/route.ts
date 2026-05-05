@@ -31,16 +31,29 @@ A clean refusal looks like: "The available knowledge base doesn't contain docume
 
 **Don't refuse just because the answer is in a table or list.** Contracts, spec sheets, and parts catalogs put their key facts in tables, line items, or bullet lists, not in summary paragraphs. If Paul asks "Stertil-Koni Sourcewell discount" and the Stertil-Koni Contract 121223 doc is in the retrieval set, the discount is in the pricing tables — extract it. If Paul asks "BendPak HD-9 capacity" and the spec sheet is retrieved, the capacity is in the specs table — extract it. Refuse only when no retrieved doc is primarily about the subject, NOT when the doc IS about the subject but the fact is in a table.
 
+**Don't refuse when the user-asked product name is a slight variation of the doc title.** "Series 700 grease gun guide" should match the "Lever-Operated Grease Gun" service guide if that doc is at rank 1 — Series 700 is a Lever-Operated Grease Gun line. Use the document title and body content to recognize matching products even when the user uses a different naming convention. Other examples: "PM35 air oil pump" matches "5:1 Ratio Air Operated Oil Pump PM35"; "Model 324300-5 air motor" matches "Air motor Model 324300-5 Service manual"; "balcrank u-count" matches "U-COUNT Parts and Technical Service Guide".
+
+If the doc title and body clearly point at the same product Paul asked about — even if the wording differs — answer from that doc. Only refuse when the retrieval set genuinely lacks the topic.
+
 ## Anti-fabrication — HARD RULE
 
-Never invent model numbers, part numbers, SKUs, dimensions, capacities, voltages, pressures, percentages, prices, or contract terms. If a specific fact is not LITERALLY present in the retrieved source body text, do NOT include it in your answer. When in doubt, quote the source verbatim with a citation, or omit that fact.
+Never invent model numbers, part numbers, SKUs, dimensions, capacities, voltages, pressures, RPM/CFM/SCFM/FAD/GPM values, watts/amps, percentages, prices, or contract terms. If a specific fact is not LITERALLY present in the retrieved source body text, do NOT include it in your answer.
+
+**Test before writing every fact:** for each numeric value, model number, SKU, or part number you're about to write, ask "is this exact string in the SOURCE_BODY of one of the cited sources?" If you cannot verify it's literally there, OMIT it. When in doubt, quote the source verbatim with a citation, or refuse for that fact: "I don't see <fact> in the retrieved sources."
 
 This applies especially to:
-- **Parts diagrams / exploded views** — these PDFs are mostly visual; the extracted text has only a part list. Do not invent surrounding specs (capacity, dimensions, voltage) from product memory.
+- **Parts diagrams / exploded views** — these PDFs are mostly visual; the extracted text has only a part list. Do not invent surrounding specs (capacity, dimensions, voltage) from product memory. Acceptable answer: "[N] is a parts diagram for the X. The retrieved text doesn't include capacity or dimensional specs." Then list the actual part names you can see.
 - **Spec sheets** — extract only the values that are literally on the sheet. Do not interpolate from "similar models" you may have memorized.
-- **Series with multiple variants** — when a doc covers "the X-series", do not list specific submodels (X1, X2, X3) unless those exact names appear in the body.
+- **Series brochures with multiple variants** — when a doc covers "the X-series" but doesn't list submodels by name, do NOT list submodels (X1, X2, X3). Failure mode: "OMER MCO model lineup includes MCO14B-4-56, MCO19B-4-76..." when the source body only said "the OMER MCO heavy-duty mobile column series". Only list a model if its EXACT name appears in the body.
+- **Manufacturer-specific specs you've memorized** — Lincoln PowerLuber model numbers, BendPak SKU patterns, Champion compressor lineups, etc. These are NOT in the body. Do not pull them from training.
 
-If the body is sparse or the fact isn't present, refuse for that specific fact: "I don't see <fact> in the retrieved sources."
+**Failure modes you've fallen into and must avoid:**
+- "Model 833407 produces 500W at 4.7A" — when the source is "Balcrank Electric Pump 120V Technical Service Guide" with no such numbers in body
+- "BendPak PL-6KDT has SKU 5175157 and drawing number 5260640" — when those numbers aren't in body
+- "Lincoln PowerLuber accessories include the 1442, 1444, and 1445" — when the source body says only "Lubrication equipment, hand-held lubrication"
+- "OMER TLS212 specifications: 12,000 lb capacity, 76" rise" — when source body doesn't mention TLS212
+
+If you cannot extract the requested specific fact from a body that LITERALLY contains it, the right answer is to name the document, list what IS in the body, and stop.
 
 ### Examples of WRONG behavior to AVOID
 
@@ -594,10 +607,26 @@ const PII_PATTERNS: { re: RegExp; replacement: string }[] = [
     re: /\bfax(?:\s*number)?\s*:?\s*(?:\+?1[\s.\-]?)?\(?\b[2-9]\d{2}\)?[\s.\-]\d{3}[\s.\-]\d{4}\b/gi,
     replacement: "[FAX REDACTED]",
   },
-  // Street address (lightweight heuristic — number + street name + suffix)
+  // Street address — number + street name + suffix. Allows period-laden
+  // street names ("J. P. Hennessy Drive"), multi-word streets, and
+  // optional NSEW prefix.
   {
-    re: /\b\d{1,6}\s+(?:[NSEW]\.?\s+)?[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)?\s+(?:Street|St|Road|Rd|Avenue|Ave|Boulevard|Blvd|Lane|Ln|Drive|Dr|Way|Court|Ct|Place|Pl|Parkway|Pkwy|Highway|Hwy|Circle|Cir)\b\.?/g,
+    re: /\b\d{1,6}\s+(?:[NSEW]\.?\s+)?(?:[A-Z][A-Za-z]*\.?\s+){1,4}(?:Street|St|Road|Rd|Avenue|Ave|Boulevard|Blvd|Lane|Ln|Drive|Dr|Way|Court|Ct|Place|Pl|Parkway|Pkwy|Highway|Hwy|Circle|Cir|Trail|Trl)\b\.?/g,
     replacement: "[ADDRESS REDACTED]",
+  },
+  // "Street name, City, ST ZIP" form — catches addresses without the
+  // leading number ("Woodward Lane, Sharonville, OH 45241"). Matches
+  // a Capitalized phrase + street suffix + comma + city + state + zip.
+  {
+    re: /\b(?:[A-Z][A-Za-z]*\.?\s+){1,4}(?:Street|St|Road|Rd|Avenue|Ave|Boulevard|Blvd|Lane|Ln|Drive|Dr|Way|Court|Ct|Place|Pl|Parkway|Pkwy|Highway|Hwy|Circle|Cir|Trail|Trl),\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*,\s+[A-Z]{2}\s+\d{5}(?:-\d{4})?\b/g,
+    replacement: "[ADDRESS REDACTED]",
+  },
+  // Bare US ZIP+state at end of a line ("LaVergne, TN USA 37086") —
+  // catches the trailing piece of an address even if the street part
+  // already matched.
+  {
+    re: /\b[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*,\s+[A-Z]{2}(?:\s+USA)?\s+\d{5}(?:-\d{4})?\b/g,
+    replacement: "[CITY/STATE/ZIP REDACTED]",
   },
 ];
 
@@ -610,9 +639,12 @@ function redactPII(text: string): string {
 }
 
 // Sparse-body threshold. Below this many chars, the source likely came from
-// a parts-diagram PDF or a visual-only document where the model has nothing
-// to extract. We append a note telling the model not to invent details.
-const SPARSE_BODY_THRESHOLD = 500;
+// a parts-diagram PDF, visual-only document, or thin sales sheet where the
+// model has very little to extract. We append a note telling the model not
+// to invent details. Iter1 used 500 but eval showed many hallucinations
+// hitting docs in the 500-2000 char range (sales sheets with title +
+// model name + brief features but no specific specs). Raised to 2000.
+const SPARSE_BODY_THRESHOLD = 2_000;
 
 function buildContext(rows: KnowledgeRow[], question: string): string {
   if (rows.length === 0) return "No relevant entries found in the knowledge base.";
@@ -824,11 +856,10 @@ export async function POST(request: NextRequest) {
     const response = await client.messages.create({
       model: "claude-sonnet-4-20250514",
       max_tokens: 4096,
-      // Lowered to 0.1 (from 0.3) after multiple regressions where the
-      // model offered wrong-product specs as "for reference" or
-      // signed answers as Paul. Synthesis is summarization, not
-      // creative writing.
-      temperature: 0.1,
+      // Temperature 0 for repeatability. Same query → same answer.
+      // Synthesis is pure extractive summarization; we want zero
+      // creativity. Reduces hallucination rate at the source.
+      temperature: 0,
       system: LIFTNOW_SYSTEM_PROMPT,
       messages: [
         {
