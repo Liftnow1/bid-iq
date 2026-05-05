@@ -31,6 +31,8 @@ A clean refusal looks like: "The available knowledge base doesn't contain docume
 
 **Don't refuse just because the answer is in a table or list.** Contracts, spec sheets, and parts catalogs put their key facts in tables, line items, or bullet lists, not in summary paragraphs. If Paul asks "Stertil-Koni Sourcewell discount" and the Stertil-Koni Contract 121223 doc is in the retrieval set, the discount is in the pricing tables — extract it. If Paul asks "BendPak HD-9 capacity" and the spec sheet is retrieved, the capacity is in the specs table — extract it. Refuse only when no retrieved doc is primarily about the subject, NOT when the doc IS about the subject but the fact is in a table.
 
+**HARD rule for contract pricing/discount queries:** when Paul asks about a brand's Sourcewell pricing, discount, or contract terms (e.g. "Coats Sourcewell discount", "BendPak Sourcewell pricing", "Stertil-Koni Sourcewell discount") AND a contract document is in the retrieval set (Sourcewell Contract 121223, RFP 121223, brand-specific contract docs), the answer IS in those documents. Pricing schedules, discount percentages, and contract terms are extracted from contract bodies — they appear in tables and line-item lists, not topic sentences. Refusing on a contract query when a contract is at top-10 is a failure mode. Extract the relevant pricing/discount line items and cite them. If pricing tables in the body are dense, summarize the relevant rows.
+
 **Don't refuse when the user-asked product name is a slight variation of the doc title.** "Series 700 grease gun guide" should match the "Lever-Operated Grease Gun" service guide if that doc is at rank 1 — Series 700 is a Lever-Operated Grease Gun line. Use the document title and body content to recognize matching products even when the user uses a different naming convention. Other examples: "PM35 air oil pump" matches "5:1 Ratio Air Operated Oil Pump PM35"; "Model 324300-5 air motor" matches "Air motor Model 324300-5 Service manual"; "balcrank u-count" matches "U-COUNT Parts and Technical Service Guide".
 
 If the doc title and body clearly point at the same product Paul asked about — even if the wording differs — answer from that doc. Only refuse when the retrieval set genuinely lacks the topic.
@@ -68,6 +70,8 @@ Each source has an \`authority\` field:
 - **operational** — internal procedures, sales process, customer profiles. Canonical for HOW Liftnow operates.
 - **illustrative** — voice/style guides, content plans, sample emails. Contain example pricing, sample customer references, draft email signatures. **NEVER quote pricing, contract terms, customer names, model numbers, or specs from illustrative sources as facts.** They are stylistic references only.
 
+**Illustrative-about-itself exception:** when Paul asks ABOUT an illustrative source itself (e.g. "what's in the voice guide?", "Paul Stern voice style guide", "describe the content plan"), describing the contents of that source IS the answer. The illustrative restriction only forbids using illustrative content as canonical fact for OTHER subjects (other products, other contracts, other prices). Describing the voice guide's structure, sections, identity-and-role guidance, signature template format, etc. is allowed when that guide is the subject of the question.
+
 ## Service map
 
 If a retrieved source is the "New Service Map - Subcontractor Coverage" document and Paul's question asks about service providers, dealers, or coverage in a specific city/state/zip:
@@ -90,6 +94,10 @@ If Paul explicitly asks for a contact ("what's the contact for X?", "who do I em
 ## Citations and refusal
 
 Sources are numbered [1], [2], … Cite the number inline for every fact, e.g. "the CL10A has a 10,000 lb capacity [3]." Do not invent citations.
+
+**Per-fact citation rule (HARD):** every model number, SKU, part number, dimension, capacity, voltage, pressure, percentage, kW/HP, flow rate, and price you write MUST be followed by a citation marker [N] pointing to the source body where that exact value appears. If you cannot place a citation marker because the value isn't literally in any cited body, OMIT the value entirely. Do not write "Models include MCO14B-4-56, MCO19B-4-76" without [N] citations supporting each model name. Do not write "20V, 4.0Ah Li-ion battery" without a citation showing those exact strings.
+
+When tempted to enumerate model variants or list specific spec values, ask yourself: "is this exact string in a cited SOURCE_BODY?" If you can't answer yes for every item in the list, replace specific items with general descriptions that match what's actually in the body (e.g. "the catalog lists multiple battery and charger options [1]" instead of inventing model numbers).
 
 If retrieved sources don't cover the question, refuse explicitly. Do not pad with general industry knowledge.
 
@@ -191,6 +199,16 @@ async function searchKnowledge(
   await ensureSchema();
   const sql = getSQL();
   const commercialOnly = mode === "commercial-only";
+
+  // Service-map ranking boost. The "New Service Map - Subcontractor Coverage"
+  // doc has a generic title that doesn't include brand names, so on queries
+  // like "closest BendPak service providers near Michigan City" it gets
+  // outranked by every BendPak service-manual title that hits "BendPak" +
+  // "service" in title-rank. This boost multiplies its rank_score by 2.5
+  // when the question looks like a location/coverage query — preserving
+  // generic ranking otherwise.
+  const isLocationQuery = looksLikeLocationQuery(question);
+  const serviceMapMultiplier = isLocationQuery ? 2.5 : 1.0;
 
   // Split on hyphens and slashes too so compound model strings like
   // "CL10A-DPC" or "PK10/B" become separate tokens; otherwise to_tsquery
@@ -313,11 +331,31 @@ async function searchKnowledge(
     .filter((w) => /\d/.test(w))
     .map(expandDigitToken);
   const wordTokens = filteredWords.filter((w) => !/\d/.test(w));
+
+  // Hyphenated model patterns ("TR-33", "NTF-230", "XPR-10S") tokenize in
+  // the english FTS config as `tr` + `-33` (the dash sticks to the digits).
+  // A naive `33:*` won't match the indexed `-33` token. Detect these
+  // patterns in the ORIGINAL question (before our hyphen-strip) and add
+  // phrase-form tsquery components that match the adjacent (word, '-digits')
+  // pair as the indexer wrote them.
+  const hyphenatedDigitPhrases: string[] = [];
+  for (const m of question.matchAll(/\b([A-Za-z]+)-(\d+[A-Za-z0-9]*)\b/g)) {
+    const word = m[1].toLowerCase();
+    const digits = m[2].toLowerCase();
+    if (word.length >= 2 && digits.length >= 1) {
+      hyphenatedDigitPhrases.push(`'${word}' <-> '-${digits}':*`);
+    }
+  }
+  // De-duplicate.
+  const uniqHyphenated = Array.from(new Set(hyphenatedDigitPhrases));
+
   let tsQuery: string;
-  if (digitTokens.length > 0 && wordTokens.length > 0) {
-    tsQuery = `(${digitTokens.join(" | ")}) & (${wordTokens.join(" | ")})`;
-  } else if (digitTokens.length > 0) {
-    tsQuery = digitTokens.join(" | ");
+  // Combine digit tokens with hyphenated phrases on the "model" side.
+  const modelSideTokens = [...digitTokens, ...uniqHyphenated];
+  if (modelSideTokens.length > 0 && wordTokens.length > 0) {
+    tsQuery = `(${modelSideTokens.join(" | ")}) & (${wordTokens.join(" | ")})`;
+  } else if (modelSideTokens.length > 0) {
+    tsQuery = modelSideTokens.join(" | ");
   } else {
     tsQuery = wordTokens.join(" | ");
   }
@@ -392,6 +430,14 @@ async function searchKnowledge(
                      WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
                      ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
                    END
+                 -- Service-map boost: lift the "New Service Map - Subcontractor
+                 -- Coverage" doc on location-shaped queries. Multiplier is 1.0
+                 -- on non-location queries so this is a no-op there.
+                 * CASE
+                     WHEN lower(coalesce(ki.title, '')) LIKE '%service map%subcontractor%'
+                       THEN ${serviceMapMultiplier}::float
+                     ELSE 1.0
+                   END
                  AS rank_score
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
@@ -435,6 +481,14 @@ async function searchKnowledge(
                      WHEN 'tier-2-internal' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_2}::float
                      WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
                      ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
+                   END
+                 -- Service-map boost: lift the "New Service Map - Subcontractor
+                 -- Coverage" doc on location-shaped queries. Multiplier is 1.0
+                 -- on non-location queries so this is a no-op there.
+                 * CASE
+                     WHEN lower(coalesce(ki.title, '')) LIKE '%service map%subcontractor%'
+                       THEN ${serviceMapMultiplier}::float
+                     ELSE 1.0
                    END
                  AS rank_score
           FROM knowledge_items ki
