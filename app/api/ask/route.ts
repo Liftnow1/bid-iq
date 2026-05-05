@@ -873,32 +873,75 @@ async function searchKnowledge(
           .map((p) => p.toLowerCase().replace(/[\s-]/g, ""))
       )
     );
-    const matchSlug = (s: string | null | undefined): string =>
-      (s || "").toLowerCase().replace(/[\s\-_]/g, "");
-    const rowMatchesModel = (row: KnowledgeRow, model: string): boolean => {
-      // Strict word-boundary match. Look for the model token followed by
-      // a non-alphanumeric or end-of-string in the title or filename.
-      // This prevents "cl12a" from matching "cl12adpc" (CL12A != CL12A-DPC).
-      const haystacks = [
-        matchSlug(row.title),
-        matchSlug(row.source_filename),
+    // Score how well a row matches a named model, considering both title
+    // and filename in their ORIGINAL form (preserving spaces and hyphens
+    // as word boundaries).
+    //
+    // Returns:
+    //   1.0  exact match (model followed by space, hyphen-then-non-letter,
+    //        underscore, period, or end-of-string)
+    //   0.6  partial match (model is part of a longer alphanumeric token,
+    //        e.g. "cl12a" inside "cl12a-dpc" — still relevant but lower
+    //        priority than exact)
+    //   0.0  no match
+    //
+    // The scoring lets us prefer the actual CL12A manual over the CL12A-
+    // DPC manual when the user typed "cl12a", AND lets us match the CL20
+    // Product Manual (filename "CL20 Product Manual...") over ambiguity.
+    const scoreMatch = (row: KnowledgeRow, model: string): number => {
+      let bestScore = 0;
+      const sources = [
+        (row.title || "").toLowerCase(),
+        (row.source_filename || "").toLowerCase(),
       ];
-      for (const h of haystacks) {
-        const idx = h.indexOf(model);
-        if (idx < 0) continue;
-        const after = h[idx + model.length];
-        // Match if the model is followed by end-of-string or a digit
-        // boundary (e.g. "cl20" must not be followed by another letter
-        // that would extend into a different model name like "cl20xfx").
-        // We allow trailing digits/letters only if they look like a model
-        // suffix (qc, dpc, lc, etc.) AND the question explicitly named
-        // that suffix. For now: match only at end-of-string OR followed by
-        // non-alphanumeric.
-        if (after === undefined || !/[a-z0-9]/.test(after)) {
-          return true;
+      for (const src of sources) {
+        // Find every occurrence of the model substring.
+        let idx = src.indexOf(model);
+        while (idx >= 0) {
+          const before = idx > 0 ? src[idx - 1] : "";
+          const after = src[idx + model.length] ?? "";
+          // Before-boundary: start-of-string OR non-alphanumeric.
+          const beforeOk = idx === 0 || !/[a-z0-9]/.test(before);
+          if (beforeOk) {
+            // After-boundary classes:
+            //   end-of-string -> 1.0
+            //   space, period, underscore -> 1.0
+            //   hyphen followed by non-alphabetic (or alphabetic ≥2 chars
+            //     that look like a separator word) -> ambiguous
+            //   alphanumeric suffix -> partial (0.6)
+            if (after === "") {
+              bestScore = Math.max(bestScore, 1.0);
+            } else if (after === " " || after === "." || after === "_") {
+              bestScore = Math.max(bestScore, 1.0);
+            } else if (after === "-") {
+              // After hyphen: if the next chars are a 1-4 char model
+              // suffix followed by non-letter (e.g. "-dpc-", "-qc.pdf"),
+              // it's a different variant — partial match. If after
+              // hyphen we see a different pattern (digits, longer word),
+              // still partial.
+              bestScore = Math.max(bestScore, 0.6);
+            } else if (/[a-z0-9]/.test(after)) {
+              // Glued alphanumeric suffix. Could be either a variant
+              // suffix ("cl12adpc") or a continuation into normal text
+              // ("cl20product"). Heuristic: if the next 1-4 alphabetic
+              // chars then transition to non-alphabetic, it looks like
+              // a model variant suffix (partial). Otherwise it looks
+              // like normal text (full match).
+              const tail = src.slice(idx + model.length);
+              const variantMatch = tail.match(/^[a-z]{1,4}([\s\-_.]|$)/);
+              if (variantMatch) {
+                bestScore = Math.max(bestScore, 0.6);
+              } else {
+                // 5+ alphabetic chars or other patterns: clearly a word
+                // (e.g. "product", "manual", "specsheet"). Treat as full.
+                bestScore = Math.max(bestScore, 1.0);
+              }
+            }
+          }
+          idx = src.indexOf(model, idx + 1);
         }
       }
-      return false;
+      return bestScore;
     };
     const isManual = (row: KnowledgeRow): boolean => {
       const fn = (row.source_filename || "").toLowerCase();
@@ -913,34 +956,33 @@ async function searchKnowledge(
     const topRankScore = top25[0]?.rank_score ?? 1.0;
     let modelIdx = 0;
     for (const namedModel of namedModels) {
-      // Find ALL matching rows and prefer manuals over spec sheets.
-      const allMatches = sortedRows.filter((r) =>
-        rowMatchesModel(r, namedModel)
-      );
-      if (allMatches.length === 0) {
+      // Compute (row, matchScore) for every row, keep only nonzero, sort
+      // by matchScore desc then by rank_score desc.
+      const scored = sortedRows
+        .map((r) => ({ row: r, ms: scoreMatch(r, namedModel) }))
+        .filter((x) => x.ms > 0)
+        .sort(
+          (a, b) =>
+            b.ms - a.ms || (b.row.rank_score ?? 0) - (a.row.rank_score ?? 0)
+        );
+      if (scored.length === 0) {
         modelIdx++;
         continue;
       }
-      const manualMatches = allMatches.filter(isManual);
-      // Pick the highest-ranked manual; if none, fall back to highest-
-      // ranked spec sheet / brochure.
-      const candidate = (manualMatches.length > 0 ? manualMatches : allMatches)[0];
+      // Among rows with the BEST match score, prefer manuals over spec
+      // sheets / brochures.
+      const bestMs = scored[0].ms;
+      const bestTier = scored.filter((x) => x.ms === bestMs).map((x) => x.row);
+      const manualMatches = bestTier.filter(isManual);
+      const candidate = (manualMatches.length > 0 ? manualMatches : bestTier)[0];
       const positionInTop25 = top25.indexOf(candidate);
-      // If the candidate is already in the first 3 slots, no promotion
-      // needed. Threshold tightened from 5 to 3 because the synthesis
-      // model has been observed to refuse on a model whose manual sat at
-      // position #5 — it scans top 3-4 reliably, anything at #5+ gets
-      // sometimes ignored. Promote aggressively.
+      // Skip if already in top 3.
       if (positionInTop25 >= 0 && positionInTop25 < 3) {
         modelIdx++;
         continue;
       }
-      // Tiered promote: each subsequent named model gets a slightly lower
-      // promoted rank.
       const promoted = topRankScore * 0.95 - modelIdx * 0.01;
       candidate.rank_score = promoted;
-      // If the candidate was outside top25, drop the lowest-ranked top25
-      // row to make room.
       if (positionInTop25 < 0) {
         top25[top25.length - 1] = candidate;
       }
@@ -1390,36 +1432,52 @@ export async function POST(request: NextRequest) {
     );
     if (namedModelsInQuery.length >= 2) {
       const modelToSource: string[] = [];
-      const slugify = (s: string | null | undefined) =>
-        (s || "").toLowerCase().replace(/[\s\-_]/g, "");
-      for (const m of namedModelsInQuery) {
-        // Match against title OR filename (strict word boundary). Prefer
-        // manuals over spec sheets when both exist. Many product manuals
-        // have generic titles ("Installation, Operation & Maintenance
-        // Manual - Two Post Surface Mounted Lift") but filenames that
-        // identify the model clearly (e.g. "CL20 Product Manual").
-        const matchesM = (r: KnowledgeRow): boolean => {
-          for (const h of [slugify(r.title), slugify(r.source_filename)]) {
-            const idx = h.indexOf(m);
-            if (idx < 0) continue;
-            const after = h[idx + m.length];
-            if (after === undefined || !/[a-z0-9]/.test(after)) return true;
+      // Match score for queryNote — same scoring as the retrieval-side
+      // candidate picker so the synthesis prompt sees the same model→doc
+      // pairing the retrieval used.
+      const scoreM = (r: KnowledgeRow, m: string): number => {
+        let best = 0;
+        for (const src of [(r.title || "").toLowerCase(), (r.source_filename || "").toLowerCase()]) {
+          let i = src.indexOf(m);
+          while (i >= 0) {
+            const before = i > 0 ? src[i - 1] : "";
+            const after = src[i + m.length] ?? "";
+            if (i === 0 || !/[a-z0-9]/.test(before)) {
+              if (after === "" || /[\s._]/.test(after)) {
+                best = Math.max(best, 1.0);
+              } else if (after === "-") {
+                best = Math.max(best, 0.6);
+              } else if (/[a-z0-9]/.test(after)) {
+                const tail = src.slice(i + m.length);
+                const variant = tail.match(/^[a-z]{1,4}([\s\-_.]|$)/);
+                best = Math.max(best, variant ? 0.6 : 1.0);
+              }
+            }
+            i = src.indexOf(m, i + 1);
           }
-          return false;
-        };
-        const isManualR = (r: KnowledgeRow): boolean => {
-          const fn = (r.source_filename || "").toLowerCase();
-          const title = (r.title || "").toLowerCase();
-          return (
-            fn.includes("manual") ||
-            title.includes("manual") ||
-            fn.includes("iom") ||
-            fn.includes("install")
-          );
-        };
-        const candidates = rows.filter(matchesM);
-        const manuals = candidates.filter(isManualR);
-        const match = manuals[0] || candidates[0];
+        }
+        return best;
+      };
+      const isManualR = (r: KnowledgeRow): boolean => {
+        const fn = (r.source_filename || "").toLowerCase();
+        const title = (r.title || "").toLowerCase();
+        return (
+          fn.includes("manual") ||
+          title.includes("manual") ||
+          fn.includes("iom") ||
+          fn.includes("install")
+        );
+      };
+      for (const m of namedModelsInQuery) {
+        const scored = rows
+          .map((r) => ({ row: r, ms: scoreM(r, m) }))
+          .filter((x) => x.ms > 0)
+          .sort((a, b) => b.ms - a.ms);
+        if (scored.length === 0) continue;
+        const bestMs = scored[0].ms;
+        const bestTier = scored.filter((x) => x.ms === bestMs).map((x) => x.row);
+        const manuals = bestTier.filter(isManualR);
+        const match = manuals[0] || bestTier[0];
         if (match) {
           const label = (match.source_filename || match.title || "").slice(0, 60);
           modelToSource.push(`${m.toUpperCase()} -> source id=${match.id} "${label}"`);
