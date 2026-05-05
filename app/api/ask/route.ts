@@ -124,6 +124,9 @@ type KnowledgeRow = {
   brand_id: number | null;
   brand_name: string | null;
   created_at: string;
+  // rank_score is populated by the FTS query; ILIKE fallbacks leave it
+  // undefined and we treat them as low-rank fillers.
+  rank_score?: number | null;
 };
 
 // Top N rows by retrieval rank that are eligible for auto-upgrade. If a
@@ -427,7 +430,17 @@ async function searchKnowledge(
 
   const collected = new Map<number, KnowledgeRow>();
   const add = (rows: KnowledgeRow[]) => {
-    for (const r of rows) if (!collected.has(r.id)) collected.set(r.id, r);
+    // When the same id shows up from multiple queries, keep the row with
+    // the higher rank_score (so a model-only OR query can promote a row
+    // above its position in the AND query if the model match was strong).
+    for (const r of rows) {
+      const existing = collected.get(r.id);
+      const incoming = r.rank_score ?? 0;
+      const prior = existing?.rank_score ?? 0;
+      if (!existing || incoming > prior) {
+        collected.set(r.id, r);
+      }
+    }
   };
 
   if (tsQuery) {
@@ -581,6 +594,109 @@ async function searchKnowledge(
     add(rows);
   }
 
+  // Supplementary model-only retrieval. The primary query is an AND
+  // between the model-side and word-side tokens, which over-restricts
+  // for queries like "is a CL20 harder to install than a CL12A?" — the
+  // CL20 spec sheet body doesn't contain "harder" / "install" / "why",
+  // so the AND filter drops it entirely. When the user explicitly names
+  // models, we want those docs in the retrieval set even if their bodies
+  // don't share Paul's framing words. Run a SECOND query with model-side
+  // tokens only (no word AND) and merge by id, keeping max rank.
+  const modelSideTokens2 = [...digitTokens, ...uniqHyphenated, ...uniqCapacityK];
+  if (modelSideTokens2.length > 0 && wordTokens.length > 0) {
+    const modelOnlyTsQuery = modelSideTokens2.join(" | ");
+    const modelOnlyRows = commercialOnly
+      ? ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_type, ki.source_filename, ki.source_path,
+                 ki.extractor_version, ki.extracted_data,
+                 ki.brand_id, b.name AS brand_name, ki.created_at,
+                 (
+                   ts_rank(
+                     to_tsvector('english', coalesce(ki.search_text, '')),
+                     to_tsquery('english', ${modelOnlyTsQuery}),
+                     32
+                   )
+                   + 2.0 * ts_rank(
+                     to_tsvector('english', coalesce(ki.title, '')),
+                     to_tsquery('english', ${modelOnlyTsQuery}),
+                     32
+                   )
+                 )
+                 * CASE WHEN ki.source_type IN ('ingested_pdf', 'pillar3_staging')
+                          THEN ${SOURCE_TYPE_PDF_BOOST}::float
+                          ELSE 1.0
+                   END
+                 * CASE
+                     WHEN 'tier-1-public' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_1}::float
+                     WHEN 'tier-2-internal' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_2}::float
+                     WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
+                     ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
+                   END
+                 * CASE
+                     WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
+                       THEN ${BRAND_MATCH_BOOST}::float
+                     ELSE 1.0
+                   END
+                 -- Slight downweight on the supplementary results so they
+                 -- don't outrank an AND-match that hit model AND words.
+                 -- Set to 0.7 so a strong supplementary match (rank ~0.5)
+                 -- still has a real chance to surface above weak AND
+                 -- matches (rank ~0.05).
+                 * 0.7
+                 AS rank_score
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.search_text, ''))
+                @@ to_tsquery('english', ${modelOnlyTsQuery})
+            AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+          ORDER BY rank_score DESC
+          LIMIT 15
+        `) as unknown as KnowledgeRow[])
+      : ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_type, ki.source_filename, ki.source_path,
+                 ki.extractor_version, ki.extracted_data,
+                 ki.brand_id, b.name AS brand_name, ki.created_at,
+                 (
+                   ts_rank(
+                     to_tsvector('english', coalesce(ki.search_text, '')),
+                     to_tsquery('english', ${modelOnlyTsQuery}),
+                     32
+                   )
+                   + 2.0 * ts_rank(
+                     to_tsvector('english', coalesce(ki.title, '')),
+                     to_tsquery('english', ${modelOnlyTsQuery}),
+                     32
+                   )
+                 )
+                 * CASE WHEN ki.source_type IN ('ingested_pdf', 'pillar3_staging')
+                          THEN ${SOURCE_TYPE_PDF_BOOST}::float
+                          ELSE 1.0
+                   END
+                 * CASE
+                     WHEN 'tier-1-public' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_1}::float
+                     WHEN 'tier-2-internal' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_2}::float
+                     WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
+                     ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
+                   END
+                 * CASE
+                     WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
+                       THEN ${BRAND_MATCH_BOOST}::float
+                     ELSE 1.0
+                   END
+                 * 0.7
+                 AS rank_score
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.search_text, ''))
+                @@ to_tsquery('english', ${modelOnlyTsQuery})
+          ORDER BY rank_score DESC
+          LIMIT 15
+        `) as unknown as KnowledgeRow[]);
+    add(modelOnlyRows);
+  }
+
   for (const pattern of modelPatterns.slice(0, 6)) {
     const like = `%${pattern.toLowerCase().replace(/\s+/g, "%")}%`;
     const rows = commercialOnly
@@ -647,7 +763,13 @@ async function searchKnowledge(
     }
   }
 
-  return Array.from(collected.values()).slice(0, 25);
+  // Sort merged results by rank_score descending so model-only matches
+  // can promote above AND-with-words matches when their score is higher.
+  // Rows from ILIKE fallbacks (no rank_score) sort to the bottom and only
+  // fill slots after FTS-scored rows.
+  return Array.from(collected.values())
+    .sort((a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0))
+    .slice(0, 25);
 }
 
 // Per-candidate body sent to the answering model.
