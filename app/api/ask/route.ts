@@ -840,29 +840,41 @@ async function searchKnowledge(
   // but it's the ONLY CL20 doc — without it, the synthesis model has no
   // CL20 information at all and refuses on that half of a comparison
   // query like "is a CL20 harder to install than a CL12A?".
-  if (modelPatterns.length > 0 && sortedRows.length > 25) {
-    const top25Titles = top25
-      .map((r) => (r.title || "").toLowerCase())
-      .join(" || ");
-    const missingModels = modelPatterns
-      .filter((p) => /[A-Za-z]/.test(p) && /\d/.test(p))
-      .map((p) => p.toLowerCase().replace(/[\s-]/g, ""))
-      .filter((p) => !top25Titles.includes(p));
-    for (const missing of Array.from(new Set(missingModels)).slice(0, 3)) {
-      // Find the highest-ranked row outside top25 whose title contains
-      // the missing model literally (with hyphens/spaces stripped for
-      // robustness).
+  //
+  // We PROMOTE the coverage rows near the TOP of the retrieval set rather
+  // than just including them at the bottom. The synthesis model has been
+  // observed to refuse on CL20 even with id=3649 retrieved at position
+  // #18 — it scans only the first ~10 sources and concludes "no CL20
+  // here". Force the model to see partial-coverage docs by ranking them
+  // just below the highest-ranked existing match.
+  if (modelPatterns.length > 0) {
+    const namedModels = Array.from(
+      new Set(
+        modelPatterns
+          .filter((p) => /[A-Za-z]/.test(p) && /\d/.test(p))
+          .map((p) => p.toLowerCase().replace(/[\s-]/g, ""))
+      )
+    );
+    const titleHas = (row: KnowledgeRow, model: string): boolean => {
+      const t = (row.title || "").toLowerCase().replace(/[\s-]/g, "");
+      return t.includes(model);
+    };
+    const topRankScore = top25[0]?.rank_score ?? 1.0;
+    for (const missing of namedModels) {
+      const alreadyInTop25 = top25.some((r) => titleHas(r, missing));
+      if (alreadyInTop25) continue;
+      // Find the highest-ranked row outside top25 whose title contains the
+      // missing model literally.
       const candidate = sortedRows
         .slice(25)
-        .find((r) => {
-          const title = (r.title || "").toLowerCase().replace(/[\s-]/g, "");
-          return title.includes(missing);
-        });
+        .find((r) => titleHas(r, missing));
       if (candidate) {
-        // Swap the candidate into top25 in place of the lowest-ranked row.
+        // Promote: assign a rank_score just below the current top so the
+        // candidate lands near position 2-3 after re-sort. Synthesis is
+        // far more likely to read sources in the first 5 than at #18.
+        candidate.rank_score = topRankScore * 0.95;
+        // Drop the lowest-ranked row to make space, then re-sort.
         top25[top25.length - 1] = candidate;
-        // Re-sort the inserted candidate into its proper rank position
-        // so the swap doesn't always force it to the bottom.
         top25.sort((a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0));
       }
     }
@@ -1292,6 +1304,37 @@ export async function POST(request: NextRequest) {
       queryNotes.push(
         "Query intent: service-provider / dealer location. The 'New Service Map - Subcontractor Coverage' document is in the retrieved set. Search its body for the city/state/zip Paul mentioned, filter to the brand if specified, and present matching providers with name + address + contact info. Each placemark has a `- Folder:` line indicating its brand."
       );
+    }
+
+    // Partial-coverage detection. If the question mentions multiple
+    // alphanumeric models AND each has at least one matching source in
+    // the retrieved set, surface that explicitly so synthesis doesn't
+    // refuse on a model just because it has only a spec sheet (no full
+    // install manual). Applies the prompt's "comparison queries with
+    // partial coverage" HARD rule.
+    const namedModelsInQuery = Array.from(
+      new Set(
+        (trimmed.match(/\b[A-Za-z]{1,4}[\s-]?\d{1,3}[A-Za-z]?(?:[\s-]\d{1,3}[A-Za-z]*)?\b/g) || [])
+          .filter((p) => /[A-Za-z]/.test(p) && /\d/.test(p))
+          .map((p) => p.toLowerCase().replace(/[\s-]/g, ""))
+      )
+    );
+    if (namedModelsInQuery.length >= 2) {
+      const modelToSource: string[] = [];
+      for (const m of namedModelsInQuery) {
+        const match = rows.find((r) => {
+          const title = (r.title || "").toLowerCase().replace(/[\s-]/g, "");
+          return title.includes(m);
+        });
+        if (match) {
+          modelToSource.push(`${m.toUpperCase()} -> source id=${match.id} "${(match.title || "").slice(0, 60)}"`);
+        }
+      }
+      if (modelToSource.length >= 2) {
+        queryNotes.push(
+          `Query intent: comparison across multiple models. Each named model has at least one retrieved source: ${modelToSource.join("; ")}. Apply the "comparison queries with partial coverage" HARD rule from the system prompt — USE BOTH/ALL named-model sources and REASON across them, even if one has only a spec sheet and another has a full install manual. Do NOT refuse on a model just because the retrieval has only a spec sheet — read what IS there (capacity, dimensions, anchoring requirements) and reason about implications, with disclaimers for inference.`
+        );
+      }
     }
     const queryNoteBlock =
       queryNotes.length > 0
