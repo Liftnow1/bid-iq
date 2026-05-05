@@ -202,6 +202,7 @@ async function searchKnowledge(
     "there", "here", "where", "everywhere", "anywhere", "nowhere",
     "again", "ever", "never", "often", "sometimes", "always",
     "really", "quite", "kind", "sort", "type", "thing", "things",
+    "vs", "versus", "between",
     // short pronouns / articles / particles (length 2-3)
     "we", "us", "my", "me", "us", "he", "it", "is", "am", "be",
     "an", "as", "at", "by", "in", "of", "on", "to", "up", "no", "or",
@@ -215,12 +216,39 @@ async function searchKnowledge(
   // doc outrank the actual 4018xfx manual.
   //
   // Strategy:
-  //   - Tokens with digits → `digit_token:*` (prefix-match for model
-  //     suffixes like 4018XFX, CL10A-DPC).
+  //   - Tokens with digits → expanded so they match BOTH the compact
+  //     form ("maxx70" → token "maxx70") AND the split form
+  //     ("Maxx 70" / "Maxx-70" → tokens "maxx" + "70"). The Postgres
+  //     english tokenizer splits hyphenated/spaced model strings, so
+  //     a corpus full of "Maxx-70-Brochure" pages has tokens [maxx, 70]
+  //     not [maxx70] — a query of just `maxx70:*` would miss them.
+  //     We OR the compact prefix-match with an AND of the split parts.
   //   - If both digit tokens AND non-digit tokens exist, AND them:
-  //     `(digit1:* | digit2:*) & (word1 | word2)` — only docs containing
+  //     `(digit1 | digit2) & (word1 | word2)` — only docs containing
   //     a model/digit token make it to ranking.
   //   - If only one kind exists, OR them as before.
+
+  // Expand a digit-bearing token into a tsquery sub-expression that
+  // matches both the compact and split forms. Examples:
+  //   "maxx70"  → "(maxx70:* | (maxx & 70))"
+  //   "4018xfx" → "(4018xfx:* | (4018 & xfx))"
+  //   "121223"  → "121223:*"   (no letters to split off)
+  //   "10hp"    → "(10hp:* | (10 & hp))"
+  function expandDigitToken(token: string): string {
+    const m1 = token.match(/^([a-z]+)(\d[a-z0-9]*)$/);
+    const m2 = token.match(/^(\d+)([a-z][a-z0-9]*)$/);
+    const match = m1 || m2;
+    if (match) {
+      const p1 = match[1];
+      const p2 = match[2];
+      // Both halves must be at least 2 chars to be useful — 'a' alone
+      // matches everything; 'cl' alone is generic but still informative.
+      if (p1.length >= 2 && p2.length >= 2) {
+        return `(${token}:* | (${p1} & ${p2}))`;
+      }
+    }
+    return `${token}:*`;
+  }
   // Keep length>=2 tokens — short acronyms ("PO", "AC", "HD", "BP") are
   // critical signal. Filter aggressive stopwords instead.
   const baseWords = words
@@ -259,7 +287,7 @@ async function searchKnowledge(
   filteredWords.length = Math.min(filteredWords.length, 12);
   const digitTokens = filteredWords
     .filter((w) => /\d/.test(w))
-    .map((w) => `${w}:*`);
+    .map(expandDigitToken);
   const wordTokens = filteredWords.filter((w) => !/\d/.test(w));
   let tsQuery: string;
   if (digitTokens.length > 0 && wordTokens.length > 0) {
