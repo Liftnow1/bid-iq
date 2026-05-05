@@ -819,9 +819,47 @@ async function searchKnowledge(
   // can promote above AND-with-words matches when their score is higher.
   // Rows from ILIKE fallbacks (no rank_score) sort to the bottom and only
   // fill slots after FTS-scored rows.
-  return Array.from(collected.values())
-    .sort((a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0))
-    .slice(0, 25);
+  const sortedRows = Array.from(collected.values()).sort(
+    (a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0)
+  );
+  const top25 = sortedRows.slice(0, 25);
+
+  // Model coverage guarantee. When the user explicitly named alphanumeric
+  // models (CL20, CL12A, HDS-18E, etc.), ensure each named model has at
+  // least one matching doc in top25. The CL20 spec sheet is thin (1211
+  // chars) and can't out-rank 55K-char CL12A install manuals on raw FTS,
+  // but it's the ONLY CL20 doc — without it, the synthesis model has no
+  // CL20 information at all and refuses on that half of a comparison
+  // query like "is a CL20 harder to install than a CL12A?".
+  if (modelPatterns.length > 0 && sortedRows.length > 25) {
+    const top25Titles = top25
+      .map((r) => (r.title || "").toLowerCase())
+      .join(" || ");
+    const missingModels = modelPatterns
+      .filter((p) => /[A-Za-z]/.test(p) && /\d/.test(p))
+      .map((p) => p.toLowerCase().replace(/[\s-]/g, ""))
+      .filter((p) => !top25Titles.includes(p));
+    for (const missing of Array.from(new Set(missingModels)).slice(0, 3)) {
+      // Find the highest-ranked row outside top25 whose title contains
+      // the missing model literally (with hyphens/spaces stripped for
+      // robustness).
+      const candidate = sortedRows
+        .slice(25)
+        .find((r) => {
+          const title = (r.title || "").toLowerCase().replace(/[\s-]/g, "");
+          return title.includes(missing);
+        });
+      if (candidate) {
+        // Swap the candidate into top25 in place of the lowest-ranked row.
+        top25[top25.length - 1] = candidate;
+        // Re-sort the inserted candidate into its proper rank position
+        // so the swap doesn't always force it to the bottom.
+        top25.sort((a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0));
+      }
+    }
+  }
+
+  return top25;
 }
 
 // Per-candidate body sent to the answering model.
