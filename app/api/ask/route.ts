@@ -91,7 +91,13 @@ const ILLUSTRATIVE_FILENAME_PATTERNS = [
   "content-master-plan",
   "content%20master%20plan",
 ];
-const ILLUSTRATIVE_DEMOTION = 0.30;
+// Bumped from 0.30 → 0.50 after the first prod run. The tighter
+// demotion crushed voice-guide retrieval below the top 25 even for
+// queries that legitimately want it ("How does Paul write to
+// procurement officers?"). 0.5 still demotes voice guide on product
+// queries (where tier-1 specs naturally outrank it) but lets it
+// surface on its native topic.
+const ILLUSTRATIVE_DEMOTION = 0.50;
 
 // Authoritativeness label sent to the synthesis LLM. See LIFTNOW_SYSTEM_PROMPT.
 type AuthorityLabel = "authoritative" | "operational" | "illustrative";
