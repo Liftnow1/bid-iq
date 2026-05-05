@@ -847,6 +847,14 @@ async function searchKnowledge(
   // #18 — it scans only the first ~10 sources and concludes "no CL20
   // here". Force the model to see partial-coverage docs by ranking them
   // just below the highest-ranked existing match.
+  // Coverage + visibility guarantee. For each alphanumeric model named in
+  // the question, find the highest-ranked row whose title contains that
+  // model (anywhere in collected, not just top25). If that row is at
+  // position 6+, promote it to position #2-3 by overriding its rank_score
+  // to topRank * 0.95 - (modelIndex * 0.01). Synthesis has been observed
+  // to scan only the first ~10 sources reliably, so a CL20 spec sheet at
+  // position #18 gets ignored even when the question is explicitly about
+  // CL20. This makes the named-model docs unmissable.
   if (modelPatterns.length > 0) {
     const namedModels = Array.from(
       new Set(
@@ -860,23 +868,36 @@ async function searchKnowledge(
       return t.includes(model);
     };
     const topRankScore = top25[0]?.rank_score ?? 1.0;
+    let modelIdx = 0;
     for (const missing of namedModels) {
-      const alreadyInTop25 = top25.some((r) => titleHas(r, missing));
-      if (alreadyInTop25) continue;
-      // Find the highest-ranked row outside top25 whose title contains the
-      // missing model literally.
-      const candidate = sortedRows
-        .slice(25)
-        .find((r) => titleHas(r, missing));
+      // Where does this model currently sit in top25?
+      const positionInTop25 = top25.findIndex((r) => titleHas(r, missing));
+      // If the model is in the first 5 slots, no promotion needed.
+      if (positionInTop25 >= 0 && positionInTop25 < 5) {
+        modelIdx++;
+        continue;
+      }
+      // Find the best candidate row whose title matches this model — could
+      // be in top25 (position 5+) or in sortedRows beyond top25.
+      const candidate =
+        positionInTop25 >= 0
+          ? top25[positionInTop25]
+          : sortedRows.slice(25).find((r) => titleHas(r, missing));
       if (candidate) {
-        // Promote: assign a rank_score just below the current top so the
-        // candidate lands near position 2-3 after re-sort. Synthesis is
-        // far more likely to read sources in the first 5 than at #18.
-        candidate.rank_score = topRankScore * 0.95;
-        // Drop the lowest-ranked row to make space, then re-sort.
-        top25[top25.length - 1] = candidate;
+        // Tiered promote: each subsequent named model gets a slightly
+        // lower promoted rank, so they don't all collide at exactly the
+        // same score (preserving stable ordering across runs).
+        const promoted = topRankScore * 0.95 - modelIdx * 0.01;
+        candidate.rank_score = promoted;
+        // If the candidate was outside top25, drop the lowest-ranked
+        // top25 row to make room.
+        if (positionInTop25 < 0) {
+          top25[top25.length - 1] = candidate;
+        }
+        // Re-sort so the candidate lands at its new position.
         top25.sort((a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0));
       }
+      modelIdx++;
     }
   }
 
