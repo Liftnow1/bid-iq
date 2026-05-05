@@ -783,6 +783,96 @@ function buildContext(rows: KnowledgeRow[], question: string): string {
 }
 
 /**
+ * Citation-grounded fact verifier.
+ *
+ * After the synthesis model returns an answer, scan the answer for specific
+ * factual claims (model numbers, SKUs, unit-bound numerics, dollar amounts)
+ * and check whether each claim string appears verbatim in the cited sources'
+ * bodies. If a claim isn't in any cited body, it's "unverified" — likely
+ * hallucinated.
+ *
+ * Used to decide whether to re-prompt for a corrected answer. Threshold of
+ * 2+ unverified facts triggers the re-prompt; below that we accept residual
+ * variance.
+ */
+
+// Pattern catches the failure modes seen in iter1-3 evals:
+//   - Bare model/SKU strings: "MCO14B-4-56", "BCAS10D-M", "Model 1872"
+//   - Multi-letter+digit hyphenated: "TLS212NR1", "XPR-10S-168"
+//   - Pure SKU runs: "5175157", "5260640" (6-digit standalones)
+//   - Unit-bound numerics: "20V", "150 PSI", "5,000 lb", "1.68 m³/min"
+//   - Dollar amounts: "$11,500", "$50,000.00"
+//
+// Skip patterns:
+//   - Single digits and 2-digit numbers (too noisy: years, list indices)
+//   - Citation markers like "[1]", "[12]"
+//   - Page numbers like "p. 5"
+const FACT_PATTERNS: RegExp[] = [
+  // Alpha-numeric model strings: 2+ letters glued to 2+ digits, optional
+  // hyphenated continuation. Matches "MCO14B-4-56", "TLS212NR1", "RJ45LP",
+  // "PL-6KDT", "HD-9AE-192", "MDS-6EXT".
+  /\b[A-Z]{2,}[\-_]?\d{2,}[A-Z0-9\-]*\b/g,
+  // Bare SKU runs (6+ digits) often quoted as "Model 5175157" or
+  // "drawing number 5260640". Also catches part numbers like "343289".
+  // Limit to 5-7 digits to avoid catching phone numbers (which are
+  // already redacted but defense-in-depth).
+  /\b\d{5,7}\b/g,
+  // Dollar amounts.
+  /\$\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?\b/g,
+  // Unit-bound numerics: number + unit. Catches "20V", "150 PSI",
+  // "5,000 lb", "1.68 m³/min", "10 HP", "62 lbs", "20A".
+  /\b\d{1,4}(?:,\d{3})*(?:\.\d+)?\s*(?:lbs?|kgs?|psi|bar|kw|hp|amps?|amperes?|volts?|hz|cfm|scfm|gpm|fpm|rpm|gal|gallons?|inches?|in\.|mm|cm|°c|°f|db|sec|seconds?|min(?:ute)?s?|hours?|kva|kwh|ah|nm|joules?)\b/gi,
+  // Voltages with V suffix: "20V", "120V", "240V".
+  /\b\d{2,4}V\b/g,
+];
+
+function extractFactClaims(answer: string): string[] {
+  const out = new Set<string>();
+  // Strip citation markers first so they don't pollute regex matches.
+  const stripped = answer.replace(/\[\d+\]/g, " ");
+  for (const re of FACT_PATTERNS) {
+    re.lastIndex = 0;
+    for (const m of stripped.matchAll(re)) {
+      const tok = m[0].trim();
+      if (tok.length >= 3) out.add(tok);
+    }
+  }
+  return Array.from(out);
+}
+
+/**
+ * For each candidate fact, check whether the lowercased fact appears as a
+ * substring of the lowercased concatenation of cited source bodies. Returns
+ * the facts that don't appear — these are likely hallucinated.
+ *
+ * Normalization:
+ *   - Lowercase both sides
+ *   - Collapse whitespace (so "150 PSI" matches "150 psi" or "150  psi")
+ *   - Strip commas from numbers ("5,000" matches "5000" too)
+ */
+function verifyFactsAgainstSources(
+  facts: string[],
+  citedRows: KnowledgeRow[]
+): string[] {
+  if (facts.length === 0) return [];
+  const normalize = (s: string) =>
+    s.toLowerCase().replace(/,/g, "").replace(/\s+/g, " ").trim();
+  const haystack = citedRows
+    .map((r) => normalize(r.raw_content || ""))
+    .join(" || ");
+  const unverified: string[] = [];
+  for (const fact of facts) {
+    const norm = normalize(fact);
+    if (!haystack.includes(norm)) {
+      unverified.push(fact);
+    }
+  }
+  return unverified;
+}
+
+const VERIFIER_THRESHOLD = 2; // re-prompt only if >= N unverified facts
+
+/**
  * Pull every [N] citation marker out of the model's answer. Returns the
  * unique 1-based source indices it referenced.
  */
@@ -928,12 +1018,70 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No response from AI" }, { status: 500 });
     }
 
+    let answerText = textBlock.text;
+    let verifierUsed = false;
+    let verifierUnverifiedCount = 0;
+
+    // Citation-grounded post-processing. Iter1-3 reduced overall hallucinations
+    // 18 -> 11, but the survivors are docs where the target IS cited at rank 1
+    // and the model still adds invented submodel suffixes / SKUs / specs.
+    // Detect those via regex against cited source bodies; if the answer has
+    // 2+ unverified factual claims, do ONE re-prompt asking the model to
+    // rewrite without them.
+    try {
+      const initialCited = parseCitedIndices(answerText);
+      const citedRows = rows.filter((_, i) => initialCited.has(i + 1));
+      if (citedRows.length > 0) {
+        const candidateFacts = extractFactClaims(answerText);
+        const unverified = verifyFactsAgainstSources(candidateFacts, citedRows);
+        verifierUnverifiedCount = unverified.length;
+        if (unverified.length >= VERIFIER_THRESHOLD) {
+          const verifyPrompt =
+            `Your previous answer contains the following claims that do NOT appear verbatim in the cited source bodies:\n\n` +
+            unverified.map((u) => `  - "${u}"`).join("\n") +
+            `\n\nThese are likely fabrications — model numbers, SKUs, dimensions, voltages, percentages, or capacity values not actually present in the retrieved knowledge base.\n\n` +
+            `Rewrite your answer:\n` +
+            `1. Remove every sentence whose key facts depend on the unverified claims above.\n` +
+            `2. Replace specific spec values that aren't in any cited body with general descriptions of what IS in the body (e.g. "the catalog lists multiple models" instead of inventing model names).\n` +
+            `3. Keep all citations [N] correct — do not invent or shift them.\n` +
+            `4. If after stripping unverified claims there is little or nothing left to say, write a short refusal naming the document and explaining what specific detail is not present.\n\n` +
+            `Output ONLY the corrected answer. No preamble, no commentary about the verification process.`;
+
+          const verifyResponse = await client.messages.create({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 4096,
+            temperature: 0,
+            system: LIFTNOW_SYSTEM_PROMPT,
+            messages: [
+              {
+                role: "user",
+                content: `${queryNoteBlock}Retrieved knowledge base entries:\n${buildContext(rows, trimmed)}\n\nQuestion: ${trimmed}`,
+              },
+              { role: "assistant", content: answerText },
+              { role: "user", content: verifyPrompt },
+            ],
+          });
+          const verifyBlock = verifyResponse.content.find(
+            (b) => b.type === "text"
+          );
+          if (verifyBlock && verifyBlock.type === "text" && verifyBlock.text.trim().length > 0) {
+            answerText = verifyBlock.text;
+            verifierUsed = true;
+          }
+        }
+      }
+    } catch (e) {
+      // Non-fatal: if the verifier or re-prompt fails, return the original
+      // answer. The verifier is best-effort.
+      console.warn("verifier error:", e);
+    }
+
     // Return ALL retrieved sources, not just the ones the model chose to
     // cite via [N]. Cited and uncited are both signal — the user needs
     // to see what was retrieved-but-not-cited so a leaked voice-guide
     // pricing example is visible instead of silent. The `cited` flag
     // lets the front-end distinguish (e.g. bold cited, dim uncited).
-    const citedIndices = parseCitedIndices(textBlock.text);
+    const citedIndices = parseCitedIndices(answerText);
     const sources = rows.map((r, i) => ({
       index: i + 1,
       cited: citedIndices.has(i + 1),
@@ -958,7 +1106,7 @@ export async function POST(request: NextRequest) {
     }));
 
     return NextResponse.json({
-      answer: textBlock.text,
+      answer: answerText,
       query_mode: queryMode,
       sources,
       upgraded_ids: Array.from(outcome.upgraded),
@@ -966,6 +1114,10 @@ export async function POST(request: NextRequest) {
       upgrade_available: outcome.skippedDueToUnavailable.length === 0
         ? undefined
         : false,
+      verifier: {
+        used: verifierUsed,
+        unverified_count: verifierUnverifiedCount,
+      },
     });
   } catch (err: unknown) {
     console.error("Ask error:", err);
