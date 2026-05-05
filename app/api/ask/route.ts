@@ -20,7 +20,9 @@ Liftnow is a Sourcewell contract holder (121223-LFT) and holds numerous state co
 
 Before answering, identify the SPECIFIC subject of Paul's question (e.g. "Champion 10 HP air compressor models", "Challenger 4018XFX anchoring requirements", "differences between Coats Maxx70 and Maxx80 tire changers", "PO auditing process").
 
-**Scan ALL retrieved sources, not just the top 3-5.** The retrieval set is ranked but ranking is imperfect — the most on-topic source is sometimes at position 5, 10, or 15. Always read every retrieved source's title and authority field, and skim the body. A document titled "Purchase Order Auditing Checklist" is on-topic for "PO auditing process" even if it ranks #7 below longer documents that share generic keywords.
+**Scan ALL retrieved sources, not just the top 3-5.** The retrieval set is ranked but ranking is imperfect — the most on-topic source is sometimes at position 5, 10, or 15. Always read every retrieved source's title, authority field, AND file= filename, and skim the body. A document titled "Purchase Order Auditing Checklist" is on-topic for "PO auditing process" even if it ranks #7 below longer documents that share generic keywords.
+
+**CRITICAL: read the file= field.** Many product manuals have generic titles like "Installation, Operation & Maintenance Manual - Two Post Surface Mounted Lift" — the model name is ONLY in the filename (e.g. file=CL20 Product Manual - CL20-IOM-A-2025-04-08.pdf). When the user asks about a specific model, scan the filenames of ALL retrieved sources to find the matching manual. If you see file=CL20 Product Manual... in any retrieved source, you HAVE CL20 documentation and must NOT refuse on "no CL20 docs in the KB" grounds.
 
 For each retrieved source, judge: is this document PRIMARILY ABOUT that exact subject? Read the title carefully — titles like "Purchase Order Auditing Checklist", "Post-Sale Process", "Installer Selection Process" are strong signals. Don't fixate on the top-ranked sources alone.
 
@@ -848,13 +850,21 @@ async function searchKnowledge(
   // here". Force the model to see partial-coverage docs by ranking them
   // just below the highest-ranked existing match.
   // Coverage + visibility guarantee. For each alphanumeric model named in
-  // the question, find the highest-ranked row whose title contains that
-  // model (anywhere in collected, not just top25). If that row is at
-  // position 6+, promote it to position #2-3 by overriding its rank_score
-  // to topRank * 0.95 - (modelIndex * 0.01). Synthesis has been observed
-  // to scan only the first ~10 sources reliably, so a CL20 spec sheet at
-  // position #18 gets ignored even when the question is explicitly about
-  // CL20. This makes the named-model docs unmissable.
+  // the question, find the highest-ranked row whose title OR filename
+  // contains that model (anywhere in collected, not just top25). If the
+  // best match is at position 6+, promote it to position #2-3.
+  //
+  // CRITICAL: many product manuals have GENERIC titles like "Installation,
+  // Operation & Maintenance Manual - Two Post Surface Mounted Lift" but
+  // their filenames clearly say "CL20 Product Manual" or "CL12A Product
+  // Manual". Title-only matching misses these, so we ALSO check
+  // source_filename. This is the difference between getting the actual
+  // CL20 install manual (id=3648, generic title) vs only the CL20 spec
+  // sheet (id=3649, title says "CL20").
+  //
+  // PREFERENCE: when both a "Manual" and a "Spec Sheet" exist for a model,
+  // prefer the manual (it has more body content). Detected via filename
+  // containing "manual" (case-insensitive).
   if (modelPatterns.length > 0) {
     const namedModels = Array.from(
       new Set(
@@ -863,40 +873,120 @@ async function searchKnowledge(
           .map((p) => p.toLowerCase().replace(/[\s-]/g, ""))
       )
     );
-    const titleHas = (row: KnowledgeRow, model: string): boolean => {
-      const t = (row.title || "").toLowerCase().replace(/[\s-]/g, "");
-      return t.includes(model);
+    // Score how well a row matches a named model, considering both title
+    // and filename in their ORIGINAL form (preserving spaces and hyphens
+    // as word boundaries).
+    //
+    // Returns:
+    //   1.0  exact match (model followed by space, hyphen-then-non-letter,
+    //        underscore, period, or end-of-string)
+    //   0.6  partial match (model is part of a longer alphanumeric token,
+    //        e.g. "cl12a" inside "cl12a-dpc" — still relevant but lower
+    //        priority than exact)
+    //   0.0  no match
+    //
+    // The scoring lets us prefer the actual CL12A manual over the CL12A-
+    // DPC manual when the user typed "cl12a", AND lets us match the CL20
+    // Product Manual (filename "CL20 Product Manual...") over ambiguity.
+    const scoreMatch = (row: KnowledgeRow, model: string): number => {
+      let bestScore = 0;
+      const sources = [
+        (row.title || "").toLowerCase(),
+        (row.source_filename || "").toLowerCase(),
+      ];
+      for (const src of sources) {
+        // Find every occurrence of the model substring.
+        let idx = src.indexOf(model);
+        while (idx >= 0) {
+          const before = idx > 0 ? src[idx - 1] : "";
+          const after = src[idx + model.length] ?? "";
+          // Before-boundary: start-of-string OR non-alphanumeric.
+          const beforeOk = idx === 0 || !/[a-z0-9]/.test(before);
+          if (beforeOk) {
+            // After-boundary classes:
+            //   end-of-string -> 1.0
+            //   space, period, underscore -> 1.0
+            //   hyphen followed by non-alphabetic (or alphabetic ≥2 chars
+            //     that look like a separator word) -> ambiguous
+            //   alphanumeric suffix -> partial (0.6)
+            if (after === "") {
+              bestScore = Math.max(bestScore, 1.0);
+            } else if (after === " " || after === "." || after === "_") {
+              bestScore = Math.max(bestScore, 1.0);
+            } else if (after === "-") {
+              // After hyphen: if the next chars are a 1-4 char model
+              // suffix followed by non-letter (e.g. "-dpc-", "-qc.pdf"),
+              // it's a different variant — partial match. If after
+              // hyphen we see a different pattern (digits, longer word),
+              // still partial.
+              bestScore = Math.max(bestScore, 0.6);
+            } else if (/[a-z0-9]/.test(after)) {
+              // Glued alphanumeric suffix. Could be either a variant
+              // suffix ("cl12adpc") or a continuation into normal text
+              // ("cl20product"). Heuristic: if the next 1-4 alphabetic
+              // chars then transition to non-alphabetic, it looks like
+              // a model variant suffix (partial). Otherwise it looks
+              // like normal text (full match).
+              const tail = src.slice(idx + model.length);
+              const variantMatch = tail.match(/^[a-z]{1,4}([\s\-_.]|$)/);
+              if (variantMatch) {
+                bestScore = Math.max(bestScore, 0.6);
+              } else {
+                // 5+ alphabetic chars or other patterns: clearly a word
+                // (e.g. "product", "manual", "specsheet"). Treat as full.
+                bestScore = Math.max(bestScore, 1.0);
+              }
+            }
+          }
+          idx = src.indexOf(model, idx + 1);
+        }
+      }
+      return bestScore;
+    };
+    const isManual = (row: KnowledgeRow): boolean => {
+      const fn = (row.source_filename || "").toLowerCase();
+      const title = (row.title || "").toLowerCase();
+      return (
+        fn.includes("manual") ||
+        title.includes("manual") ||
+        fn.includes("iom") ||
+        fn.includes("install")
+      );
     };
     const topRankScore = top25[0]?.rank_score ?? 1.0;
     let modelIdx = 0;
-    for (const missing of namedModels) {
-      // Where does this model currently sit in top25?
-      const positionInTop25 = top25.findIndex((r) => titleHas(r, missing));
-      // If the model is in the first 5 slots, no promotion needed.
-      if (positionInTop25 >= 0 && positionInTop25 < 5) {
+    for (const namedModel of namedModels) {
+      // Compute (row, matchScore) for every row, keep only nonzero, sort
+      // by matchScore desc then by rank_score desc.
+      const scored = sortedRows
+        .map((r) => ({ row: r, ms: scoreMatch(r, namedModel) }))
+        .filter((x) => x.ms > 0)
+        .sort(
+          (a, b) =>
+            b.ms - a.ms || (b.row.rank_score ?? 0) - (a.row.rank_score ?? 0)
+        );
+      if (scored.length === 0) {
         modelIdx++;
         continue;
       }
-      // Find the best candidate row whose title matches this model — could
-      // be in top25 (position 5+) or in sortedRows beyond top25.
-      const candidate =
-        positionInTop25 >= 0
-          ? top25[positionInTop25]
-          : sortedRows.slice(25).find((r) => titleHas(r, missing));
-      if (candidate) {
-        // Tiered promote: each subsequent named model gets a slightly
-        // lower promoted rank, so they don't all collide at exactly the
-        // same score (preserving stable ordering across runs).
-        const promoted = topRankScore * 0.95 - modelIdx * 0.01;
-        candidate.rank_score = promoted;
-        // If the candidate was outside top25, drop the lowest-ranked
-        // top25 row to make room.
-        if (positionInTop25 < 0) {
-          top25[top25.length - 1] = candidate;
-        }
-        // Re-sort so the candidate lands at its new position.
-        top25.sort((a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0));
+      // Among rows with the BEST match score, prefer manuals over spec
+      // sheets / brochures.
+      const bestMs = scored[0].ms;
+      const bestTier = scored.filter((x) => x.ms === bestMs).map((x) => x.row);
+      const manualMatches = bestTier.filter(isManual);
+      const candidate = (manualMatches.length > 0 ? manualMatches : bestTier)[0];
+      const positionInTop25 = top25.indexOf(candidate);
+      // Skip if already in top 3.
+      if (positionInTop25 >= 0 && positionInTop25 < 3) {
+        modelIdx++;
+        continue;
       }
+      const promoted = topRankScore * 0.95 - modelIdx * 0.01;
+      candidate.rank_score = promoted;
+      if (positionInTop25 < 0) {
+        top25[top25.length - 1] = candidate;
+      }
+      top25.sort((a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0));
       modelIdx++;
     }
   }
@@ -1342,13 +1432,55 @@ export async function POST(request: NextRequest) {
     );
     if (namedModelsInQuery.length >= 2) {
       const modelToSource: string[] = [];
+      // Match score for queryNote — same scoring as the retrieval-side
+      // candidate picker so the synthesis prompt sees the same model→doc
+      // pairing the retrieval used.
+      const scoreM = (r: KnowledgeRow, m: string): number => {
+        let best = 0;
+        for (const src of [(r.title || "").toLowerCase(), (r.source_filename || "").toLowerCase()]) {
+          let i = src.indexOf(m);
+          while (i >= 0) {
+            const before = i > 0 ? src[i - 1] : "";
+            const after = src[i + m.length] ?? "";
+            if (i === 0 || !/[a-z0-9]/.test(before)) {
+              if (after === "" || /[\s._]/.test(after)) {
+                best = Math.max(best, 1.0);
+              } else if (after === "-") {
+                best = Math.max(best, 0.6);
+              } else if (/[a-z0-9]/.test(after)) {
+                const tail = src.slice(i + m.length);
+                const variant = tail.match(/^[a-z]{1,4}([\s\-_.]|$)/);
+                best = Math.max(best, variant ? 0.6 : 1.0);
+              }
+            }
+            i = src.indexOf(m, i + 1);
+          }
+        }
+        return best;
+      };
+      const isManualR = (r: KnowledgeRow): boolean => {
+        const fn = (r.source_filename || "").toLowerCase();
+        const title = (r.title || "").toLowerCase();
+        return (
+          fn.includes("manual") ||
+          title.includes("manual") ||
+          fn.includes("iom") ||
+          fn.includes("install")
+        );
+      };
       for (const m of namedModelsInQuery) {
-        const match = rows.find((r) => {
-          const title = (r.title || "").toLowerCase().replace(/[\s-]/g, "");
-          return title.includes(m);
-        });
+        const scored = rows
+          .map((r) => ({ row: r, ms: scoreM(r, m) }))
+          .filter((x) => x.ms > 0)
+          .sort((a, b) => b.ms - a.ms);
+        if (scored.length === 0) continue;
+        const bestMs = scored[0].ms;
+        const bestTier = scored.filter((x) => x.ms === bestMs).map((x) => x.row);
+        const manuals = bestTier.filter(isManualR);
+        const match = manuals[0] || bestTier[0];
         if (match) {
-          modelToSource.push(`${m.toUpperCase()} -> source id=${match.id} "${(match.title || "").slice(0, 60)}"`);
+          const label = (match.source_filename || match.title || "").slice(0, 60);
+          modelToSource.push(`${m.toUpperCase()} -> source id=${match.id} "${label}"`);
         }
       }
       if (modelToSource.length >= 2) {
