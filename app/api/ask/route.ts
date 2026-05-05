@@ -33,6 +33,15 @@ A clean refusal looks like: "The available knowledge base doesn't contain docume
 
 **HARD rule for contract pricing/discount queries:** when Paul asks about a brand's Sourcewell pricing, discount, or contract terms (e.g. "Coats Sourcewell discount", "BendPak Sourcewell pricing", "Stertil-Koni Sourcewell discount") AND a contract document is in the retrieval set (Sourcewell Contract 121223, RFP 121223, brand-specific contract docs), the answer IS in those documents. Pricing schedules, discount percentages, and contract terms are extracted from contract bodies — they appear in tables and line-item lists, not topic sentences. Refusing on a contract query when a contract is at top-10 is a failure mode. Extract the relevant pricing/discount line items and cite them. If pricing tables in the body are dense, summarize the relevant rows.
 
+**HARD rule for comparison queries with partial coverage:** when Paul asks to compare two models (e.g. "is the CL20 harder to install than the CL12A?", "differences between Maxx70 and Maxx80", "X vs Y") and the retrieval set contains DIFFERENT depths of coverage for each model (e.g. install manual for one, spec sheet for the other) — USE BOTH and REASON across them. Do NOT refuse because one side is "only a spec sheet". A spec sheet still tells you capacity, dimensions, footprint, anchoring requirements, voltage — all of which determine relative installation difficulty.
+
+For a CL20 (20K lb capacity) vs CL12A (12K lb capacity) install comparison:
+- Cite the CL12A install manual for its specific anchoring/concrete/footprint specs
+- Cite the CL20 spec sheet for its capacity/dimensions
+- Reason: heavier capacity generally implies thicker concrete / larger anchors / more clearance. State which differences you can support from the cited bodies vs which are reasonable engineering inference, and clearly mark inference as such ("Based on the CL20's higher 20,000 lb capacity [N] vs CL12A's 12,000 lb [M], the CL20 likely requires more substantial concrete and anchoring, though I don't have a CL20 install manual to confirm specific values.")
+
+The right behavior is partial-coverage REASONING with clear disclaiming — NOT refusal. Refusal is only correct when neither model has any retrieved doc.
+
 **Don't refuse when the user-asked product name is a slight variation of the doc title.** "Series 700 grease gun guide" should match the "Lever-Operated Grease Gun" service guide if that doc is at rank 1 — Series 700 is a Lever-Operated Grease Gun line. Use the document title and body content to recognize matching products even when the user uses a different naming convention. Other examples: "PM35 air oil pump" matches "5:1 Ratio Air Operated Oil Pump PM35"; "Model 324300-5 air motor" matches "Air motor Model 324300-5 Service manual"; "balcrank u-count" matches "U-COUNT Parts and Technical Service Guide".
 
 If the doc title and body clearly point at the same product Paul asked about — even if the wording differs — answer from that doc. Only refuse when the retrieval set genuinely lacks the topic.
@@ -124,6 +133,9 @@ type KnowledgeRow = {
   brand_id: number | null;
   brand_name: string | null;
   created_at: string;
+  // rank_score is populated by the FTS query; ILIKE fallbacks leave it
+  // undefined and we treat them as low-rank fillers.
+  rank_score?: number | null;
 };
 
 // Top N rows by retrieval rank that are eligible for auto-upgrade. If a
@@ -242,11 +254,13 @@ async function searchKnowledge(
       break; // first brand mention wins
     }
   }
+  const BRAND_MATCH_BOOST = 5.0;
   // SQL receives either the canonical brand name or an empty string.
   // The CASE WHEN b.name = '' THEN ... will never match, so a no-brand
   // query gets the 1.0 multiplier branch — a no-op.
-  const brandFilter = mentionedBrand ?? "";
-  const BRAND_MATCH_BOOST = 5.0;
+  // (brandFilter is populated below — possibly via inference if no explicit
+  // brand mention was found.)
+  let brandFilter = mentionedBrand ?? "";
 
   // Split on hyphens and slashes too so compound model strings like
   // "CL10A-DPC" or "PK10/B" become separate tokens; otherwise to_tsquery
@@ -425,9 +439,69 @@ async function searchKnowledge(
       /\b[A-Za-z]{1,4}[\s-]?\d{1,3}[A-Za-z]?(?:[\s-]\d{1,3}[A-Za-z]*)?\b|\b\d{3,6}[A-Za-z]{0,3}\b/g
     ) || [];
 
+  // Brand inference from model patterns. When the user asks about explicit
+  // alphanumeric models (e.g. "CL20" or "CL12A") but doesn't name the brand,
+  // figure out the brand from the model corpus. CL20 / CL12A are unique to
+  // Challenger; HD-9 / HDS-18E are unique to BendPak. A quick lookup across
+  // matching rows tells us the dominant brand. Only run when (a) no brand
+  // was already detected and (b) we have at least one alphanumeric model
+  // pattern (not just bare digit runs which are too generic).
+  const hasAlphaNumModel = modelPatterns.some((p) => /[A-Za-z]/.test(p) && /\d/.test(p));
+  if (!brandFilter && hasAlphaNumModel) {
+    try {
+      // TIGHT inference tsquery: use only the EXACT prefix-form of each
+      // alphanumeric model pattern. Don't fall back to "cl & 20" split-form
+      // here — that lets BendPak docs (which have "cl" from XPR-18CL-192
+      // and "20" from capacities as separate tokens) match a CL20/CL12A
+      // query. We want only docs that contain the literal model string.
+      const tightTokens = modelPatterns
+        .filter((p) => /[A-Za-z]/.test(p) && /\d/.test(p))
+        .map((p) => `${p.toLowerCase().replace(/[\s-]/g, "")}:*`);
+      if (tightTokens.length === 0) {
+        // No alphanumeric models to infer from; skip.
+      } else {
+        const inferenceTsQuery = tightTokens.join(" | ");
+        // Pull the top-3 brand_ids by hit count among model-matching rows.
+        const brandCounts = (await sql`
+          SELECT lower(coalesce(b.name, '')) AS brand, count(*)::int AS n
+          FROM knowledge_items ki LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.search_text, ''))
+                @@ to_tsquery('english', ${inferenceTsQuery})
+            AND b.name IS NOT NULL
+          GROUP BY lower(coalesce(b.name, ''))
+          ORDER BY n DESC
+          LIMIT 3
+        `) as unknown as Array<{ brand: string; n: number }>;
+        if (brandCounts.length > 0) {
+          const total = brandCounts.reduce((s, r) => s + r.n, 0);
+          const top = brandCounts[0];
+          // Infer the brand only if the top brand dominates at least 60%
+          // of matches AND has at least 3 hits. Otherwise the model
+          // patterns are ambiguous (cross-brand naming collision).
+          if (top.n >= 3 && top.n / total >= 0.6) {
+            brandFilter = top.brand;
+          }
+        }
+      }
+    } catch (e) {
+      // Inference is non-fatal; fall back to no-brand-boost behavior.
+      console.warn("brand inference error:", e);
+    }
+  }
+
   const collected = new Map<number, KnowledgeRow>();
   const add = (rows: KnowledgeRow[]) => {
-    for (const r of rows) if (!collected.has(r.id)) collected.set(r.id, r);
+    // When the same id shows up from multiple queries, keep the row with
+    // the higher rank_score (so a model-only OR query can promote a row
+    // above its position in the AND query if the model match was strong).
+    for (const r of rows) {
+      const existing = collected.get(r.id);
+      const incoming = r.rank_score ?? 0;
+      const prior = existing?.rank_score ?? 0;
+      if (!existing || incoming > prior) {
+        collected.set(r.id, r);
+      }
+    }
   };
 
   if (tsQuery) {
@@ -581,6 +655,109 @@ async function searchKnowledge(
     add(rows);
   }
 
+  // Supplementary model-only retrieval. The primary query is an AND
+  // between the model-side and word-side tokens, which over-restricts
+  // for queries like "is a CL20 harder to install than a CL12A?" — the
+  // CL20 spec sheet body doesn't contain "harder" / "install" / "why",
+  // so the AND filter drops it entirely. When the user explicitly names
+  // models, we want those docs in the retrieval set even if their bodies
+  // don't share Paul's framing words. Run a SECOND query with model-side
+  // tokens only (no word AND) and merge by id, keeping max rank.
+  const modelSideTokens2 = [...digitTokens, ...uniqHyphenated, ...uniqCapacityK];
+  if (modelSideTokens2.length > 0 && wordTokens.length > 0) {
+    const modelOnlyTsQuery = modelSideTokens2.join(" | ");
+    const modelOnlyRows = commercialOnly
+      ? ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_type, ki.source_filename, ki.source_path,
+                 ki.extractor_version, ki.extracted_data,
+                 ki.brand_id, b.name AS brand_name, ki.created_at,
+                 (
+                   ts_rank(
+                     to_tsvector('english', coalesce(ki.search_text, '')),
+                     to_tsquery('english', ${modelOnlyTsQuery}),
+                     32
+                   )
+                   + 2.0 * ts_rank(
+                     to_tsvector('english', coalesce(ki.title, '')),
+                     to_tsquery('english', ${modelOnlyTsQuery}),
+                     32
+                   )
+                 )
+                 * CASE WHEN ki.source_type IN ('ingested_pdf', 'pillar3_staging')
+                          THEN ${SOURCE_TYPE_PDF_BOOST}::float
+                          ELSE 1.0
+                   END
+                 * CASE
+                     WHEN 'tier-1-public' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_1}::float
+                     WHEN 'tier-2-internal' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_2}::float
+                     WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
+                     ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
+                   END
+                 * CASE
+                     WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
+                       THEN ${BRAND_MATCH_BOOST}::float
+                     ELSE 1.0
+                   END
+                 -- Slight downweight on the supplementary results so they
+                 -- don't outrank an AND-match that hit model AND words.
+                 -- Set to 0.7 so a strong supplementary match (rank ~0.5)
+                 -- still has a real chance to surface above weak AND
+                 -- matches (rank ~0.05).
+                 * 0.7
+                 AS rank_score
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.search_text, ''))
+                @@ to_tsquery('english', ${modelOnlyTsQuery})
+            AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+          ORDER BY rank_score DESC
+          LIMIT 15
+        `) as unknown as KnowledgeRow[])
+      : ((await sql`
+          SELECT ki.id, ki.title, ki.category, ki.summary, ki.tags, ki.raw_content,
+                 ki.source, ki.source_type, ki.source_filename, ki.source_path,
+                 ki.extractor_version, ki.extracted_data,
+                 ki.brand_id, b.name AS brand_name, ki.created_at,
+                 (
+                   ts_rank(
+                     to_tsvector('english', coalesce(ki.search_text, '')),
+                     to_tsquery('english', ${modelOnlyTsQuery}),
+                     32
+                   )
+                   + 2.0 * ts_rank(
+                     to_tsvector('english', coalesce(ki.title, '')),
+                     to_tsquery('english', ${modelOnlyTsQuery}),
+                     32
+                   )
+                 )
+                 * CASE WHEN ki.source_type IN ('ingested_pdf', 'pillar3_staging')
+                          THEN ${SOURCE_TYPE_PDF_BOOST}::float
+                          ELSE 1.0
+                   END
+                 * CASE
+                     WHEN 'tier-1-public' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_1}::float
+                     WHEN 'tier-2-internal' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_2}::float
+                     WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
+                     ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
+                   END
+                 * CASE
+                     WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
+                       THEN ${BRAND_MATCH_BOOST}::float
+                     ELSE 1.0
+                   END
+                 * 0.7
+                 AS rank_score
+          FROM knowledge_items ki
+          LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.search_text, ''))
+                @@ to_tsquery('english', ${modelOnlyTsQuery})
+          ORDER BY rank_score DESC
+          LIMIT 15
+        `) as unknown as KnowledgeRow[]);
+    add(modelOnlyRows);
+  }
+
   for (const pattern of modelPatterns.slice(0, 6)) {
     const like = `%${pattern.toLowerCase().replace(/\s+/g, "%")}%`;
     const rows = commercialOnly
@@ -647,7 +824,84 @@ async function searchKnowledge(
     }
   }
 
-  return Array.from(collected.values()).slice(0, 25);
+  // Sort merged results by rank_score descending so model-only matches
+  // can promote above AND-with-words matches when their score is higher.
+  // Rows from ILIKE fallbacks (no rank_score) sort to the bottom and only
+  // fill slots after FTS-scored rows.
+  const sortedRows = Array.from(collected.values()).sort(
+    (a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0)
+  );
+  const top25 = sortedRows.slice(0, 25);
+
+  // Model coverage guarantee. When the user explicitly named alphanumeric
+  // models (CL20, CL12A, HDS-18E, etc.), ensure each named model has at
+  // least one matching doc in top25. The CL20 spec sheet is thin (1211
+  // chars) and can't out-rank 55K-char CL12A install manuals on raw FTS,
+  // but it's the ONLY CL20 doc — without it, the synthesis model has no
+  // CL20 information at all and refuses on that half of a comparison
+  // query like "is a CL20 harder to install than a CL12A?".
+  //
+  // We PROMOTE the coverage rows near the TOP of the retrieval set rather
+  // than just including them at the bottom. The synthesis model has been
+  // observed to refuse on CL20 even with id=3649 retrieved at position
+  // #18 — it scans only the first ~10 sources and concludes "no CL20
+  // here". Force the model to see partial-coverage docs by ranking them
+  // just below the highest-ranked existing match.
+  // Coverage + visibility guarantee. For each alphanumeric model named in
+  // the question, find the highest-ranked row whose title contains that
+  // model (anywhere in collected, not just top25). If that row is at
+  // position 6+, promote it to position #2-3 by overriding its rank_score
+  // to topRank * 0.95 - (modelIndex * 0.01). Synthesis has been observed
+  // to scan only the first ~10 sources reliably, so a CL20 spec sheet at
+  // position #18 gets ignored even when the question is explicitly about
+  // CL20. This makes the named-model docs unmissable.
+  if (modelPatterns.length > 0) {
+    const namedModels = Array.from(
+      new Set(
+        modelPatterns
+          .filter((p) => /[A-Za-z]/.test(p) && /\d/.test(p))
+          .map((p) => p.toLowerCase().replace(/[\s-]/g, ""))
+      )
+    );
+    const titleHas = (row: KnowledgeRow, model: string): boolean => {
+      const t = (row.title || "").toLowerCase().replace(/[\s-]/g, "");
+      return t.includes(model);
+    };
+    const topRankScore = top25[0]?.rank_score ?? 1.0;
+    let modelIdx = 0;
+    for (const missing of namedModels) {
+      // Where does this model currently sit in top25?
+      const positionInTop25 = top25.findIndex((r) => titleHas(r, missing));
+      // If the model is in the first 5 slots, no promotion needed.
+      if (positionInTop25 >= 0 && positionInTop25 < 5) {
+        modelIdx++;
+        continue;
+      }
+      // Find the best candidate row whose title matches this model — could
+      // be in top25 (position 5+) or in sortedRows beyond top25.
+      const candidate =
+        positionInTop25 >= 0
+          ? top25[positionInTop25]
+          : sortedRows.slice(25).find((r) => titleHas(r, missing));
+      if (candidate) {
+        // Tiered promote: each subsequent named model gets a slightly
+        // lower promoted rank, so they don't all collide at exactly the
+        // same score (preserving stable ordering across runs).
+        const promoted = topRankScore * 0.95 - modelIdx * 0.01;
+        candidate.rank_score = promoted;
+        // If the candidate was outside top25, drop the lowest-ranked
+        // top25 row to make room.
+        if (positionInTop25 < 0) {
+          top25[top25.length - 1] = candidate;
+        }
+        // Re-sort so the candidate lands at its new position.
+        top25.sort((a, b) => (b.rank_score ?? 0) - (a.rank_score ?? 0));
+      }
+      modelIdx++;
+    }
+  }
+
+  return top25;
 }
 
 // Per-candidate body sent to the answering model.
@@ -1071,6 +1325,37 @@ export async function POST(request: NextRequest) {
       queryNotes.push(
         "Query intent: service-provider / dealer location. The 'New Service Map - Subcontractor Coverage' document is in the retrieved set. Search its body for the city/state/zip Paul mentioned, filter to the brand if specified, and present matching providers with name + address + contact info. Each placemark has a `- Folder:` line indicating its brand."
       );
+    }
+
+    // Partial-coverage detection. If the question mentions multiple
+    // alphanumeric models AND each has at least one matching source in
+    // the retrieved set, surface that explicitly so synthesis doesn't
+    // refuse on a model just because it has only a spec sheet (no full
+    // install manual). Applies the prompt's "comparison queries with
+    // partial coverage" HARD rule.
+    const namedModelsInQuery = Array.from(
+      new Set(
+        (trimmed.match(/\b[A-Za-z]{1,4}[\s-]?\d{1,3}[A-Za-z]?(?:[\s-]\d{1,3}[A-Za-z]*)?\b/g) || [])
+          .filter((p) => /[A-Za-z]/.test(p) && /\d/.test(p))
+          .map((p) => p.toLowerCase().replace(/[\s-]/g, ""))
+      )
+    );
+    if (namedModelsInQuery.length >= 2) {
+      const modelToSource: string[] = [];
+      for (const m of namedModelsInQuery) {
+        const match = rows.find((r) => {
+          const title = (r.title || "").toLowerCase().replace(/[\s-]/g, "");
+          return title.includes(m);
+        });
+        if (match) {
+          modelToSource.push(`${m.toUpperCase()} -> source id=${match.id} "${(match.title || "").slice(0, 60)}"`);
+        }
+      }
+      if (modelToSource.length >= 2) {
+        queryNotes.push(
+          `Query intent: comparison across multiple models. Each named model has at least one retrieved source: ${modelToSource.join("; ")}. Apply the "comparison queries with partial coverage" HARD rule from the system prompt — USE BOTH/ALL named-model sources and REASON across them, even if one has only a spec sheet and another has a full install manual. Do NOT refuse on a model just because the retrieval has only a spec sheet — read what IS there (capacity, dimensions, anchoring requirements) and reason about implications, with disclaimers for inference.`
+        );
+      }
     }
     const queryNoteBlock =
       queryNotes.length > 0
