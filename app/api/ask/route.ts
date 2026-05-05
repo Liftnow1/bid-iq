@@ -245,11 +245,13 @@ async function searchKnowledge(
       break; // first brand mention wins
     }
   }
+  const BRAND_MATCH_BOOST = 5.0;
   // SQL receives either the canonical brand name or an empty string.
   // The CASE WHEN b.name = '' THEN ... will never match, so a no-brand
   // query gets the 1.0 multiplier branch — a no-op.
-  const brandFilter = mentionedBrand ?? "";
-  const BRAND_MATCH_BOOST = 5.0;
+  // (brandFilter is populated below — possibly via inference if no explicit
+  // brand mention was found.)
+  let brandFilter = mentionedBrand ?? "";
 
   // Split on hyphens and slashes too so compound model strings like
   // "CL10A-DPC" or "PK10/B" become separate tokens; otherwise to_tsquery
@@ -427,6 +429,56 @@ async function searchKnowledge(
     question.match(
       /\b[A-Za-z]{1,4}[\s-]?\d{1,3}[A-Za-z]?(?:[\s-]\d{1,3}[A-Za-z]*)?\b|\b\d{3,6}[A-Za-z]{0,3}\b/g
     ) || [];
+
+  // Brand inference from model patterns. When the user asks about explicit
+  // alphanumeric models (e.g. "CL20" or "CL12A") but doesn't name the brand,
+  // figure out the brand from the model corpus. CL20 / CL12A are unique to
+  // Challenger; HD-9 / HDS-18E are unique to BendPak. A quick lookup across
+  // matching rows tells us the dominant brand. Only run when (a) no brand
+  // was already detected and (b) we have at least one alphanumeric model
+  // pattern (not just bare digit runs which are too generic).
+  const hasAlphaNumModel = modelPatterns.some((p) => /[A-Za-z]/.test(p) && /\d/.test(p));
+  if (!brandFilter && hasAlphaNumModel) {
+    try {
+      // TIGHT inference tsquery: use only the EXACT prefix-form of each
+      // alphanumeric model pattern. Don't fall back to "cl & 20" split-form
+      // here — that lets BendPak docs (which have "cl" from XPR-18CL-192
+      // and "20" from capacities as separate tokens) match a CL20/CL12A
+      // query. We want only docs that contain the literal model string.
+      const tightTokens = modelPatterns
+        .filter((p) => /[A-Za-z]/.test(p) && /\d/.test(p))
+        .map((p) => `${p.toLowerCase().replace(/[\s-]/g, "")}:*`);
+      if (tightTokens.length === 0) {
+        // No alphanumeric models to infer from; skip.
+      } else {
+        const inferenceTsQuery = tightTokens.join(" | ");
+        // Pull the top-3 brand_ids by hit count among model-matching rows.
+        const brandCounts = (await sql`
+          SELECT lower(coalesce(b.name, '')) AS brand, count(*)::int AS n
+          FROM knowledge_items ki LEFT JOIN brands b ON b.id = ki.brand_id
+          WHERE to_tsvector('english', coalesce(ki.search_text, ''))
+                @@ to_tsquery('english', ${inferenceTsQuery})
+            AND b.name IS NOT NULL
+          GROUP BY lower(coalesce(b.name, ''))
+          ORDER BY n DESC
+          LIMIT 3
+        `) as unknown as Array<{ brand: string; n: number }>;
+        if (brandCounts.length > 0) {
+          const total = brandCounts.reduce((s, r) => s + r.n, 0);
+          const top = brandCounts[0];
+          // Infer the brand only if the top brand dominates at least 60%
+          // of matches AND has at least 3 hits. Otherwise the model
+          // patterns are ambiguous (cross-brand naming collision).
+          if (top.n >= 3 && top.n / total >= 0.6) {
+            brandFilter = top.brand;
+          }
+        }
+      }
+    } catch (e) {
+      // Inference is non-fatal; fall back to no-brand-boost behavior.
+      console.warn("brand inference error:", e);
+    }
+  }
 
   const collected = new Map<number, KnowledgeRow>();
   const add = (rows: KnowledgeRow[]) => {
