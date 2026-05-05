@@ -210,6 +210,44 @@ async function searchKnowledge(
   const isLocationQuery = looksLikeLocationQuery(question);
   const serviceMapMultiplier = isLocationQuery ? 2.5 : 1.0;
 
+  // Brand-aware boost. When the question mentions a known brand name,
+  // boost rows whose brand_id matches that brand by 5x. This fixes the
+  // "challenger lifts two post less than 20,000 lbs" failure mode where
+  // BendPak/Coats doc TITLES had "12,000 / 15,000 / 18,000" matches that
+  // crushed Challenger's title-rank (Challenger uses "12K HD" / "20K HD"
+  // naming). Brand intent should dominate keyword overlap.
+  //
+  // We match against the brands table at SQL time via b.name. Brands are
+  // a closed set of ~18 entries; lowercasing both sides is enough.
+  const KNOWN_BRANDS = [
+    "challenger", "bendpak", "coats", "mohawk", "rotary", "stertil-koni",
+    "hunter", "ari-hetra", "ari", "mahle", "champion", "mattei",
+    "balcrank", "alemite", "lincoln", "pro-cut", "procut", "pks", "omer",
+    "liftnow", "robinair", "ranger", "snap-on", "snapon",
+  ];
+  // Aliases — when the user types "snapon" we want to match brand_id for "snap-on".
+  const BRAND_ALIASES: Record<string, string> = {
+    "ari": "ari-hetra",
+    "procut": "pro-cut",
+    "snapon": "snap-on",
+  };
+  const lowerQ = question.toLowerCase();
+  let mentionedBrand: string | null = null;
+  for (const b of KNOWN_BRANDS) {
+    // Word-boundary match so "challenger" doesn't accidentally hit "challengers".
+    // Note: we use a relaxed boundary that also matches at the end of a hyphenated form.
+    const re = new RegExp(`\\b${b.replace(/-/g, "[\\-\\s]?")}s?\\b`, "i");
+    if (re.test(lowerQ)) {
+      mentionedBrand = BRAND_ALIASES[b] ?? b;
+      break; // first brand mention wins
+    }
+  }
+  // SQL receives either the canonical brand name or an empty string.
+  // The CASE WHEN b.name = '' THEN ... will never match, so a no-brand
+  // query gets the 1.0 multiplier branch — a no-op.
+  const brandFilter = mentionedBrand ?? "";
+  const BRAND_MATCH_BOOST = 5.0;
+
   // Split on hyphens and slashes too so compound model strings like
   // "CL10A-DPC" or "PK10/B" become separate tokens; otherwise to_tsquery
   // sees "cl10a-dpc" as one tsquery term and either parses oddly or
@@ -349,9 +387,27 @@ async function searchKnowledge(
   // De-duplicate.
   const uniqHyphenated = Array.from(new Set(hyphenatedDigitPhrases));
 
+  // Capacity normalization. Manufacturers spec lift capacity in either
+  // "12,000 lbs" (BendPak/Coats style) or "12K" / "12k" (Challenger style).
+  // A query of "20,000 lbs" tokenizes to `20:* | 000:*` and won't prefix-
+  // match Challenger titles that say "20K" / "20K HD". Detect "X,000" and
+  // "X000" patterns in the original question and add the K-form as an
+  // alternative digit token.
+  const capacityKTokens: string[] = [];
+  for (const m of question.matchAll(/\b(\d{1,3}),?000\b/g)) {
+    const k = m[1];
+    if (k.length >= 1) {
+      // Add both "<k>k" prefix-form and the bare "<k>k" token.
+      capacityKTokens.push(`${k}k:*`);
+    }
+  }
+  const uniqCapacityK = Array.from(new Set(capacityKTokens));
+
   let tsQuery: string;
-  // Combine digit tokens with hyphenated phrases on the "model" side.
-  const modelSideTokens = [...digitTokens, ...uniqHyphenated];
+  // Combine digit tokens, hyphenated phrases, and capacity-K alternates
+  // on the "model" side. All three help the AND-with-words branch match
+  // a wider set of correctly-named docs.
+  const modelSideTokens = [...digitTokens, ...uniqHyphenated, ...uniqCapacityK];
   if (modelSideTokens.length > 0 && wordTokens.length > 0) {
     tsQuery = `(${modelSideTokens.join(" | ")}) & (${wordTokens.join(" | ")})`;
   } else if (modelSideTokens.length > 0) {
@@ -438,6 +494,18 @@ async function searchKnowledge(
                        THEN ${serviceMapMultiplier}::float
                      ELSE 1.0
                    END
+                 -- Brand-match boost: when the question mentions a known
+                 -- brand, pump up rows whose brand_id matches that brand by
+                 -- 5x. Fixes the "challenger 2-post" failure where BendPak/
+                 -- Coats title-rank dominates because their titles literally
+                 -- contain "12,000 / 15,000 / 18,000 lbs" while Challenger
+                 -- titles use "12K HD" naming. brandFilter is '' on no-brand
+                 -- queries → no-op.
+                 * CASE
+                     WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
+                       THEN ${BRAND_MATCH_BOOST}::float
+                     ELSE 1.0
+                   END
                  AS rank_score
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
@@ -488,6 +556,18 @@ async function searchKnowledge(
                  * CASE
                      WHEN lower(coalesce(ki.title, '')) LIKE '%service map%subcontractor%'
                        THEN ${serviceMapMultiplier}::float
+                     ELSE 1.0
+                   END
+                 -- Brand-match boost: when the question mentions a known
+                 -- brand, pump up rows whose brand_id matches that brand by
+                 -- 5x. Fixes the "challenger 2-post" failure where BendPak/
+                 -- Coats title-rank dominates because their titles literally
+                 -- contain "12,000 / 15,000 / 18,000 lbs" while Challenger
+                 -- titles use "12K HD" naming. brandFilter is '' on no-brand
+                 -- queries → no-op.
+                 * CASE
+                     WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
+                       THEN ${BRAND_MATCH_BOOST}::float
                      ELSE 1.0
                    END
                  AS rank_score
