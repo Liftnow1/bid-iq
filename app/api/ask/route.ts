@@ -174,12 +174,30 @@ async function searchKnowledge(
   // — e.g. "what install requirements challenger 4018" should not OR in
   // "what" / "are" / "the" / "for". Bigger result sets push the planner
   // toward seq scans; narrower queries hit the GIN index.
+  //
+  // Includes short pronouns / articles / particles ("we", "us", "of", "to")
+  // because we now keep length-2 tokens to preserve acronyms like
+  // "PO" / "AC" / "HD" / "RV" / "BP". Without short stopwords, conversational
+  // phrasing like "once we get a PO" would OR in "we" / "do" / "go" — too
+  // broad. With the list below, only "po" survives → much more focused.
   const STOPWORDS = new Set([
+    // common words (any length)
     "what", "are", "the", "for", "and", "but", "with", "from", "into",
     "that", "this", "these", "those", "any", "all", "how", "why", "who",
     "when", "where", "which", "you", "your", "our", "can", "does", "did",
     "was", "were", "has", "have", "had", "will", "would", "should", "could",
     "may", "might", "must", "shall", "say", "says", "tell", "tells",
+    "once", "just", "also", "very", "much", "more", "less", "than", "then",
+    "over", "under", "after", "before", "during",
+    "there", "here", "where", "everywhere", "anywhere", "nowhere",
+    "again", "ever", "never", "often", "sometimes", "always",
+    "really", "quite", "kind", "sort", "type", "thing", "things",
+    // short pronouns / articles / particles (length 2-3)
+    "we", "us", "my", "me", "us", "he", "it", "is", "am", "be",
+    "an", "as", "at", "by", "in", "of", "on", "to", "up", "no", "or",
+    "so", "if", "do", "go", "we", "us", "us",
+    "his", "her", "its", "him", "she", "yes", "off", "out", "now", "new",
+    "get", "got", "let", "say", "use", "see", "way",
   ]);
   // Build a smarter tsquery. The naive form `term1 | term2 | term3`
   // dilutes model-number signal — a query "4018xfx anchoring requirements"
@@ -193,9 +211,42 @@ async function searchKnowledge(
   //     `(digit1:* | digit2:*) & (word1 | word2)` — only docs containing
   //     a model/digit token make it to ranking.
   //   - If only one kind exists, OR them as before.
-  const filteredWords = words
-    .filter((w) => w.length > 2 && !STOPWORDS.has(w))
+  // Keep length>=2 tokens — short acronyms ("PO", "AC", "HD", "BP") are
+  // critical signal. Filter aggressive stopwords instead.
+  const baseWords = words
+    .filter((w) => w.length >= 2 && !STOPWORDS.has(w))
     .slice(0, 12);
+
+  // Expand common bid-iq acronyms into their full-word forms so docs
+  // titled "Purchase Order Auditing Checklist" / "Post Sale Process"
+  // rank for queries like "once we get a PO". Pure 2-letter tokens
+  // are too thin for English-FTS stemming to disambiguate; the
+  // expansion adds the conceptual full-word tokens.
+  const ACRONYM_EXPANSIONS: Record<string, string[]> = {
+    po: ["po", "purchase", "order"],
+    pos: ["pos", "purchase", "order"],
+    rfp: ["rfp", "request", "proposal"],
+    rfq: ["rfq", "request", "quote"],
+    msa: ["msa", "master", "agreement"],
+    iom: ["iom", "installation", "operation", "maintenance"],
+    msrp: ["msrp", "retail"],
+    ali: ["ali", "automotive", "lift"],
+    sled: ["sled", "state", "local", "education"],
+    naspo: ["naspo", "purchasing"],
+  };
+  const seen = new Set<string>();
+  const filteredWords: string[] = [];
+  for (const w of baseWords) {
+    const expansion = ACRONYM_EXPANSIONS[w] ?? [w];
+    for (const t of expansion) {
+      if (!seen.has(t)) {
+        seen.add(t);
+        filteredWords.push(t);
+      }
+    }
+  }
+  // Cap final length so a many-acronym query doesn't overflow.
+  filteredWords.length = Math.min(filteredWords.length, 12);
   const digitTokens = filteredWords
     .filter((w) => /\d/.test(w))
     .map((w) => `${w}:*`);
