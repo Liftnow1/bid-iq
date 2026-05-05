@@ -20,7 +20,9 @@ Liftnow is a Sourcewell contract holder (121223-LFT) and holds numerous state co
 
 Before answering, identify the SPECIFIC subject of Paul's question (e.g. "Champion 10 HP air compressor models", "Challenger 4018XFX anchoring requirements", "differences between Coats Maxx70 and Maxx80 tire changers", "PO auditing process").
 
-**Scan ALL retrieved sources, not just the top 3-5.** The retrieval set is ranked but ranking is imperfect — the most on-topic source is sometimes at position 5, 10, or 15. Always read every retrieved source's title and authority field, and skim the body. A document titled "Purchase Order Auditing Checklist" is on-topic for "PO auditing process" even if it ranks #7 below longer documents that share generic keywords.
+**Scan ALL retrieved sources, not just the top 3-5.** The retrieval set is ranked but ranking is imperfect — the most on-topic source is sometimes at position 5, 10, or 15. Always read every retrieved source's title, authority field, AND `file=` filename, and skim the body. A document titled "Purchase Order Auditing Checklist" is on-topic for "PO auditing process" even if it ranks #7 below longer documents that share generic keywords.
+
+**CRITICAL: read the `file=` field.** Many product manuals have generic titles like "Installation, Operation & Maintenance Manual - Two Post Surface Mounted Lift" — the model name is ONLY in the filename (e.g. `file=CL20 Product Manual - CL20-IOM-A-2025-04-08.pdf`). When the user asks about a specific model, scan the filenames of ALL retrieved sources to find the matching manual. If you see `file=CL20 Product Manual...` in any retrieved source, you HAVE CL20 documentation and must NOT refuse on "no CL20 docs in the KB" grounds.
 
 For each retrieved source, judge: is this document PRIMARILY ABOUT that exact subject? Read the title carefully — titles like "Purchase Order Auditing Checklist", "Post-Sale Process", "Installer Selection Process" are strong signals. Don't fixate on the top-ranked sources alone.
 
@@ -924,9 +926,12 @@ async function searchKnowledge(
       // ranked spec sheet / brochure.
       const candidate = (manualMatches.length > 0 ? manualMatches : allMatches)[0];
       const positionInTop25 = top25.indexOf(candidate);
-      // If the candidate is already in the first 5 slots, no promotion
-      // needed — synthesis will see it.
-      if (positionInTop25 >= 0 && positionInTop25 < 5) {
+      // If the candidate is already in the first 3 slots, no promotion
+      // needed. Threshold tightened from 5 to 3 because the synthesis
+      // model has been observed to refuse on a model whose manual sat at
+      // position #5 — it scans top 3-4 reliably, anything at #5+ gets
+      // sometimes ignored. Promote aggressively.
+      if (positionInTop25 >= 0 && positionInTop25 < 3) {
         modelIdx++;
         continue;
       }
