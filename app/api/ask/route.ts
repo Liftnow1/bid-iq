@@ -18,14 +18,16 @@ Liftnow is a Sourcewell contract holder (121223-LFT) and holds numerous state co
 
 ## TOPIC MATCH — HARD RULE
 
-Before answering, identify the SPECIFIC subject of Paul's question (e.g. "Champion 10 HP air compressor models", "Challenger 4018XFX anchoring requirements", "differences between Coats Maxx70 and Maxx80 tire changers", "Stertil-Koni mobile column part number for 18,500 lb capacity").
+Before answering, identify the SPECIFIC subject of Paul's question (e.g. "Champion 10 HP air compressor models", "Challenger 4018XFX anchoring requirements", "differences between Coats Maxx70 and Maxx80 tire changers", "PO auditing process").
 
-For each retrieved source, judge: is this document PRIMARILY ABOUT that exact subject? Not "does it mention the keyword" — is the document itself centered on the user's subject?
+**Scan ALL retrieved sources, not just the top 3-5.** The retrieval set is ranked but ranking is imperfect — the most on-topic source is sometimes at position 5, 10, or 15. Always read every retrieved source's title and authority field, and skim the body. A document titled "Purchase Order Auditing Checklist" is on-topic for "PO auditing process" even if it ranks #7 below longer documents that share generic keywords.
 
-- **If at least one source is primarily about the subject:** answer from those sources only. Cite them.
+For each retrieved source, judge: is this document PRIMARILY ABOUT that exact subject? Read the title carefully — titles like "Purchase Order Auditing Checklist", "Post-Sale Process", "Installer Selection Process" are strong signals. Don't fixate on the top-ranked sources alone.
+
+- **If at least one source is primarily about the subject:** answer from those sources. Cite them by index, e.g. [7]. You can cite sources from anywhere in the retrieved set — top to bottom.
 - **If no source is primarily about the subject — but a source TANGENTIALLY mentions related keywords — REFUSE.** Do not offer "for reference" specs from a related-but-different product. Do not piece together an answer from tangentially-relevant docs.
 
-A clean refusal looks like: "The available knowledge base doesn't contain documentation specifically about <subject>. The closest matches are <list of titles> but they cover different products / topics. To answer this question, check <recommend a path: contact manufacturer, look up Sourcewell pricing sheet, etc.>"
+A clean refusal looks like: "The available knowledge base doesn't contain documentation specifically about <subject>. The closest matches are <list of titles> but they cover different products / topics."
 
 ### Examples of WRONG behavior to AVOID
 
@@ -338,16 +340,26 @@ async function searchKnowledge(
                  ki.source, ki.source_type, ki.source_filename, ki.source_path,
                  ki.extractor_version, ki.extracted_data,
                  ki.brand_id, b.name AS brand_name, ki.created_at,
-                 ts_rank(
-                   to_tsvector('english', coalesce(ki.search_text, '')),
-                   to_tsquery('english', ${tsQuery}),
-                   32  -- normalization: 32 = divide by 1+log(length); prevents long docs dominating short focused ones
+                 (
+                   ts_rank(
+                     to_tsvector('english', coalesce(ki.search_text, '')),
+                     to_tsquery('english', ${tsQuery}),
+                     32  -- normalization: 32 = divide by 1+log(length); prevents long docs dominating short focused ones
+                   )
+                   -- Title-rank boost: docs whose title matches the query
+                   -- (e.g. "Purchase Order Auditing Checklist" for a query
+                   -- "po auditing process") get an extra ts_rank component
+                   -- weighted 2x. Without this, short focused docs lose to
+                   -- longer docs that mention keywords in passing.
+                   + 2.0 * ts_rank(
+                     to_tsvector('english', coalesce(ki.title, '')),
+                     to_tsquery('english', ${tsQuery}),
+                     32
+                   )
                  )
                  -- Both ingested_pdf (Wave 1 carry-brand PDFs) and pillar3_staging
                  -- (Pillar 3 contracts, manuals, voice guide) are real extractions
                  -- that should outrank legacy ALI cert metadata when both match.
-                 -- Treating only ingested_pdf as boost-eligible structurally
-                 -- disadvantaged Pillar 3 retrieval; including both fixes that.
                  * CASE WHEN ki.source_type IN ('ingested_pdf', 'pillar3_staging')
                           THEN ${SOURCE_TYPE_PDF_BOOST}::float
                           ELSE 1.0
@@ -358,11 +370,6 @@ async function searchKnowledge(
                      WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
                      ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
                    END
-                 -- Illustrative demotion removed — was suppressing voice guide
-                 -- below the top 25 even on voice queries that legitimately
-                 -- want it. Hallucinated-pricing protection now lives in the
-                 -- synthesis prompt's Pricing rule (require disclaimer when
-                 -- quoting illustrative pricing).
                  AS rank_score
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
@@ -377,16 +384,26 @@ async function searchKnowledge(
                  ki.source, ki.source_type, ki.source_filename, ki.source_path,
                  ki.extractor_version, ki.extracted_data,
                  ki.brand_id, b.name AS brand_name, ki.created_at,
-                 ts_rank(
-                   to_tsvector('english', coalesce(ki.search_text, '')),
-                   to_tsquery('english', ${tsQuery}),
-                   32  -- normalization: 32 = divide by 1+log(length); prevents long docs dominating short focused ones
+                 (
+                   ts_rank(
+                     to_tsvector('english', coalesce(ki.search_text, '')),
+                     to_tsquery('english', ${tsQuery}),
+                     32  -- normalization: 32 = divide by 1+log(length); prevents long docs dominating short focused ones
+                   )
+                   -- Title-rank boost: docs whose title matches the query
+                   -- (e.g. "Purchase Order Auditing Checklist" for a query
+                   -- "po auditing process") get an extra ts_rank component
+                   -- weighted 2x. Without this, short focused docs lose to
+                   -- longer docs that mention keywords in passing.
+                   + 2.0 * ts_rank(
+                     to_tsvector('english', coalesce(ki.title, '')),
+                     to_tsquery('english', ${tsQuery}),
+                     32
+                   )
                  )
                  -- Both ingested_pdf (Wave 1 carry-brand PDFs) and pillar3_staging
                  -- (Pillar 3 contracts, manuals, voice guide) are real extractions
                  -- that should outrank legacy ALI cert metadata when both match.
-                 -- Treating only ingested_pdf as boost-eligible structurally
-                 -- disadvantaged Pillar 3 retrieval; including both fixes that.
                  * CASE WHEN ki.source_type IN ('ingested_pdf', 'pillar3_staging')
                           THEN ${SOURCE_TYPE_PDF_BOOST}::float
                           ELSE 1.0
@@ -397,11 +414,6 @@ async function searchKnowledge(
                      WHEN 'tier-3-paul-only' = ANY(ki.category) THEN ${TIER_WEIGHT_TIER_3}::float
                      ELSE ${TIER_WEIGHT_UNCATEGORIZED}::float
                    END
-                 -- Illustrative demotion removed — was suppressing voice guide
-                 -- below the top 25 even on voice queries that legitimately
-                 -- want it. Hallucinated-pricing protection now lives in the
-                 -- synthesis prompt's Pricing rule (require disclaimer when
-                 -- quoting illustrative pricing).
                  AS rank_score
           FROM knowledge_items ki
           LEFT JOIN brands b ON b.id = ki.brand_id
