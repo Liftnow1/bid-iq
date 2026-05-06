@@ -368,19 +368,32 @@ async function searchKnowledge(
     sled: ["sled", "state", "local", "education"],
     naspo: ["naspo", "purchasing"],
   };
-  const seen = new Set<string>();
-  const filteredWords: string[] = [];
+  // Build groups, where each baseWord becomes one OR-group of synonyms
+  // (the acronym expansion). The groups themselves get AND'd at query
+  // time. This is the iter10 change: previously every token was OR'd;
+  // now each baseWord is REQUIRED (via AND) but its synonym alternatives
+  // OR within the group. So "challenger mobile column warranty" becomes
+  // `challenger & mobile & column & warranty` (4 required tokens) and
+  // "po auditing process" becomes `(po | purchase | order) & auditing
+  // & process` (acronym group OR'd internally, baseWords AND'd).
+  type WordGroup = { isDigit: boolean; tokens: string[] };
+  const baseGroups: WordGroup[] = [];
   for (const w of baseWords) {
-    const expansion = ACRONYM_EXPANSIONS[w] ?? [w];
-    for (const t of expansion) {
-      if (!seen.has(t)) {
-        seen.add(t);
-        filteredWords.push(t);
-      }
+    if (/\d/.test(w)) {
+      baseGroups.push({ isDigit: true, tokens: [w] });
+    } else {
+      const expansion = ACRONYM_EXPANSIONS[w] ?? [w];
+      baseGroups.push({ isDigit: false, tokens: expansion });
     }
   }
-  // Cap final length so a many-acronym query doesn't overflow.
-  filteredWords.length = Math.min(filteredWords.length, 12);
+  // Cap groups to keep query size reasonable.
+  baseGroups.length = Math.min(baseGroups.length, 12);
+
+  // Flat token lists kept for downstream callers (model-only retrieval,
+  // brand inference, etc.) that still want a flat list to OR.
+  const filteredWords = Array.from(
+    new Set(baseGroups.flatMap((g) => g.tokens))
+  );
   const digitTokens = filteredWords
     .filter((w) => /\d/.test(w))
     .map(expandDigitToken);
@@ -419,17 +432,105 @@ async function searchKnowledge(
   }
   const uniqCapacityK = Array.from(new Set(capacityKTokens));
 
-  let tsQuery: string;
   // Combine digit tokens, hyphenated phrases, and capacity-K alternates
   // on the "model" side. All three help the AND-with-words branch match
   // a wider set of correctly-named docs.
   const modelSideTokens = [...digitTokens, ...uniqHyphenated, ...uniqCapacityK];
+
+  // ITER10: split word baseGroups into rarest-K (AND-required) and rest
+  // (OR'd). Look up document frequency per group via a single COUNT query;
+  // the GIN index makes this fast (<10ms total). Rarest K=2 is the sweet
+  // spot — it filters out off-topic docs without over-restricting.
+  //
+  // Examples:
+  //   "challenger mobile column warranty" -> rarest 2 = challenger,warranty
+  //     -> (challenger & warranty) & (mobile | column)  -> 43 matches, handbook in top 5
+  //   "heavy duty inground vehicle lift"  -> rarest 2 = inground,duty
+  //     -> (inground & duty) & (heavy | vehicle | lift) -> PKS HD Ingrounds at #1
+  //   "is my CL12A ali certified"          -> rarest 2 = ali,certified (cl12a is digit)
+  //     -> (cl12a) & (ali & certified) -> CL12A ALI cert metadata at top
+  //   "po auditing process"                -> rarest 2 = auditing,po (acronym)
+  //     -> (auditing & (po | purchase | order)) & process -> PO docs at top
+  const RAREST_K = 2;
+  const wordGroups = baseGroups.filter((g) => !g.isDigit);
+  const groupExpr = (g: WordGroup): string =>
+    g.tokens.length > 1 ? `(${g.tokens.join(" | ")})` : g.tokens[0];
+  // Compute DF per group (use FIRST token of each group as the
+  // representative for DF). Run all in parallel.
+  const groupDfs: Array<{ group: WordGroup; df: number }> = [];
+  if (wordGroups.length > 0) {
+    try {
+      const dfRows = (await Promise.all(
+        wordGroups.map((g) =>
+          sql`
+            SELECT count(*)::int AS n
+            FROM knowledge_items
+            WHERE to_tsvector('english', coalesce(search_text, ''))
+                  @@ to_tsquery('english', ${g.tokens[0]})
+              AND (extractor_version IS NULL OR extractor_version != 'catalog-db-migration')
+          `
+        )
+      )) as unknown as Array<Array<{ n: number }>>;
+      for (let i = 0; i < wordGroups.length; i++) {
+        groupDfs.push({ group: wordGroups[i], df: dfRows[i][0]?.n ?? 0 });
+      }
+    } catch (e) {
+      // If DF lookup fails, skip iter10 and fall back to legacy OR-form.
+      console.warn("group DF lookup failed:", e);
+    }
+  }
+  // Sort by DF ascending; rarest first.
+  groupDfs.sort((a, b) => a.df - b.df);
+  const rarestGroups = groupDfs.slice(0, RAREST_K).map((x) => x.group);
+  const restGroups = groupDfs.slice(RAREST_K).map((x) => x.group);
+
+  // STRICT tsquery (iter10): rarest-K AND'd, rest OR'd, model-side OR'd.
+  const buildStrict = (): string => {
+    const parts: string[] = [];
+    if (modelSideTokens.length > 0) {
+      parts.push(`(${modelSideTokens.join(" | ")})`);
+    }
+    if (rarestGroups.length > 0) {
+      parts.push(`(${rarestGroups.map(groupExpr).join(" & ")})`);
+    }
+    if (restGroups.length > 0) {
+      parts.push(`(${restGroups.map(groupExpr).join(" | ")})`);
+    }
+    return parts.join(" & ");
+  };
+  const tsQueryStrict = buildStrict();
+
+  // LOOSE tsquery (legacy / fallback): word-side OR'd. Preserves the old
+  // behavior when STRICT filters too aggressively (no on-topic match).
+  let tsQueryLoose: string;
   if (modelSideTokens.length > 0 && wordTokens.length > 0) {
-    tsQuery = `(${modelSideTokens.join(" | ")}) & (${wordTokens.join(" | ")})`;
+    tsQueryLoose = `(${modelSideTokens.join(" | ")}) & (${wordTokens.join(" | ")})`;
   } else if (modelSideTokens.length > 0) {
-    tsQuery = modelSideTokens.join(" | ");
+    tsQueryLoose = modelSideTokens.join(" | ");
   } else {
-    tsQuery = wordTokens.join(" | ");
+    tsQueryLoose = wordTokens.join(" | ");
+  }
+
+  // Pick STRICT if it produces a non-trivial retrieval set, else fall
+  // back to LOOSE. Threshold of 3 ensures we don't hand the synthesis
+  // model a 0- or 1-row set when there's no on-topic content.
+  let tsQuery = tsQueryStrict || tsQueryLoose;
+  if (tsQueryStrict && tsQueryStrict !== tsQueryLoose) {
+    try {
+      const strictCount = (await sql`
+        SELECT count(*)::int AS n
+        FROM knowledge_items ki
+        WHERE to_tsvector('english', coalesce(ki.search_text, ''))
+              @@ to_tsquery('english', ${tsQueryStrict})
+          AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+      `) as unknown as Array<{ n: number }>;
+      if (strictCount.length > 0 && strictCount[0].n < 3) {
+        tsQuery = tsQueryLoose;
+      }
+    } catch (e) {
+      console.warn("strict tsquery count failed, using loose:", e);
+      tsQuery = tsQueryLoose;
+    }
   }
 
   // Catch both "<letters><digits>" model strings (CL10, RJ45) AND
