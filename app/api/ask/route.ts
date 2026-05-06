@@ -106,6 +106,26 @@ If a retrieved source is the "New Service Map - Subcontractor Coverage" document
 
 The "Contact information" HARD RULE below forbids phone/email/address in answers. **The service map is the ONE exception.** Per Paul's directive: contact info from service-map placemarks IS allowed in answers. You may include the phone, email, and full mailing address from a service-map placemark when answering a service-provider/dealer query. Other sources (product manuals, RFPs, etc.) remain redacted as before.
 
+## Aggregation directives — HARD RULE
+
+When Paul asks for an aggregate ("average X", "total X", "sum of X", "count of X", "list of X", "top N X", "highest X", "lowest X", "all X in 2024", etc.), treat the directive word as an INSTRUCTION on what to do with the data — NOT as a search term.
+
+For these queries:
+
+1. **The retrieval pipeline pre-filters spreadsheet rows for you.** When a retrieved source is a multi-sheet markdown spreadsheet (header line "## Sheet: ...") with row data, you may see a header line at the top of the body like \`[SPREADSHEET — sliced to rows matching year(s) 2024 AND brand=challenger. ... N matching data rows.]\`. **The rows beneath that header ARE the rows you should aggregate over.** The slicer already filtered by year/brand from the question.
+
+2. **Compute the requested statistic from the cell values.** The masterfile has columns like \`Total\`, \`Cost\`, \`Profit ($)\`, \`Profit (%)\`. For "average profit margin on challenger 2024", read the \`Profit (%)\` column for every row in the slice and compute the mean. For "total profit", sum the \`Profit ($)\` column. Cite the exact row count: "Across N Challenger transactions in 2024, the average profit margin was X% [source]".
+
+3. **Do NOT refuse on grounds of "no data" if a [SPREADSHEET — sliced to ...] header is present.** The header existing means at least some rows matched; the rows below it ARE the data. A wrong answer here is "I don't see 2024 data" when the slicer header explicitly says "year(s) 2024" and rows follow.
+
+4. **Do NOT make up numbers.** Only cite values that are literally in the cell text. If the slicer kept 0 rows (header says "0 matching data rows"), THEN say "no matching rows in [year/brand]".
+
+5. **Vocabulary mapping.** Spreadsheets use column headers like "Profit (%)" / "Profit ($)" / "Total" / "Gross After Fees". Treat the user's natural-language synonyms as referring to these:
+   - margin / profit margin → \`Profit (%)\` column
+   - profit / dollars / earnings → \`Profit ($)\` column
+   - revenue / sales / total → \`Total\` or \`Gross After Fees\` (use Total unless context suggests net)
+   - cost / cogs → \`Cost\` column
+
 ## Missing-model labeling — HARD RULE
 
 When Paul asks about two or more models (e.g. "12AP vs 12APX", "CL20 vs CL12A") and one of them is NOT in the retrieved knowledge base while the other is, you MUST state correctly which one is missing. Before writing a sentence like "I don't have documentation about the [MODEL]", do this verification:
@@ -350,6 +370,15 @@ async function searchKnowledge(
     "again", "ever", "never", "often", "sometimes", "always",
     "really", "quite", "kind", "sort", "type", "thing", "things",
     "vs", "versus", "between",
+    // Statistics directives — these are aggregation INSTRUCTIONS to the
+    // synthesis model, not search terms. "Average X" means "compute the
+    // mean across rows matching X", not "find documents containing the
+    // literal word 'average'". Stripping these from the FTS query lets
+    // the masterfile (which has Profit (%) values but not the word
+    // "average") actually surface for "average margin" queries.
+    "average", "averages", "avg", "mean", "median", "stddev",
+    "calculate", "calculated", "calculating", "computation", "compute",
+    "computed", "computes", "computing",
     // short pronouns / articles / particles (length 2-3)
     "we", "us", "my", "me", "us", "he", "it", "is", "am", "be",
     "an", "as", "at", "by", "in", "of", "on", "to", "up", "no", "or",
@@ -1664,6 +1693,139 @@ function isServiceMapRow(r: KnowledgeRow): boolean {
   );
 }
 
+// ---------- Spreadsheet slicer (iter12.2) ----------
+//
+// The Liftnow Government Summary Master File is a 220K-char xlsx that's been
+// extracted as multi-sheet markdown tables. Paul's "average margin on
+// challenger lifts in 2024" failure had two stacked bugs:
+//   1. Synonym mismatch (margin vs Profit) — fixed by ACRONYM_EXPANSIONS
+//      adding margin → margin|profit (iter12.1).
+//   2. The 2024 sheet starts at byte 94K, but the per-row body cap is 60K.
+//      So even when retrieval surfaced the masterfile, synthesis only saw
+//      Sheets Summary + 2022 + part of 2023 (positions 0-60K). 2024 / 2025
+//      / 2026 were entirely cut off — synthesis truthfully said "no 2024
+//      data" because none was in its prompt window.
+//
+// Fix: when a retrieved doc IS a multi-sheet spreadsheet AND the question
+// mentions a year and/or brand, slice the body to header rows + matching
+// data rows BEFORE the 60K cap. Verified locally for "challenger 2024":
+// 220K → 11K chars, 40× '2024' / 36× 'Challenger' tokens preserved.
+
+function isSpreadsheetBody(body: string): boolean {
+  // Heuristic: many `|`-prefixed rows + at least one `## Sheet:` marker.
+  // The xlsx ingester emits this exact shape.
+  if (!body.includes("## Sheet:")) return false;
+  let pipeRows = 0;
+  for (const ln of body.split("\n")) {
+    if (ln.startsWith("|")) {
+      pipeRows++;
+      if (pipeRows >= 50) return true;
+    }
+  }
+  return false;
+}
+
+function sliceSpreadsheetBody(
+  body: string,
+  question: string,
+  brandFilter: string,
+  capChars: number
+): string {
+  if (!isSpreadsheetBody(body)) return body.slice(0, capChars);
+
+  // Detect year(s) — 4-digit years 2010..2039.
+  const years = new Set<string>();
+  for (const m of question.matchAll(/\b(20[1-3]\d)\b/g)) years.add(m[1]);
+
+  // Brand filter is already passed in (the same brandFilter that's used for
+  // FTS scoring upstream). When the question mentions a brand, we filter
+  // rows to those that contain the brand string. brandFilter is "" when no
+  // brand was named or inferred.
+  const brand = brandFilter.trim();
+
+  // No filter signal at all — return body capped (legacy behavior).
+  if (years.size === 0 && brand === "") return body.slice(0, capChars);
+
+  const out: string[] = [];
+  let inTable = false;
+  let firstHeaderEmitted = false;
+  let kept = 0;
+  let scanned = 0;
+  const brandRe = brand ? new RegExp(`\\b${escapeRegExp(brand)}\\b`, "i") : null;
+
+  for (const line of body.split("\n")) {
+    const isSheetMarker = line.startsWith("## Sheet:") || line.startsWith("# ");
+    const isPipeRow = line.startsWith("|");
+    const isSeparator = isPipeRow && /^\s*\|[\s\-:|]+\|\s*$/.test(line);
+
+    if (isSheetMarker) {
+      out.push(line);
+      inTable = false;
+      firstHeaderEmitted = false;
+      continue;
+    }
+
+    if (!isPipeRow) {
+      // Non-table content (paragraph text, blank line) — keep blank lines
+      // sparingly to preserve readability without bloating output.
+      if (line.trim() === "") {
+        if (out.length && out[out.length - 1].trim() !== "") out.push(line);
+      } else {
+        out.push(line);
+      }
+      inTable = false;
+      firstHeaderEmitted = false;
+      continue;
+    }
+
+    // We're on a `|`-prefixed line.
+    if (!inTable) {
+      // First `|` line after a sheet break = the header row. Always keep.
+      inTable = true;
+      firstHeaderEmitted = true;
+      out.push(line);
+      continue;
+    }
+    if (isSeparator) {
+      out.push(line);
+      continue;
+    }
+    // Data row.
+    scanned++;
+    if (line.trim() === "|") continue;
+    // All-empty cells row (e.g. `|  |  |  |`) — skip silently.
+    if (/^\s*\|(\s*\|)+\s*$/.test(line)) continue;
+
+    let yearOk = years.size === 0;
+    if (!yearOk) {
+      for (const y of years) {
+        if (line.includes(y)) { yearOk = true; break; }
+      }
+    }
+    let brandOk = brandRe === null;
+    if (!brandOk && brandRe) brandOk = brandRe.test(line);
+
+    if (yearOk && brandOk) {
+      out.push(line);
+      kept++;
+    }
+  }
+
+  const filterDesc: string[] = [];
+  if (years.size > 0) filterDesc.push(`year(s) ${[...years].sort().join(", ")}`);
+  if (brand) filterDesc.push(`brand=${brand}`);
+  const header =
+    `[SPREADSHEET — sliced to rows matching ${filterDesc.join(" AND ")}.\n` +
+    `Header rows preserved per sheet. ${kept} matching data rows of ~${scanned} scanned.\n` +
+    `Use these rows to compute aggregations (averages, totals, counts) when the user asks. ` +
+    `If the user asked for "average X" or "total X", DO NOT refuse on grounds of "no data" — ` +
+    `the matching rows are below.]\n\n`;
+
+  let result = header + out.join("\n");
+  if (result.length > capChars) result = result.slice(0, capChars);
+  return result;
+}
+
 // Sparse-body threshold. Below this many chars, the source likely came from
 // a parts-diagram PDF, visual-only document, or thin sales sheet where the
 // model has very little to extract. We append a note telling the model not
@@ -1717,10 +1879,36 @@ function buildContext(rows: KnowledgeRow[], question: string): string {
     // query rather than the always-first ALI inspectors section). Skip PII
     // redaction on this one source — placemark contact info IS the
     // legitimate content of this doc per Paul's directive.
+    //
+    // Spreadsheet smart slicer (iter12.2). When this row is a multi-sheet
+    // markdown spreadsheet (e.g. the Government Summary masterfile, 220K
+    // chars), slice to header rows + data rows matching the question's
+    // year/brand BEFORE the 60K cap. Without this, anything past the first
+    // 60K of the file (which for the masterfile is everything from 2024
+    // onward) is invisible to synthesis.
     const isSvcMap = isServiceMapRow(r);
-    const bodyTruncated = isSvcMap
-      ? sliceServiceMapBody(fullBody, question, rankCap)
-      : fullBody.slice(0, rankCap);
+    let bodyTruncated: string;
+    if (isSvcMap) {
+      bodyTruncated = sliceServiceMapBody(fullBody, question, rankCap);
+    } else if (isSpreadsheetBody(fullBody)) {
+      // Detect brand mentioned in the question for the spreadsheet slicer.
+      // Use the same KNOWN_BRANDS list searchKnowledge uses upstream.
+      const qLower = question.toLowerCase();
+      let brand = "";
+      const KNOWN_BRANDS_FOR_SLICER = [
+        "challenger", "bendpak", "coats", "mohawk", "rotary", "stertil-koni",
+        "hunter", "ari-hetra", "mahle", "champion", "mattei", "balcrank",
+        "alemite", "lincoln", "pro-cut", "pks", "omer", "robinair", "ranger",
+        "snap-on",
+      ];
+      for (const b of KNOWN_BRANDS_FOR_SLICER) {
+        const re = new RegExp(`\\b${b.replace(/-/g, "[\\-\\s]?")}s?\\b`, "i");
+        if (re.test(qLower)) { brand = b; break; }
+      }
+      bodyTruncated = sliceSpreadsheetBody(fullBody, question, brand, rankCap);
+    } else {
+      bodyTruncated = fullBody.slice(0, rankCap);
+    }
     // PII redaction. See PII_PATTERNS for the rationale — the "no contact
     // info" prompt rule is unreliable; redacting at the source guarantees
     // emails/phones/addresses never reach the model. Service-map rows are
