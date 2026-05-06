@@ -479,7 +479,30 @@ async function searchKnowledge(
   //   "po auditing process"                -> rarest 2 = auditing,po (acronym)
   //     -> (auditing & (po | purchase | order)) & process -> PO docs at top
   const RAREST_K = 2;
-  const wordGroups = baseGroups.filter((g) => !g.isDigit);
+  // Strip the EXPLICITLY-mentioned brand from word-groups before DF/rarest
+  // sorting. Brand intent is already captured by BRAND_MATCH_BOOST (5x) and
+  // the liftnow co-boost (3x) at scoring time — including the brand token
+  // in the rarest-K AND set just collapses the discriminator onto a topic
+  // pair (e.g. "challenger mobile" for "challenger mobile column warranty"),
+  // letting "warranty" fall into the rest/OR slot. The whole point of
+  // rarest-K AND is to require the topical pivot; brand tokens dilute that.
+  // Only strip when mentionedBrand is set (explicit word match in the
+  // question). When brandFilter is set via INFERENCE (no brand word in
+  // query), there's no brand token in baseGroups to strip — leave the
+  // filter as-is.
+  const brandWordSet = new Set<string>();
+  if (mentionedBrand) {
+    // Canonical form with hyphens stripped, plus each hyphen-split
+    // component (so "stertil-koni" matches both "stertil" and "koni"
+    // word tokens; "snap-on" → "snap" + "on" + "snapon").
+    brandWordSet.add(mentionedBrand.replace(/-/g, ""));
+    for (const part of mentionedBrand.split("-")) {
+      if (part.length >= 2) brandWordSet.add(part);
+    }
+  }
+  const wordGroups = baseGroups.filter(
+    (g) => !g.isDigit && !brandWordSet.has(g.tokens[0])
+  );
   const groupExpr = (g: WordGroup): string =>
     g.tokens.length > 1 ? `(${g.tokens.join(" | ")})` : g.tokens[0];
   // Compute DF per group (use FIRST token of each group as the
