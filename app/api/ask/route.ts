@@ -1484,6 +1484,11 @@ function detectFolderBrandInQuestion(question: string): string | null {
   return null;
 }
 
+// Escape user-supplied or constant strings before inlining into a RegExp.
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function sliceServiceMapBody(
   body: string,
   question: string,
@@ -1494,88 +1499,85 @@ function sliceServiceMapBody(
   if (!brandKey) return body.slice(0, capChars);
 
   const folderSubstr = BRAND_TO_FOLDER_SUBSTR[brandKey];
-  // Find folder section boundaries. Each placemark has its own "- Folder: X"
-  // line, so the same folder name appears repeatedly. We scan all "Folder:"
-  // matches and take the contiguous run for our brand.
-  const folderMatches: { idx: number; name: string }[] = [];
-  const folderRegex = /^[\s\-]*Folder:\s*(.+?)\s*$/gim;
-  let fm: RegExpExecArray | null;
-  while ((fm = folderRegex.exec(body)) !== null) {
-    folderMatches.push({ idx: fm.index, name: fm[1] });
-  }
-  if (folderMatches.length === 0) return body.slice(0, capChars);
 
-  // Find first placemark whose folder matches our brand, and the first
-  // subsequent placemark whose folder does NOT match (= next folder section).
-  let sectionStart = -1;
-  let sectionEnd = body.length;
-  for (let i = 0; i < folderMatches.length; i++) {
-    const isMatch = folderMatches[i].name
-      .toLowerCase()
-      .includes(folderSubstr.toLowerCase());
-    if (isMatch && sectionStart < 0) sectionStart = folderMatches[i].idx;
-    if (sectionStart >= 0 && !isMatch) {
-      sectionEnd = folderMatches[i].idx;
-      break;
-    }
-  }
-  if (sectionStart < 0) {
+  // Each placemark in the doc is structured as:
+  //   **COMPANY NAME**
+  //   - Folder: <brand folder>
+  //   - Address: <street, city, ST ZIP>
+  //   - Business Genres: ...
+  //   - Business Phone Number: ...
+  //   - Business Address: ...
+  //
+  // The NAME line comes BEFORE the data, on its own line wrapped in **bold**.
+  // Critical: an earlier version of this function split on `Folder:` lines,
+  // which fall MID-block — that grabbed the NEXT placemark's `**NAME**` into
+  // the current block, giving synthesis mis-paired name/address combos
+  // (e.g. labelling MINNESOTA AUQUIPCO's name onto MILLERS PETRO SYSTEMS's
+  // Pittsfield, MA address). Split on the `**NAME**` line instead — each
+  // resulting block is one fully-self-contained placemark with its name on
+  // top followed by its own data.
+  const blocks = body.split(/(?=^\*\*[^*\n]+\*\*\s*$)/m);
+  // Block 0 is preamble before the first placemark — drop it.
+  const placemarkBlocks = blocks.slice(1);
+
+  // Filter to blocks whose `Folder:` line matches our brand substring.
+  const folderRegex = new RegExp(
+    `^[\\s\\-]*Folder:.*${escapeRegExp(folderSubstr)}`,
+    "im"
+  );
+  const ourBlocks = placemarkBlocks.filter((b) => folderRegex.test(b));
+  if (ourBlocks.length === 0) {
     // Brand mentioned but no matching folder in the body — return cap from
     // start so synthesis at least sees something. Should be rare.
     return body.slice(0, capChars);
   }
-  const folderSection = body.slice(sectionStart, sectionEnd);
 
-  // State filter. Each placemark block starts with "- Folder:" and contains
-  // an "Address:" line with "ST ZIP" tail. Filter placemarks whose address
-  // state is in the user's states ∪ adjacent states.
+  // State filter — placemark address contains "ST ZIP".
   const states = detectStatesInQuestion(question);
   const targetStates = new Set<string>(states);
   for (const s of states) {
     for (const adj of STATE_ADJACENCY[s] ?? []) targetStates.add(adj);
   }
 
-  if (targetStates.size === 0) {
-    // No state filter — cap from start of the brand section.
-    const header =
-      `[SERVICE MAP — sliced to "${brandKey}" folder; ` +
-      `state filter not applied (no state mentioned in question).]\n\n`;
-    const trimmed = folderSection.slice(0, Math.max(0, capChars - header.length));
-    return header + trimmed;
-  }
-
-  // Split the folder section into placemark blocks. Within one folder, every
-  // placemark begins with "- Folder: <brand>". Use that as the block delimiter.
-  const blocks = folderSection.split(/(?=^[\s\-]*Folder:\s*)/m);
-  const matched: string[] = [];
-  for (const blk of blocks) {
-    // State code is the 2-letter token followed by a 5-digit ZIP, found in
-    // either "Address:" or "Business Address:" lines.
-    const stateMatches = Array.from(blk.matchAll(/\b([A-Z]{2})\s+\d{5}(?:-\d{4})?\b/g));
-    if (stateMatches.some((m) => targetStates.has(m[1]))) {
-      matched.push(blk);
+  let candidate = ourBlocks;
+  let stateFilterApplied = false;
+  let stateFilterFoundNothing = false;
+  if (targetStates.size > 0) {
+    const filtered = ourBlocks.filter((blk) => {
+      const sm = Array.from(blk.matchAll(/\b([A-Z]{2})\s+\d{5}(?:-\d{4})?\b/g));
+      return sm.some((m) => targetStates.has(m[1]));
+    });
+    if (filtered.length > 0) {
+      candidate = filtered;
+      stateFilterApplied = true;
+    } else {
+      stateFilterFoundNothing = true;
     }
   }
 
-  if (matched.length === 0) {
-    // No placemarks in target states — return brand section capped, with a
-    // header explaining the situation so synthesis can say "no providers in
-    // this region" rather than substituting a different brand.
-    const header =
-      `[SERVICE MAP — no "${brandKey}" placemarks found in/near ${
-        [...states].join(", ")
-      } (searched ${[...targetStates].sort().join(", ")}). ` +
-      `Showing first portion of "${brandKey}" folder for context.]\n\n`;
-    const trimmed = folderSection.slice(0, Math.max(0, capChars - header.length));
-    return header + trimmed;
+  // Build a header so synthesis knows what the slicer did. The header lives
+  // INSIDE the source body, so synthesis sees it before reading placemarks.
+  let stateNote: string;
+  if (states.size === 0) {
+    stateNote = "no state filter (no state mentioned in question)";
+  } else if (stateFilterApplied) {
+    stateNote =
+      `filtered to placemarks in/near ${[...states].join(", ")} ` +
+      `(states searched: ${[...targetStates].sort().join(", ")})`;
+  } else if (stateFilterFoundNothing) {
+    stateNote =
+      `NO "${brandKey}" placemarks in/near ${[...states].join(", ")} ` +
+      `(searched ${[...targetStates].sort().join(", ")}); ` +
+      `showing all "${brandKey}" placemarks for context — ` +
+      `synthesis should answer "no ${brandKey} providers in/near ${[...states].join(", ")}"`;
+  } else {
+    stateNote = "state filter applied";
   }
-
   const header =
-    `[SERVICE MAP — filtered to brand "${brandKey}" placemarks in/near ${
-      [...states].join(", ")
-    }. States searched: ${[...targetStates].sort().join(", ")}. ` +
-    `${matched.length} placemarks match (of ~${blocks.length - 1} in this brand folder).]\n\n`;
-  let out = header + matched.join("");
+    `[SERVICE MAP — brand "${brandKey}"; ${stateNote}. ` +
+    `${candidate.length} placemarks shown of ${ourBlocks.length} in this brand folder.]\n\n`;
+
+  let out = header + candidate.join("");
   if (out.length > capChars) out = out.slice(0, capChars);
   return out;
 }
