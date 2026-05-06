@@ -103,39 +103,52 @@ export function resolveQueryLocation(question: string): ResolvedLocation | null 
     if (c) return { centroid: c, label: zipMatch[1], resolution: "zip" };
   }
 
-  // 2. City + state. Build a regex that matches a 1-3 word city followed by
-  //    an optional comma and either a state name or 2-letter code.
-  //    Examples we want to match (case-insensitive):
-  //      "reno, nv"
-  //      "Reno NV"
-  //      "Pittsfield Massachusetts"
-  //      "los angeles, ca"
-  //
-  // Strategy: find each candidate "<words> <STATE-or-name>" span, look up
-  //    its centroid in the city map. Prefer the longest match (3-word city
-  //    over 1-word) to handle "Los Angeles CA" vs "Los Angeles" alone.
+  // 2. City + state. The earlier implementation used a single greedy regex
+  //    `\b(\w+(?:\s+\w+){0,2})\s*,?\s+<state>\b` and that captured up to
+  //    THREE words before each state mention. For "closest bendpak providers
+  //    to reno nv", that grabbed "providers to reno" as the city, looked
+  //    up "PROVIDERS TO RENO,NV" (not in our table), and fell through to
+  //    state-only resolution — yielding distances "from NV" centroid
+  //    (central Nevada, ~200 mi from Reno) instead of "from Reno, NV"
+  //    proper. Fix: for each state mention, try the 1-, 2-, and 3-word
+  //    suffixes that precede it as candidate cities; take the LONGEST that
+  //    actually exists in our city centroids table (prefers "Los Angeles,
+  //    CA" over "Angeles, CA").
   const stateNameAlt = Object.keys(STATE_NAME_TO_CODE).join("|");
   const stateCodeAlt = Array.from(VALID_STATE_CODES).join("|");
-  // City: 1-3 capitalized-or-lowercase word tokens; allow apostrophes and hyphens.
-  // We'll then look up the resolved (CITY, ST) in the city centroids table.
-  const cityStateRe = new RegExp(
-    `\\b([A-Za-z][A-Za-z'.\\-]*(?:\\s+[A-Za-z][A-Za-z'.\\-]*){0,2})` +
-      `\\s*,?\\s+(${stateNameAlt}|${stateCodeAlt})\\b`,
+  const stateMentionRe = new RegExp(
+    `\\b(${stateNameAlt}|${stateCodeAlt})\\b`,
     "gi"
   );
   let best: ResolvedLocation | null = null;
-  for (const m of question.matchAll(cityStateRe)) {
-    const city = m[1].trim();
-    const stRaw = m[2].toLowerCase();
+  for (const stMatch of question.matchAll(stateMentionRe)) {
+    const stRaw = stMatch[1].toLowerCase();
     const stCode = STATE_NAME_TO_CODE[stRaw] ?? stRaw.toUpperCase();
     if (!VALID_STATE_CODES.has(stCode)) continue;
-    const centroid = getCityCentroid(city, stCode);
-    if (centroid) {
-      // Prefer longer city names — "Los Angeles, CA" > "Angeles, CA".
-      const label = `${city.replace(/\s+/g, " ")}, ${stCode}`;
-      if (!best || city.length > best.label.length) {
-        best = { centroid, label, resolution: "city-state" };
+    // Look at the substring before the state mention. Trim trailing
+    // whitespace and an optional comma.
+    const prefix = question
+      .slice(0, stMatch.index!)
+      .replace(/[\s,]+$/, "");
+    if (!prefix) continue;
+    // Tokenize the prefix into word-like tokens and try the LAST 1, 2, 3
+    // tokens (right-to-left) as candidate city names. Take the longest
+    // that's in the city centroid map.
+    const tokens = prefix.match(/[A-Za-z][A-Za-z'.\-]*/g) ?? [];
+    if (tokens.length === 0) continue;
+    let chosen: { city: string; centroid: LatLng } | null = null;
+    for (let n = Math.min(3, tokens.length); n >= 1; n--) {
+      const candidate = tokens.slice(tokens.length - n).join(" ");
+      const c = getCityCentroid(candidate, stCode);
+      if (c) {
+        chosen = { city: candidate, centroid: c };
+        break; // longest valid match wins
       }
+    }
+    if (!chosen) continue;
+    const label = `${chosen.city.replace(/\s+/g, " ")}, ${stCode}`;
+    if (!best || chosen.city.length > best.label.length) {
+      best = { centroid: chosen.centroid, label, resolution: "city-state" };
     }
   }
   if (best) return best;
@@ -152,13 +165,46 @@ export function resolveQueryLocation(question: string): ResolvedLocation | null 
       if (c) return { centroid: c, label: code, resolution: "state" };
     }
   }
-  // 2-letter code, accepting either case (this is the bug Paul caught).
+  // 2-letter code fallback. Two traps to avoid:
+  //   (a) Lowercase 2-letter words that ARE common English words but happen
+  //       to overlap with state codes — IN (preposition), OR, ME, HI, AL,
+  //       AS, AR, AZ, CA, OK, MA, PA, etc. We accept these only when they
+  //       look like real state references: either uppercase in the source
+  //       text, or they appear at end-of-string.
+  //   (b) Picking the FIRST 2-letter token (leftmost) when the user wrote
+  //       "providers in nv" — "in" appears first and would mis-resolve to
+  //       Indiana. Iterate matches but PREFER the rightmost candidate, since
+  //       the state name typically comes after the city in English ("X near
+  //       Reno NV", not "NV providers"). And skip ambiguous lowercase codes
+  //       unless they're at the end of the question.
+  const ENGLISH_WORD_CODES = new Set([
+    "IN", "OR", "ME", "HI", "AS", "AT", "BY", "OF", "ON", "TO", "SO",
+    "IF", "DO", "GO", "IS", "BE", "AM", "WE", "US", "MY", "HE", "IT",
+    "AN", "UP", "NO", "OK",
+  ]);
+  const candidates: { code: string; idx: number; uppercase: boolean }[] = [];
   for (const m of question.matchAll(/\b([A-Za-z]{2})\b/g)) {
     const upper = m[1].toUpperCase();
-    if (VALID_STATE_CODES.has(upper)) {
-      const c = getStateCentroid(upper);
-      if (c) return { centroid: c, label: upper, resolution: "state" };
+    if (!VALID_STATE_CODES.has(upper)) continue;
+    candidates.push({
+      code: upper,
+      idx: m.index ?? 0,
+      uppercase: m[1] === upper,
+    });
+  }
+  // Sort by position descending — rightmost first.
+  candidates.sort((a, b) => b.idx - a.idx);
+  for (const cand of candidates) {
+    if (ENGLISH_WORD_CODES.has(cand.code) && !cand.uppercase) {
+      // Only accept ambiguous codes if they're at the very end of the
+      // question (with maybe trailing punctuation/whitespace).
+      const tail = question.slice(cand.idx + 2).trim();
+      if (tail !== "" && tail !== "?" && tail !== "." && tail !== "!") {
+        continue;
+      }
     }
+    const c = getStateCentroid(cand.code);
+    if (c) return { centroid: c, label: cand.code, resolution: "state" };
   }
 
   return null;

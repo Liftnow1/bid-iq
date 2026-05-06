@@ -418,6 +418,32 @@ async function searchKnowledge(
     ali: ["ali", "automotive", "lift"],
     sled: ["sled", "state", "local", "education"],
     naspo: ["naspo", "purchasing"],
+    // Business-vocabulary synonyms. Paul says "margin" but the government
+    // masterfile spreadsheet uses the column header "Profit (%)". Without
+    // this expansion, asking "average margin on challenger lifts in 2024"
+    // failed the strict `margin & challenger & 2024` AND because "margin"
+    // isn't literally in the file. With the expansion the tsquery becomes
+    // `(margin | profit) & challenger & 2024` and the masterfile surfaces.
+    margin: ["margin", "profit"],
+    margins: ["margins", "margin", "profit"],
+    profit: ["profit", "margin"],
+    revenue: ["revenue", "total", "sales", "gross"],
+    sales: ["sales", "revenue", "gross", "total"],
+    cost: ["cost", "cogs"],
+    cogs: ["cogs", "cost"],
+    // Vendor / dealer / installer / supplier all refer to the same role
+    // depending on which side of the transaction the doc is written from.
+    vendor: ["vendor", "dealer", "supplier", "installer"],
+    vendors: ["vendors", "dealers", "suppliers", "installers"],
+    dealer: ["dealer", "vendor", "installer", "supplier"],
+    dealers: ["dealers", "vendors", "installers", "suppliers"],
+    supplier: ["supplier", "vendor", "dealer"],
+    suppliers: ["suppliers", "vendors", "dealers"],
+    // "Customer" / "client" / "buyer" / "agency" — bid-side synonyms.
+    customer: ["customer", "client", "buyer"],
+    customers: ["customers", "clients", "buyers"],
+    client: ["client", "customer", "buyer"],
+    clients: ["clients", "customers", "buyers"],
   };
   // Build groups, where each baseWord becomes one OR-group of synonyms
   // (the acronym expansion). The groups themselves get AND'd at query
