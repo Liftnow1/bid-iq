@@ -457,27 +457,25 @@ async function searchKnowledge(
   const groupExpr = (g: WordGroup): string =>
     g.tokens.length > 1 ? `(${g.tokens.join(" | ")})` : g.tokens[0];
   // Compute DF per group (use FIRST token of each group as the
-  // representative for DF). Run all in parallel.
+  // representative for DF). SERIAL — neon HTTP serverless doesn't always
+  // tolerate multiple concurrent queries on the same `sql` factory; if
+  // any one of them fails, Promise.all rejects and the whole iter10
+  // STRICT path falls back to LOOSE silently. With ~5 queries × ~5ms
+  // each (GIN index), serial is plenty fast (<30ms total).
   const groupDfs: Array<{ group: WordGroup; df: number }> = [];
-  if (wordGroups.length > 0) {
+  for (const g of wordGroups) {
     try {
-      const dfRows = (await Promise.all(
-        wordGroups.map((g) =>
-          sql`
-            SELECT count(*)::int AS n
-            FROM knowledge_items
-            WHERE to_tsvector('english', coalesce(search_text, ''))
-                  @@ to_tsquery('english', ${g.tokens[0]})
-              AND (extractor_version IS NULL OR extractor_version != 'catalog-db-migration')
-          `
-        )
-      )) as unknown as Array<Array<{ n: number }>>;
-      for (let i = 0; i < wordGroups.length; i++) {
-        groupDfs.push({ group: wordGroups[i], df: dfRows[i][0]?.n ?? 0 });
-      }
+      const r = (await sql`
+        SELECT count(*)::int AS n
+        FROM knowledge_items
+        WHERE to_tsvector('english', coalesce(search_text, ''))
+              @@ to_tsquery('english', ${g.tokens[0]})
+          AND (extractor_version IS NULL OR extractor_version != 'catalog-db-migration')
+      `) as unknown as Array<{ n: number }>;
+      groupDfs.push({ group: g, df: r[0]?.n ?? 0 });
     } catch (e) {
-      // If DF lookup fails, skip iter10 and fall back to legacy OR-form.
-      console.warn("group DF lookup failed:", e);
+      console.warn(`DF lookup failed for token "${g.tokens[0]}":`, e);
+      // Skip this group — don't kill the whole iter10 path.
     }
   }
   // Sort by DF ascending; rarest first.
