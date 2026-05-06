@@ -83,14 +83,29 @@ Each source has an \`authority\` field:
 
 **Illustrative-about-itself exception:** when Paul asks ABOUT an illustrative source itself (e.g. "what's in the voice guide?", "Paul Stern voice style guide", "describe the content plan"), describing the contents of that source IS the answer. The illustrative restriction only forbids using illustrative content as canonical fact for OTHER subjects (other products, other contracts, other prices). Describing the voice guide's structure, sections, identity-and-role guidance, signature template format, etc. is allowed when that guide is the subject of the question.
 
-## Service map
+## Service map — HARD RULES
 
-If a retrieved source is the "New Service Map - Subcontractor Coverage" document and Paul's question asks about service providers, dealers, or coverage in a specific city/state/zip:
-- Search that document's body for the city/state/zip
-- Each placemark has a \`- Folder:\` line indicating brand (ALI / Champion / Challenger / Robinair / Rotary / Lift Service Locations BP)
-- Filter to the brand Paul asked about (if any) and to the location
-- Present matching providers with name, city/state, phone/email
-- If no matches in the requested area, say so explicitly
+If a retrieved source is the "New Service Map - Subcontractor Coverage" document and Paul's question asks about service providers, dealers, installers, or coverage in a specific city/state/zip:
+
+- Each placemark has a \`- Folder:\` line indicating which brand it belongs to. Folder values are: \`ALI Certified Lift Inspectors\`, \`Challenger - Incomplete\`, \`Champion Air Compressor Service Centers\`, \`Lift Service Locations (BP)\` (= BendPak), \`Robinair\`, \`Rotary Service Locator 2024.xlsx\`.
+- **HARD: brand-folder filter.** If Paul mentioned a brand in his question (Rotary, BendPak, Challenger, Champion, Robinair, ALI), use ONLY placemarks whose \`- Folder:\` line matches that brand. NEVER substitute providers from a different brand's folder. If Paul asked for "Rotary installers" and the only nearby placemarks are from the ALI folder, the correct answer is "I don't see Rotary installers in/near [location]" — do NOT list ALI inspectors as a near-match. Different brands authorize different installers.
+- **HARD: literal state codes.** The state of each placemark is the 2-letter code in the address line (e.g. \`875 CRANE AVE PITTSFIELD, MA 01201\` → MA; \`5440 LOCKWOOD ROAD AUBURN, NY 13021\` → NY). Use the state code AS WRITTEN in the address. Do NOT infer the state from the city name. Do NOT group placemarks under the wrong state header (e.g. an Auburn, NY entry must NOT appear under "In Massachusetts").
+- The body you receive may be prefaced with a \`[SERVICE MAP — filtered to ...]\` header indicating the slicer's brand+state filter. If that header says "no [brand] placemarks found in/near [region]", that's the correct answer — say so explicitly. Do not pad with other-brand alternatives.
+- Distance ranking is approximate (no geocoded haversine sort yet). Group by state, then list within each state. Note that this is "in or near [region]" coverage, not a precise distance ranking.
+
+## Service map contact info — EXCEPTION to the contact-info HARD RULE
+
+The "Contact information" HARD RULE below forbids phone/email/address in answers. **The service map is the ONE exception.** Per Paul's directive: contact info from service-map placemarks IS allowed in answers. You may include the phone, email, and full mailing address from a service-map placemark when answering a service-provider/dealer query. Other sources (product manuals, RFPs, etc.) remain redacted as before.
+
+## Missing-model labeling — HARD RULE
+
+When Paul asks about two or more models (e.g. "12AP vs 12APX", "CL20 vs CL12A") and one of them is NOT in the retrieved knowledge base while the other is, you MUST state correctly which one is missing. Before writing a sentence like "I don't have documentation about the [MODEL]", do this verification:
+
+1. Scan the \`file=\` filename and \`title\` of every retrieved source for the EXACT string of each model the user named, with word boundaries (so "12APX" is not satisfied by "12AP-SRT"; "CL20" is not satisfied by "CL20HD").
+2. Whichever model returns at least one filename or title hit is PRESENT in the KB. The model with zero hits is the one you don't have docs for.
+3. If you write "no documentation for X" but then quote specs from a source whose filename contains X, you have transposed the labels. Rewrite the opening to say "no documentation for [the actually-absent model]" before sending.
+
+Example: KB contains \`12APX-Spec-Sheet.pdf\` and \`12AP-SRT-Manual.pdf\` but no plain-12AP doc. The correct opening is "I have specs for the 12APX and 12AP-SRT but no plain-12AP documentation in the KB." NOT "I don't have documentation for 12APX" — that's exactly backwards.
 
 ## Voice / persona — HARD RULE
 
@@ -1328,6 +1343,255 @@ function redactPII(text: string): string {
   return out;
 }
 
+// ---------- Service-map smart slicer (iter11) ----------
+//
+// The "New Service Map - Subcontractor Coverage" doc is 566K chars. The 60K
+// per-row body cap chops it at byte 60,000 — but the folders inside the doc
+// are stored sequentially:
+//   ALI Certified Lift Inspectors  (positions 184 – 122,878)
+//   Rotary Service Locator         (122,878 – 269,245)
+//   Robinair                       (269,245 – 320,608)
+//   Challenger - Incomplete        (320,608 – 376,169)
+//   Champion Air Compressor        (376,169 – 410,278)
+//   Lift Service Locations (BP)    (410,278 – end)
+// Without this slicer, ANY non-ALI brand query gets a body that contains
+// only ALI placemarks, so synthesis structurally cannot answer (e.g. "rotary
+// installers near pittsfield ma" was returning ALI inspectors).
+//
+// Strategy: when the question mentions a brand, slice to that brand's folder
+// section before truncation. If the question also mentions a US state, filter
+// placemarks within the brand folder to that state + adjacent states. The
+// resulting text is small (typical: ~10–30K chars for a state-filtered brand
+// folder) and fits well under the cap.
+
+const STATE_NAMES_TO_CODE: Record<string, string> = {
+  alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR",
+  california: "CA", colorado: "CO", connecticut: "CT", delaware: "DE",
+  florida: "FL", georgia: "GA", hawaii: "HI", idaho: "ID",
+  illinois: "IL", indiana: "IN", iowa: "IA", kansas: "KS",
+  kentucky: "KY", louisiana: "LA", maine: "ME", maryland: "MD",
+  massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS",
+  missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV",
+  "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY",
+  "north carolina": "NC", "north dakota": "ND", ohio: "OH", oklahoma: "OK",
+  oregon: "OR", pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC",
+  "south dakota": "SD", tennessee: "TN", texas: "TX", utah: "UT",
+  vermont: "VT", virginia: "VA", washington: "WA", "west virginia": "WV",
+  wisconsin: "WI", wyoming: "WY",
+};
+
+const VALID_STATE_CODES = new Set(Object.values(STATE_NAMES_TO_CODE));
+
+// Lower-48 state adjacency. Used to expand a "Pittsfield MA" query to also
+// pull placemarks from NY/VT/NH/CT/RI (within reasonable driving distance).
+// Approximate; not a substitute for real geocoded haversine sorting (iter12).
+const STATE_ADJACENCY: Record<string, string[]> = {
+  ME: ["NH"],
+  NH: ["ME","MA","VT"],
+  VT: ["NH","MA","NY"],
+  MA: ["NH","VT","NY","CT","RI"],
+  RI: ["MA","CT"],
+  CT: ["NY","MA","RI"],
+  NY: ["VT","MA","CT","NJ","PA"],
+  NJ: ["NY","PA","DE"],
+  PA: ["NY","NJ","DE","MD","WV","OH"],
+  DE: ["NJ","PA","MD"],
+  MD: ["PA","DE","WV","VA","DC"],
+  DC: ["MD","VA"],
+  VA: ["MD","DC","NC","TN","KY","WV"],
+  WV: ["PA","MD","VA","KY","OH"],
+  NC: ["VA","SC","GA","TN"],
+  SC: ["NC","GA"],
+  GA: ["TN","NC","SC","FL","AL"],
+  FL: ["GA","AL"],
+  OH: ["MI","PA","WV","KY","IN"],
+  MI: ["WI","IN","OH"],
+  IN: ["MI","OH","KY","IL"],
+  IL: ["WI","IN","KY","MO","IA"],
+  KY: ["IN","OH","WV","VA","TN","MO","IL"],
+  WI: ["MN","IA","IL","MI"],
+  MN: ["ND","SD","IA","WI"],
+  IA: ["MN","WI","IL","MO","NE","SD"],
+  MO: ["IA","IL","KY","TN","AR","OK","KS","NE"],
+  ND: ["MN","SD","MT"],
+  SD: ["ND","MN","IA","NE","WY","MT"],
+  NE: ["SD","IA","MO","KS","CO","WY"],
+  KS: ["NE","MO","OK","CO"],
+  TN: ["KY","VA","NC","GA","AL","MS","AR","MO"],
+  AL: ["FL","GA","TN","MS"],
+  MS: ["TN","AL","LA","AR"],
+  LA: ["AR","MS","TX"],
+  AR: ["MO","TN","MS","LA","TX","OK"],
+  OK: ["KS","MO","AR","TX","NM","CO"],
+  TX: ["NM","OK","AR","LA"],
+  MT: ["ND","SD","WY","ID"],
+  WY: ["MT","SD","NE","CO","UT","ID"],
+  CO: ["WY","NE","KS","OK","NM","UT","AZ"],
+  NM: ["CO","OK","TX","AZ","UT"],
+  ID: ["MT","WY","UT","NV","OR","WA"],
+  UT: ["ID","WY","CO","NM","AZ","NV"],
+  AZ: ["NV","UT","CO","NM","CA"],
+  NV: ["OR","ID","UT","AZ","CA"],
+  WA: ["ID","OR"],
+  OR: ["WA","ID","NV","CA"],
+  CA: ["OR","NV","AZ"],
+  // Non-contiguous — no adjacency for routing purposes
+  HI: [],
+  AK: [],
+};
+
+// Maps from a question keyword → folder-name substring to look for in the
+// "- Folder: ..." line of each placemark. Folder names in the actual KMZ
+// extract are: "ALI Certified Lift Inspectors", "Challenger - Incomplete",
+// "Champion Air Compressor Service Centers", "Lift Service Locations (BP)",
+// "Robinair", "Rotary Service Locator 2024.xlsx".
+const BRAND_TO_FOLDER_SUBSTR: Record<string, string> = {
+  rotary: "Rotary Service Locator",
+  bendpak: "Lift Service Locations (BP)",
+  bp: "Lift Service Locations (BP)",
+  challenger: "Challenger",
+  champion: "Champion Air Compressor",
+  robinair: "Robinair",
+  ali: "ALI Certified Lift Inspectors",
+};
+
+function detectStatesInQuestion(question: string): Set<string> {
+  const q = question.toLowerCase();
+  const states = new Set<string>();
+  for (const [name, code] of Object.entries(STATE_NAMES_TO_CODE)) {
+    if (new RegExp(`\\b${name}\\b`, "i").test(q)) states.add(code);
+  }
+  // Uppercase 2-letter codes only — avoids treating english words like "in"
+  // or "or" or "me" as state codes.
+  for (const m of question.matchAll(/\b([A-Z]{2})\b/g)) {
+    if (VALID_STATE_CODES.has(m[1])) states.add(m[1]);
+  }
+  return states;
+}
+
+function detectFolderBrandInQuestion(question: string): string | null {
+  const q = question.toLowerCase();
+  // Longest match first to avoid e.g. "bp" inside "bpa" (none in our list,
+  // but as a defensive habit). Keys are short; sort by length desc.
+  const keys = Object.keys(BRAND_TO_FOLDER_SUBSTR).sort(
+    (a, b) => b.length - a.length
+  );
+  for (const k of keys) {
+    if (new RegExp(`\\b${k}\\b`, "i").test(q)) return k;
+  }
+  // "inspector" / "inspectors" → ALI folder
+  if (/\binspectors?\b/i.test(question)) return "ali";
+  return null;
+}
+
+function sliceServiceMapBody(
+  body: string,
+  question: string,
+  capChars: number
+): string {
+  const brandKey = detectFolderBrandInQuestion(question);
+  // No brand mention → preserve legacy behavior (cap from start).
+  if (!brandKey) return body.slice(0, capChars);
+
+  const folderSubstr = BRAND_TO_FOLDER_SUBSTR[brandKey];
+  // Find folder section boundaries. Each placemark has its own "- Folder: X"
+  // line, so the same folder name appears repeatedly. We scan all "Folder:"
+  // matches and take the contiguous run for our brand.
+  const folderMatches: { idx: number; name: string }[] = [];
+  const folderRegex = /^[\s\-]*Folder:\s*(.+?)\s*$/gim;
+  let fm: RegExpExecArray | null;
+  while ((fm = folderRegex.exec(body)) !== null) {
+    folderMatches.push({ idx: fm.index, name: fm[1] });
+  }
+  if (folderMatches.length === 0) return body.slice(0, capChars);
+
+  // Find first placemark whose folder matches our brand, and the first
+  // subsequent placemark whose folder does NOT match (= next folder section).
+  let sectionStart = -1;
+  let sectionEnd = body.length;
+  for (let i = 0; i < folderMatches.length; i++) {
+    const isMatch = folderMatches[i].name
+      .toLowerCase()
+      .includes(folderSubstr.toLowerCase());
+    if (isMatch && sectionStart < 0) sectionStart = folderMatches[i].idx;
+    if (sectionStart >= 0 && !isMatch) {
+      sectionEnd = folderMatches[i].idx;
+      break;
+    }
+  }
+  if (sectionStart < 0) {
+    // Brand mentioned but no matching folder in the body — return cap from
+    // start so synthesis at least sees something. Should be rare.
+    return body.slice(0, capChars);
+  }
+  const folderSection = body.slice(sectionStart, sectionEnd);
+
+  // State filter. Each placemark block starts with "- Folder:" and contains
+  // an "Address:" line with "ST ZIP" tail. Filter placemarks whose address
+  // state is in the user's states ∪ adjacent states.
+  const states = detectStatesInQuestion(question);
+  const targetStates = new Set<string>(states);
+  for (const s of states) {
+    for (const adj of STATE_ADJACENCY[s] ?? []) targetStates.add(adj);
+  }
+
+  if (targetStates.size === 0) {
+    // No state filter — cap from start of the brand section.
+    const header =
+      `[SERVICE MAP — sliced to "${brandKey}" folder; ` +
+      `state filter not applied (no state mentioned in question).]\n\n`;
+    const trimmed = folderSection.slice(0, Math.max(0, capChars - header.length));
+    return header + trimmed;
+  }
+
+  // Split the folder section into placemark blocks. Within one folder, every
+  // placemark begins with "- Folder: <brand>". Use that as the block delimiter.
+  const blocks = folderSection.split(/(?=^[\s\-]*Folder:\s*)/m);
+  const matched: string[] = [];
+  for (const blk of blocks) {
+    // State code is the 2-letter token followed by a 5-digit ZIP, found in
+    // either "Address:" or "Business Address:" lines.
+    const stateMatches = Array.from(blk.matchAll(/\b([A-Z]{2})\s+\d{5}(?:-\d{4})?\b/g));
+    if (stateMatches.some((m) => targetStates.has(m[1]))) {
+      matched.push(blk);
+    }
+  }
+
+  if (matched.length === 0) {
+    // No placemarks in target states — return brand section capped, with a
+    // header explaining the situation so synthesis can say "no providers in
+    // this region" rather than substituting a different brand.
+    const header =
+      `[SERVICE MAP — no "${brandKey}" placemarks found in/near ${
+        [...states].join(", ")
+      } (searched ${[...targetStates].sort().join(", ")}). ` +
+      `Showing first portion of "${brandKey}" folder for context.]\n\n`;
+    const trimmed = folderSection.slice(0, Math.max(0, capChars - header.length));
+    return header + trimmed;
+  }
+
+  const header =
+    `[SERVICE MAP — filtered to brand "${brandKey}" placemarks in/near ${
+      [...states].join(", ")
+    }. States searched: ${[...targetStates].sort().join(", ")}. ` +
+    `${matched.length} placemarks match (of ~${blocks.length - 1} in this brand folder).]\n\n`;
+  let out = header + matched.join("");
+  if (out.length > capChars) out = out.slice(0, capChars);
+  return out;
+}
+
+// True iff the row IS the service-map document. Used to (a) take the smart
+// slicer code path and (b) skip PII redaction on this one source — placemark
+// phone/email IS the legitimate content of this source per Paul's directive.
+function isServiceMapRow(r: KnowledgeRow): boolean {
+  const fname = (r.source_filename || "").toLowerCase();
+  const title = (r.title || "").toLowerCase();
+  return (
+    fname.includes("subcontractor coverage") ||
+    title.includes("service map") && title.includes("subcontractor")
+  );
+}
+
 // Sparse-body threshold. Below this many chars, the source likely came from
 // a parts-diagram PDF, visual-only document, or thin sales sheet where the
 // model has very little to extract. We append a note telling the model not
@@ -1375,11 +1639,21 @@ function buildContext(rows: KnowledgeRow[], question: string): string {
     // service map) from blowing past Anthropic's 200K-token limit.
     const rankCap =
       i < FULL_CONTENT_TOP_N ? PER_ROW_BODY_CAP_CHARS : TRUNCATED_BODY_CHARS;
-    const bodyTruncated = fullBody.slice(0, rankCap);
+    // Service-map smart slicer + PII carve-out (iter11). When this row IS
+    // the service map, slice to the requested brand's folder section before
+    // truncation (so synthesis actually sees Rotary content for a Rotary
+    // query rather than the always-first ALI inspectors section). Skip PII
+    // redaction on this one source — placemark contact info IS the
+    // legitimate content of this doc per Paul's directive.
+    const isSvcMap = isServiceMapRow(r);
+    const bodyTruncated = isSvcMap
+      ? sliceServiceMapBody(fullBody, question, rankCap)
+      : fullBody.slice(0, rankCap);
     // PII redaction. See PII_PATTERNS for the rationale — the "no contact
     // info" prompt rule is unreliable; redacting at the source guarantees
-    // emails/phones/addresses never reach the model.
-    const bodyRedacted = redactPII(bodyTruncated);
+    // emails/phones/addresses never reach the model. Service-map rows are
+    // exempted — see the prompt's "Service map contact info" exception.
+    const bodyRedacted = isSvcMap ? bodyTruncated : redactPII(bodyTruncated);
     // Sparse-body refusal note. When the body is essentially empty (parts
     // diagrams, visual-only PDFs), the model tends to invent specs to fill
     // the gap. Appending an explicit "do not invent" note in the body cuts
