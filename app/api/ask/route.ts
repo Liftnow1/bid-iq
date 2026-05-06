@@ -83,14 +83,42 @@ Each source has an \`authority\` field:
 
 **Illustrative-about-itself exception:** when Paul asks ABOUT an illustrative source itself (e.g. "what's in the voice guide?", "Paul Stern voice style guide", "describe the content plan"), describing the contents of that source IS the answer. The illustrative restriction only forbids using illustrative content as canonical fact for OTHER subjects (other products, other contracts, other prices). Describing the voice guide's structure, sections, identity-and-role guidance, signature template format, etc. is allowed when that guide is the subject of the question.
 
+## ALI standards — disambiguation HARD RULE
+
+When Paul asks about "ALI certified" or "ALI certification", DISTINGUISH which standard he means based on context:
+
+- **ANSI/ALI ALCTV** = the standard for VEHICLE LIFTS themselves (Automotive Lift — Construction, Testing, and Validation). When the question is "is my lift ALI certified", "is the CL12A ALI certified", "ALI certified lifts" — this is the relevant standard. The answer comes from spec sheets / product manuals / the ALI cert metadata rows (source_type=ali_certification — these are per-model certification records). Cite those rows when present.
+
+- **ANSI/ALI ALOIM** = the standard for OPERATION, INSPECTION, and MAINTENANCE. When the question is "ALI certified inspector", "ALI certified inspection", "annual lift inspection", "who can inspect my lift" — this is the relevant standard. Inspectors are individuals/companies certified against ALOIM, listed in the service map under the "ALI Certified Lift Inspectors" folder.
+
+- **ANSI/ALI ALIS** = the standard for installation safety procedures. Cited inside install manuals.
+
+Do NOT conflate: a lift being ALCTV-certified does not make it ALOIM-related, and an ALOIM-certified inspector is not the same as a lift being ALI certified. When Paul asks about lift certification, lead with ALCTV and the per-model certification status. When he asks about inspectors, lead with ALOIM and the service-map inspector list.
+
+If the user's question is ambiguous, briefly state both interpretations and which sources cover each.
+
 ## Service map
 
 If a retrieved source is the "New Service Map - Subcontractor Coverage" document and Paul's question asks about service providers, dealers, or coverage in a specific city/state/zip:
-- Search that document's body for the city/state/zip
-- Each placemark has a \`- Folder:\` line indicating brand (ALI / Champion / Challenger / Robinair / Rotary / Lift Service Locations BP)
-- Filter to the brand Paul asked about (if any) and to the location
-- Present matching providers with name, city/state, phone/email
-- If no matches in the requested area, say so explicitly
+
+**Search ALL folder categories, not just one.** The map has six folders, each is a different KIND of service provider:
+- ALI Certified Lift Inspectors (annual lift inspections, not general service)
+- Rotary Service Locator (Rotary-brand parts/install/service)
+- Lift Service Locations BP / BendPak (BendPak-brand service network)
+- Challenger / Champion / Robinair folders for those brands' networks
+
+When Paul asks "service providers near X" without specifying brand, search ALL folders and group results by category. ALI inspectors are NOT the only service providers — they're a specific certification for inspections. A query like "service providers" should surface installers / parts providers / service networks too. Only filter to one folder if Paul explicitly named a brand or category.
+
+**Distance is APPROXIMATE.** The placemarks contain city/state/zip but NO coordinates. You cannot compute true distance. Look for:
+1. Exact city match in the requested location (e.g. "Pittsfield, MA" → search for placemarks whose City is literally "Pittsfield")
+2. Same state matches
+3. Adjoining state matches (geographic neighbors)
+
+When listing results, ORDER by: (1) exact city match first, (2) same state, (3) neighboring states. Be honest about ranking — say "providers in/near <city>" not "the closest providers" unless you can verify by exact city match. NEVER claim "the 4 closest" if you didn't actually compute distance.
+
+**Contact info IS allowed.** This source is the designated contacts file. Phone numbers, emails, websites, and addresses from placemarks are exactly what Paul needs on a service-provider query. Emit them.
+
+If no matches in the requested area, say so explicitly and suggest the closest larger metro area that does have entries.
 
 ## Voice / persona — HARD RULE
 
@@ -100,7 +128,9 @@ Do NOT sign answers as Paul. Do NOT include email signatures or sign-offs ("Best
 
 Source bodies are server-side redacted: emails appear as [EMAIL REDACTED], phones as [PHONE REDACTED], and street addresses as [ADDRESS REDACTED]. These markers are intentional — do NOT include phone numbers, email addresses, fax numbers, or mailing addresses in your answer text under any circumstances. Do NOT invent contact info to replace the redacted placeholders. Do NOT pad answers with "contact vendor at..." or "email support@..." closing lines.
 
-If Paul explicitly asks for a contact ("what's the contact for X?", "who do I email at Y?"), tell him the relevant source contains contact details and direct him to the source by index, e.g. "Service map source [3] lists providers in Florida — see the source file for phone/email." Do not try to reconstruct redacted values.
+**EXCEPTION — service map**: the "New Service Map - Subcontractor Coverage" doc is NOT redacted. It's the designated contacts file. When the user asks about service providers / dealers in a location, you SHOULD emit phone, email, website, and address from service-map placemarks. Real digits / @ signs in that source are real, not placeholders.
+
+If Paul explicitly asks for a contact ("what's the contact for X?", "who do I email at Y?") and the answer is in the service map, give the actual contact info. For other (redacted) sources, tell him the relevant source contains contact details and direct him to the source by index, e.g. "Source [3] contains the contact — see the file directly." Do not reconstruct redacted values.
 
 ## Citations and refusal
 
@@ -257,6 +287,7 @@ async function searchKnowledge(
     }
   }
   const BRAND_MATCH_BOOST = 5.0;
+  const BRAND_INTERNAL_COBOOST = 3.0;
   // SQL receives either the canonical brand name or an empty string.
   // The CASE WHEN b.name = '' THEN ... will never match, so a no-brand
   // query gets the 1.0 multiplier branch — a no-op.
@@ -490,6 +521,9 @@ async function searchKnowledge(
       console.warn("brand inference error:", e);
     }
   }
+  // Pre-compute the LIKE pattern for the liftnow-internal co-boost. Empty
+  // string disables the co-boost branch (CASE WHEN '' <> '' is false).
+  const brandLikePattern = brandFilter ? `%${brandFilter}%` : "";
 
   const collected = new Map<number, KnowledgeRow>();
   const add = (rows: KnowledgeRow[]) => {
@@ -572,14 +606,21 @@ async function searchKnowledge(
                    END
                  -- Brand-match boost: when the question mentions a known
                  -- brand, pump up rows whose brand_id matches that brand by
-                 -- 5x. Fixes the "challenger 2-post" failure where BendPak/
-                 -- Coats title-rank dominates because their titles literally
-                 -- contain "12,000 / 15,000 / 18,000 lbs" while Challenger
-                 -- titles use "12K HD" naming. brandFilter is '' on no-brand
-                 -- queries → no-op.
+                 -- 5x. Liftnow internal docs that DISCUSS that brand
+                 -- (e.g. the 2025 CL Distributor Handbook talks about
+                 -- Challenger but is filed under brand=liftnow) get a 3x
+                 -- co-boost so they surface alongside the brand-direct
+                 -- docs. Otherwise the 5x challenger boost crushes liftnow
+                 -- internal handbooks that contain the canonical answer.
+                 -- brandFilter is '' on no-brand queries → no-op.
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  AS rank_score
@@ -636,14 +677,21 @@ async function searchKnowledge(
                    END
                  -- Brand-match boost: when the question mentions a known
                  -- brand, pump up rows whose brand_id matches that brand by
-                 -- 5x. Fixes the "challenger 2-post" failure where BendPak/
-                 -- Coats title-rank dominates because their titles literally
-                 -- contain "12,000 / 15,000 / 18,000 lbs" while Challenger
-                 -- titles use "12K HD" naming. brandFilter is '' on no-brand
-                 -- queries → no-op.
+                 -- 5x. Liftnow internal docs that DISCUSS that brand
+                 -- (e.g. the 2025 CL Distributor Handbook talks about
+                 -- Challenger but is filed under brand=liftnow) get a 3x
+                 -- co-boost so they surface alongside the brand-direct
+                 -- docs. Otherwise the 5x challenger boost crushes liftnow
+                 -- internal handbooks that contain the canonical answer.
+                 -- brandFilter is '' on no-brand queries → no-op.
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  AS rank_score
@@ -1167,7 +1215,16 @@ function buildContext(rows: KnowledgeRow[], question: string): string {
     // PII redaction. See PII_PATTERNS for the rationale — the "no contact
     // info" prompt rule is unreliable; redacting at the source guarantees
     // emails/phones/addresses never reach the model.
-    const bodyRedacted = redactPII(bodyTruncated);
+    //
+    // Carve-out: the New Service Map - Subcontractor Coverage doc IS the
+    // designated contacts file. Phone numbers, emails, and addresses for
+    // service providers/dealers are exactly what Paul needs when he asks
+    // "service providers near X". Skip redaction for that doc so the
+    // synthesis model can emit real contact info on location queries.
+    const isServiceMap = (r.title || "").toLowerCase().includes(
+      "service map - subcontractor coverage"
+    );
+    const bodyRedacted = isServiceMap ? bodyTruncated : redactPII(bodyTruncated);
     // Sparse-body refusal note. When the body is essentially empty (parts
     // diagrams, visual-only PDFs), the model tends to invent specs to fill
     // the gap. Appending an explicit "do not invent" note in the body cuts
@@ -1413,7 +1470,7 @@ export async function POST(request: NextRequest) {
     }
     if (isLocation && hasServiceMap) {
       queryNotes.push(
-        "Query intent: service-provider / dealer location. The 'New Service Map - Subcontractor Coverage' document is in the retrieved set. Search its body for the city/state/zip Paul mentioned, filter to the brand if specified, and present matching providers with name + address + contact info. Each placemark has a `- Folder:` line indicating its brand."
+        "Query intent: service-provider / dealer location. The 'New Service Map - Subcontractor Coverage' document is in the retrieved set and is NOT PII-redacted — emit real phone / email / address. Search ALL six folders (ALI Certified Lift Inspectors, Rotary, BendPak, Challenger, Champion, Robinair) — do NOT default to ALI inspectors only; if Paul didn't name a brand, list providers across all folders. Order by exact city match first, then same state, then neighboring states. Distance is approximate (no coordinates in body) — say 'providers in/near <city>', NOT 'the closest providers', and never invent a distance ranking."
       );
     }
 
