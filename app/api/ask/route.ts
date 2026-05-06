@@ -7,6 +7,12 @@ import {
   isUpgradeAvailable,
   tierOf,
 } from "@/lib/upgrade";
+import {
+  resolveQueryLocation,
+  getZipCentroid,
+  haversineMiles,
+  extractZipFromAddress,
+} from "@/lib/geo";
 
 // Auto-upgrade can take 30s-2min per Tier-1 source. Bump max duration so
 // the first query against a fresh Tier-1 row doesn't time out.
@@ -90,8 +96,11 @@ If a retrieved source is the "New Service Map - Subcontractor Coverage" document
 - Each placemark has a \`- Folder:\` line indicating which brand it belongs to. Folder values are: \`ALI Certified Lift Inspectors\`, \`Challenger - Incomplete\`, \`Champion Air Compressor Service Centers\`, \`Lift Service Locations (BP)\` (= BendPak), \`Robinair\`, \`Rotary Service Locator 2024.xlsx\`.
 - **HARD: brand-folder filter.** If Paul mentioned a brand in his question (Rotary, BendPak, Challenger, Champion, Robinair, ALI), use ONLY placemarks whose \`- Folder:\` line matches that brand. NEVER substitute providers from a different brand's folder. If Paul asked for "Rotary installers" and the only nearby placemarks are from the ALI folder, the correct answer is "I don't see Rotary installers in/near [location]" — do NOT list ALI inspectors as a near-match. Different brands authorize different installers.
 - **HARD: literal state codes.** The state of each placemark is the 2-letter code in the address line (e.g. \`875 CRANE AVE PITTSFIELD, MA 01201\` → MA; \`5440 LOCKWOOD ROAD AUBURN, NY 13021\` → NY). Use the state code AS WRITTEN in the address. Do NOT infer the state from the city name. Do NOT group placemarks under the wrong state header (e.g. an Auburn, NY entry must NOT appear under "In Massachusetts").
-- The body you receive may be prefaced with a \`[SERVICE MAP — filtered to ...]\` header indicating the slicer's brand+state filter. If that header says "no [brand] placemarks found in/near [region]", that's the correct answer — say so explicitly. Do not pad with other-brand alternatives.
-- Distance ranking is approximate (no geocoded haversine sort yet). Group by state, then list within each state. Note that this is "in or near [region]" coverage, not a precise distance ranking.
+- The body you receive starts with a \`[SERVICE MAP — brand "X"; sorted by distance from Y; top N closest of M ...]\` header indicating the slicer's brand filter and the location it sorted by. If the header says "no location detected in query", just present the placemarks as-is. If the header says "sorted by distance from Y", use that ordering — placemarks are already ranked closest-first.
+- **Distance lines are inserted by the slicer.** Each placemark now has a \`- Distance: NN.N mi from <label>\` line right after the \`**NAME**\` header. These are zip-centroid approximations (typically ±5 mi for ranking purposes; not exact driving distances). Use them to PRESENT the order ("closest", "next closest"), but do NOT promise exact mileage to Paul or his customer. Phrasing like "approximately X mi away" or "in [city] (about NN mi from Reno)" is fine; "exactly 3.2 miles away" is not.
+- Lead with the closest placemark. List the top 5–10 in order, with name, city/state, distance, and contact info (phone/email allowed for service-map per the exception below).
+- If the slicer found a placemark in the same city Paul asked about, lead with "There's a [brand] [installer/service provider] in [city] itself: ..." then list the others by distance.
+- If the slicer's header says "no location detected", say so and ask Paul to clarify the location (with city + state, or a ZIP).
 
 ## Service map contact info — EXCEPTION to the contact-info HARD RULE
 
@@ -409,6 +418,32 @@ async function searchKnowledge(
     ali: ["ali", "automotive", "lift"],
     sled: ["sled", "state", "local", "education"],
     naspo: ["naspo", "purchasing"],
+    // Business-vocabulary synonyms. Paul says "margin" but the government
+    // masterfile spreadsheet uses the column header "Profit (%)". Without
+    // this expansion, asking "average margin on challenger lifts in 2024"
+    // failed the strict `margin & challenger & 2024` AND because "margin"
+    // isn't literally in the file. With the expansion the tsquery becomes
+    // `(margin | profit) & challenger & 2024` and the masterfile surfaces.
+    margin: ["margin", "profit"],
+    margins: ["margins", "margin", "profit"],
+    profit: ["profit", "margin"],
+    revenue: ["revenue", "total", "sales", "gross"],
+    sales: ["sales", "revenue", "gross", "total"],
+    cost: ["cost", "cogs"],
+    cogs: ["cogs", "cost"],
+    // Vendor / dealer / installer / supplier all refer to the same role
+    // depending on which side of the transaction the doc is written from.
+    vendor: ["vendor", "dealer", "supplier", "installer"],
+    vendors: ["vendors", "dealers", "suppliers", "installers"],
+    dealer: ["dealer", "vendor", "installer", "supplier"],
+    dealers: ["dealers", "vendors", "installers", "suppliers"],
+    supplier: ["supplier", "vendor", "dealer"],
+    suppliers: ["suppliers", "vendors", "dealers"],
+    // "Customer" / "client" / "buyer" / "agency" — bid-side synonyms.
+    customer: ["customer", "client", "buyer"],
+    customers: ["customers", "clients", "buyers"],
+    client: ["client", "customer", "buyer"],
+    clients: ["clients", "customers", "buyers"],
   };
   // Build groups, where each baseWord becomes one OR-group of synonyms
   // (the acronym expansion). The groups themselves get AND'd at query
@@ -1364,81 +1399,10 @@ function redactPII(text: string): string {
 // resulting text is small (typical: ~10–30K chars for a state-filtered brand
 // folder) and fits well under the cap.
 
-const STATE_NAMES_TO_CODE: Record<string, string> = {
-  alabama: "AL", alaska: "AK", arizona: "AZ", arkansas: "AR",
-  california: "CA", colorado: "CO", connecticut: "CT", delaware: "DE",
-  florida: "FL", georgia: "GA", hawaii: "HI", idaho: "ID",
-  illinois: "IL", indiana: "IN", iowa: "IA", kansas: "KS",
-  kentucky: "KY", louisiana: "LA", maine: "ME", maryland: "MD",
-  massachusetts: "MA", michigan: "MI", minnesota: "MN", mississippi: "MS",
-  missouri: "MO", montana: "MT", nebraska: "NE", nevada: "NV",
-  "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY",
-  "north carolina": "NC", "north dakota": "ND", ohio: "OH", oklahoma: "OK",
-  oregon: "OR", pennsylvania: "PA", "rhode island": "RI", "south carolina": "SC",
-  "south dakota": "SD", tennessee: "TN", texas: "TX", utah: "UT",
-  vermont: "VT", virginia: "VA", washington: "WA", "west virginia": "WV",
-  wisconsin: "WI", wyoming: "WY",
-};
-
-const VALID_STATE_CODES = new Set(Object.values(STATE_NAMES_TO_CODE));
-
-// Lower-48 state adjacency. Used to expand a "Pittsfield MA" query to also
-// pull placemarks from NY/VT/NH/CT/RI (within reasonable driving distance).
-// Approximate; not a substitute for real geocoded haversine sorting (iter12).
-const STATE_ADJACENCY: Record<string, string[]> = {
-  ME: ["NH"],
-  NH: ["ME","MA","VT"],
-  VT: ["NH","MA","NY"],
-  MA: ["NH","VT","NY","CT","RI"],
-  RI: ["MA","CT"],
-  CT: ["NY","MA","RI"],
-  NY: ["VT","MA","CT","NJ","PA"],
-  NJ: ["NY","PA","DE"],
-  PA: ["NY","NJ","DE","MD","WV","OH"],
-  DE: ["NJ","PA","MD"],
-  MD: ["PA","DE","WV","VA","DC"],
-  DC: ["MD","VA"],
-  VA: ["MD","DC","NC","TN","KY","WV"],
-  WV: ["PA","MD","VA","KY","OH"],
-  NC: ["VA","SC","GA","TN"],
-  SC: ["NC","GA"],
-  GA: ["TN","NC","SC","FL","AL"],
-  FL: ["GA","AL"],
-  OH: ["MI","PA","WV","KY","IN"],
-  MI: ["WI","IN","OH"],
-  IN: ["MI","OH","KY","IL"],
-  IL: ["WI","IN","KY","MO","IA"],
-  KY: ["IN","OH","WV","VA","TN","MO","IL"],
-  WI: ["MN","IA","IL","MI"],
-  MN: ["ND","SD","IA","WI"],
-  IA: ["MN","WI","IL","MO","NE","SD"],
-  MO: ["IA","IL","KY","TN","AR","OK","KS","NE"],
-  ND: ["MN","SD","MT"],
-  SD: ["ND","MN","IA","NE","WY","MT"],
-  NE: ["SD","IA","MO","KS","CO","WY"],
-  KS: ["NE","MO","OK","CO"],
-  TN: ["KY","VA","NC","GA","AL","MS","AR","MO"],
-  AL: ["FL","GA","TN","MS"],
-  MS: ["TN","AL","LA","AR"],
-  LA: ["AR","MS","TX"],
-  AR: ["MO","TN","MS","LA","TX","OK"],
-  OK: ["KS","MO","AR","TX","NM","CO"],
-  TX: ["NM","OK","AR","LA"],
-  MT: ["ND","SD","WY","ID"],
-  WY: ["MT","SD","NE","CO","UT","ID"],
-  CO: ["WY","NE","KS","OK","NM","UT","AZ"],
-  NM: ["CO","OK","TX","AZ","UT"],
-  ID: ["MT","WY","UT","NV","OR","WA"],
-  UT: ["ID","WY","CO","NM","AZ","NV"],
-  AZ: ["NV","UT","CO","NM","CA"],
-  NV: ["OR","ID","UT","AZ","CA"],
-  WA: ["ID","OR"],
-  OR: ["WA","ID","NV","CA"],
-  CA: ["OR","NV","AZ"],
-  // Non-contiguous — no adjacency for routing purposes
-  HI: [],
-  AK: [],
-};
+// State name/code lookup and adjacency map were here in iter11; iter12
+// replaced state-adjacency filtering with real haversine-distance sorting
+// (lib/geo provides the centroid lookups + resolveQueryLocation). The old
+// tables and detectStatesInQuestion helper were removed in this commit.
 
 // Maps from a question keyword → folder-name substring to look for in the
 // "- Folder: ..." line of each placemark. Folder names in the actual KMZ
@@ -1454,20 +1418,6 @@ const BRAND_TO_FOLDER_SUBSTR: Record<string, string> = {
   robinair: "Robinair",
   ali: "ALI Certified Lift Inspectors",
 };
-
-function detectStatesInQuestion(question: string): Set<string> {
-  const q = question.toLowerCase();
-  const states = new Set<string>();
-  for (const [name, code] of Object.entries(STATE_NAMES_TO_CODE)) {
-    if (new RegExp(`\\b${name}\\b`, "i").test(q)) states.add(code);
-  }
-  // Uppercase 2-letter codes only — avoids treating english words like "in"
-  // or "or" or "me" as state codes.
-  for (const m of question.matchAll(/\b([A-Z]{2})\b/g)) {
-    if (VALID_STATE_CODES.has(m[1])) states.add(m[1]);
-  }
-  return states;
-}
 
 function detectFolderBrandInQuestion(question: string): string | null {
   const q = question.toLowerCase();
@@ -1489,6 +1439,69 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+// Default count when Paul doesn't specify "5 closest" / "top 10" etc.
+// 12 is plenty for "closest provider" answers and keeps the prompt small.
+const DISTANCE_RANKED_DEFAULT_N = 12;
+// Hard cap regardless of what Paul asks for, so a "list every provider"
+// query can't blow the per-row body limit.
+const DISTANCE_RANKED_HARD_CAP = 50;
+
+/**
+ * Parse Paul's question for an explicit count or radius constraint:
+ *   "5 closest", "top 10 providers", "list 20 dealers"  → count
+ *   "within 50 miles", "100 mile radius", "in 25 mi"     → radiusMi
+ * If neither is present, returns null fields and the slicer uses default N.
+ */
+function parseRequestedScope(question: string): {
+  count: number | null;
+  radiusMi: number | null;
+} {
+  const q = question.toLowerCase();
+
+  // Count: "<N> (closest|nearest|providers|installers|dealers|service centers
+  //         |service providers|locations|results|matches|of them)"
+  // Also "top <N>", "list <N>", "show <N>", "give me <N>", "first <N>"
+  let count: number | null = null;
+  const countPatterns = [
+    /\b(?:top|list|show|give\s+me|first|nearest|closest|find\s+me)\s+(\d{1,3})\b/,
+    /\b(\d{1,3})\s+(?:closest|nearest|top)\b/,
+    /\b(\d{1,3})\s+(?:providers?|installers?|dealers?|service\s+centers?|service\s+providers?|locations?|results?|matches?)\b/,
+  ];
+  for (const re of countPatterns) {
+    const m = q.match(re);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      if (n >= 1 && n <= DISTANCE_RANKED_HARD_CAP) {
+        count = n;
+        break;
+      }
+    }
+  }
+
+  // Radius: "<N> mile(s)" / "<N> mi" with optional preceding "within" /
+  // "in a"/ "within a" / "radius of" / "in".
+  let radiusMi: number | null = null;
+  const radiusPatterns = [
+    /\bwithin\s+(\d{1,4})\s*(?:mile|miles|mi)\b/,
+    /\bin\s+a\s+(\d{1,4})[\s-]*(?:mile|miles|mi)\s*(?:radius)?\b/,
+    /\b(\d{1,4})[\s-]*(?:mile|miles|mi)\s+radius\b/,
+    /\bradius\s+of\s+(\d{1,4})\s*(?:mile|miles|mi)\b/,
+    /\bin\s+(\d{1,4})\s*(?:mile|miles|mi)\b/,
+  ];
+  for (const re of radiusPatterns) {
+    const m = q.match(re);
+    if (m) {
+      const n = parseInt(m[1], 10);
+      if (n >= 1 && n <= 5000) {
+        radiusMi = n;
+        break;
+      }
+    }
+  }
+
+  return { count, radiusMi };
+}
+
 function sliceServiceMapBody(
   body: string,
   question: string,
@@ -1508,16 +1521,11 @@ function sliceServiceMapBody(
   //   - Business Phone Number: ...
   //   - Business Address: ...
   //
-  // The NAME line comes BEFORE the data, on its own line wrapped in **bold**.
-  // Critical: an earlier version of this function split on `Folder:` lines,
-  // which fall MID-block — that grabbed the NEXT placemark's `**NAME**` into
-  // the current block, giving synthesis mis-paired name/address combos
-  // (e.g. labelling MINNESOTA AUQUIPCO's name onto MILLERS PETRO SYSTEMS's
-  // Pittsfield, MA address). Split on the `**NAME**` line instead — each
-  // resulting block is one fully-self-contained placemark with its name on
-  // top followed by its own data.
+  // The NAME line comes BEFORE the data. Iter11.1 fixed an earlier bug
+  // where this function split on `Folder:` lines (which fall mid-block)
+  // and mis-paired names with addresses. We now split on `**NAME**` lines
+  // so each block is one fully-self-contained placemark.
   const blocks = body.split(/(?=^\*\*[^*\n]+\*\*\s*$)/m);
-  // Block 0 is preamble before the first placemark — drop it.
   const placemarkBlocks = blocks.slice(1);
 
   // Filter to blocks whose `Folder:` line matches our brand substring.
@@ -1532,52 +1540,114 @@ function sliceServiceMapBody(
     return body.slice(0, capChars);
   }
 
-  // State filter — placemark address contains "ST ZIP".
-  const states = detectStatesInQuestion(question);
-  const targetStates = new Set<string>(states);
-  for (const s of states) {
-    for (const adj of STATE_ADJACENCY[s] ?? []) targetStates.add(adj);
-  }
+  // ITER12: parse explicit scope from the question — "5 closest" → count=5,
+  // "within 50 miles" → radiusMi=50. The slicer respects whichever is given
+  // (or both) instead of always returning a fixed 12.
+  const scope = parseRequestedScope(question);
 
-  let candidate = ourBlocks;
-  let stateFilterApplied = false;
-  let stateFilterFoundNothing = false;
-  if (targetStates.size > 0) {
-    const filtered = ourBlocks.filter((blk) => {
-      const sm = Array.from(blk.matchAll(/\b([A-Z]{2})\s+\d{5}(?:-\d{4})?\b/g));
-      return sm.some((m) => targetStates.has(m[1]));
-    });
-    if (filtered.length > 0) {
-      candidate = filtered;
-      stateFilterApplied = true;
-    } else {
-      stateFilterFoundNothing = true;
+  // ITER12: distance-ranked slicing. Resolve the user's location to a
+  // lat/lng centroid, then for each placemark in the brand folder, extract
+  // its ZIP from the address and look up the placemark's centroid. Sort by
+  // haversine distance ascending and keep the top N closest. This replaces
+  // the iter11 state-adjacency heuristic, which couldn't answer "closest
+  // BendPak to Reno NV" because (a) the lowercase "nv" wasn't being
+  // detected and (b) state adjacency picked alphabetical order within
+  // filtered blocks, ignoring how far each placemark actually was from
+  // Reno. Real distance ranking pulls the actual nearest provider — which
+  // for a Reno query is Nevada Lift in Reno itself, not a placemark in
+  // some southern state that happens to come first in the file.
+  const queryLoc = resolveQueryLocation(question);
+
+  type Annotated = {
+    block: string;
+    addr: string;
+    zip: string | null;
+    centroid: readonly [number, number] | null;
+    distanceMi: number;
+  };
+  const annotated: Annotated[] = ourBlocks.map((blk) => {
+    const addrM = blk.match(/^[\s\-]*(?:Business\s+)?Address:\s*(.+?)$/im);
+    const addr = addrM ? addrM[1].trim() : "";
+    const zip = addr ? extractZipFromAddress(addr) : null;
+    const centroid = zip ? getZipCentroid(zip) : null;
+    const distanceMi =
+      queryLoc && centroid
+        ? haversineMiles(queryLoc.centroid, centroid)
+        : Number.POSITIVE_INFINITY;
+    return { block: blk, addr, zip, centroid, distanceMi };
+  });
+
+  let candidate: Annotated[];
+  let modeNote: string;
+
+  if (queryLoc) {
+    annotated.sort((a, b) => a.distanceMi - b.distanceMi);
+    // Apply scope filter: radius first (if given), then count.
+    let filtered = annotated;
+    let radiusNote = "";
+    if (scope.radiusMi !== null) {
+      filtered = annotated.filter(
+        (a) => a.distanceMi !== Number.POSITIVE_INFINITY && a.distanceMi <= scope.radiusMi!
+      );
+      radiusNote = ` within ${scope.radiusMi} mi`;
+      // Hard cap so a 5000-mi radius doesn't dump the whole folder into the
+      // prompt. Synthesis sees a clear note when this happens.
+      if (filtered.length > DISTANCE_RANKED_HARD_CAP) {
+        filtered = filtered.slice(0, DISTANCE_RANKED_HARD_CAP);
+        radiusNote += ` (capped at ${DISTANCE_RANKED_HARD_CAP} closest)`;
+      }
     }
-  }
-
-  // Build a header so synthesis knows what the slicer did. The header lives
-  // INSIDE the source body, so synthesis sees it before reading placemarks.
-  let stateNote: string;
-  if (states.size === 0) {
-    stateNote = "no state filter (no state mentioned in question)";
-  } else if (stateFilterApplied) {
-    stateNote =
-      `filtered to placemarks in/near ${[...states].join(", ")} ` +
-      `(states searched: ${[...targetStates].sort().join(", ")})`;
-  } else if (stateFilterFoundNothing) {
-    stateNote =
-      `NO "${brandKey}" placemarks in/near ${[...states].join(", ")} ` +
-      `(searched ${[...targetStates].sort().join(", ")}); ` +
-      `showing all "${brandKey}" placemarks for context — ` +
-      `synthesis should answer "no ${brandKey} providers in/near ${[...states].join(", ")}"`;
+    const cappedCount = scope.count ?? DISTANCE_RANKED_DEFAULT_N;
+    const finalSliceN = Math.min(cappedCount, DISTANCE_RANKED_HARD_CAP);
+    if (scope.radiusMi === null) {
+      // No radius — just top-N closest.
+      filtered = filtered.slice(0, finalSliceN);
+    } else if (scope.count !== null) {
+      // Both radius AND count — within-radius then trim to count.
+      filtered = filtered.slice(0, finalSliceN);
+    }
+    // Insert a "- Distance: NN.N mi from <label>" line right after the
+    // **NAME** header so synthesis sees the distance alongside the rest
+    // of each placemark's data.
+    candidate = filtered.map((a) => {
+      const distLine =
+        a.distanceMi === Number.POSITIVE_INFINITY
+          ? `- Distance: (could not geocode this placemark's ZIP)\n`
+          : `- Distance: ${a.distanceMi.toFixed(1)} mi from ${queryLoc.label}\n`;
+      const firstNl = a.block.indexOf("\n");
+      const blockWithDist =
+        firstNl < 0
+          ? a.block + "\n" + distLine
+          : a.block.slice(0, firstNl + 1) + distLine + a.block.slice(firstNl + 1);
+      return { ...a, block: blockWithDist };
+    });
+    const scopeNote = scope.count !== null && scope.radiusMi !== null
+      ? `top ${scope.count}${radiusNote}`
+      : scope.count !== null
+      ? `top ${scope.count} closest`
+      : scope.radiusMi !== null
+      ? `all placemarks${radiusNote}`
+      : `top ${DISTANCE_RANKED_DEFAULT_N} closest`;
+    modeNote =
+      `sorted by distance from ${queryLoc.label} ` +
+      `(${queryLoc.resolution}-resolved); ${scopeNote} — ${candidate.length} shown of ${ourBlocks.length} ` +
+      `${brandKey} placemarks total`;
   } else {
-    stateNote = "state filter applied";
+    // No location detected → no distance ranking. Use scope.count if given,
+    // otherwise default. Radius without a location is meaningless — ignore.
+    const n = Math.min(scope.count ?? DISTANCE_RANKED_DEFAULT_N, DISTANCE_RANKED_HARD_CAP);
+    candidate = annotated.slice(0, n);
+    modeNote =
+      `no location detected in query; first ${candidate.length} of ${ourBlocks.length} ` +
+      `${brandKey} placemarks (no distance ranking applied — Paul should mention a city/state/ZIP for distance ranking)`;
   }
-  const header =
-    `[SERVICE MAP — brand "${brandKey}"; ${stateNote}. ` +
-    `${candidate.length} placemarks shown of ${ourBlocks.length} in this brand folder.]\n\n`;
 
-  let out = header + candidate.join("");
+  const header =
+    `[SERVICE MAP — brand "${brandKey}"; ${modeNote}.\n` +
+    `Distances are zip-centroid approximations (typically accurate within a few miles for ranking ` +
+    `purposes). Use them for ordering; do not present them as exact driving distances.]\n\n`;
+
+  let out = header + candidate.map((c) => c.block).join("");
   if (out.length > capChars) out = out.slice(0, capChars);
   return out;
 }

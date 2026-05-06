@@ -364,30 +364,39 @@ export default function Home() {
                 <div className="whitespace-pre-wrap">{msg.content}</div>
               </div>
 
-              {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs uppercase tracking-wide text-gray-500">
-                      Sources ({msg.sources.length})
-                    </div>
-                    {msg.queryMode && (
-                      <div className="text-[10px] text-gray-600 font-mono">
-                        {msg.queryMode}
+              {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (() => {
+                // Only show sources the model actually cited in its answer.
+                // Retrieved-but-not-cited rows are kept on the response object
+                // for debugging but hidden from the UI per Paul's request.
+                // `cited === false` is the explicit "retrieved but not cited"
+                // flag; legacy responses without the flag are assumed cited.
+                const citedSources = msg.sources.filter((s) => s.cited !== false);
+                if (citedSources.length === 0) return null;
+                return (
+                  <div className="mt-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="text-xs uppercase tracking-wide text-gray-500">
+                        Sources ({citedSources.length})
                       </div>
-                    )}
+                      {msg.queryMode && (
+                        <div className="text-[10px] text-gray-600 font-mono">
+                          {msg.queryMode}
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      {citedSources.map((src, sIdx) => (
+                        <SourceCard
+                          key={src.id}
+                          source={src}
+                          messageIdx={i}
+                          sourceIdx={sIdx}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    {msg.sources.map((src, sIdx) => (
-                      <SourceCard
-                        key={src.id}
-                        source={src}
-                        messageIdx={i}
-                        sourceIdx={sIdx}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </div>
         ))}
