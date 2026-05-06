@@ -257,6 +257,7 @@ async function searchKnowledge(
     }
   }
   const BRAND_MATCH_BOOST = 5.0;
+  const BRAND_INTERNAL_COBOOST = 3.0;
   // SQL receives either the canonical brand name or an empty string.
   // The CASE WHEN b.name = '' THEN ... will never match, so a no-brand
   // query gets the 1.0 multiplier branch — a no-op.
@@ -591,6 +592,14 @@ async function searchKnowledge(
       console.warn("brand inference error:", e);
     }
   }
+  // Pre-compute the LIKE pattern for the liftnow-internal co-boost. When
+  // the user mentions a brand (challenger), the 5x brand boost applies to
+  // brand=challenger rows. But Liftnow internal docs (handbooks, sales
+  // material) that DISCUSS the brand should also surface — they often
+  // contain the canonical answer (e.g. the 2025 CL Distributor Handbook
+  // has the Challenger mobile-column warranty table). Co-boost rows
+  // where brand=liftnow AND the body mentions the queried brand by 3x.
+  const brandLikePattern = brandFilter ? `%${brandFilter}%` : "";
 
   const collected = new Map<number, KnowledgeRow>();
   const add = (rows: KnowledgeRow[]) => {
@@ -681,6 +690,11 @@ async function searchKnowledge(
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  AS rank_score
@@ -745,6 +759,11 @@ async function searchKnowledge(
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  AS rank_score
@@ -800,6 +819,11 @@ async function searchKnowledge(
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  -- Slight downweight on the supplementary results so they
@@ -847,6 +871,11 @@ async function searchKnowledge(
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  * 0.7
