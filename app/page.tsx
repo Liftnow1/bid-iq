@@ -249,6 +249,11 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  // Iter13: optional file attachment for vision/document Q&A. The upload
+  // becomes the primary subject of the answer; KB context is supporting
+  // reference. Session-scoped — never persisted into the KB.
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -260,16 +265,39 @@ export default function Home() {
     if (!query.trim() || loading) return;
 
     const userMessage = query.trim();
+    const currentAttachment = attachment;
     setQuery("");
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    setAttachment(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: currentAttachment
+          ? `${userMessage}\n[attached: ${currentAttachment.name} — ${(currentAttachment.size / 1024).toFixed(1)} KB]`
+          : userMessage,
+      },
+    ]);
     setLoading(true);
 
     try {
-      const res = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: userMessage }),
-      });
+      let res: Response;
+      if (currentAttachment) {
+        // Multipart upload path — POST to the with-attachment endpoint.
+        const fd = new FormData();
+        fd.append("question", userMessage);
+        fd.append("attachment", currentAttachment);
+        res = await fetch("/api/ask-with-attachment", {
+          method: "POST",
+          body: fd,
+        });
+      } else {
+        res = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: userMessage }),
+        });
+      }
 
       const data = await res.json();
       if (!res.ok) {
@@ -278,12 +306,20 @@ export default function Home() {
       if (!data.answer) {
         throw new Error("Empty response from API");
       }
+      // For attachment responses, the cited KB sources live under
+      // data.kb_context.sources rather than data.sources. Normalize to the
+      // shape the UI already renders.
+      const sources = Array.isArray(data.sources)
+        ? data.sources
+        : Array.isArray(data.kb_context?.sources)
+        ? data.kb_context.sources
+        : [];
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           content: data.answer,
-          sources: Array.isArray(data.sources) ? data.sources : [],
+          sources,
           queryMode: data.query_mode,
         },
       ]);
@@ -414,13 +450,87 @@ export default function Home() {
       </div>
 
       {/* Input */}
-      <div className="px-6 py-4 border-t border-gray-800">
-        <form onSubmit={handleSubmit} className="flex gap-3">
+      <div className="px-6 py-4 border-t border-gray-800 space-y-2">
+        {/* Attachment chip — visible only when a file is selected. */}
+        {attachment && (
+          <div className="flex items-center gap-2 text-xs">
+            <div className="bg-blue-500/10 border border-blue-500/30 text-blue-300 px-3 py-1.5 rounded-md flex items-center gap-2">
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                />
+              </svg>
+              <span className="font-mono">{attachment.name}</span>
+              <span className="text-blue-400/70">
+                ({(attachment.size / 1024).toFixed(1)} KB)
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setAttachment(null);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="ml-1 text-blue-400 hover:text-blue-200 font-bold"
+                aria-label="Remove attachment"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="flex gap-2 items-stretch">
+          {/* Hidden file input + paperclip button. PDF + common image
+              types only; the API rejects everything else with a 415. */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf,image/png,image/jpeg,image/gif,image/webp"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) setAttachment(f);
+            }}
+            disabled={loading}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading}
+            className="bg-gray-800 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed border border-gray-700 hover:border-gray-600 text-gray-400 hover:text-gray-200 px-3 py-3 rounded-lg transition-colors flex items-center justify-center"
+            title="Attach a PDF or image to ask a question about it"
+            aria-label="Attach file"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+              />
+            </svg>
+          </button>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask about Liftnow products, specs, installation..."
+            placeholder={
+              attachment
+                ? "Ask a question about the attached file..."
+                : "Ask about Liftnow products, specs, installation..."
+            }
             className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
             disabled={loading}
           />
