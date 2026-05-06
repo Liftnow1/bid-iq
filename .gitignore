@@ -21,3 +21,7 @@ data/product_data/_DEDUP-EXECUTION-LOG-ALL.csv
 # Ingest logs (local-only run artifacts)
 logs/
 data/extraction-errors.log
+
+# Daily watcher state (local-only; per-machine state)
+data/.ingest-manifest.json
+data/.ingest-log/
