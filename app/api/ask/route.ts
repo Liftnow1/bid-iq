@@ -206,9 +206,35 @@ function isCertQuery(question: string): boolean {
   return /\b(ali|certified|certification|cert\s+number|cert\s+date)\b/.test(q);
 }
 
+// ITER10c-DEBUG: per-call diagnostics. The route handler optionally
+// passes one of these in to capture the exact retrieval path executed.
+// This is the only way to see, from a live production request, whether
+// the STRICT or LOOSE tsquery fired and what the DF lookups returned.
+type SearchDebug = {
+  brandFilter?: string;
+  modelSideTokens?: string[];
+  wordTokens?: string[];
+  baseGroups?: Array<{ isDigit: boolean; tokens: string[] }>;
+  groupDfs?: Array<{ token: string; df: number }>;
+  rarestTokens?: string[];
+  restTokens?: string[];
+  tsQueryStrict?: string;
+  tsQueryLoose?: string;
+  strictCount?: number | null;
+  tsQueryUsed?: string;
+  primaryRowCount?: number;
+  topRows?: Array<{
+    id: number;
+    title: string;
+    brand: string | null;
+    rank_score: number | null;
+  }>;
+};
+
 async function searchKnowledge(
   question: string,
-  mode: QueryMode
+  mode: QueryMode,
+  debug?: SearchDebug
 ): Promise<KnowledgeRow[]> {
   await ensureSchema();
   const sql = getSQL();
@@ -257,6 +283,7 @@ async function searchKnowledge(
     }
   }
   const BRAND_MATCH_BOOST = 5.0;
+  const BRAND_INTERNAL_COBOOST = 3.0;
   // SQL receives either the canonical brand name or an empty string.
   // The CASE WHEN b.name = '' THEN ... will never match, so a no-brand
   // query gets the 1.0 multiplier branch — a no-op.
@@ -368,19 +395,32 @@ async function searchKnowledge(
     sled: ["sled", "state", "local", "education"],
     naspo: ["naspo", "purchasing"],
   };
-  const seen = new Set<string>();
-  const filteredWords: string[] = [];
+  // Build groups, where each baseWord becomes one OR-group of synonyms
+  // (the acronym expansion). The groups themselves get AND'd at query
+  // time. This is the iter10 change: previously every token was OR'd;
+  // now each baseWord is REQUIRED (via AND) but its synonym alternatives
+  // OR within the group. So "challenger mobile column warranty" becomes
+  // `challenger & mobile & column & warranty` (4 required tokens) and
+  // "po auditing process" becomes `(po | purchase | order) & auditing
+  // & process` (acronym group OR'd internally, baseWords AND'd).
+  type WordGroup = { isDigit: boolean; tokens: string[] };
+  const baseGroups: WordGroup[] = [];
   for (const w of baseWords) {
-    const expansion = ACRONYM_EXPANSIONS[w] ?? [w];
-    for (const t of expansion) {
-      if (!seen.has(t)) {
-        seen.add(t);
-        filteredWords.push(t);
-      }
+    if (/\d/.test(w)) {
+      baseGroups.push({ isDigit: true, tokens: [w] });
+    } else {
+      const expansion = ACRONYM_EXPANSIONS[w] ?? [w];
+      baseGroups.push({ isDigit: false, tokens: expansion });
     }
   }
-  // Cap final length so a many-acronym query doesn't overflow.
-  filteredWords.length = Math.min(filteredWords.length, 12);
+  // Cap groups to keep query size reasonable.
+  baseGroups.length = Math.min(baseGroups.length, 12);
+
+  // Flat token lists kept for downstream callers (model-only retrieval,
+  // brand inference, etc.) that still want a flat list to OR.
+  const filteredWords = Array.from(
+    new Set(baseGroups.flatMap((g) => g.tokens))
+  );
   const digitTokens = filteredWords
     .filter((w) => /\d/.test(w))
     .map(expandDigitToken);
@@ -419,17 +459,152 @@ async function searchKnowledge(
   }
   const uniqCapacityK = Array.from(new Set(capacityKTokens));
 
-  let tsQuery: string;
   // Combine digit tokens, hyphenated phrases, and capacity-K alternates
   // on the "model" side. All three help the AND-with-words branch match
   // a wider set of correctly-named docs.
   const modelSideTokens = [...digitTokens, ...uniqHyphenated, ...uniqCapacityK];
+
+  // ITER10: split word baseGroups into rarest-K (AND-required) and rest
+  // (OR'd). Look up document frequency per group via a single COUNT query;
+  // the GIN index makes this fast (<10ms total). Rarest K=2 is the sweet
+  // spot — it filters out off-topic docs without over-restricting.
+  //
+  // Examples:
+  //   "challenger mobile column warranty" -> rarest 2 = challenger,warranty
+  //     -> (challenger & warranty) & (mobile | column)  -> 43 matches, handbook in top 5
+  //   "heavy duty inground vehicle lift"  -> rarest 2 = inground,duty
+  //     -> (inground & duty) & (heavy | vehicle | lift) -> PKS HD Ingrounds at #1
+  //   "is my CL12A ali certified"          -> rarest 2 = ali,certified (cl12a is digit)
+  //     -> (cl12a) & (ali & certified) -> CL12A ALI cert metadata at top
+  //   "po auditing process"                -> rarest 2 = auditing,po (acronym)
+  //     -> (auditing & (po | purchase | order)) & process -> PO docs at top
+  const RAREST_K = 2;
+  // Strip the EXPLICITLY-mentioned brand from word-groups before DF/rarest
+  // sorting. Brand intent is already captured by BRAND_MATCH_BOOST (5x) and
+  // the liftnow co-boost (3x) at scoring time — including the brand token
+  // in the rarest-K AND set just collapses the discriminator onto a topic
+  // pair (e.g. "challenger mobile" for "challenger mobile column warranty"),
+  // letting "warranty" fall into the rest/OR slot. The whole point of
+  // rarest-K AND is to require the topical pivot; brand tokens dilute that.
+  // Only strip when mentionedBrand is set (explicit word match in the
+  // question). When brandFilter is set via INFERENCE (no brand word in
+  // query), there's no brand token in baseGroups to strip — leave the
+  // filter as-is.
+  const brandWordSet = new Set<string>();
+  if (mentionedBrand) {
+    // Canonical form with hyphens stripped, plus each hyphen-split
+    // component (so "stertil-koni" matches both "stertil" and "koni"
+    // word tokens; "snap-on" → "snap" + "on" + "snapon").
+    brandWordSet.add(mentionedBrand.replace(/-/g, ""));
+    for (const part of mentionedBrand.split("-")) {
+      if (part.length >= 2) brandWordSet.add(part);
+    }
+  }
+  const wordGroups = baseGroups.filter(
+    (g) => !g.isDigit && !brandWordSet.has(g.tokens[0])
+  );
+  const groupExpr = (g: WordGroup): string =>
+    g.tokens.length > 1 ? `(${g.tokens.join(" | ")})` : g.tokens[0];
+  // Compute DF per group (use FIRST token of each group as the
+  // representative for DF). SERIAL — neon HTTP serverless doesn't always
+  // tolerate multiple concurrent queries on the same `sql` factory; if
+  // any one of them fails, Promise.all rejects and the whole iter10
+  // STRICT path falls back to LOOSE silently. With ~5 queries × ~5ms
+  // each (GIN index), serial is plenty fast (<30ms total).
+  const groupDfs: Array<{ group: WordGroup; df: number }> = [];
+  for (const g of wordGroups) {
+    try {
+      const r = (await sql`
+        SELECT count(*)::int AS n
+        FROM knowledge_items
+        WHERE to_tsvector('english', coalesce(search_text, ''))
+              @@ to_tsquery('english', ${g.tokens[0]})
+          AND (extractor_version IS NULL OR extractor_version != 'catalog-db-migration')
+      `) as unknown as Array<{ n: number }>;
+      groupDfs.push({ group: g, df: r[0]?.n ?? 0 });
+    } catch (e) {
+      console.warn(`DF lookup failed for token "${g.tokens[0]}":`, e);
+      // Skip this group — don't kill the whole iter10 path.
+    }
+  }
+  // Sort by DF ascending; rarest first.
+  groupDfs.sort((a, b) => a.df - b.df);
+  const rarestGroups = groupDfs.slice(0, RAREST_K).map((x) => x.group);
+  const restGroups = groupDfs.slice(RAREST_K).map((x) => x.group);
+  if (debug) {
+    debug.baseGroups = baseGroups.map((g) => ({
+      isDigit: g.isDigit,
+      tokens: g.tokens,
+    }));
+    debug.modelSideTokens = modelSideTokens;
+    debug.wordTokens = wordTokens;
+    debug.groupDfs = groupDfs.map((x) => ({
+      token: x.group.tokens[0],
+      df: x.df,
+    }));
+    debug.rarestTokens = rarestGroups.map((g) => g.tokens[0]);
+    debug.restTokens = restGroups.map((g) => g.tokens[0]);
+  }
+
+  // STRICT tsquery (iter10): rarest-K AND'd, rest OR'd, model-side OR'd.
+  const buildStrict = (): string => {
+    const parts: string[] = [];
+    if (modelSideTokens.length > 0) {
+      parts.push(`(${modelSideTokens.join(" | ")})`);
+    }
+    if (rarestGroups.length > 0) {
+      parts.push(`(${rarestGroups.map(groupExpr).join(" & ")})`);
+    }
+    if (restGroups.length > 0) {
+      parts.push(`(${restGroups.map(groupExpr).join(" | ")})`);
+    }
+    return parts.join(" & ");
+  };
+  const tsQueryStrict = buildStrict();
+
+  // LOOSE tsquery (legacy / fallback): word-side OR'd. Preserves the old
+  // behavior when STRICT filters too aggressively (no on-topic match).
+  let tsQueryLoose: string;
   if (modelSideTokens.length > 0 && wordTokens.length > 0) {
-    tsQuery = `(${modelSideTokens.join(" | ")}) & (${wordTokens.join(" | ")})`;
+    tsQueryLoose = `(${modelSideTokens.join(" | ")}) & (${wordTokens.join(" | ")})`;
   } else if (modelSideTokens.length > 0) {
-    tsQuery = modelSideTokens.join(" | ");
+    tsQueryLoose = modelSideTokens.join(" | ");
   } else {
-    tsQuery = wordTokens.join(" | ");
+    tsQueryLoose = wordTokens.join(" | ");
+  }
+
+  // Pick STRICT if it produces a non-trivial retrieval set, else fall
+  // back to LOOSE. Threshold of 3 ensures we don't hand the synthesis
+  // model a 0- or 1-row set when there's no on-topic content.
+  let tsQuery = tsQueryStrict || tsQueryLoose;
+  if (debug) {
+    debug.tsQueryStrict = tsQueryStrict;
+    debug.tsQueryLoose = tsQueryLoose;
+    debug.strictCount = null;
+  }
+  if (tsQueryStrict && tsQueryStrict !== tsQueryLoose) {
+    try {
+      const strictCount = (await sql`
+        SELECT count(*)::int AS n
+        FROM knowledge_items ki
+        WHERE to_tsvector('english', coalesce(ki.search_text, ''))
+              @@ to_tsquery('english', ${tsQueryStrict})
+          AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
+      `) as unknown as Array<{ n: number }>;
+      if (debug) {
+        debug.strictCount = strictCount.length > 0 ? strictCount[0].n : null;
+      }
+      if (strictCount.length > 0 && strictCount[0].n < 3) {
+        tsQuery = tsQueryLoose;
+      }
+    } catch (e) {
+      console.warn("strict tsquery count failed, using loose:", e);
+      tsQuery = tsQueryLoose;
+    }
+  }
+  if (debug) {
+    debug.brandFilter = brandFilter;
+    debug.tsQueryUsed = tsQuery;
   }
 
   // Catch both "<letters><digits>" model strings (CL10, RJ45) AND
@@ -490,6 +665,14 @@ async function searchKnowledge(
       console.warn("brand inference error:", e);
     }
   }
+  // Pre-compute the LIKE pattern for the liftnow-internal co-boost. When
+  // the user mentions a brand (challenger), the 5x brand boost applies to
+  // brand=challenger rows. But Liftnow internal docs (handbooks, sales
+  // material) that DISCUSS the brand should also surface — they often
+  // contain the canonical answer (e.g. the 2025 CL Distributor Handbook
+  // has the Challenger mobile-column warranty table). Co-boost rows
+  // where brand=liftnow AND the body mentions the queried brand by 3x.
+  const brandLikePattern = brandFilter ? `%${brandFilter}%` : "";
 
   const collected = new Map<number, KnowledgeRow>();
   const add = (rows: KnowledgeRow[]) => {
@@ -580,6 +763,11 @@ async function searchKnowledge(
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  AS rank_score
@@ -644,6 +832,11 @@ async function searchKnowledge(
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  AS rank_score
@@ -654,6 +847,15 @@ async function searchKnowledge(
           ORDER BY rank_score DESC
           LIMIT 25
         `) as unknown as KnowledgeRow[]);
+    if (debug) {
+      debug.primaryRowCount = rows.length;
+      debug.topRows = rows.slice(0, 5).map((r) => ({
+        id: r.id,
+        title: r.title || "",
+        brand: r.brand_name ?? null,
+        rank_score: r.rank_score ?? null,
+      }));
+    }
     add(rows);
   }
 
@@ -699,6 +901,11 @@ async function searchKnowledge(
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  -- Slight downweight on the supplementary results so they
@@ -746,6 +953,11 @@ async function searchKnowledge(
                  * CASE
                      WHEN ${brandFilter} <> '' AND lower(coalesce(b.name, '')) = ${brandFilter}
                        THEN ${BRAND_MATCH_BOOST}::float
+                     WHEN ${brandFilter} <> ''
+                          AND lower(coalesce(b.name, '')) = 'liftnow'
+                          AND ${brandLikePattern} <> ''
+                          AND lower(coalesce(ki.search_text, '')) LIKE ${brandLikePattern}
+                       THEN ${BRAND_INTERNAL_COBOOST}::float
                      ELSE 1.0
                    END
                  * 0.7
@@ -1384,10 +1596,11 @@ export async function POST(request: NextRequest) {
     // populated raw_content participates in ranking. On hosts without the
     // Python upgrade flow (e.g. Vercel serverless), the upgrade step is
     // skipped and the answer is generated from Tier-1 metadata only.
-    let rows = await searchKnowledge(trimmed, queryMode);
+    const debug: SearchDebug = {};
+    let rows = await searchKnowledge(trimmed, queryMode, debug);
     const outcome = await upgradeTier1Candidates(rows);
     if (outcome.upgraded.size > 0) {
-      rows = await searchKnowledge(trimmed, queryMode);
+      rows = await searchKnowledge(trimmed, queryMode, debug);
     }
 
     const client = new Anthropic();
@@ -1615,6 +1828,7 @@ export async function POST(request: NextRequest) {
         used: verifierUsed,
         unverified_count: verifierUnverifiedCount,
       },
+      debug,
     });
   } catch (err: unknown) {
     console.error("Ask error:", err);
