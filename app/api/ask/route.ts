@@ -206,9 +206,35 @@ function isCertQuery(question: string): boolean {
   return /\b(ali|certified|certification|cert\s+number|cert\s+date)\b/.test(q);
 }
 
+// ITER10c-DEBUG: per-call diagnostics. The route handler optionally
+// passes one of these in to capture the exact retrieval path executed.
+// This is the only way to see, from a live production request, whether
+// the STRICT or LOOSE tsquery fired and what the DF lookups returned.
+type SearchDebug = {
+  brandFilter?: string;
+  modelSideTokens?: string[];
+  wordTokens?: string[];
+  baseGroups?: Array<{ isDigit: boolean; tokens: string[] }>;
+  groupDfs?: Array<{ token: string; df: number }>;
+  rarestTokens?: string[];
+  restTokens?: string[];
+  tsQueryStrict?: string;
+  tsQueryLoose?: string;
+  strictCount?: number | null;
+  tsQueryUsed?: string;
+  primaryRowCount?: number;
+  topRows?: Array<{
+    id: number;
+    title: string;
+    brand: string | null;
+    rank_score: number | null;
+  }>;
+};
+
 async function searchKnowledge(
   question: string,
-  mode: QueryMode
+  mode: QueryMode,
+  debug?: SearchDebug
 ): Promise<KnowledgeRow[]> {
   await ensureSchema();
   const sql = getSQL();
@@ -482,6 +508,20 @@ async function searchKnowledge(
   groupDfs.sort((a, b) => a.df - b.df);
   const rarestGroups = groupDfs.slice(0, RAREST_K).map((x) => x.group);
   const restGroups = groupDfs.slice(RAREST_K).map((x) => x.group);
+  if (debug) {
+    debug.baseGroups = baseGroups.map((g) => ({
+      isDigit: g.isDigit,
+      tokens: g.tokens,
+    }));
+    debug.modelSideTokens = modelSideTokens;
+    debug.wordTokens = wordTokens;
+    debug.groupDfs = groupDfs.map((x) => ({
+      token: x.group.tokens[0],
+      df: x.df,
+    }));
+    debug.rarestTokens = rarestGroups.map((g) => g.tokens[0]);
+    debug.restTokens = restGroups.map((g) => g.tokens[0]);
+  }
 
   // STRICT tsquery (iter10): rarest-K AND'd, rest OR'd, model-side OR'd.
   const buildStrict = (): string => {
@@ -514,6 +554,11 @@ async function searchKnowledge(
   // back to LOOSE. Threshold of 3 ensures we don't hand the synthesis
   // model a 0- or 1-row set when there's no on-topic content.
   let tsQuery = tsQueryStrict || tsQueryLoose;
+  if (debug) {
+    debug.tsQueryStrict = tsQueryStrict;
+    debug.tsQueryLoose = tsQueryLoose;
+    debug.strictCount = null;
+  }
   if (tsQueryStrict && tsQueryStrict !== tsQueryLoose) {
     try {
       const strictCount = (await sql`
@@ -523,6 +568,9 @@ async function searchKnowledge(
               @@ to_tsquery('english', ${tsQueryStrict})
           AND (ki.extractor_version IS NULL OR ki.extractor_version != 'catalog-db-migration')
       `) as unknown as Array<{ n: number }>;
+      if (debug) {
+        debug.strictCount = strictCount.length > 0 ? strictCount[0].n : null;
+      }
       if (strictCount.length > 0 && strictCount[0].n < 3) {
         tsQuery = tsQueryLoose;
       }
@@ -530,6 +578,10 @@ async function searchKnowledge(
       console.warn("strict tsquery count failed, using loose:", e);
       tsQuery = tsQueryLoose;
     }
+  }
+  if (debug) {
+    debug.brandFilter = brandFilter;
+    debug.tsQueryUsed = tsQuery;
   }
 
   // Catch both "<letters><digits>" model strings (CL10, RJ45) AND
@@ -772,6 +824,15 @@ async function searchKnowledge(
           ORDER BY rank_score DESC
           LIMIT 25
         `) as unknown as KnowledgeRow[]);
+    if (debug) {
+      debug.primaryRowCount = rows.length;
+      debug.topRows = rows.slice(0, 5).map((r) => ({
+        id: r.id,
+        title: r.title || "",
+        brand: r.brand_name ?? null,
+        rank_score: r.rank_score ?? null,
+      }));
+    }
     add(rows);
   }
 
@@ -1512,10 +1573,11 @@ export async function POST(request: NextRequest) {
     // populated raw_content participates in ranking. On hosts without the
     // Python upgrade flow (e.g. Vercel serverless), the upgrade step is
     // skipped and the answer is generated from Tier-1 metadata only.
-    let rows = await searchKnowledge(trimmed, queryMode);
+    const debug: SearchDebug = {};
+    let rows = await searchKnowledge(trimmed, queryMode, debug);
     const outcome = await upgradeTier1Candidates(rows);
     if (outcome.upgraded.size > 0) {
-      rows = await searchKnowledge(trimmed, queryMode);
+      rows = await searchKnowledge(trimmed, queryMode, debug);
     }
 
     const client = new Anthropic();
@@ -1743,6 +1805,7 @@ export async function POST(request: NextRequest) {
         used: verifierUsed,
         unverified_count: verifierUnverifiedCount,
       },
+      debug,
     });
   } catch (err: unknown) {
     console.error("Ask error:", err);
