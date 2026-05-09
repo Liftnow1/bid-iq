@@ -4,9 +4,11 @@ Bid IQ is Liftnow's internal tool for ingesting government bid packages and asse
 
 ## Architecture
 
-- **Postgres (Neon serverless)** is the single source of truth. Two tables matter:
+- **Postgres (Neon serverless)** is the single source of truth. Four tables matter:
   - `brands` — every manufacturer/brand we track (Liftnow, Mohawk, BendPak, Rotary, Challenger, Stertil-Koni, Hunter, etc.), with `we_carry` and `relationship_type` flags.
   - `knowledge_items` — every queryable piece of knowledge: product specs, pricing, bid history, installation guides, compliance data, competitive intel, customer intel. Each row is classified into one of three access tiers (`tier-1-public`, `tier-2-internal`, `tier-3-paul-only`, plus `uncategorized` for documents that can't be classified confidently). `category` is `TEXT[]` — the schema supports multi-tagging for future use, but the v2 classifier always returns a single-element array.
+  - `products` — structured vehicle-lift catalog. One row per **family** (e.g. Hunter `RX16K`), with all configurable variants collapsed into a `variant_skus` JSONB array. Family-level fields: `brand_id`, `sku`, `family_name`, `category` (10 lift categories + `unclassified`), `capacity_lbs`, `is_ali_certified`, `status`. Hand-curated from manufacturer price sheets via `scripts/parse-price-sheet.py`, round-tripped through Excel for human review (`export-products-to-excel.py` / `import-products-from-excel.py`).
+  - `product_documents` — M:N join from `products` to `knowledge_items`. Each row links a product family to a doc with a `doc_type` (`spec-sheet`, `install-manual`, `service-manual`, `parts-diagram`, `brochure`, `price-sheet`, `other`). `is_primary = true` flags the canonical doc per `(product, doc_type)` pair (longest body wins).
 - **Next.js 16 app** (`app/`) serves the UI and API routes. Deployed via Vercel.
 - **Anthropic Claude** handles classification (`/api/knowledge-base/ingest`) and Q&A (`/api/ask`).
 
@@ -37,6 +39,11 @@ Agent-tier filtering constants are defined in [`lib/category-tiers.ts`](lib/cate
 | `POST /api/knowledge-base/ingest` | Classify + insert text or uploaded file |
 | `GET/DELETE /api/knowledge-base/items` | List, search, delete items |
 | `POST /api/db-setup` | Ensure schema (idempotent) |
+| `GET  /api/products` | Paginated product catalog with brand / category / capacity / status / sku / free-text filters |
+| `GET  /api/products/[id]` | Full product detail with all linked documents |
+| `GET  /api/products/[id]/documents` | Just the documents for one product |
+
+The product catalog endpoints are documented in detail at [`docs/PRODUCTS_API.md`](docs/PRODUCTS_API.md) — that's the contract for downstream consumers (e.g. the inventory portal). It's read-only and unauthenticated today.
 
 ## Running locally
 
@@ -86,6 +93,30 @@ node scripts/drop-products-table.mjs
 ```
 
 All scripts are idempotent — re-running them inserts nothing new and skips existing rows.
+
+## Product catalog pipeline
+
+The hand-curated lift catalog lives in `products` + `product_documents`. Its build pipeline:
+
+```bash
+# 1. Parse a manufacturer price sheet (xlsx or PDF) into product rows
+python scripts/parse-price-sheet.py <path> [--brand <name>] [--guidance-file <md>] [--wipe-brand]
+
+# 2. Export the live catalog to xlsx for human review (round-trip)
+python scripts/export-products-to-excel.py --out data/pillar2-staging/products-master-vN.xlsx
+
+# 3. Re-import an edited xlsx (diffs hidden id column against DB; applies inserts/updates/deletes)
+python scripts/import-products-from-excel.py <edited.xlsx>
+
+# 4. Match knowledge_items (PDFs already in the KB) to product rows
+python scripts/match-kb-to-products.py [--brand <name>] [--with-fallback]
+
+# Brand-specific linkers (idempotent)
+python scripts/link-forward-from-rotary-csv.py        # parses data/product_data/rotary/rotary_lookup.csv
+python scripts/cross-link-forward-el-variants.py      # shares CR14/CRA14/CRO14/1000MCL docs with EL/DT trims
+```
+
+Current state: **442 product families across 12 brands**, **1,048 product↔doc links**, **189 / 442 (42%)** families have ≥1 doc. Stertil-Koni / ARI-Hetra / Coats / PKS are sparsely covered because their manuals aren't in the KB yet.
 
 ## Deployment notes
 

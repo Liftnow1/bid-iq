@@ -118,7 +118,7 @@ def read_pdf_rows(path: Path) -> list[list[str]]:
     return rows
 
 
-def rows_to_text_block(rows: list[list[str]], max_chars: int = 50_000) -> str:
+def rows_to_text_block(rows: list[list[str]], max_chars: int = 250_000) -> str:
     """Compact a row list into a pipe-delimited text block bounded by max_chars.
     Empty rows are dropped; long values are truncated to keep the prompt small."""
     out: list[str] = []
