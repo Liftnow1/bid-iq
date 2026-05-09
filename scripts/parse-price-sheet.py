@@ -223,9 +223,14 @@ Extract families + variants per the system rules. Vehicle lifts and rolling jack
 def call_claude(brand: str, file_label: str, rows_block: str) -> dict:
     import anthropic
     client = anthropic.Anthropic()
+    # 16K is enough for ~200 family entries with full variant arrays. The
+    # original 8K cap truncated mid-JSON on BendPak (798 source rows) and
+    # PKS (PDF text). Sonnet 4.5 supports up to 64K output tokens; staying
+    # at 16K keeps per-call cost reasonable while preventing truncation
+    # for any plausible single price-sheet brand.
     resp = client.messages.create(
         model="claude-sonnet-4-5",
-        max_tokens=8192,
+        max_tokens=16384,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": build_user_prompt(brand, file_label, rows_block)}],
     )
