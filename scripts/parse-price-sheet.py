@@ -209,10 +209,19 @@ Rules for the JSON:
 """
 
 
-def build_user_prompt(brand: str, file_label: str, rows_block: str) -> str:
+def build_user_prompt(
+    brand: str, file_label: str, rows_block: str, guidance: str = ""
+) -> str:
+    guidance_block = ""
+    if guidance.strip():
+        guidance_block = f"""
+## Brand-specific guidance (HARD — overrides any conflicting general rules)
+
+{guidance.strip()}
+"""
     return f"""Brand: {brand}
 Source file: {file_label}
-
+{guidance_block}
 Price-sheet excerpt (pipe-delimited rows):
 
 {rows_block}
@@ -220,7 +229,7 @@ Price-sheet excerpt (pipe-delimited rows):
 Extract families + variants per the system rules. Vehicle lifts and rolling jacks only. No pricing. JSON only."""
 
 
-def call_claude(brand: str, file_label: str, rows_block: str) -> dict:
+def call_claude(brand: str, file_label: str, rows_block: str, guidance: str = "") -> dict:
     import anthropic
     client = anthropic.Anthropic()
     # 16K is enough for ~200 family entries with full variant arrays. The
@@ -232,7 +241,7 @@ def call_claude(brand: str, file_label: str, rows_block: str) -> dict:
         model="claude-sonnet-4-5",
         max_tokens=16384,
         system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": build_user_prompt(brand, file_label, rows_block)}],
+        messages=[{"role": "user", "content": build_user_prompt(brand, file_label, rows_block, guidance)}],
     )
     text = "".join(b.text for b in resp.content if b.type == "text").strip()
     # Be defensive — strip any code-fence Claude sometimes wraps despite "JSON only".
@@ -383,7 +392,17 @@ def main() -> int:
                     help="print CSV preview only; do not write to DB")
     ap.add_argument("--out", default=None,
                     help="CSV output path (default: logs/price-sheet-<brand>.csv)")
+    ap.add_argument("--guidance", default="",
+                    help="brand-specific guidance text to inject into the prompt")
+    ap.add_argument("--guidance-file", default=None,
+                    help="path to a text file containing the brand-specific guidance")
+    ap.add_argument("--wipe-brand", action="store_true",
+                    help="DELETE existing rows for this brand before upserting (for full restructures)")
     args = ap.parse_args()
+
+    guidance = args.guidance
+    if args.guidance_file:
+        guidance = (Path(args.guidance_file).read_text(encoding="utf-8")).strip()
 
     fpath = Path(args.file)
     if not fpath.exists():
@@ -403,8 +422,10 @@ def main() -> int:
     rows_block = rows_to_text_block(rows)
     print(f"[parser] rows_block size: {len(rows_block):,} chars")
 
+    if guidance:
+        print(f"[parser] guidance ({len(guidance)} chars): {guidance[:120]}{'...' if len(guidance)>120 else ''}")
     print(f"[parser] calling Claude...")
-    result = call_claude(args.brand, fpath.name, rows_block)
+    result = call_claude(args.brand, fpath.name, rows_block, guidance)
     raw_products = result.get("products", [])
     print(f"[parser] Claude returned {len(raw_products)} raw products")
 
@@ -436,6 +457,18 @@ def main() -> int:
     if args.dry_run:
         print(f"\n[parser] DRY-RUN — DB unchanged. Review CSV above and re-run without --dry-run.")
         return 0
+
+    if args.wipe_brand:
+        # Full-restructure path. Delete every existing row for this brand
+        # before upserting the new set. Used when the family-grouping itself
+        # needs to change (e.g. Hunter consolidating to RX10K/RX12K/RX14K/RX16K).
+        import psycopg
+        with psycopg.connect(os.environ["DATABASE_URL"], autocommit=True) as conn, conn.cursor() as cur:
+            cur.execute(
+                "DELETE FROM products WHERE brand_id = (SELECT id FROM brands WHERE lower(name)=lower(%s))",
+                (args.brand,),
+            )
+            print(f"[parser] WIPED {cur.rowcount} existing rows for brand={args.brand}")
 
     print(f"\n[parser] upserting {len(products)} rows into products table...")
     ins, upd = upsert_products(products)
