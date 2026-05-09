@@ -144,5 +144,33 @@ export async function ensureSchema() {
   await sql`CREATE INDEX IF NOT EXISTS idx_pd_knowledge_item_id ON product_documents(knowledge_item_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_pd_doc_type ON product_documents(doc_type)`;
 
+  // Bump products.updated_at when the product's documents change.
+  // Without this, doc-only edits (re-running match-kb-to-products,
+  // adding a cross-link, flipping is_primary) wouldn't be visible to
+  // a portal that polls /api/products and compares updated_at.
+  await sql`
+    CREATE OR REPLACE FUNCTION bump_product_updated_at_from_pd()
+    RETURNS TRIGGER AS $$
+    BEGIN
+      IF (TG_OP = 'DELETE') THEN
+        UPDATE products SET updated_at = NOW() WHERE id = OLD.product_id;
+        RETURN OLD;
+      ELSE
+        UPDATE products SET updated_at = NOW() WHERE id = NEW.product_id;
+        IF (TG_OP = 'UPDATE' AND OLD.product_id <> NEW.product_id) THEN
+          UPDATE products SET updated_at = NOW() WHERE id = OLD.product_id;
+        END IF;
+        RETURN NEW;
+      END IF;
+    END;
+    $$ LANGUAGE plpgsql
+  `;
+  await sql`DROP TRIGGER IF EXISTS trg_pd_bump_product ON product_documents`;
+  await sql`
+    CREATE TRIGGER trg_pd_bump_product
+    AFTER INSERT OR UPDATE OR DELETE ON product_documents
+    FOR EACH ROW EXECUTE FUNCTION bump_product_updated_at_from_pd()
+  `;
+
   schemaReady = true;
 }

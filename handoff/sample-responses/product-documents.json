@@ -1,0 +1,74 @@
+{
+  "documents": [
+    {
+      "id": 642,
+      "product_id": 187,
+      "knowledge_item_id": 6638,
+      "doc_type": "install-manual",
+      "is_primary": true,
+      "pdf_url": null,
+      "notes": null,
+      "created_at": "2026-05-09T18:36:26.524924+00:00",
+      "ki_title": "SP0A10NB, SP0A10, SP010, SP0A7 (500-1600 Series Lifts) Installation Instructions",
+      "ki_filename": "0RdbhnydRYmT4vkW8Ro2.pdf",
+      "ki_source_path": "data\\product_data\\rotary\\0RdbhnydRYmT4vkW8Ro2.pdf",
+      "ki_body_chars": 310999
+    },
+    {
+      "id": 901,
+      "product_id": 187,
+      "knowledge_item_id": 7906,
+      "doc_type": "other",
+      "is_primary": true,
+      "pdf_url": null,
+      "notes": null,
+      "created_at": "2026-05-09T18:36:26.524924+00:00",
+      "ki_title": "SP0A10, SP010, SP0A7 Hybrid, & Shockwave\u2122 Models Parts Breakdown",
+      "ki_filename": "xCGVSa0UT0mEcc81bJAy.pdf",
+      "ki_source_path": "data\\product_data\\rotary\\xCGVSa0UT0mEcc81bJAy.pdf",
+      "ki_body_chars": 86180
+    },
+    {
+      "id": 646,
+      "product_id": 187,
+      "knowledge_item_id": 6655,
+      "doc_type": "install-manual",
+      "is_primary": false,
+      "pdf_url": null,
+      "notes": null,
+      "created_at": "2026-05-09T18:36:26.524924+00:00",
+      "ki_title": "SP0A10NB, SP0A10, SP010, SP0A7 Installation Instructions",
+      "ki_filename": "18Zlsq2XQYW34AeJNCGh.pdf",
+      "ki_source_path": "data\\product_data\\rotary\\18Zlsq2XQYW34AeJNCGh.pdf",
+      "ki_body_chars": 33788
+    },
+    {
+      "id": 653,
+      "product_id": 187,
+      "knowledge_item_id": 6689,
+      "doc_type": "install-manual",
+      "is_primary": false,
+      "pdf_url": null,
+      "notes": null,
+      "created_at": "2026-05-09T18:36:26.524924+00:00",
+      "ki_title": "SP0A10NB, SP0A10, SP010, SP0A7, SP0A9, SP09 Operation & Maintenance Manual",
+      "ki_filename": "2qEiRTFRlKMxMcnItZ0v.pdf",
+      "ki_source_path": "data\\product_data\\rotary\\2qEiRTFRlKMxMcnItZ0v.pdf",
+      "ki_body_chars": 25210
+    },
+    {
+      "id": 694,
+      "product_id": 187,
+      "knowledge_item_id": 6883,
+      "doc_type": "install-manual",
+      "is_primary": false,
+      "pdf_url": null,
+      "notes": null,
+      "created_at": "2026-05-09T18:36:26.524924+00:00",
+      "ki_title": "SP0A10NB, SP0A10, SP010, SP0A7 (500, 700, and 800 Series Lifts) Installation Instructions",
+      "ki_filename": "9bZy4yB0R3WvQkzR4tED.pdf",
+      "ki_source_path": "data\\product_data\\rotary\\9bZy4yB0R3WvQkzR4tED.pdf",
+      "ki_body_chars": 30598
+    }
+  ]
+}
