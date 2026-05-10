@@ -32,7 +32,14 @@ $PythonExe = "python"
 
 # Build the action command. We cd into the repo so relative paths in the
 # script (data/, .env, etc.) all work. PowerShell's `;` chains commands.
-$Cmd = "cd `"$RepoRoot`"; & `"$PythonExe`" `"$ScriptPath`" *>> `"$LogFile`""
+#
+# --max-files 50 is a hard cap. Without it a stray timestamp shift (git
+# stash pop, OneDrive sync, antivirus scan) can make thousands of files
+# look "changed" and the watcher will re-pay Claude for every one. With
+# the cap, the worst-case daily damage is ~50 files * ~$0.02 = ~$1, not
+# the $40+ surprise we saw on 2026-05-10. Real new files just take a
+# few extra days to drain through the queue.
+$Cmd = "cd `"$RepoRoot`"; & `"$PythonExe`" `"$ScriptPath`" --max-files 50 *>> `"$LogFile`""
 
 $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -WindowStyle Hidden -Command `"$Cmd`""
 $Trigger = New-ScheduledTaskTrigger -Daily -At 3:00am

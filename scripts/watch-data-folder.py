@@ -45,6 +45,7 @@ The schtasks command is included in the README of this branch.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -102,13 +103,25 @@ from bidiq.ingest_pillar3 import (  # noqa: E402
 # loose sense. These are reference data, not documents.
 SKIP_EXTS = {".json", ".csv", ".db", ".log", ".zip", ".gz", ".tar"}
 
+# Path prefixes (under data/) that the watcher must NEVER classify, because
+# they're working files for other pipelines, not knowledge content. Review
+# xlsx round-trips, intermediate parser dumps, and backup snapshots all
+# belong here. data/pillar3-staging/ stays ingestible — that's Paul's
+# intentional drop-zone for tier-3 source documents.
+SKIP_PATH_PREFIXES = (
+    "data/pillar2-staging/",   # round-trip xlsx review files (export/import)
+    "data/scrapes/",           # raw web scrapes — not KB content
+    "data/extraction-cache/",  # parser intermediate cache, if it ever appears
+)
+
 
 @dataclass
 class ManifestEntry:
-    path: str          # repo-relative path, forward-slashed
-    mtime: float       # last modified time at ingest
-    size: int          # file size at ingest
-    last_result: str   # "success" | "failure" | "skip" | "dry-run"
+    path: str                          # repo-relative path, forward-slashed
+    mtime: float                       # last modified time at ingest
+    size: int                          # file size at ingest
+    last_result: str                   # "success" | "failure" | "skip" | "dry-run"
+    content_hash: Optional[str] = None # sha256 of the file bytes — primary change detector
     db_row_id: Optional[int] = None
     error_message: Optional[str] = None
     ingested_at: str = ""
@@ -116,6 +129,23 @@ class ManifestEntry:
     def to_dict(self) -> dict:
         d = asdict(self)
         return {k: v for k, v in d.items() if v not in (None, "")}
+
+
+def compute_content_hash(p: Path) -> Optional[str]:
+    """Return the sha256 hex digest of a file, or None on read error.
+
+    Streamed in 1 MB chunks so we don't load multi-hundred-MB PDFs into RAM.
+    Hashing 1 MB takes ~5 ms on this machine — even 7,000 files is well
+    under a minute, and it's all local I/O (no API spend).
+    """
+    h = hashlib.sha256()
+    try:
+        with open(p, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+    except OSError:
+        return None
+    return h.hexdigest()
 
 
 def load_manifest() -> dict[str, ManifestEntry]:
@@ -134,6 +164,7 @@ def load_manifest() -> dict[str, ManifestEntry]:
                 mtime=float(v["mtime"]),
                 size=int(v["size"]),
                 last_result=v.get("last_result", ""),
+                content_hash=v.get("content_hash"),
                 db_row_id=v.get("db_row_id"),
                 error_message=v.get("error_message"),
                 ingested_at=v.get("ingested_at", ""),
@@ -184,13 +215,39 @@ def should_skip(p: Path, verbose: bool) -> Optional[str]:
         return f"reference-ext={ext}"
     if ext not in SUPPORTED_EXTS:
         return f"unsupported-ext={ext}"
+    # Path-prefix skips for review / staging / scrape directories.
+    try:
+        rel = p.resolve().relative_to(REPO_ROOT)
+    except (ValueError, OSError):
+        return None
+    rel_key = str(rel).replace("\\", "/")
+    for prefix in SKIP_PATH_PREFIXES:
+        if rel_key.startswith(prefix):
+            return f"path-skip={prefix.rstrip('/')}"
     return None
 
 
 def discover_changed_files(
     manifest: dict[str, ManifestEntry], verbose: bool
 ) -> tuple[list[Pillar3File], list[tuple[str, str]]]:
-    """Walk data/ for files not in the manifest (or with newer mtime).
+    """Walk data/ for files whose content has actually changed.
+
+    Change detection is **content-hash first** (sha256 of bytes). mtime+size
+    is unreliable: `git stash pop`, OneDrive, antivirus, even some Windows
+    backup paths bump mtimes without changing content, and a watcher that
+    keys on mtime will re-classify thousands of unchanged files at $40+ per
+    surprise. Hash comparison is the source of truth.
+
+    Logic:
+      - prev hash recorded and matches disk hash → SKIP (truly unchanged)
+      - prev hash recorded and differs           → INGEST (real edit)
+      - no prev hash but size matches manifest   → SKIP and BACKFILL hash
+                                                   (legacy bootstrap entry —
+                                                    same size = almost
+                                                    certainly same content;
+                                                    avoids re-paying for
+                                                    files we already saw)
+      - no prev entry at all                     → INGEST (genuinely new)
 
     Returns:
       new_or_changed: list of Pillar3File records to ingest this run
@@ -202,6 +259,7 @@ def discover_changed_files(
         print(f"[err] data root missing: {DATA_ROOT}", file=sys.stderr)
         return [], []
 
+    backfilled = 0
     for p in DATA_ROOT.rglob("*"):
         if not p.is_file():
             continue
@@ -219,14 +277,37 @@ def discover_changed_files(
             continue
 
         prev = manifest.get(rel_key)
-        unchanged = (
+
+        # Case 1: known file with a recorded hash → compare hashes
+        if prev is not None and prev.content_hash:
+            disk_hash = compute_content_hash(p)
+            if disk_hash is not None and disk_hash == prev.content_hash:
+                continue  # truly unchanged
+            # else: fall through to ingest
+
+        # Case 2: known file from a legacy bootstrap (no hash recorded) but
+        # the size matches what we saw → assume unchanged and backfill the
+        # hash so future runs are deterministic. mtime is intentionally
+        # ignored here.
+        elif (
             prev is not None
-            and abs(prev.mtime - stat.st_mtime) < 1.0
-            and prev.size == stat.st_size
             and prev.last_result == "success"
-        )
-        if unchanged:
-            continue
+            and prev.size == stat.st_size
+        ):
+            disk_hash = compute_content_hash(p)
+            if disk_hash is not None:
+                manifest[rel_key] = ManifestEntry(
+                    path=rel_key,
+                    mtime=stat.st_mtime,
+                    size=stat.st_size,
+                    last_result=prev.last_result,
+                    content_hash=disk_hash,
+                    db_row_id=prev.db_row_id,
+                    error_message=prev.error_message,
+                    ingested_at=prev.ingested_at,
+                )
+                backfilled += 1
+            continue  # treat as unchanged either way
 
         tier = derive_tier_for_path(rel)
         files.append(
@@ -237,6 +318,8 @@ def discover_changed_files(
                 size_bytes=stat.st_size,
             )
         )
+    if backfilled and verbose:
+        print(f"[watcher] backfilled content_hash on {backfilled} legacy manifest entries")
     return files, skipped
 
 
@@ -286,15 +369,85 @@ def main() -> int:
                          "already-ingested in the manifest WITHOUT actually ingesting. "
                          "Use this once at install time so the daily watcher only catches "
                          "files added AFTER bootstrap, not all 3000 files already in the KB.")
+    ap.add_argument("--rehash", action="store_true",
+                    help="Walk data/, recompute sha256 for every supported file currently "
+                         "on disk, and store it in the manifest. Use this after a bulk "
+                         "operation (git stash pop, OneDrive sync, mass copy) that bumped "
+                         "mtimes without changing content — otherwise the next daily run "
+                         "treats every touched file as 'changed' and re-pays Claude. "
+                         "Does NOT call the Anthropic API.")
     args = ap.parse_args()
 
     db_url = os.environ.get("DATABASE_URL") or ""
     api_key = os.environ.get("ANTHROPIC_API_KEY") or ""
-    if not db_url or not api_key:
-        print("[err] DATABASE_URL or ANTHROPIC_API_KEY missing", file=sys.stderr)
+    # --rehash is a local-only operation; only DATABASE_URL is needed for
+    # the regular ingest path. Skip the api_key check in rehash mode.
+    if not db_url:
+        print("[err] DATABASE_URL missing", file=sys.stderr)
+        return 2
+    if not args.rehash and not args.bootstrap and not api_key:
+        print("[err] ANTHROPIC_API_KEY missing", file=sys.stderr)
         return 2
 
     manifest = load_manifest()
+
+    # --rehash: walk data/, compute sha256 of every supported file, write
+    # to manifest, save. No Claude calls. Idempotent.
+    if args.rehash:
+        rehashed = 0
+        added = 0
+        removed = 0
+        seen_keys: set[str] = set()
+        for p in DATA_ROOT.rglob("*"):
+            if not p.is_file():
+                continue
+            if should_skip(p, args.verbose) is not None:
+                continue
+            try:
+                stat = p.stat()
+            except OSError:
+                continue
+            rel_key = str(p.relative_to(REPO_ROOT)).replace("\\", "/")
+            seen_keys.add(rel_key)
+            digest = compute_content_hash(p)
+            if digest is None:
+                continue
+            prev = manifest.get(rel_key)
+            if prev is None:
+                manifest[rel_key] = ManifestEntry(
+                    path=rel_key,
+                    mtime=stat.st_mtime,
+                    size=stat.st_size,
+                    last_result="success",
+                    content_hash=digest,
+                    ingested_at=datetime.now(timezone.utc).isoformat() + " (rehash-add)",
+                )
+                added += 1
+            elif prev.content_hash != digest:
+                manifest[rel_key] = ManifestEntry(
+                    path=rel_key,
+                    mtime=stat.st_mtime,
+                    size=stat.st_size,
+                    last_result=prev.last_result or "success",
+                    content_hash=digest,
+                    db_row_id=prev.db_row_id,
+                    error_message=prev.error_message,
+                    ingested_at=prev.ingested_at,
+                )
+                rehashed += 1
+        # Drop manifest entries for files that no longer exist on disk.
+        # Without this the manifest grows forever as files get renamed.
+        stale = [k for k in manifest if k not in seen_keys]
+        for k in stale:
+            del manifest[k]
+            removed += 1
+        save_manifest(manifest)
+        print(
+            f"[watcher] rehash: hashed_or_added={added}, "
+            f"refreshed_existing={rehashed}, removed_stale={removed}, "
+            f"total_manifest_entries={len(manifest)}"
+        )
+        return 0
 
     # Bootstrap mode: mark every currently-existing supported file as
     # already-ingested in the manifest, then exit. Caller can then enable
@@ -314,11 +467,13 @@ def main() -> int:
             rel_key = str(p.relative_to(REPO_ROOT)).replace("\\", "/")
             if rel_key in manifest:
                 continue  # already known
+            digest = compute_content_hash(p)
             manifest[rel_key] = ManifestEntry(
                 path=rel_key,
                 mtime=stat.st_mtime,
                 size=stat.st_size,
                 last_result="success",
+                content_hash=digest,
                 db_row_id=None,
                 error_message=None,
                 ingested_at=datetime.now(timezone.utc).isoformat() + " (bootstrap)",
@@ -397,17 +552,25 @@ def main() -> int:
         counts[result] = counts.get(result, 0) + 1
         cost_total += float(row.get("api_cost_estimate", 0) or 0)
 
-        # Update manifest entry for this file
+        # Update manifest entry for this file. Always record a content_hash
+        # so the next run does true content-based change detection.
         rel_key = str(f.path.relative_to(REPO_ROOT)).replace("\\", "/")
         manifest[rel_key] = ManifestEntry(
             path=rel_key,
             mtime=f.path.stat().st_mtime,
             size=f.size_bytes,
             last_result=result,
+            content_hash=compute_content_hash(f.path),
             db_row_id=row.get("db_row_id") or None,
             error_message=row.get("error_message") or None,
             ingested_at=datetime.now(timezone.utc).isoformat(),
         )
+
+        # Persist the manifest after every file. Previously it only saved
+        # at the very end of a run, so a crash or kill mid-run lost ALL
+        # progress and the next run re-paid Claude for every already-done
+        # file. JSON write is fast enough (<100ms even at 5K entries).
+        save_manifest(manifest)
 
         if args.verbose:
             mark = result[:3].upper()
