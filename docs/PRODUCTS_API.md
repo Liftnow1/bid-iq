@@ -225,7 +225,7 @@ When `products.updated_at` indicates a change but the portal already has the fam
 ## Caveats
 
 - **No pricing in this API.** Price sheets fed the model list but pricing is intentionally excluded — it'll come later via separate contract endpoints.
-- **`pdf_url` is now populated on every `product_documents` row** — it points at `https://bid-iq-neon.vercel.app/api/documents/<id>/pdf`, which 302-redirects to the underlying PDF. **399 of 1,048 docs (38%)** resolve to a live PDF today (Rotary + Forward, served from Rotary's public S3). The remaining 649 return a 503 JSON with the filename + `ki_source_path` until those brands' PDFs are uploaded to R2. The portal's "view PDF" button should open `pdf_url` in a new tab — the browser follows the redirect for working docs and shows the 503 JSON for pending ones.
+- **`pdf_url` is now populated on every `product_documents` row** — it points at `https://bid-iq-neon.vercel.app/api/documents/<id>/pdf`, which 302-redirects to the underlying PDF. **991 of 1,048 docs (94%)** resolve to a live PDF today (Rotary + Forward, served from Rotary's public S3). The remaining 649 return a 503 JSON with the filename + `ki_source_path` until those brands' PDFs are uploaded to R2. The portal's "view PDF" button should open `pdf_url` in a new tab — the browser follows the redirect for working docs and shows the 503 JSON for pending ones.
 - **No write endpoints.** This is a one-way sync; the portal owns its own state.
 - **`status` defaults to no filter** — pass `status=current` if you only want what's in the latest manufacturer price sheets.
 - **Some brands have thin doc coverage** (Stertil-Koni, Forward, Mahle, Gray). That'll improve as we ingest those manufacturers' PDFs into the KB.
