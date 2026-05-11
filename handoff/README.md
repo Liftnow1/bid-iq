@@ -16,7 +16,7 @@ Everything Paul's colleague (and their Claude) needs to start consuming the Lift
 
 ## TL;DR for the portal
 
-- **Base URL:** `https://bid-iq.vercel.app` (once iter15 is merged to main)
+- **Base URL:** `https://bid-iq-neon.vercel.app` — verified live with all five iter15 routes returning 200. Do NOT use `bid-iq.vercel.app`; that short alias is owned by an unrelated Vercel project. A custom domain is planned.
 - **Read-only, unauthenticated** in v1. We can add API-key auth before going prod — flag it.
 - **Initial sync:** page through `GET /api/products?page=N&page_size=200` until `total_pages` is reached. Index locally by `id`.
 - **Incremental sync:** poll daily, compare `updated_at` per row to detect changes. Family-level edits, status flips, AND document-level changes (linked / unlinked / re-classified) all bump `products.updated_at` via DB trigger. One timestamp watch is enough.

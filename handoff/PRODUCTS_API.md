@@ -1,6 +1,8 @@
 # Products API — contract for the inventory portal
 
-**Base URL**: `https://bid-iq.vercel.app` (or your preview alias)
+**Base URL**: `https://bid-iq-neon.vercel.app`
+
+(Note: not `bid-iq.vercel.app` — that short alias is owned by an unrelated Vercel project. Our project lives at the `-neon` alias under the `pauljosephstern-1166s-projects` team. A custom domain is planned.)
 
 This API exposes the vehicle-lift product catalog the portal will sync. It's read-only HTTP. The catalog is hand-curated from manufacturer price sheets (current models only, ~12 brands) and tied to a knowledge base of installation manuals, spec sheets, service manuals, brochures, and parts diagrams.
 
@@ -69,7 +71,7 @@ Paginated list with filtering.
 {
   "products": [
     {
-      "id": 12,
+      "id": 65,
       "brand_id": 3,
       "brand_name": "challenger",
       "sku": "CL12A",
@@ -91,7 +93,7 @@ Paginated list with filtering.
     },
     ...
   ],
-  "total": 417,
+  "total": 442,
   "page": 1,
   "page_size": 50,
   "total_pages": 9
@@ -110,7 +112,7 @@ Full product detail with all documents.
   "documents": [
     {
       "id": 845,
-      "product_id": 12,
+      "product_id": 65,
       "knowledge_item_id": 3642,
       "doc_type": "install-manual",
       "is_primary": true,
@@ -212,22 +214,22 @@ When `products.updated_at` indicates a change but the portal already has the fam
 
 ```bash
 # Full first page
-curl 'https://bid-iq.vercel.app/api/products?page=1&page_size=20'
+curl 'https://bid-iq-neon.vercel.app/api/products?page=1&page_size=20'
 
 # All BendPak two-post lifts in a capacity window
-curl 'https://bid-iq.vercel.app/api/products?brand=bendpak&category=two-post-lift&capacity_min=10000&capacity_max=20000'
+curl 'https://bid-iq-neon.vercel.app/api/products?brand=bendpak&category=two-post-lift&capacity_min=10000&capacity_max=20000'
 
 # Look up a specific variant SKU
-curl 'https://bid-iq.vercel.app/api/products?sku=CL12A-LC-QC'
+curl 'https://bid-iq-neon.vercel.app/api/products?sku=CL12A-LC-QC'
 
 # Full detail for one product
-curl 'https://bid-iq.vercel.app/api/products/12'
+curl 'https://bid-iq-neon.vercel.app/api/products/65'
 
 # Just the documents
-curl 'https://bid-iq.vercel.app/api/products/12/documents'
+curl 'https://bid-iq-neon.vercel.app/api/products/65/documents'
 
 # Free-text search with documents inlined
-curl 'https://bid-iq.vercel.app/api/products?q=mobile%20column&include_documents=true'
+curl 'https://bid-iq-neon.vercel.app/api/products?q=mobile%20column&include_documents=true'
 ```
 
 ## Open questions for the portal team

@@ -4,8 +4,8 @@ Generate sample API response JSONs straight from the live DB, mirroring
 the queries in app/api/products/{route.ts, [id]/route.ts, [id]/documents/route.ts}.
 
 These samples ship in handoff/sample-responses/ so the portal team's Claude
-can see real response shapes before bid-iq.vercel.app has the iter15
-branch deployed.
+can see real response shapes without having to call the live API at
+https://bid-iq-neon.vercel.app.
 
 Outputs:
   products-page1.json
