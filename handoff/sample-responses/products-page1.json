@@ -10,8 +10,8 @@
       "description": "Wireless, battery-powered mobile column lift system. 12,000 lbs per column capacity. Available in 2, 4, 6, or 8 column configurations with multiple carriage widths including Medium (32.28\"/820mm), XX Wide (48.23\"/1225mm), and Adjustable (35.43\"/900mm). Fork lengths 15-20 inches.",
       "category": "mobile-column",
       "capacity_lbs": 12000,
-      "is_ali_certified": false,
-      "ali_cert_date": null,
+      "is_ali_certified": true,
+      "ali_cert_date": "2018-09-07",
       "variant_skus": [
         "BPW-6-2-M",
         "BPW-6-4-M",
@@ -43,8 +43,8 @@
       "description": "Line powered (3-phase) mobile column lift system. 12,000 lbs per column capacity. Available in 2, 4, or 6 column configurations with Medium (32.28\"/820mm), XX Wide (48.23\"/1225mm), and Adjustable (35.43\"/900mm) carriage widths. Fork lengths 15-20 inches.",
       "category": "mobile-column",
       "capacity_lbs": 12000,
-      "is_ali_certified": false,
-      "ali_cert_date": null,
+      "is_ali_certified": true,
+      "ali_cert_date": "2019-12-11",
       "variant_skus": [
         "LP-6-2-M",
         "LP-6-4-M",
@@ -73,8 +73,8 @@
       "description": "Wireless, battery-powered mobile column lift system. 15,000 lbs per column capacity. Available in 2, 4, 6, or 8 column configurations with standard (31.5\"/800mm) and wide (35.43\"/900mm) carriage widths. 20-inch forks.",
       "category": "mobile-column",
       "capacity_lbs": 15000,
-      "is_ali_certified": false,
-      "ali_cert_date": null,
+      "is_ali_certified": true,
+      "ali_cert_date": "2018-09-07",
       "variant_skus": [
         "BPW-8-2-20",
         "BPW-8-4-20",

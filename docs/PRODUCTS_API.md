@@ -116,7 +116,7 @@ Full product detail with all documents.
       "knowledge_item_id": 3642,
       "doc_type": "install-manual",
       "is_primary": true,
-      "pdf_url": null,
+      "pdf_url": "https://bid-iq-neon.vercel.app/api/documents/845/pdf",
       "notes": null,
       "created_at": "2026-05-09T...",
       "ki_title": "Challenger CL12A Product Manual",
@@ -133,15 +133,35 @@ Full product detail with all documents.
 
 Just the documents for a product. Useful for refreshing doc lists without re-fetching the whole product. Same document shape as above.
 
+### `GET /api/documents/[id]/pdf`
+
+The clickable indirection for a product_document's underlying PDF. `id` is the `product_documents.id` (the same value returned as `documents[].id` from the `/api/products/...` endpoints, and the same value `pdf_url` is built from).
+
+**Responses:**
+
+| status | meaning |
+|---|---|
+| `302 Found` | The PDF is hosted publicly. The `Location` header points at the canonical URL (today: Rotary's public S3 for Rotary/Forward; later: a Cloudflare R2 URL for the rest). Open in a browser and it follows automatically. |
+| `503 Service Unavailable` | The PDF exists in the bid-iq KB but hasn't been uploaded to object storage yet. Body is JSON with `document_id`, `product_id`, `doc_type`, `ki_id`, `ki_filename`, `ki_source_path`, `ki_title`, and an explanatory `message`. The portal can render this as "Coming soon" with the filename. |
+| `404 Not Found` | No `product_documents` row with that id. |
+| `400 Bad Request` | id is not a positive integer. |
+| `500 Internal Server Error` | DB or upstream failure. Returns `{"error": "..."}`. |
+
+**Why a redirect and not a direct URL on the product_documents row?** Stability. `pdf_url` is stored in the catalog and any client may cache it. If we migrate storage backends (today S3, tomorrow R2, day-after maybe a CDN in front of R2), the indirection means we never have to rewrite every stored URL — just update the redirect target.
+
 ## How to consume
 
 1. **Initial sync**: `GET /api/products?page=1&page_size=200`, then page until `total_pages` is reached. Keep the full result indexed by `id` in the portal's local DB.
 2. **Incremental sync**: poll `GET /api/products?page=...` daily; compare `updated_at` to detect changed rows. (Or use `created_at > last_sync` for new rows only — both fields are present.) See **Sync semantics** below for what `updated_at` is guaranteed to catch.
 3. **Search**: pass `q` + filters straight from the portal's search UI.
 4. **Display**: show `family_name` (or fall back to `product_name`, then `sku`). Show `capacity_lbs` and `category`. Variant SKUs are visible to the user as "configurations" — typically a dropdown or multi-line subtable.
-5. **Documents**: deep-link the user to the doc. **PDF URLs are not yet populated** (`pdf_url` is null on every row in v1). For now, the document's `ki_filename` + `ki_source_path` are the canonical references. **A future iteration will upload PDFs to object storage (R2 likely) and populate `pdf_url`.** Until then, the portal can either:
-   - Display the filename as text and rely on out-of-band file delivery, or
-   - Wait for the storage rollout (~1 week)
+5. **Documents**: deep-link the user to the doc via `pdf_url`. Every `product_documents` row now has a `pdf_url` of the form `https://bid-iq-neon.vercel.app/api/documents/<id>/pdf`. Hitting that URL:
+   - **302 redirects** to the public PDF when one is available (today: all 399 Rotary + Forward docs are live via Rotary's public S3 hosting; tomorrow: BendPak / Mohawk / Challenger / Hunter / etc. ship after the R2 upload pass)
+   - **503 returns JSON** with the filename and KB source path when the PDF isn't yet uploaded — so the portal can render "PDF coming soon" with useful context (filename, doc_type, ki_id) instead of a broken link
+   
+   The redirect is the indirection layer: `pdf_url` always stays the same in the catalog even when we migrate storage backends. The portal just opens `pdf_url` in a new tab and the browser follows the redirect.
+
+   See `GET /api/documents/[id]/pdf` below for the full contract.
 
 ## Sync semantics — what `updated_at` catches
 
@@ -205,7 +225,7 @@ When `products.updated_at` indicates a change but the portal already has the fam
 ## Caveats
 
 - **No pricing in this API.** Price sheets fed the model list but pricing is intentionally excluded — it'll come later via separate contract endpoints.
-- **`pdf_url` always null in v1.** PDF storage decision still pending.
+- **`pdf_url` is now populated on every `product_documents` row** — it points at `https://bid-iq-neon.vercel.app/api/documents/<id>/pdf`, which 302-redirects to the underlying PDF. **399 of 1,048 docs (38%)** resolve to a live PDF today (Rotary + Forward, served from Rotary's public S3). The remaining 649 return a 503 JSON with the filename + `ki_source_path` until those brands' PDFs are uploaded to R2. The portal's "view PDF" button should open `pdf_url` in a new tab — the browser follows the redirect for working docs and shows the 503 JSON for pending ones.
 - **No write endpoints.** This is a one-way sync; the portal owns its own state.
 - **`status` defaults to no filter** — pass `status=current` if you only want what's in the latest manufacturer price sheets.
 - **Some brands have thin doc coverage** (Stertil-Koni, Forward, Mahle, Gray). That'll improve as we ingest those manufacturers' PDFs into the KB.

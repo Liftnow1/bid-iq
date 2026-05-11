@@ -55,6 +55,12 @@ export async function ensureSchema() {
   await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS source_pages_count INTEGER`;
   await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extracted_at TIMESTAMPTZ`;
   await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS extractor_version TEXT`;
+  // external_url: a public, user-clickable URL for the underlying document.
+  // For Rotary/Forward docs this is the manufacturer's S3 URL (Rotary hosts
+  // these publicly already). For other brands it will be a Cloudflare R2
+  // URL once we upload — until then it stays NULL and /api/documents/[id]/pdf
+  // returns a clean 503.
+  await sql`ALTER TABLE knowledge_items ADD COLUMN IF NOT EXISTS external_url TEXT`;
 
   // Tier-1 (shallow) ingestion writes rows with raw_content NULL until a
   // Tier-2 upgrade fills in the full body.
