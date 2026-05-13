@@ -38,9 +38,27 @@ If you query by SKU and the user types a variant string (e.g. `RX16KLFIS`), the 
 
 ### Status
 
-- `current` — model is in the manufacturer's most recent price sheet (default filter)
-- `discontinued` — KB-only model (older PDF in our archive but not in current price sheet) — **none populated yet, ignore for now**
-- `unknown` — fallback
+- `current` — actively sold. Either in the manufacturer's most recent price sheet, OR listed as actively distributed in a trusted third-party catalog (e.g., SVI).
+- `discontinued` — no longer in production / no longer distributed. ~828 rows are flagged this way (mostly SVI-sourced makes that SVI lists as discontinued at the make level).
+- `unknown` — fallback.
+
+### Source
+
+Indicates how a row entered the catalog. The portal can filter on this to distinguish trusted-internal data from third-party imports.
+
+- `price-sheet` — hand-curated from the manufacturer's current price sheet (the original 442 rows; this is our highest-trust data and our internal record)
+- `svi-catalog` — imported from SVI International's distributor catalog (~1,814 rows). SVI is a third-party master distributor of vehicle lift parts and these listings reflect what SVI carries / sold historically. **Lower trust** than `price-sheet`: SVI lists many older models, models from defunct OEMs, and OEM-rebrands.
+- `kb-extraction`, `web-scrape`, `manual`, `unknown` — reserved for future ingest paths.
+
+### ALI certification
+
+- `is_ali_certified = TRUE` — found in the ALI Lift Inspector Directory; `ali_cert_date` is populated
+- `is_ali_certified = FALSE` — explicitly checked against ALI and not found (our original 442 went through this check)
+- `is_ali_certified = NULL` — unknown. Default for everything imported from SVI: we haven't re-run the ALI match against SVI-sourced rows yet, and many SVI rows are old/defunct OEMs that have never been ALI-certified.
+
+### External catalog references
+
+A separate `product_external_refs` table records every third-party listing we know about for a product, including the listings we couldn't fold into a canonical row. Today it carries the 2,558 SVI catalog rows, each with the SVI page URL and up to 14 SVI resource endpoint URLs (spec sheets, parts manuals, etc.). The table is **not yet exposed via the API**; let me know if the portal wants it surfaced.
 
 ## Endpoints
 
@@ -93,7 +111,7 @@ Paginated list with filtering.
     },
     ...
   ],
-  "total": 442,
+  "total": 2256,
   "page": 1,
   "page_size": 50,
   "total_pages": 9
@@ -198,11 +216,14 @@ local_db.delete_or_archive(removed)
 
 When `products.updated_at` indicates a change but the portal already has the family-level fields it cares about, fetch just `GET /api/products/[id]/documents` to refresh the doc list. That endpoint returns the same doc shape as the inlined `documents` array on `GET /api/products/[id]`.
 
-## Current data state (v1)
+## Current data state (v2)
 
-- **442 product families** across 12 brands (BendPak, Challenger, Mohawk, Rotary, Hunter, Stertil-Koni, ARI-Hetra, PKS, Coats, Mahle, Forward, Gray) — Omer parked pending a price list
-- **1,715+ variant SKUs** across those families
-- **1,048 product_documents** linked, **189 / 442 (42%) of families** have ≥1 doc
+- **2,256 product rows total**, split by source:
+  - **442 hand-curated families** (`source='price-sheet'`) across our 12 carry-brands (BendPak, Challenger, Mohawk, Rotary, Hunter, Stertil-Koni, ARI-Hetra, PKS, Coats, Mahle, Forward, Gray). This is our internal truth. ALI certification status is populated on every row (TRUE or FALSE). The portal team should treat these as the high-confidence layer.
+  - **1,814 SVI-imported rows** (`source='svi-catalog'`) across 73 makes (most of which are NEW brands we don't otherwise carry — defunct OEMs, regional brands, OEM-rebrands). 828 of these are flagged `status='discontinued'` per SVI's make-level disposition. ALI cert is `NULL` (Unknown) for all of them.
+- **1,715+ variant SKUs** under the 442 hand-curated families
+- **2,558 rows in `product_external_refs`** holding SVI page URLs + resource endpoint URLs, joined to the products they describe (both pre-existing and newly-imported)
+- **1,048 product_documents** linked, **189 / 442 (42%) of hand-curated families** have ≥1 doc
 - Per-brand coverage:
 
   | brand | families | w/ docs | cov% | links |

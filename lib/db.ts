@@ -113,7 +113,7 @@ export async function ensureSchema() {
         status IN ('current', 'discontinued', 'unknown')
       ),
       CONSTRAINT products_source_check CHECK (
-        source IN ('price-sheet', 'kb-extraction', 'web-scrape', 'manual', 'unknown')
+        source IN ('price-sheet', 'kb-extraction', 'web-scrape', 'manual', 'unknown', 'svi-catalog')
       ),
       UNIQUE (brand_id, sku)
     )
@@ -149,6 +149,33 @@ export async function ensureSchema() {
   await sql`CREATE INDEX IF NOT EXISTS idx_pd_product_id ON product_documents(product_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_pd_knowledge_item_id ON product_documents(knowledge_item_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_pd_doc_type ON product_documents(doc_type)`;
+
+  // product_external_refs: side table for catalog cross-references we
+  // import from third-party sources (SVI International, the ALI directory,
+  // future Sourcewell PCN listings, etc.). Lets us preserve every URL
+  // a source publishes for a model without merging untrusted data into
+  // the canonical products row — important when our internal catalog
+  // is sourced from manufacturer price sheets and we trust those over
+  // third-party listings.
+  await sql`
+    CREATE TABLE IF NOT EXISTS product_external_refs (
+      id SERIAL PRIMARY KEY,
+      product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      source TEXT NOT NULL,            -- 'svi-catalog', 'ali-directory', ...
+      external_sku TEXT,               -- the SKU as the source lists it
+      external_make TEXT,              -- the make as the source lists it
+      external_category TEXT,          -- the lift category as the source lists it
+      page_url TEXT,                   -- canonical page for this model on the source's site
+      resource_urls JSONB DEFAULT '[]'::jsonb,  -- array of all spec/manual/parts URLs
+      notes TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE (product_id, source, external_sku)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_per_product_id ON product_external_refs(product_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_per_source ON product_external_refs(source)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_per_external_sku ON product_external_refs(lower(external_sku))`;
 
   // Bump products.updated_at when the product's documents change.
   // Without this, doc-only edits (re-running match-kb-to-products,
