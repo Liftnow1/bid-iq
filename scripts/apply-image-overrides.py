@@ -177,6 +177,20 @@ def url_looks_like_image(url: str) -> bool:
     return path.endswith(IMAGE_EXTS)
 
 
+def url_is_image_by_content_type(url: str) -> bool:
+    """Fallback for image URLs with no file extension (CDN transform
+    URLs like https://*.bynder.com/transform/<uuid>/<name>?io=...).
+    Cheap HEAD; if Content-Type starts with image/, treat as direct."""
+    req = urllib.request.Request(
+        url, headers={"User-Agent": UA, "Accept": "*/*"}, method="HEAD",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=8) as r:
+            return r.headers.get("Content-Type", "").lower().startswith("image/")
+    except Exception:
+        return False
+
+
 def parse_overrides(stream) -> list[tuple[int, str]]:
     out: list[tuple[int, str]] = []
     for raw in stream:
@@ -225,7 +239,12 @@ def main() -> int:
     failed = 0
 
     for pid, url in overrides:
-        if url_looks_like_image(url):
+        is_image = url_looks_like_image(url)
+        if not is_image:
+            # No image extension — try HEAD to see if it's an
+            # extensionless image (CDN transform URLs, etc.)
+            is_image = url_is_image_by_content_type(url)
+        if is_image:
             # Direct image URL — trust Paul, store as-is
             if _BAD_IMAGE_PATTERNS.search(url):
                 print(f"  [{pid}] REJECT (bad pattern): {url}")
