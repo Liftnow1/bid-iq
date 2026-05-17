@@ -90,18 +90,28 @@ HEAD = """\
   .flag-btn { background:none; border:none; color:var(--bad); cursor:pointer;
               padding:0; font:inherit; }
   .flag-btn:hover { text-decoration:underline; }
+  .override { display:none; margin-top:6px; }
+  .override input { width:100%; font:12px ui-monospace,Menlo,Consolas,monospace;
+                    padding:4px 6px; border:1px solid var(--bd); border-radius:4px; }
+  .override input::placeholder { color:#aaa; font-style:italic; }
+  .card.bad .override { display:block; }
+  .card.has-override { background:#fff8e6; border-color:#d6a300; }
   .copy-region { position:fixed; right:24px; bottom:24px; background:#222; color:#fff;
-                 padding:16px; border-radius:8px; max-width:50ch; box-shadow:0 4px 24px rgba(0,0,0,0.2);
+                 padding:16px; border-radius:8px; max-width:64ch; box-shadow:0 4px 24px rgba(0,0,0,0.2);
                  z-index:50; display:none; font-family:ui-monospace,Menlo,Consolas,monospace;
                  font-size:12px; line-height:1.5; }
   .copy-region.show { display:block; }
-  .copy-region textarea { width:100%; height:140px; background:#111; color:#fff;
+  .copy-region textarea { width:100%; height:160px; background:#111; color:#fff;
                           border:1px solid #444; border-radius:4px; padding:8px;
-                          font:inherit; resize:none; }
+                          font:inherit; resize:vertical; }
   .copy-region .hint { color:#aaa; margin-bottom:8px; }
-  .copy-region button { background:#444; color:#fff; border:0; padding:6px 12px;
+  .copy-region .tab-row { display:flex; gap:4px; margin-bottom:6px; }
+  .copy-region .tab { background:#333; color:#bbb; border:0; padding:6px 10px; border-radius:4px 4px 0 0;
+                      cursor:pointer; font:inherit; }
+  .copy-region .tab.active { background:#444; color:#fff; }
+  .copy-region button.btn { background:#444; color:#fff; border:0; padding:6px 12px;
                         border-radius:4px; cursor:pointer; margin-top:6px; margin-right:6px; }
-  .copy-region button:hover { background:#666; }
+  .copy-region button.btn:hover { background:#666; }
 </style>
 </head>
 <body>
@@ -109,42 +119,118 @@ HEAD = """\
 
 TAIL = """\
 <div class="copy-region" id="copyRegion">
-  <div class="hint">Bad SKUs collected (paste into psql / Neon SQL editor):</div>
+  <div class="tab-row">
+    <button class="tab active" id="tabSQL" onclick="showTab('sql')">SQL (clear &amp; rescrape)</button>
+    <button class="tab" id="tabOver" onclick="showTab('over')">Overrides (Paul-supplied URLs)</button>
+  </div>
+  <div class="hint" id="hint">Flag products you want re-scraped, OR paste a better URL in the override field to give Claude a specific source.</div>
   <textarea id="copyText" readonly></textarea>
-  <button onclick="copyToClipboard()">Copy</button>
-  <button onclick="document.getElementById('copyRegion').classList.remove('show')">Close</button>
+  <button class="btn" onclick="copyToClipboard()">Copy</button>
+  <button class="btn" onclick="document.getElementById('copyRegion').classList.remove('show')">Close</button>
 </div>
 <script>
   const flaggedIds = new Set();
+  const overrides = new Map();  // productId -> url
+  let activeTab = 'sql';
+
   function flag(card, productId) {
-    flaggedIds.has(productId) ? flaggedIds.delete(productId) : flaggedIds.add(productId);
+    if (flaggedIds.has(productId)) {
+      flaggedIds.delete(productId);
+      overrides.delete(productId);
+      card.classList.remove('has-override');
+      const input = card.querySelector('.override input');
+      if (input) input.value = '';
+    } else {
+      flaggedIds.add(productId);
+    }
     card.classList.toggle('bad');
     updatePanel();
   }
+
+  function setOverride(card, productId, url) {
+    url = (url || '').trim();
+    if (url) {
+      overrides.set(productId, url);
+      card.classList.add('has-override');
+      if (!flaggedIds.has(productId)) {
+        flaggedIds.add(productId);
+        card.classList.add('bad');
+      }
+    } else {
+      overrides.delete(productId);
+      card.classList.remove('has-override');
+    }
+    updatePanel();
+  }
+
+  function showTab(t) {
+    activeTab = t;
+    document.getElementById('tabSQL').classList.toggle('active', t === 'sql');
+    document.getElementById('tabOver').classList.toggle('active', t === 'over');
+    updatePanel();
+  }
+
   function updatePanel() {
     const region = document.getElementById('copyRegion');
     const txt = document.getElementById('copyText');
-    if (flaggedIds.size === 0) { region.classList.remove('show'); return; }
+    const hint = document.getElementById('hint');
+    if (flaggedIds.size === 0 && overrides.size === 0) {
+      region.classList.remove('show');
+      return;
+    }
     region.classList.add('show');
-    const ids = Array.from(flaggedIds).sort((a,b)=>a-b).join(',');
-    txt.value =
-      `-- Clear image_url on flagged products so we can re-run the scraper on them:\n` +
-      `UPDATE products SET image_url=NULL, image_source_url=NULL, image_fetched_at=NULL\n` +
-      `WHERE id IN (${ids});\n` +
-      `-- ${flaggedIds.size} flagged product(s)`;
+
+    if (activeTab === 'sql') {
+      // SQL tab: clear flagged-without-override rows so Claude can rescrape
+      const idsToClear = Array.from(flaggedIds).filter(id => !overrides.has(id)).sort((a,b)=>a-b);
+      hint.textContent = `${idsToClear.length} flagged-without-override product(s). Paste into Neon SQL editor:`;
+      if (idsToClear.length === 0) {
+        txt.value = `-- No flagged-without-override products. Switch to the Overrides tab.\n`;
+      } else {
+        txt.value =
+          `-- Clear image_url on flagged products so the scraper picks them up again:\n` +
+          `UPDATE products SET image_url=NULL, image_source_url=NULL, image_fetched_at=NULL\n` +
+          `WHERE id IN (${idsToClear.join(',')});\n` +
+          `-- ${idsToClear.length} flagged-without-override product(s)`;
+      }
+    } else {
+      // Override tab: id<TAB>url pairs to feed apply-image-overrides.py
+      hint.textContent = `${overrides.size} override(s). Save these lines to a file or paste to Claude:`;
+      if (overrides.size === 0) {
+        txt.value = `# No overrides supplied. Paste a better URL into any flagged tile's input.\n`;
+      } else {
+        const lines = ['# bid-iq image overrides — feed to scripts/apply-image-overrides.py',
+                       '# Format: <product_id> <url>'];
+        const pairs = Array.from(overrides.entries()).sort((a,b)=>a[0]-b[0]);
+        for (const [id, url] of pairs) lines.push(`${id} ${url}`);
+        txt.value = lines.join('\\n');
+      }
+    }
   }
+
   function copyToClipboard() {
     const txt = document.getElementById('copyText');
     txt.select(); document.execCommand('copy');
   }
+
   document.querySelectorAll('img.thumb').forEach(img => {
     img.addEventListener('error', () => img.classList.add('broken'));
   });
+
   document.getElementById('q').addEventListener('input', e => {
     const v = e.target.value.toLowerCase().trim();
     document.querySelectorAll('.card').forEach(c => {
       const t = c.dataset.search;
       c.style.display = !v || t.includes(v) ? '' : 'none';
+    });
+  });
+
+  // Wire up override inputs
+  document.querySelectorAll('.override input').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const card = e.target.closest('.card');
+      const pid = parseInt(card.dataset.productId, 10);
+      setOverride(card, pid, e.target.value);
     });
   });
 </script>
@@ -182,7 +268,7 @@ def render(rows: list[dict]) -> str:
             img = r["image_url"] or ""
             search_blob = f"{brand} {sku} {fam}".lower()
             out.append(
-                f'<div class="card" data-search="{html.escape(search_blob)}">'
+                f'<div class="card" data-search="{html.escape(search_blob)}" data-product-id="{r["id"]}">'
                 f'<img class="thumb" loading="lazy" referrerpolicy="no-referrer" src="{html.escape(img)}" alt="{html.escape(sku)}">'
                 f'<div class="sku">{html.escape(sku)}</div>'
                 f'<div class="family">{html.escape(fam)}</div>'
@@ -190,7 +276,11 @@ def render(rows: list[dict]) -> str:
                 f'<a href="{html.escape(src)}" target="_blank" rel="noopener">source page &#x2197;</a>'
                 f'<a href="{html.escape(img)}" target="_blank" rel="noopener">image &#x2197;</a>'
                 f'<button class="flag-btn" onclick="flag(this.closest(\'.card\'), {r["id"]})">flag bad</button>'
-                f'</div></div>'
+                f'</div>'
+                f'<div class="override">'
+                f'<input type="url" placeholder="paste better page URL or image URL..." />'
+                f'</div>'
+                f'</div>'
             )
         out.append('</div></div>')
     out.append(TAIL)
