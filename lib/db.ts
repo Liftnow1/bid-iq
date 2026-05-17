@@ -118,6 +118,15 @@ export async function ensureSchema() {
       UNIQUE (brand_id, sku)
     )
   `;
+  // Product images — populated by scripts/populate-product-images.py
+  // from manufacturer site og:image tags. Stored as a URL pointing at
+  // the manufacturer's CDN (BendPak's, Rotary's, etc.); we do NOT
+  // mirror these into R2. image_source_url is the page the og:image
+  // was scraped from, kept for audit/refetch.
+  await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS image_url TEXT`;
+  await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS image_source_url TEXT`;
+  await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS image_fetched_at TIMESTAMPTZ`;
+
   await sql`CREATE INDEX IF NOT EXISTS idx_products_brand_id ON products(brand_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_products_status ON products(status)`;

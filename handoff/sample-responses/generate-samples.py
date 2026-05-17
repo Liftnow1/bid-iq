@@ -74,6 +74,7 @@ def main():
                p.is_ali_certified, p.ali_cert_date,
                coalesce(p.variant_skus, '[]'::jsonb) AS variant_skus,
                p.status, p.source, p.source_file, p.notes,
+               p.image_url, p.image_source_url, p.image_fetched_at,
                p.created_at, p.updated_at
         FROM products p JOIN brands b ON b.id = p.brand_id
         ORDER BY b.name, p.category, p.capacity_lbs NULLS LAST, p.sku
@@ -108,6 +109,7 @@ def main():
                p.is_ali_certified, p.ali_cert_date,
                coalesce(p.variant_skus, '[]'::jsonb) AS variant_skus,
                p.status, p.source, p.source_file, p.notes,
+               p.image_url, p.image_source_url, p.image_fetched_at,
                p.created_at, p.updated_at
         FROM products p JOIN brands b ON b.id = p.brand_id
         WHERE p.id = %s
@@ -144,6 +146,7 @@ def main():
                p.is_ali_certified, p.ali_cert_date,
                coalesce(p.variant_skus, '[]'::jsonb) AS variant_skus,
                p.status, p.source, p.source_file, p.notes,
+               p.image_url, p.image_source_url, p.image_fetched_at,
                p.created_at, p.updated_at
         FROM products p JOIN brands b ON b.id = p.brand_id
         ORDER BY b.name, p.category, p.capacity_lbs NULLS LAST, p.sku

@@ -144,6 +144,7 @@ export async function GET(request: NextRequest) {
              p.is_ali_certified, p.ali_cert_date,
              coalesce(p.variant_skus, '[]'::jsonb) AS variant_skus,
              p.status, p.source, p.source_file, p.notes,
+             p.image_url, p.image_source_url, p.image_fetched_at,
              p.created_at, p.updated_at
       FROM products p JOIN brands b ON b.id = p.brand_id
       WHERE 1=1

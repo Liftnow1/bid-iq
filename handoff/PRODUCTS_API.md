@@ -60,6 +60,36 @@ Indicates how a row entered the catalog. The portal can filter on this to distin
 
 A separate `product_external_refs` table records every third-party listing we know about for a product, including the listings we couldn't fold into a canonical row. Today it carries the 2,558 SVI catalog rows, each with the SVI page URL and up to 14 SVI resource endpoint URLs (spec sheets, parts manuals, etc.). The table is **not yet exposed via the API**; let me know if the portal wants it surfaced.
 
+### Product images
+
+Three product-image fields are returned on every row:
+
+- `image_url` — URL to a product photo. Hosted on the manufacturer's CDN, an authorized reseller's CDN, or a vendor's image-hosting platform (Shopify, WordPress, etc.). The portal can `<img src="{image_url}">` directly. **Currently populated on 339 of 442 hand-curated products (76%);** SVI-imported rows have NULL `image_url`.
+- `image_source_url` — the page the image was scraped from. Kept for audit; if a flagged image needs replacing, this is the page to verify against.
+- `image_fetched_at` — when the scrape happened. After a manual re-scrape (`scripts/populate-product-images-v2.py --force`) this gets bumped.
+
+Coverage by brand:
+
+| brand | imaged | total | % |
+|---|---:|---:|---:|
+| challenger | 40 | 40 | 100% |
+| forward | 22 | 22 | 100% |
+| gray | 4 | 4 | 100% |
+| mahle | 3 | 3 | 100% |
+| bendpak | 82 | 84 | 97% |
+| ari-hetra | 25 | 26 | 96% |
+| rotary | 56 | 60 | 93% |
+| coats | 24 | 27 | 88% |
+| stertil-koni | 20 | 33 | 60% |
+| mohawk | 24 | 39 | 62% |
+| hunter | 7 | 12 | 58% |
+| pks | 32 | 92 | 35% |
+| **TOTAL** | **339** | **442** | **76%** |
+
+The 103 uncovered rows are products without retail-facing pages anywhere on the public web — primarily PKS heavy-duty ingrounds and older Stertil-Koni/Mohawk/Hunter fleet variants sold via direct quote rather than catalog. They keep `image_url = NULL`.
+
+**Quality:** the v2 scraper requires the SKU to appear in the source-page text (proves on-product relevance) and rejects placeholder/logo/favicon image filenames. After scrape, the catalog went through three rounds of human visual audit (Paul flagged bad matches via an HTML grid review; the rejections got cleared and re-scraped). Every URL in `image_url` has been seen by a human in iter-3 or earlier.
+
 ## Endpoints
 
 ### `GET /api/products`
@@ -105,6 +135,9 @@ Paginated list with filtering.
       "source": "price-sheet",
       "source_file": "Challenger Lifts - Current SW 04-20-2026.xlsx",
       "notes": null,
+      "image_url": "https://challengerlifts.com/wp-content/uploads/2023/04/Screen-Shot-2023-04-14-at-9.42.34-AM.png",
+      "image_source_url": "https://www.challengerlifts.com/CL12A",
+      "image_fetched_at": "2026-05-17T...",
       "created_at": "2026-05-09T...",
       "updated_at": "2026-05-09T...",
       "documents": [...]   // present only if include_documents=true
