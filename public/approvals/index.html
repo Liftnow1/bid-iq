@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liftnow Agent Approvals</title>
+<style>
+  :root{
+    --bg:#0e1116; --card:#161b22; --border:#2a313c; --muted:#8b949e;
+    --fg:#e6edf3; --fg-dim:#c9d1d9;
+    --ok:#3fb950; --warn:#d29922; --err:#f85149; --accent:#58a6ff;
+    --priority-high:#f85149; --priority-med:#d29922; --priority-low:#3fb950;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:#0a0d12}
+  h1{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:12px;margin-top:2px}
+  .tabs{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);background:#0a0d12}
+  .tab{padding:12px 18px;background:none;border:none;color:var(--muted);font:inherit;cursor:pointer;border-bottom:2px solid transparent}
+  .tab.active{color:var(--fg);border-bottom-color:var(--accent)}
+  .tab:hover:not(.active){color:var(--fg-dim)}
+  main{max-width:980px;margin:0 auto;padding:24px}
+  .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+  .meta{color:var(--muted);font-size:12px}
+  .btn{background:#21262d;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
+  .btn:hover{background:#2d333b}
+  .btn.refresh{margin-left:auto}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+  .card.collapsed .body,.card.collapsed .actions{display:none}
+  .card-head{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
+  .agent-badge{background:#1f2937;color:var(--accent);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
+  .priority{font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;text-transform:uppercase}
+  .priority-HIGH{background:rgba(248,81,73,.15);color:var(--priority-high)}
+  .priority-MEDIUM{background:rgba(210,153,34,.15);color:var(--priority-med)}
+  .priority-LOW{background:rgba(63,185,80,.15);color:var(--priority-low)}
+  .subject{flex:1;font-weight:600;color:var(--fg)}
+  .age{color:var(--muted);font-size:12px;white-space:nowrap}
+  .body{margin-top:12px;color:var(--fg-dim);white-space:pre-wrap;font-size:13px;background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:12px;max-height:280px;overflow:auto}
+  .body details{margin-top:8px}
+  .actions{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .comment{flex:1;min-width:220px;background:#0d1117;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font:inherit;resize:vertical;min-height:34px}
+  .btn-approve{background:#1f7a3a;border-color:#2ea043;color:#fff}
+  .btn-approve:hover{background:#2ea043}
+  .btn-defer{background:#7a5a1a;border-color:#9e6a00;color:#fff}
+  .btn-defer:hover{background:#9e6a00}
+  .btn-reject{background:#7a2424;border-color:#a52828;color:#fff}
+  .btn-reject:hover{background:#a52828}
+  .btn[disabled]{opacity:.5;cursor:wait}
+  .toast{position:fixed;right:24px;bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;animation:slidein .2s ease-out;max-width:320px}
+  .toast.ok{border-color:var(--ok)}
+  .toast.err{border-color:var(--err)}
+  @keyframes slidein{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .empty{padding:40px;text-align:center;color:var(--muted)}
+  .loading{padding:40px;text-align:center;color:var(--muted)}
+  .reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px}
+  .stat-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+  .stat-value{font-size:28px;font-weight:700;color:var(--fg)}
+  .stat-sub{color:var(--muted);font-size:12px;margin-top:4px}
+  h2{font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:24px 0 8px}
+  .agent-row{display:flex;justify-content:space-between;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:13px}
+  .count{display:inline-block;background:#21262d;color:var(--muted);padding:1px 6px;border-radius:10px;font-size:11px;margin-left:4px;min-width:18px;text-align:center}
+  .tab.active .count{background:var(--accent);color:#fff}
+  .btn-ack{background:#1f2937;border-color:var(--border);color:var(--fg)}
+  .btn-ack:hover{background:#2d333b}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Liftnow Agent Approvals</h1>
+    <div class="sub" id="connection-status">Connected to agents.liftnowdirect.com</div>
+  </div>
+  <button class="btn refresh" onclick="loadCurrentTab()">Refresh</button>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-view="pending" onclick="switchTab('pending')">Pending <span class="count" id="count-pending"></span></button>
+  <button class="tab" data-view="inbox" onclick="switchTab('inbox')">Inbox <span class="count" id="count-inbox"></span></button>
+  <button class="tab" data-view="done" onclick="switchTab('done')">Recently Done</button>
+  <button class="tab" data-view="stats" onclick="switchTab('stats')">Stats</button>
+</div>
+
+<main id="main">
+  <div class="loading">Loading...</div>
+</main>
+
+<script>
+const API_BASE = 'https://agents.liftnowdirect.com/webhook';
+let currentView = 'pending';
+
+function isReport(t){
+  const s = t.subject || '';
+  const rt = (t.recommendationType || '').toLowerCase();
+  return /\bsummary\b|\[coordinator\]|^weekly |^monthly |weekly (report|summary|backlink|sem|keyword)|monthly (report|summary|keyword)/i.test(s)
+      || /^report$|^summary$/.test(rt);
+}
+
+function switchTab(view){
+  currentView = view;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.view===view));
+  loadCurrentTab();
+}
+
+async function loadCurrentTab(){
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    if (currentView === 'stats') {
+      await renderStats();
+    } else if (currentView === 'done') {
+      const data = await fetchTickets('done');
+      renderList(data, 'done');
+    } else {
+      // pending OR inbox — both read from the same source, split client-side
+      const data = await fetchTickets('pending');
+      const reports = (data.tickets || []).filter(isReport);
+      const proposals = (data.tickets || []).filter(t => !isReport(t));
+      document.getElementById('count-pending').textContent = proposals.length || '';
+      document.getElementById('count-inbox').textContent = reports.length || '';
+      renderList({tickets: currentView === 'inbox' ? reports : proposals}, currentView);
+    }
+  } catch (e) {
+    main.innerHTML = `<div class="empty">Error: ${escapeHtml(e.message)}<br><br><button class="btn" onclick="loadCurrentTab()">Retry</button></div>`;
+  }
+}
+
+async function fetchTickets(view){
+  const r = await fetch(`${API_BASE}/agent-proposals?view=${view}`);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function ageLabel(hours){
+  if (hours < 1) return 'just now';
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours/24)}d ago`;
+}
+
+function renderList(data, mode){
+  const main = document.getElementById('main');
+  const tickets = data.tickets || [];
+  const labels = {
+    pending: 'awaiting your decision',
+    inbox: 'reports & summaries to acknowledge',
+    done: 'completed in last 7 days'
+  };
+  const emptyMsg = {
+    pending: 'Inbox zero ✨',
+    inbox: 'No reports to read',
+    done: 'No completed items yet'
+  };
+  const toolbar = `
+    <div class="toolbar">
+      <span class="meta">${tickets.length} ${labels[mode] || ''}</span>
+    </div>`;
+  if (!tickets.length) {
+    main.innerHTML = toolbar + `<div class="empty">${emptyMsg[mode] || 'Nothing here'}</div>`;
+    return;
+  }
+  main.innerHTML = toolbar + tickets.map((t,i)=>renderCard(t,i,mode)).join('');
+}
+
+function renderCard(t, idx, mode){
+  const stageLabel = {'1':'Pending','2':'Approved','3':'In Progress','4':'Closed'}[t.stage] || t.stage;
+  let actionsHtml = '';
+  if (mode === 'pending') {
+    actionsHtml = `
+    <div class="actions">
+      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional comment / instruction..."></textarea>
+      <button class="btn btn-approve" onclick="decide('${t.ticketId}','approve',this)">Approve</button>
+      <button class="btn btn-defer" onclick="decide('${t.ticketId}','defer',this)">Defer 3d</button>
+      <button class="btn btn-reject" onclick="decide('${t.ticketId}','reject',this)">Reject</button>
+    </div>`;
+  } else if (mode === 'inbox') {
+    actionsHtml = `
+    <div class="actions">
+      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional note for the agent..."></textarea>
+      <button class="btn btn-ack" onclick="decide('${t.ticketId}','acknowledge',this)">Acknowledge</button>
+    </div>`;
+  }
+  return `
+  <div class="card collapsed" id="card-${t.ticketId}">
+    <div class="card-head" onclick="document.getElementById('card-${t.ticketId}').classList.toggle('collapsed')">
+      <span class="agent-badge">${escapeHtml(t.agent)}</span>
+      <span class="priority priority-${escapeHtml(t.priority)}">${escapeHtml(t.priority)}</span>
+      <span class="subject">${escapeHtml(t.subject)}</span>
+      <span class="age">${mode === 'done' ? stageLabel + ' · ' : ''}${ageLabel(t.ageHours)}</span>
+    </div>
+    <div class="body">${escapeHtml(t.content || '(no detail)')}
+      ${t.recommendationDetail ? `<details><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Recommendation detail</summary><pre style="white-space:pre-wrap;margin:8px 0 0">${escapeHtml(t.recommendationDetail)}</pre></details>` : ''}
+      ${t.outcomeNotes ? `<details open><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Outcome notes</summary><pre style="white-space:pre-wrap;margin:8px 0 0">${escapeHtml(t.outcomeNotes)}</pre></details>` : ''}
+    </div>
+    ${actionsHtml}
+  </div>`;
+}
+
+async function decide(ticketId, decision, btn){
+  const comment = document.getElementById('comment-'+ticketId)?.value || '';
+  const card = document.getElementById('card-'+ticketId);
+  card.querySelectorAll('button').forEach(b=>b.disabled=true);
+  try {
+    const r = await fetch(`${API_BASE}/process-decision`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ticketId, decision, comment, deferDays: 3})
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    toast(`${decision.toUpperCase()} sent`, 'ok');
+    card.style.opacity='0.4';
+    setTimeout(()=>card.remove(), 400);
+  } catch (e) {
+    toast('Failed: '+e.message, 'err');
+    card.querySelectorAll('button').forEach(b=>b.disabled=false);
+  }
+}
+
+function toast(msg, kind='ok'){
+  const t = document.createElement('div');
+  t.className = 'toast ' + kind;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)}, 2500);
+}
+
+async function renderStats(){
+  const main = document.getElementById('main');
+  const [pending, done] = await Promise.all([fetchTickets('pending'), fetchTickets('done')]);
+  const proposals = pending.tickets.filter(t => !isReport(t));
+  const reports = pending.tickets.filter(isReport);
+  const dCount = done.tickets.length;
+  const approved = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('APPROVED')).length;
+  const rejected = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('REJECTED')).length;
+  const acknowledged = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('ACKNOWLEDGED')).length;
+  const decided = approved + rejected;
+  const approveRate = decided ? Math.round(approved*100/decided) : null;
+  const byAgent = {};
+  for (const t of [...pending.tickets, ...done.tickets]) {
+    byAgent[t.agent] = (byAgent[t.agent]||0)+1;
+  }
+  const agentRows = Object.entries(byAgent).sort((a,b)=>b[1]-a[1]).map(([a,c])=>`<div class="agent-row"><span>${escapeHtml(a)}</span><span class="meta">${c}</span></div>`).join('');
+  main.innerHTML = `
+    <div class="reports-grid">
+      <div class="stat"><div class="stat-label">Pending Decisions</div><div class="stat-value">${proposals.length}</div><div class="stat-sub">in Pending tab</div></div>
+      <div class="stat"><div class="stat-label">Reports To Read</div><div class="stat-value">${reports.length}</div><div class="stat-sub">in Inbox tab</div></div>
+      <div class="stat"><div class="stat-label">Last 7 Days</div><div class="stat-value">${dCount}</div><div class="stat-sub">processed</div></div>
+      <div class="stat"><div class="stat-label">Approve Rate</div><div class="stat-value">${approveRate !== null ? approveRate+'%' : '—'}</div><div class="stat-sub">${approved} approved · ${rejected} rejected · ${acknowledged} ack'd</div></div>
+    </div>
+    <h2>Volume by Agent</h2>
+    ${agentRows || '<div class="empty">No data yet</div>'}
+  `;
+}
+
+loadCurrentTab();
+setInterval(()=>{ if (currentView==='pending') loadCurrentTab(); }, 60000);
+</script>
+</body>
+</html>

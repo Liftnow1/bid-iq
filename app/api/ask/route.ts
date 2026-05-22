@@ -18,6 +18,47 @@ import {
 // the first query against a fresh Tier-1 row doesn't time out.
 export const maxDuration = 300;
 
+// Brands Liftnow actually carries. When `consumer_role === "marketing"`,
+// these are the ONLY brands the answer may present as Liftnow products.
+// Source of truth is the `brands` table (we_carry = true) — keep this list
+// in sync with that table. The strings below are matched case-insensitively
+// against both retrieved content and the answer.
+const LIFTNOW_CARRIED_BRANDS = [
+  "BendPak", "Alemite", "Challenger", "PKS", "Coats", "Omer", "Balcrank",
+  "Mahle", "Champion", "Lincoln", "Mattei", "Pro-Cut", "Liftnow",
+];
+
+// Brands frequently appearing in the KB for competitor / bid-analysis
+// purposes — these are explicitly NOT Liftnow products. Marketing-mode
+// answers must never list these as Liftnow offerings.
+const LIFTNOW_NOT_CARRIED_BRANDS = [
+  "Stertil-Koni", "Mohawk", "Mohawk Lifts", "Ari-Hetra", "Ari", "Hunter",
+  "Rotary", "Ranger", "Snap-on", "Snapon", "Robinair",
+];
+
+const MARKETING_MODE_PREAMBLE = `## MARKETING MODE — HARDEST RULE (overrides everything below when in conflict)
+
+You are answering for Liftnow's marketing/content team. The answer will be used to draft public-facing content (blog posts, landing pages, LinkedIn, ads). Two extra constraints apply:
+
+**Brands Liftnow carries (ONLY these may be presented as Liftnow products):**
+${LIFTNOW_CARRIED_BRANDS.join(", ")}.
+
+**Brands Liftnow does NOT carry (must never be presented as Liftnow offerings):**
+${LIFTNOW_NOT_CARRIED_BRANDS.join(", ")}.
+
+Retrieved sources will often include content about non-carried brands — those documents are in the KB for competitor/bid analysis, NOT as product catalog. When drafting marketing content:
+
+1. Do NOT name any non-carried brand as something Liftnow sells, stocks, installs, or recommends as a Liftnow option.
+2. Do NOT structure the answer around a non-carried brand's product line (e.g. "Liftnow's Stertil-Koni lifts...") even if multiple retrieved sources are about that brand — that means retrieval brought back the wrong docs for this purpose.
+3. If the marketing topic is genuinely brand-agnostic (e.g. "benefits of two-post lifts"), reference Liftnow-carried brands by name for examples; describe non-carried brands only generically ("other lift manufacturers") and only when necessary for context.
+4. If a retrieved source has authoritative facts about a non-carried brand and the user's question is comparative (e.g. "how do our BendPak HD-9s compare to Mohawk's TR-50"), you may state factual differences but always frame Liftnow as offering the carried brand — never imply Liftnow sells the competitor.
+
+If the answer cannot be written about a Liftnow-carried brand from the retrieved sources, REFUSE explicitly: "The retrieved KB doesn't contain Liftnow-carried-brand content for this topic — needs a different query or KB additions."
+
+---
+
+`;
+
 const LIFTNOW_SYSTEM_PROMPT = `You are a strict factual research assistant for Liftnow, a government-focused dealer of vehicle lifts and heavy equipment maintenance gear. Your job is to answer Paul's questions ONLY using the retrieved knowledge base entries provided in the user message. You are NOT a creative writer, NOT a salesperson, NOT Paul.
 
 Liftnow is a Sourcewell contract holder (121223-LFT) and holds numerous state contracts.
@@ -2110,9 +2151,11 @@ export async function POST(request: NextRequest) {
   try {
     const text = await request.text();
     let question = "";
+    let consumerRole = "";
     try {
       const body = JSON.parse(text);
       question = body?.question || "";
+      consumerRole = typeof body?.consumer_role === "string" ? body.consumer_role : "";
     } catch {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
@@ -2121,6 +2164,10 @@ export async function POST(request: NextRequest) {
     }
 
     const trimmed = question.trim();
+    const isMarketingConsumer = consumerRole.toLowerCase() === "marketing";
+    const systemPrompt = isMarketingConsumer
+      ? MARKETING_MODE_PREAMBLE + LIFTNOW_SYSTEM_PROMPT
+      : LIFTNOW_SYSTEM_PROMPT;
     const queryMode: QueryMode = isCertQuery(trimmed)
       ? "cert-inclusive"
       : "commercial-only";
@@ -2248,7 +2295,7 @@ export async function POST(request: NextRequest) {
       // Synthesis is pure extractive summarization; we want zero
       // creativity. Reduces hallucination rate at the source.
       temperature: 0,
-      system: LIFTNOW_SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: [
         {
           role: "user",
@@ -2295,7 +2342,7 @@ export async function POST(request: NextRequest) {
             model: "claude-sonnet-4-20250514",
             max_tokens: 4096,
             temperature: 0,
-            system: LIFTNOW_SYSTEM_PROMPT,
+            system: systemPrompt,
             messages: [
               {
                 role: "user",
