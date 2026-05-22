@@ -80,6 +80,7 @@
   <button class="tab active" data-view="pending" onclick="switchTab('pending')">Pending <span class="count" id="count-pending"></span></button>
   <button class="tab" data-view="inbox" onclick="switchTab('inbox')">Inbox <span class="count" id="count-inbox"></span></button>
   <button class="tab" data-view="done" onclick="switchTab('done')">Recently Done</button>
+  <button class="tab" data-view="learnings" onclick="switchTab('learnings')">Learnings</button>
   <button class="tab" data-view="stats" onclick="switchTab('stats')">Stats</button>
 </div>
 
@@ -110,6 +111,8 @@ async function loadCurrentTab(){
   try {
     if (currentView === 'stats') {
       await renderStats();
+    } else if (currentView === 'learnings') {
+      await renderLearnings();
     } else if (currentView === 'done') {
       const data = await fetchTickets('done');
       renderList(data, 'done');
@@ -226,6 +229,43 @@ function toast(msg, kind='ok'){
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)}, 2500);
+}
+
+async function renderLearnings(){
+  const main = document.getElementById('main');
+  const done = await fetchTickets('done');
+  const tickets = (done.tickets || []).filter(t => (t.outcomeNotes||'').startsWith('REJECTED'));
+  const byAgent = {};
+  for (const t of tickets) {
+    const a = t.agent || '(unknown)';
+    byAgent[a] = byAgent[a] || [];
+    byAgent[a].push(t);
+  }
+  const sortedAgents = Object.entries(byAgent).sort((a,b) => b[1].length - a[1].length);
+  let html = `
+    <div class="toolbar">
+      <span class="meta">${tickets.length} rejections in last 7 days — the team learns from these</span>
+    </div>`;
+  if (!tickets.length) {
+    html += '<div class="empty">No rejections yet. Nothing learned from the no-pile.</div>';
+  } else {
+    for (const [agent, list] of sortedAgents) {
+      html += `<h2 style="margin-top:24px">${escapeHtml(agent)} <span style="color:var(--muted);font-weight:400">(${list.length})</span></h2>`;
+      for (const t of list) {
+        const comment = (t.outcomeNotes||'').replace(/^REJECTED\s+\S+\s*—?\s*/, '').trim();
+        html += `
+        <div class="card collapsed" id="card-${t.ticketId}">
+          <div class="card-head" onclick="document.getElementById('card-${t.ticketId}').classList.toggle('collapsed')">
+            <span class="priority priority-${escapeHtml(t.priority)}">${escapeHtml(t.priority)}</span>
+            <span class="subject">${escapeHtml(t.subject)}</span>
+            <span class="age">${ageLabel(t.ageHours)}</span>
+          </div>
+          <div class="body">${comment ? '<strong>Paul:</strong> ' + escapeHtml(comment) + '\n\n' : '<em>(no comment given)</em>\n\n'}---ORIGINAL PROPOSAL---\n${escapeHtml(t.content || '')}</div>
+        </div>`;
+      }
+    }
+  }
+  main.innerHTML = html;
 }
 
 async function renderStats(){
