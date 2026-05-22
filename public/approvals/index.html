@@ -46,6 +46,8 @@
   .btn-defer:hover{background:#855700}
   .btn-reject{background:#d73a49;border-color:#b31d28;color:#fff}
   .btn-reject:hover{background:#b31d28}
+  .btn-cond{background:#6f42c1;border-color:#5a32a3;color:#fff}
+  .btn-cond:hover{background:#5a32a3}
   .btn[disabled]{opacity:.5;cursor:wait}
   .toast{position:fixed;right:24px;bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;animation:slidein .2s ease-out;max-width:320px}
   .toast.ok{border-color:var(--ok)}
@@ -174,8 +176,9 @@ function renderCard(t, idx, mode){
   if (mode === 'pending') {
     actionsHtml = `
     <div class="actions">
-      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional comment / instruction..."></textarea>
+      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional comment / conditions (e.g. 'approve but cap at $500')..."></textarea>
       <button class="btn btn-approve" onclick="decide('${t.ticketId}','approve',this)">Approve</button>
+      <button class="btn btn-cond" onclick="decide('${t.ticketId}','conditional_approve',this)" title="Approve with conditions — your comment becomes the conditions Approval Executor enforces">Approve w/ Conditions</button>
       <button class="btn btn-defer" onclick="decide('${t.ticketId}','defer',this)">Defer 3d</button>
       <button class="btn btn-reject" onclick="decide('${t.ticketId}','reject',this)">Reject</button>
     </div>`;
@@ -204,6 +207,10 @@ function renderCard(t, idx, mode){
 
 async function decide(ticketId, decision, btn){
   const comment = document.getElementById('comment-'+ticketId)?.value || '';
+  if (decision === 'conditional_approve' && !comment.trim()) {
+    toast('Conditional approve needs a condition in the comment box', 'err');
+    return;
+  }
   const card = document.getElementById('card-'+ticketId);
   card.querySelectorAll('button').forEach(b=>b.disabled=true);
   try {
@@ -214,7 +221,8 @@ async function decide(ticketId, decision, btn){
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
-    toast(`${decision.toUpperCase()} sent`, 'ok');
+    const label = decision === 'conditional_approve' ? 'CONDITIONAL APPROVE' : decision.toUpperCase();
+    toast(`${label} sent`, 'ok');
     card.style.opacity='0.4';
     setTimeout(()=>card.remove(), 400);
   } catch (e) {
