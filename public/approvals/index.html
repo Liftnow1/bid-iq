@@ -10,62 +10,136 @@
     --fg:#24292e; --fg-dim:#586069;
     --ok:#22863a; --warn:#b08800; --err:#d73a49; --accent:#0366d6;
     --priority-high:#d73a49; --priority-med:#b08800; --priority-low:#22863a;
+    /* Agent colors */
+    --a-content:#0366d6; --a-sem:#d97706; --a-seo:#0891b2;
+    --a-backlink:#7c3aed; --a-keyword:#be185d; --a-linkedin:#15803d;
+    --a-uiux:#0d9488; --a-competitor:#9333ea; --a-coordinator:#1f2937;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-  header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:#f6f8fa}
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:#f6f8fa}
   h1{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
   .sub{color:var(--muted);font-size:12px;margin-top:2px}
   .tabs{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);background:#f6f8fa}
-  .tab{padding:12px 18px;background:none;border:none;color:var(--muted);font:inherit;cursor:pointer;border-bottom:2px solid transparent}
+  .tab{padding:10px 18px;background:none;border:none;color:var(--muted);font:inherit;cursor:pointer;border-bottom:2px solid transparent}
   .tab.active{color:var(--fg);border-bottom-color:var(--accent)}
   .tab:hover:not(.active){color:var(--fg-dim)}
-  main{max-width:980px;margin:0 auto;padding:24px}
-  .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+  .count{display:inline-block;background:#e1e4e8;color:var(--muted);padding:1px 6px;border-radius:10px;font-size:11px;margin-left:4px;min-width:18px;text-align:center;font-variant-numeric:tabular-nums}
+  .tab.active .count{background:var(--accent);color:#fff}
+  main{max-width:1080px;margin:0 auto;padding:16px 24px 32px}
+
+  /* === Coordinator strip === */
+  .coord-strip{background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden;transition:max-height 240ms cubic-bezier(0.4,0,0.2,1)}
+  .coord-strip-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none}
+  .coord-strip-head:hover{background:#f6f8fa}
+  .health-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+  .health-green{background:var(--ok)} .health-yellow{background:var(--warn)} .health-red{background:var(--err)} .health-unknown{background:var(--muted)}
+  .coord-summary{flex:1;font-size:13px;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .coord-strip-pills{display:flex;gap:6px;flex-shrink:0}
+  .pill{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#e1e4e8;color:var(--muted);cursor:pointer}
+  .pill.has-conflicts{background:rgba(176,136,0,.15);color:var(--warn)}
+  .pill.has-redflags{background:rgba(215,58,73,.15);color:var(--err)}
+  .pill.has-synergies{background:rgba(34,134,58,.15);color:var(--ok)}
+  .coord-strip-body{padding:0 16px 16px;border-top:1px solid var(--border);display:none}
+  .coord-strip.expanded .coord-strip-body{display:block}
+  .coord-section{margin-top:12px}
+  .coord-section h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 6px;font-weight:600}
+  .coord-item{padding:6px 10px;background:#f6f8fa;border-radius:6px;margin-bottom:4px;font-size:13px}
+  .coord-priority{display:flex;align-items:center;gap:8px}
+  .rank-chip{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:var(--accent);color:#fff;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;flex-shrink:0}
+  .ticket-link{color:var(--accent);text-decoration:none;font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px;cursor:pointer}
+  .ticket-link:hover{text-decoration:underline}
+  .coord-no-brief{color:var(--muted);font-style:italic;font-size:13px}
+
+  /* === Toolbar === */
+  .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
   .meta{color:var(--muted);font-size:12px}
-  .btn{background:#ffffff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
-  .btn:hover{background:#f0f3f6}
-  .btn.refresh{margin-left:auto}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
-  .card.collapsed .body,.card.collapsed .actions{display:none}
-  .card-head{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
-  .agent-badge{background:#ddeefe;color:var(--accent);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
-  .priority{font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;text-transform:uppercase}
-  .priority-HIGH{background:rgba(248,81,73,.15);color:var(--priority-high)}
-  .priority-MEDIUM{background:rgba(210,153,34,.15);color:var(--priority-med)}
-  .priority-LOW{background:rgba(63,185,80,.15);color:var(--priority-low)}
-  .subject{flex:1;font-weight:600;color:var(--fg)}
-  .age{color:var(--muted);font-size:12px;white-space:nowrap}
-  .body{margin-top:12px;color:var(--fg-dim);white-space:pre-wrap;font-size:13px;background:#f6f8fa;border:1px solid var(--border);border-radius:6px;padding:12px;max-height:280px;overflow:auto}
+  .toolbar input[type=text],.toolbar select{background:#fff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font:inherit;font-size:13px}
+  .toolbar input[type=text]{flex:1;min-width:160px}
+  .toolbar .spacer{flex:1}
+
+  /* === Cards === */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:8px;transition:opacity 200ms ease-out,transform 200ms ease-out;position:relative}
+  .card.low{background:#fafbfc;opacity:.92}
+  .card.collapsed .body,.card.collapsed .actions,.card.collapsed .coord-context{display:none}
+  .card.focused{outline:2px solid var(--accent);outline-offset:4px}
+  .card.red-flag{box-shadow:inset 3px 0 0 var(--err)}
+  .card.fading{opacity:0;transform:translateX(8px)}
+  .card-head{display:flex;align-items:center;gap:10px;cursor:pointer;min-height:24px}
+  .rank-chip.in-card{margin-right:2px}
+  .agent-badge{background:var(--badge-bg,#e7f0fe);color:var(--badge-fg,var(--accent));padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
+  .priority{font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;text-transform:uppercase;font-variant-numeric:tabular-nums}
+  .priority-HIGH{background:rgba(215,58,73,.15);color:var(--priority-high)}
+  .priority-MEDIUM{background:rgba(176,136,0,.15);color:var(--priority-med)}
+  .priority-LOW{background:rgba(34,134,58,.15);color:var(--priority-low)}
+  .subject{flex:1;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .card.collapsed .subject{white-space:nowrap}
+  .card:not(.collapsed) .subject{white-space:normal}
+  .age{color:var(--muted);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .age.old{color:var(--warn)} .age.stale{color:var(--err)}
+  .redflag-dot{width:8px;height:8px;border-radius:50%;background:var(--err);flex-shrink:0}
+  .exec-status{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+  .exec-queued{background:#e1e4e8;color:var(--muted)}
+  .exec-executing{background:rgba(3,102,214,.15);color:var(--accent);animation:pulse 1.5s ease-in-out infinite}
+  .exec-completed{background:rgba(34,134,58,.15);color:var(--ok)}
+  .exec-failed{background:rgba(215,58,73,.15);color:var(--err)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+  .coord-context{margin-top:10px;padding:8px 10px;background:#f0f7ff;border-left:3px solid var(--accent);border-radius:0 6px 6px 0;font-size:12px;color:var(--fg-dim)}
+  .coord-conflict{background:#fffbea;border-left-color:var(--warn);color:#7a5d00}
+  .body{margin-top:10px;color:var(--fg-dim);white-space:pre-wrap;font-size:13px;background:#f6f8fa;border:1px solid var(--border);border-radius:6px;padding:10px 12px;max-height:280px;overflow:auto}
   .body details{margin-top:8px}
-  .actions{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .comment{flex:1;min-width:220px;background:#ffffff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font:inherit;resize:vertical;min-height:34px}
+  .body pre{margin:6px 0;font-size:12px}
+  .dm-note{margin-top:6px;font-size:12px;color:var(--muted);font-style:italic}
+
+  .actions{margin-top:10px;display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
+  .comment{flex:1;min-width:200px;background:#fff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font:inherit;resize:vertical;min-height:34px;max-height:200px}
+  .btn{background:#fff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+  .btn:hover{background:#f0f3f6}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn[disabled]{opacity:.5;cursor:wait}
   .btn-approve{background:#2ea043;border-color:#22863a;color:#fff}
   .btn-approve:hover{background:#22863a}
+  .btn-cond{background:#6f42c1;border-color:#5a32a3;color:#fff}
+  .btn-cond:hover{background:#5a32a3}
   .btn-defer{background:#b08800;border-color:#855700;color:#fff}
   .btn-defer:hover{background:#855700}
   .btn-reject{background:#d73a49;border-color:#b31d28;color:#fff}
   .btn-reject:hover{background:#b31d28}
-  .btn-cond{background:#6f42c1;border-color:#5a32a3;color:#fff}
-  .btn-cond:hover{background:#5a32a3}
-  .btn[disabled]{opacity:.5;cursor:wait}
-  .toast{position:fixed;right:24px;bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;animation:slidein .2s ease-out;max-width:320px}
+  .btn-ack{background:#fff;border-color:var(--border);color:var(--fg)}
+  .btn-ack:hover{background:#f0f3f6}
+  .btn.refresh{padding:5px 10px}
+
+  /* === Toast === */
+  .toast{position:fixed;right:24px;bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;animation:slidein .2s ease-out;max-width:320px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,.08)}
   .toast.ok{border-color:var(--ok)}
   .toast.err{border-color:var(--err)}
   @keyframes slidein{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+  /* === Misc === */
   .empty{padding:40px;text-align:center;color:var(--muted)}
   .loading{padding:40px;text-align:center;color:var(--muted)}
   .reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
   .stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px}
   .stat-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
-  .stat-value{font-size:28px;font-weight:700;color:var(--fg)}
+  .stat-value{font-size:28px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
   .stat-sub{color:var(--muted);font-size:12px;margin-top:4px}
-  h2{font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:24px 0 8px}
+  h2{font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:20px 0 8px}
   .agent-row{display:flex;justify-content:space-between;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:13px}
-  .count{display:inline-block;background:#e1e4e8;color:var(--muted);padding:1px 6px;border-radius:10px;font-size:11px;margin-left:4px;min-width:18px;text-align:center}
-  .tab.active .count{background:var(--accent);color:#fff}
-  .btn-ack{background:#ffffff;border-color:var(--border);color:var(--fg)}
-  .btn-ack:hover{background:#f0f3f6}
+
+  /* === Shortcut hint === */
+  .shortcut-hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(36,41,46,.92);color:#fff;padding:6px 14px;border-radius:18px;font-size:11px;z-index:999;font-family:ui-monospace,SFMono-Regular,monospace}
+  .shortcut-hint.fade-out{opacity:0;transition:opacity 800ms ease-out}
+
+  /* === Mobile === */
+  @media (max-width:640px){
+    main{padding:12px}
+    .toolbar{flex-direction:column;align-items:stretch}
+    .toolbar input[type=text],.toolbar select{width:100%}
+    .actions{flex-direction:column}
+    .comment{width:100%}
+    .btn{width:100%}
+  }
 </style>
 </head>
 <body>
@@ -73,7 +147,7 @@
 <header>
   <div>
     <h1>Liftnow Agent Approvals</h1>
-    <div class="sub" id="connection-status">Connected to agents.liftnowdirect.com</div>
+    <div class="sub">10-agent marketing team · <span id="last-refresh">connecting…</span></div>
   </div>
   <button class="btn refresh" onclick="loadCurrentTab()">Refresh</button>
 </header>
@@ -87,18 +161,43 @@
 </div>
 
 <main id="main">
-  <div class="loading">Loading...</div>
+  <div class="loading">Loading…</div>
 </main>
 
 <script>
 const API_BASE = 'https://agents.liftnowdirect.com/webhook';
 let currentView = 'pending';
+let cachedPending = null;
+let cachedInbox = null;
+let cachedDone = null;
+let coordinatorBrief = null;
+let agentFilter = 'all';
+let searchTerm = '';
+let sortMode = 'priority';
+let focusedTicketId = null;
+let shortcutHintShown = sessionStorage.getItem('shortcutHintShown') === '1';
+
+const AGENT_COLORS = {
+  'Content Producer':       {bg:'rgba(3,102,214,.12)', fg:'#0366d6'},
+  'SEM Manager':            {bg:'rgba(217,119,6,.12)', fg:'#d97706'},
+  'SEO Optimizer':          {bg:'rgba(8,145,178,.12)', fg:'#0891b2'},
+  'Backlink Builder':       {bg:'rgba(124,58,237,.12)', fg:'#7c3aed'},
+  'Keyword Discovery':      {bg:'rgba(190,24,93,.12)', fg:'#be185d'},
+  'LinkedIn Cadence':       {bg:'rgba(21,128,61,.12)', fg:'#15803d'},
+  'UI/UX Performance':      {bg:'rgba(13,148,136,.12)', fg:'#0d9488'},
+  'Competitor SERP Monitor':{bg:'rgba(147,51,234,.12)', fg:'#9333ea'},
+  'Coordinator':            {bg:'rgba(31,41,55,.12)', fg:'#1f2937'},
+  'Content Decay Detector': {bg:'rgba(180,83,9,.12)', fg:'#b45309'},
+  'Brand Listening':        {bg:'rgba(120,113,108,.12)', fg:'#78716c'},
+  'Daily Briefing':         {bg:'rgba(82,82,91,.12)', fg:'#52525b'},
+};
+function agentColor(name){ return AGENT_COLORS[name] || {bg:'#f0f3f6', fg:'#586069'}; }
 
 function isReport(t){
   const s = t.subject || '';
   const rt = (t.recommendationType || '').toLowerCase();
-  return /\bsummary\b|\[coordinator\]|^weekly |^monthly |weekly (report|summary|backlink|sem|keyword)|monthly (report|summary|keyword)/i.test(s)
-      || /^report$|^summary$/.test(rt);
+  return /\bsummary\b|\[coordinator\]|^weekly |^monthly |weekly (report|summary|backlink|sem|keyword)|monthly (report|summary|keyword)|daily briefing/i.test(s)
+      || /^report$|^summary$|^daily digest$|^daily briefing$/.test(rt);
 }
 
 function switchTab(view){
@@ -109,7 +208,7 @@ function switchTab(view){
 
 async function loadCurrentTab(){
   const main = document.getElementById('main');
-  main.innerHTML = '<div class="loading">Loading...</div>';
+  main.innerHTML = '<div class="loading">Loading…</div>';
   try {
     if (currentView === 'stats') {
       await renderStats();
@@ -117,19 +216,36 @@ async function loadCurrentTab(){
       await renderLearnings();
     } else if (currentView === 'done') {
       const data = await fetchTickets('done');
+      cachedDone = data;
       renderList(data, 'done');
     } else {
-      // pending OR inbox — both read from the same source, split client-side
       const data = await fetchTickets('pending');
+      cachedPending = data;
       const reports = (data.tickets || []).filter(isReport);
       const proposals = (data.tickets || []).filter(t => !isReport(t));
+      // Extract Coordinator brief from pending or inbox
+      const coordTicket = (data.tickets || []).find(t => t.agent === 'Coordinator' && (t.recommendationType||'').toLowerCase().includes('briefing'));
+      coordinatorBrief = parseCoordinatorBrief(coordTicket);
       document.getElementById('count-pending').textContent = proposals.length || '';
       document.getElementById('count-inbox').textContent = reports.length || '';
-      renderList({tickets: currentView === 'inbox' ? reports : proposals}, currentView);
+      document.getElementById('last-refresh').textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      if (currentView === 'inbox') {
+        renderList({tickets: reports}, 'inbox');
+      } else {
+        renderPending(proposals);
+      }
     }
   } catch (e) {
     main.innerHTML = `<div class="empty">Error: ${escapeHtml(e.message)}<br><br><button class="btn" onclick="loadCurrentTab()">Retry</button></div>`;
   }
+}
+
+function parseCoordinatorBrief(ticket){
+  if (!ticket) return null;
+  try {
+    const detail = JSON.parse(ticket.recommendationDetail || '{}');
+    return {ticketId: ticket.ticketId, ageHours: ticket.ageHours, ...detail};
+  } catch (e) { return null; }
 }
 
 async function fetchTickets(view){
@@ -138,71 +254,245 @@ async function fetchTickets(view){
   return r.json();
 }
 
-function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function ageLabel(hours){
   if (hours < 1) return 'just now';
   if (hours < 24) return `${hours}h ago`;
   return `${Math.floor(hours/24)}d ago`;
 }
+function ageClass(hours){
+  if (hours > 120) return 'stale';
+  if (hours > 48) return 'old';
+  return '';
+}
+
+function renderCoordStrip(){
+  if (!coordinatorBrief) {
+    return `<div class="coord-strip"><div class="coord-strip-head">
+      <span class="health-dot health-unknown"></span>
+      <span class="coord-no-brief">Coordinator brief pending (next run 10:00 AM ET)</span>
+    </div></div>`;
+  }
+  const b = coordinatorBrief;
+  const healthClass = b.overall_health === 'green' ? 'health-green' : b.overall_health === 'yellow' ? 'health-yellow' : b.overall_health === 'red' ? 'health-red' : 'health-unknown';
+  const summary = (b.executive_summary || '').slice(0, 100);
+  const conflictsCount = (b.conflicts || []).length;
+  const synergiesCount = (b.synergies || []).length;
+  const redflagsCount = (b.red_flags || []).length;
+  let body = '';
+  if (b.executive_summary) {
+    body += `<div class="coord-section"><h3>Executive Summary</h3><div style="font-size:13px;color:var(--fg)">${escapeHtml(b.executive_summary)}</div></div>`;
+  }
+  if (b.priority_order && b.priority_order.length) {
+    body += `<div class="coord-section"><h3>Today's priority order</h3>`;
+    for (const p of b.priority_order) {
+      body += `<div class="coord-item coord-priority"><span class="rank-chip">${p.rank}</span><a class="ticket-link" onclick="scrollToTicket('${p.ticket_id}')">${p.ticket_id}</a><span style="color:var(--fg-dim)">${escapeHtml(p.rationale || '')}</span></div>`;
+    }
+    body += `</div>`;
+  }
+  if (conflictsCount) {
+    body += `<div class="coord-section"><h3>Conflicts (${conflictsCount})</h3>`;
+    for (const c of b.conflicts) {
+      body += `<div class="coord-item" style="background:#fffbea"><strong>[${(c.agents||[]).join(' vs ')}]</strong> ${escapeHtml(c.description)} <em style="color:var(--fg-dim)">→ ${escapeHtml(c.recommendation || '')}</em></div>`;
+    }
+    body += `</div>`;
+  }
+  if (synergiesCount) {
+    body += `<div class="coord-section"><h3>Synergies (${synergiesCount})</h3>`;
+    for (const s of b.synergies) {
+      body += `<div class="coord-item" style="background:#f0fdf4"><a class="ticket-link" onclick="scrollToTicket('${s.primary_ticket_id}')">${s.primary_ticket_id}</a> → <strong>${escapeHtml(s.secondary_agent || '')}</strong>: ${escapeHtml(s.description)} <em style="color:var(--fg-dim)">→ ${escapeHtml(s.suggested_action || '')}</em></div>`;
+    }
+    body += `</div>`;
+  }
+  if (redflagsCount) {
+    body += `<div class="coord-section"><h3 style="color:var(--err)">Red flags (${redflagsCount})</h3>`;
+    for (const r of b.red_flags) {
+      body += `<div class="coord-item" style="background:#fef2f2;color:var(--err)">${escapeHtml(r)}</div>`;
+    }
+    body += `</div>`;
+  }
+  return `<div class="coord-strip" id="coord-strip">
+    <div class="coord-strip-head" onclick="toggleCoordStrip()">
+      <span class="health-dot ${healthClass}" title="overall_health: ${b.overall_health || 'unknown'}"></span>
+      <span class="coord-summary">${escapeHtml(summary)}${b.executive_summary && b.executive_summary.length > 100 ? '…' : ''}</span>
+      <span class="coord-strip-pills">
+        ${conflictsCount ? `<span class="pill has-conflicts">${conflictsCount} conflict${conflictsCount>1?'s':''}</span>` : ''}
+        ${synergiesCount ? `<span class="pill has-synergies">${synergiesCount} synergy${synergiesCount>1?'ies':''}</span>` : ''}
+        ${redflagsCount ? `<span class="pill has-redflags">${redflagsCount} red flag${redflagsCount>1?'s':''}</span>` : ''}
+      </span>
+    </div>
+    <div class="coord-strip-body">${body}</div>
+  </div>`;
+}
+
+function toggleCoordStrip(){
+  const s = document.getElementById('coord-strip');
+  if (s) s.classList.toggle('expanded');
+}
+
+function scrollToTicket(ticketId){
+  const card = document.getElementById('card-'+ticketId);
+  if (!card) return;
+  card.scrollIntoView({behavior:'smooth', block:'center'});
+  card.classList.remove('collapsed');
+  card.classList.add('focused');
+  focusedTicketId = ticketId;
+  setTimeout(()=>card.classList.remove('focused'), 1800);
+}
+
+function enrichWithCoord(ticket){
+  if (!coordinatorBrief) return {rank:null, rationale:null, conflicts:[], synergies:[]};
+  const p = (coordinatorBrief.priority_order || []).find(p => String(p.ticket_id) === String(ticket.ticketId));
+  const conflicts = (coordinatorBrief.conflicts || []).filter(c => (c.ticket_ids || []).map(String).includes(String(ticket.ticketId)));
+  const synergies = (coordinatorBrief.synergies || []).filter(s => String(s.primary_ticket_id) === String(ticket.ticketId));
+  const redflagged = (coordinatorBrief.red_flags || []).some(r => String(r).includes(String(ticket.ticketId)));
+  return {rank: p ? p.rank : null, rationale: p ? p.rationale : null, conflicts, synergies, redflagged};
+}
+
+function getUniqueAgents(tickets){
+  return [...new Set(tickets.map(t => t.agent || '(unknown)'))].sort();
+}
+
+function renderPending(tickets){
+  const main = document.getElementById('main');
+  let html = renderCoordStrip();
+  const agents = getUniqueAgents(tickets);
+  html += `<div class="toolbar">
+    <span class="meta">${tickets.length} pending</span>
+    ${agents.length > 1 ? `<select onchange="agentFilter=this.value;renderPending(cachedPending.tickets.filter(t=>!isReport(t)))">
+      <option value="all">All agents</option>
+      ${agents.map(a => `<option value="${escapeHtml(a)}" ${agentFilter===a?'selected':''}>${escapeHtml(a)}</option>`).join('')}
+    </select>` : ''}
+    <input type="text" placeholder="Search…" value="${escapeHtml(searchTerm)}" oninput="searchTerm=this.value;renderPending(cachedPending.tickets.filter(t=>!isReport(t)))">
+    <select onchange="sortMode=this.value;renderPending(cachedPending.tickets.filter(t=>!isReport(t)))">
+      <option value="priority" ${sortMode==='priority'?'selected':''}>Coordinator priority</option>
+      <option value="age" ${sortMode==='age'?'selected':''}>Age (newest)</option>
+      <option value="agent" ${sortMode==='agent'?'selected':''}>Agent</option>
+    </select>
+    <span class="spacer"></span>
+    <span class="meta" style="font-size:11px">j/k navigate · a approve · c condition · d defer · r reject · ? help</span>
+  </div>`;
+  let filtered = tickets;
+  if (agentFilter !== 'all') filtered = filtered.filter(t => (t.agent||'') === agentFilter);
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    filtered = filtered.filter(t => ((t.subject||'') + ' ' + (t.content||'')).toLowerCase().includes(q));
+  }
+  // Sort
+  if (sortMode === 'priority') {
+    const rankMap = new Map();
+    if (coordinatorBrief && coordinatorBrief.priority_order) {
+      for (const p of coordinatorBrief.priority_order) rankMap.set(String(p.ticket_id), p.rank);
+    }
+    filtered.sort((a,b)=>{
+      const ra = rankMap.get(String(a.ticketId));
+      const rb = rankMap.get(String(b.ticketId));
+      if (ra && rb) return ra - rb;
+      if (ra) return -1;
+      if (rb) return 1;
+      // priority HIGH first, then by age
+      const pOrder = {HIGH:1, MEDIUM:2, LOW:3};
+      const pa = pOrder[a.priority] || 4;
+      const pb = pOrder[b.priority] || 4;
+      if (pa !== pb) return pa - pb;
+      return (a.ageHours||0) - (b.ageHours||0);
+    });
+  } else if (sortMode === 'age') {
+    filtered.sort((a,b)=>(a.ageHours||0) - (b.ageHours||0));
+  } else if (sortMode === 'agent') {
+    filtered.sort((a,b)=>(a.agent||'').localeCompare(b.agent||''));
+  }
+  if (!filtered.length) {
+    html += '<div class="empty">Inbox zero ✨</div>';
+  } else {
+    html += filtered.map(t => renderCard(t, 'pending')).join('');
+  }
+  main.innerHTML = html;
+  if (!shortcutHintShown && filtered.length) showShortcutHint();
+}
 
 function renderList(data, mode){
   const main = document.getElementById('main');
   const tickets = data.tickets || [];
-  const labels = {
-    pending: 'awaiting your decision',
-    inbox: 'reports & summaries to acknowledge',
-    done: 'completed in last 7 days'
-  };
-  const emptyMsg = {
-    pending: 'Inbox zero ✨',
-    inbox: 'No reports to read',
-    done: 'No completed items yet'
-  };
-  const toolbar = `
-    <div class="toolbar">
-      <span class="meta">${tickets.length} ${labels[mode] || ''}</span>
-    </div>`;
+  const labels = {pending:'pending', inbox:'reports & summaries', done:'completed in last 7 days'};
+  const emptyMsg = {pending:'Inbox zero ✨', inbox:'No reports to read', done:'No completed items yet'};
+  let html = `<div class="toolbar"><span class="meta">${tickets.length} ${labels[mode]||''}</span></div>`;
   if (!tickets.length) {
-    main.innerHTML = toolbar + `<div class="empty">${emptyMsg[mode] || 'Nothing here'}</div>`;
-    return;
+    html += `<div class="empty">${emptyMsg[mode]||'Nothing here'}</div>`;
+  } else {
+    html += tickets.map(t => renderCard(t, mode)).join('');
   }
-  main.innerHTML = toolbar + tickets.map((t,i)=>renderCard(t,i,mode)).join('');
+  main.innerHTML = html;
 }
 
-function renderCard(t, idx, mode){
+function renderCard(t, mode){
   const stageLabel = {'1':'Pending','2':'Approved','3':'In Progress','4':'Closed'}[t.stage] || t.stage;
+  const c = agentColor(t.agent);
+  const enriched = mode === 'pending' ? enrichWithCoord(t) : null;
+  const isLowPriority = (t.priority || '').toUpperCase() === 'LOW';
+  const cardClasses = ['card','collapsed'];
+  if (isLowPriority && mode === 'pending') cardClasses.push('low');
+  if (enriched && enriched.redflagged) cardClasses.push('red-flag');
   let actionsHtml = '';
   if (mode === 'pending') {
     actionsHtml = `
     <div class="actions">
-      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional comment / conditions (e.g. 'approve but cap at $500')..."></textarea>
-      <button class="btn btn-approve" onclick="decide('${t.ticketId}','approve',this)">Approve</button>
-      <button class="btn btn-cond" onclick="decide('${t.ticketId}','conditional_approve',this)" title="Approve with conditions — your comment becomes the conditions Approval Executor enforces">Approve w/ Conditions</button>
-      <button class="btn btn-defer" onclick="decide('${t.ticketId}','defer',this)">Defer 3d</button>
-      <button class="btn btn-reject" onclick="decide('${t.ticketId}','reject',this)">Reject</button>
+      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional comment / conditions…" oninput="autoGrow(this)"></textarea>
+      <button class="btn btn-approve" onclick="decide('${t.ticketId}','approve',this)" title="a">Approve</button>
+      <button class="btn btn-cond" onclick="decide('${t.ticketId}','conditional_approve',this)" title="c · approve with conditions in the comment box">Approve w/ Conditions</button>
+      <button class="btn btn-defer" onclick="decide('${t.ticketId}','defer',this)" title="d">Defer 3d</button>
+      <button class="btn btn-reject" onclick="decide('${t.ticketId}','reject',this)" title="r">Reject</button>
     </div>`;
   } else if (mode === 'inbox') {
     actionsHtml = `
     <div class="actions">
-      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional note for the agent..."></textarea>
+      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional note for the agent…" oninput="autoGrow(this)"></textarea>
       <button class="btn btn-ack" onclick="decide('${t.ticketId}','acknowledge',this)">Acknowledge</button>
     </div>`;
   }
+  let coordCtx = '';
+  if (enriched) {
+    if (enriched.rank) {
+      coordCtx += `<div class="coord-context">Coordinator ranked #${enriched.rank} — ${escapeHtml(enriched.rationale||'')}</div>`;
+    }
+    if (enriched.conflicts.length) {
+      const conf = enriched.conflicts[0];
+      coordCtx += `<div class="coord-context coord-conflict">⚠ Conflicts with: <strong>[${(conf.agents||[]).join(', ')}]</strong> — ${escapeHtml(conf.description||'')} <em>→ ${escapeHtml(conf.recommendation||'')}</em></div>`;
+    }
+    if (enriched.synergies.length) {
+      const syn = enriched.synergies[0];
+      coordCtx += `<div class="coord-context" style="background:#f0fdf4;border-left-color:var(--ok)">✨ Synergy → <strong>${escapeHtml(syn.secondary_agent||'')}</strong>: ${escapeHtml(syn.description||'')} <em>→ ${escapeHtml(syn.suggested_action||'')}</em></div>`;
+    }
+  }
+  const ageCls = ageClass(t.ageHours || 0);
   return `
-  <div class="card collapsed" id="card-${t.ticketId}">
-    <div class="card-head" onclick="document.getElementById('card-${t.ticketId}').classList.toggle('collapsed')">
-      <span class="agent-badge">${escapeHtml(t.agent)}</span>
-      <span class="priority priority-${escapeHtml(t.priority)}">${escapeHtml(t.priority)}</span>
-      <span class="subject">${escapeHtml(t.subject)}</span>
-      <span class="age">${mode === 'done' ? stageLabel + ' · ' : ''}${ageLabel(t.ageHours)}</span>
+  <div class="${cardClasses.join(' ')}" id="card-${t.ticketId}" data-ticket="${t.ticketId}">
+    <div class="card-head" onclick="toggleCard('${t.ticketId}')">
+      ${enriched && enriched.rank ? `<span class="rank-chip in-card">${enriched.rank}</span>` : ''}
+      ${enriched && enriched.redflagged ? `<span class="redflag-dot" title="Coordinator flagged"></span>` : ''}
+      <span class="agent-badge" style="--badge-bg:${c.bg};--badge-fg:${c.fg}">${escapeHtml(t.agent||'(unknown)')}</span>
+      <span class="priority priority-${escapeHtml(t.priority||'LOW')}">${escapeHtml(t.priority||'LOW')}</span>
+      <span class="subject">${escapeHtml(t.subject||'(no subject)')}</span>
+      <span class="age ${ageCls}">${mode === 'done' ? stageLabel + ' · ' : ''}${ageLabel(t.ageHours||0)}</span>
     </div>
+    ${coordCtx}
     <div class="body">${escapeHtml(t.content || '(no detail)')}
-      ${t.recommendationDetail ? `<details><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Recommendation detail</summary><pre style="white-space:pre-wrap;margin:8px 0 0">${escapeHtml(t.recommendationDetail)}</pre></details>` : ''}
-      ${t.outcomeNotes ? `<details open><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Outcome notes</summary><pre style="white-space:pre-wrap;margin:8px 0 0">${escapeHtml(t.outcomeNotes)}</pre></details>` : ''}
+      ${t.recommendationDetail ? `<details><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Recommendation detail</summary><pre>${escapeHtml(t.recommendationDetail)}</pre></details>` : ''}
+      ${t.outcomeNotes ? `<details open><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Outcome notes</summary><pre>${escapeHtml(t.outcomeNotes)}</pre></details>` : ''}
     </div>
     ${actionsHtml}
   </div>`;
+}
+
+function toggleCard(id){
+  const c = document.getElementById('card-'+id);
+  if (c) c.classList.toggle('collapsed');
+}
+
+function autoGrow(el){
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
 }
 
 async function decide(ticketId, decision, btn){
@@ -211,8 +501,14 @@ async function decide(ticketId, decision, btn){
     toast('Conditional approve needs a condition in the comment box', 'err');
     return;
   }
+  if (decision === 'reject' && !comment.trim()) {
+    toast('Reject needs a reason in the comment — the team learns from this', 'err');
+    return;
+  }
   const card = document.getElementById('card-'+ticketId);
-  card.querySelectorAll('button').forEach(b=>b.disabled=true);
+  card.querySelectorAll('button').forEach(b => b.disabled = true);
+  card.classList.add('fading');
+  // Optimistic
   try {
     const r = await fetch(`${API_BASE}/process-decision`, {
       method: 'POST',
@@ -220,14 +516,33 @@ async function decide(ticketId, decision, btn){
       body: JSON.stringify({ticketId, decision, comment, deferDays: 3})
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
     const label = decision === 'conditional_approve' ? 'CONDITIONAL APPROVE' : decision.toUpperCase();
     toast(`${label} sent`, 'ok');
-    card.style.opacity='0.4';
-    setTimeout(()=>card.remove(), 400);
+    setTimeout(() => {
+      card.remove();
+      advanceFocus(ticketId);
+      // Update pending count
+      if (cachedPending) {
+        cachedPending.tickets = cachedPending.tickets.filter(t => t.ticketId !== ticketId);
+        const proposals = cachedPending.tickets.filter(t => !isReport(t));
+        document.getElementById('count-pending').textContent = proposals.length || '';
+      }
+    }, 250);
   } catch (e) {
     toast('Failed: '+e.message, 'err');
-    card.querySelectorAll('button').forEach(b=>b.disabled=false);
+    card.classList.remove('fading');
+    card.querySelectorAll('button').forEach(b => b.disabled = false);
+  }
+}
+
+function advanceFocus(removedId){
+  const cards = Array.from(document.querySelectorAll('.card[data-ticket]'));
+  if (!cards.length) return;
+  const next = cards[0];
+  if (next) {
+    next.classList.add('focused');
+    focusedTicketId = next.dataset.ticket;
+    next.scrollIntoView({behavior:'smooth', block:'nearest'});
   }
 }
 
@@ -236,9 +551,50 @@ function toast(msg, kind='ok'){
   t.className = 'toast ' + kind;
   t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)}, 2500);
+  setTimeout(() => {t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)}, 2500);
 }
 
+function showShortcutHint(){
+  if (shortcutHintShown) return;
+  const h = document.createElement('div');
+  h.className = 'shortcut-hint';
+  h.textContent = 'j/k navigate · a approve · c condition · d defer · r reject · ? help';
+  document.body.appendChild(h);
+  setTimeout(() => h.classList.add('fade-out'), 5000);
+  setTimeout(() => h.remove(), 6000);
+  sessionStorage.setItem('shortcutHintShown', '1');
+  shortcutHintShown = true;
+}
+
+// === Keyboard navigation ===
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+    if (e.key === 'Escape') e.target.blur();
+    return;
+  }
+  if (currentView !== 'pending') return;
+  const cards = Array.from(document.querySelectorAll('.card[data-ticket]'));
+  if (!cards.length) return;
+  const focused = focusedTicketId ? cards.find(c => c.dataset.ticket === focusedTicketId) : null;
+  const idx = focused ? cards.indexOf(focused) : -1;
+  const setFocus = (c) => {
+    cards.forEach(cc => cc.classList.remove('focused'));
+    c.classList.add('focused');
+    c.classList.remove('collapsed');
+    focusedTicketId = c.dataset.ticket;
+    c.scrollIntoView({behavior:'smooth', block:'nearest'});
+  };
+  if (e.key === 'j') { e.preventDefault(); setFocus(cards[Math.min(idx+1, cards.length-1)] || cards[0]); }
+  else if (e.key === 'k') { e.preventDefault(); setFocus(cards[Math.max(idx-1, 0)] || cards[0]); }
+  else if (e.key === 'a' && focused) { e.preventDefault(); decide(focused.dataset.ticket, 'approve'); }
+  else if (e.key === 'c' && focused) { e.preventDefault(); const ta = document.getElementById('comment-'+focused.dataset.ticket); if (ta) ta.focus(); }
+  else if (e.key === 'd' && focused) { e.preventDefault(); decide(focused.dataset.ticket, 'defer'); }
+  else if (e.key === 'r' && focused) { e.preventDefault(); const ta = document.getElementById('comment-'+focused.dataset.ticket); if (ta) ta.focus(); }
+  else if (e.key === '/' ) { e.preventDefault(); document.querySelector('input[type=text]')?.focus(); }
+  else if (e.key === 'Enter' && focused) { e.preventDefault(); focused.classList.toggle('collapsed'); }
+});
+
+// === Tabs renderers ===
 async function renderLearnings(){
   const main = document.getElementById('main');
   const done = await fetchTickets('done');
@@ -250,23 +606,21 @@ async function renderLearnings(){
     byAgent[a].push(t);
   }
   const sortedAgents = Object.entries(byAgent).sort((a,b) => b[1].length - a[1].length);
-  let html = `
-    <div class="toolbar">
-      <span class="meta">${tickets.length} rejections in last 7 days — the team learns from these</span>
-    </div>`;
+  let html = `<div class="toolbar"><span class="meta">${tickets.length} rejections in last 7 days — the team learns from these</span></div>`;
   if (!tickets.length) {
     html += '<div class="empty">No rejections yet. Nothing learned from the no-pile.</div>';
   } else {
     for (const [agent, list] of sortedAgents) {
-      html += `<h2 style="margin-top:24px">${escapeHtml(agent)} <span style="color:var(--muted);font-weight:400">(${list.length})</span></h2>`;
+      const c = agentColor(agent);
+      html += `<h2 style="color:${c.fg}">${escapeHtml(agent)} <span style="color:var(--muted);font-weight:400">(${list.length})</span></h2>`;
       for (const t of list) {
         const comment = (t.outcomeNotes||'').replace(/^REJECTED\s+\S+\s*—?\s*/, '').trim();
         html += `
         <div class="card collapsed" id="card-${t.ticketId}">
-          <div class="card-head" onclick="document.getElementById('card-${t.ticketId}').classList.toggle('collapsed')">
-            <span class="priority priority-${escapeHtml(t.priority)}">${escapeHtml(t.priority)}</span>
+          <div class="card-head" onclick="toggleCard('${t.ticketId}')">
+            <span class="priority priority-${escapeHtml(t.priority||'LOW')}">${escapeHtml(t.priority||'LOW')}</span>
             <span class="subject">${escapeHtml(t.subject)}</span>
-            <span class="age">${ageLabel(t.ageHours)}</span>
+            <span class="age">${ageLabel(t.ageHours||0)}</span>
           </div>
           <div class="body">${comment ? '<strong>Paul:</strong> ' + escapeHtml(comment) + '\n\n' : '<em>(no comment given)</em>\n\n'}---ORIGINAL PROPOSAL---\n${escapeHtml(t.content || '')}</div>
         </div>`;
@@ -283,29 +637,40 @@ async function renderStats(){
   const reports = pending.tickets.filter(isReport);
   const dCount = done.tickets.length;
   const approved = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('APPROVED')).length;
+  const cond = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('CONDITIONAL_APPROVE')).length;
   const rejected = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('REJECTED')).length;
   const acknowledged = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('ACKNOWLEDGED')).length;
-  const decided = approved + rejected;
-  const approveRate = decided ? Math.round(approved*100/decided) : null;
+  const decided = approved + cond + rejected;
+  const approveRate = decided ? Math.round((approved+cond)*100/decided) : null;
   const byAgent = {};
   for (const t of [...pending.tickets, ...done.tickets]) {
     byAgent[t.agent] = (byAgent[t.agent]||0)+1;
   }
-  const agentRows = Object.entries(byAgent).sort((a,b)=>b[1]-a[1]).map(([a,c])=>`<div class="agent-row"><span>${escapeHtml(a)}</span><span class="meta">${c}</span></div>`).join('');
+  const agentRows = Object.entries(byAgent).sort((a,b)=>b[1]-a[1]).map(([a,c])=>{
+    const col = agentColor(a);
+    return `<div class="agent-row"><span style="color:${col.fg};font-weight:600">${escapeHtml(a)}</span><span class="meta">${c}</span></div>`;
+  }).join('');
   main.innerHTML = `
     <div class="reports-grid">
       <div class="stat"><div class="stat-label">Pending Decisions</div><div class="stat-value">${proposals.length}</div><div class="stat-sub">in Pending tab</div></div>
       <div class="stat"><div class="stat-label">Reports To Read</div><div class="stat-value">${reports.length}</div><div class="stat-sub">in Inbox tab</div></div>
       <div class="stat"><div class="stat-label">Last 7 Days</div><div class="stat-value">${dCount}</div><div class="stat-sub">processed</div></div>
-      <div class="stat"><div class="stat-label">Approve Rate</div><div class="stat-value">${approveRate !== null ? approveRate+'%' : '—'}</div><div class="stat-sub">${approved} approved · ${rejected} rejected · ${acknowledged} ack'd</div></div>
+      <div class="stat"><div class="stat-label">Approve Rate</div><div class="stat-value">${approveRate !== null ? approveRate+'%' : '—'}</div><div class="stat-sub">${approved} ✓ · ${cond} ✓w/cond · ${rejected} ✗ · ${acknowledged} ack</div></div>
     </div>
     <h2>Volume by Agent</h2>
     ${agentRows || '<div class="empty">No data yet</div>'}
   `;
 }
 
+// === Auto-refresh ===
 loadCurrentTab();
-setInterval(()=>{ if (currentView==='pending') loadCurrentTab(); }, 60000);
+let pollInterval = setInterval(() => {
+  if (document.hidden) return;
+  if (currentView === 'pending') loadCurrentTab();
+}, 60000);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && currentView === 'pending') loadCurrentTab();
+});
 </script>
 </body>
 </html>
