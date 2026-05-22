@@ -6,46 +6,46 @@
 <title>Liftnow Agent Approvals</title>
 <style>
   :root{
-    --bg:#0e1116; --card:#161b22; --border:#2a313c; --muted:#8b949e;
-    --fg:#e6edf3; --fg-dim:#c9d1d9;
-    --ok:#3fb950; --warn:#d29922; --err:#f85149; --accent:#58a6ff;
-    --priority-high:#f85149; --priority-med:#d29922; --priority-low:#3fb950;
+    --bg:#fafbfc; --card:#ffffff; --border:#e1e4e8; --muted:#6a737d;
+    --fg:#24292e; --fg-dim:#586069;
+    --ok:#22863a; --warn:#b08800; --err:#d73a49; --accent:#0366d6;
+    --priority-high:#d73a49; --priority-med:#b08800; --priority-low:#22863a;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-  header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:#0a0d12}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:#f6f8fa}
   h1{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
   .sub{color:var(--muted);font-size:12px;margin-top:2px}
-  .tabs{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);background:#0a0d12}
+  .tabs{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);background:#f6f8fa}
   .tab{padding:12px 18px;background:none;border:none;color:var(--muted);font:inherit;cursor:pointer;border-bottom:2px solid transparent}
   .tab.active{color:var(--fg);border-bottom-color:var(--accent)}
   .tab:hover:not(.active){color:var(--fg-dim)}
   main{max-width:980px;margin:0 auto;padding:24px}
   .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px}
   .meta{color:var(--muted);font-size:12px}
-  .btn{background:#21262d;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
-  .btn:hover{background:#2d333b}
+  .btn{background:#ffffff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
+  .btn:hover{background:#f0f3f6}
   .btn.refresh{margin-left:auto}
   .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
   .card.collapsed .body,.card.collapsed .actions{display:none}
   .card-head{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
-  .agent-badge{background:#1f2937;color:var(--accent);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
+  .agent-badge{background:#ddeefe;color:var(--accent);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
   .priority{font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;text-transform:uppercase}
   .priority-HIGH{background:rgba(248,81,73,.15);color:var(--priority-high)}
   .priority-MEDIUM{background:rgba(210,153,34,.15);color:var(--priority-med)}
   .priority-LOW{background:rgba(63,185,80,.15);color:var(--priority-low)}
   .subject{flex:1;font-weight:600;color:var(--fg)}
   .age{color:var(--muted);font-size:12px;white-space:nowrap}
-  .body{margin-top:12px;color:var(--fg-dim);white-space:pre-wrap;font-size:13px;background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:12px;max-height:280px;overflow:auto}
+  .body{margin-top:12px;color:var(--fg-dim);white-space:pre-wrap;font-size:13px;background:#f6f8fa;border:1px solid var(--border);border-radius:6px;padding:12px;max-height:280px;overflow:auto}
   .body details{margin-top:8px}
   .actions{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .comment{flex:1;min-width:220px;background:#0d1117;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font:inherit;resize:vertical;min-height:34px}
-  .btn-approve{background:#1f7a3a;border-color:#2ea043;color:#fff}
-  .btn-approve:hover{background:#2ea043}
-  .btn-defer{background:#7a5a1a;border-color:#9e6a00;color:#fff}
-  .btn-defer:hover{background:#9e6a00}
-  .btn-reject{background:#7a2424;border-color:#a52828;color:#fff}
-  .btn-reject:hover{background:#a52828}
+  .comment{flex:1;min-width:220px;background:#ffffff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font:inherit;resize:vertical;min-height:34px}
+  .btn-approve{background:#2ea043;border-color:#22863a;color:#fff}
+  .btn-approve:hover{background:#22863a}
+  .btn-defer{background:#b08800;border-color:#855700;color:#fff}
+  .btn-defer:hover{background:#855700}
+  .btn-reject{background:#d73a49;border-color:#b31d28;color:#fff}
+  .btn-reject:hover{background:#b31d28}
   .btn[disabled]{opacity:.5;cursor:wait}
   .toast{position:fixed;right:24px;bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;animation:slidein .2s ease-out;max-width:320px}
   .toast.ok{border-color:var(--ok)}
@@ -60,10 +60,10 @@
   .stat-sub{color:var(--muted);font-size:12px;margin-top:4px}
   h2{font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:24px 0 8px}
   .agent-row{display:flex;justify-content:space-between;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:13px}
-  .count{display:inline-block;background:#21262d;color:var(--muted);padding:1px 6px;border-radius:10px;font-size:11px;margin-left:4px;min-width:18px;text-align:center}
+  .count{display:inline-block;background:#e1e4e8;color:var(--muted);padding:1px 6px;border-radius:10px;font-size:11px;margin-left:4px;min-width:18px;text-align:center}
   .tab.active .count{background:var(--accent);color:#fff}
-  .btn-ack{background:#1f2937;border-color:var(--border);color:var(--fg)}
-  .btn-ack:hover{background:#2d333b}
+  .btn-ack{background:#ffffff;border-color:var(--border);color:var(--fg)}
+  .btn-ack:hover{background:#f0f3f6}
 </style>
 </head>
 <body>
