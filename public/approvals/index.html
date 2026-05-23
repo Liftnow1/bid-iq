@@ -91,6 +91,11 @@
   .body details{margin-top:8px}
   .body pre{margin:6px 0;font-size:12px}
   .dm-note{margin-top:6px;font-size:12px;color:var(--muted);font-style:italic}
+  .section{margin:10px 0}
+  .section-label{font-size:11px;font-weight:700;color:var(--fg-dim);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
+  .section-body{white-space:pre-wrap;font-size:14px;line-height:1.4}
+  .section-approve{background:#f0fdf4;border-left:3px solid var(--ok);padding:6px 10px;margin:8px 0;border-radius:4px}
+  .section-reject{background:#fef2f2;border-left:3px solid #e74c3c;padding:6px 10px;margin:8px 0;border-radius:4px}
 
   .actions{margin-top:10px;display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
   .comment{flex:1;min-width:200px;background:#fff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font:inherit;resize:vertical;min-height:34px;max-height:200px}
@@ -106,8 +111,8 @@
   .btn-defer:hover{background:#855700}
   .btn-reject{background:#d73a49;border-color:#b31d28;color:#fff}
   .btn-reject:hover{background:#b31d28}
-  .btn-ack{background:#fff;border-color:var(--border);color:var(--fg)}
-  .btn-ack:hover{background:#f0f3f6}
+  .btn-ack{background:var(--accent);border-color:#024ea4;color:#fff;font-weight:600}
+  .btn-ack:hover{background:#024ea4}
   .btn.refresh{padding:5px 10px}
 
   /* === Toast === */
@@ -196,8 +201,8 @@ function agentColor(name){ return AGENT_COLORS[name] || {bg:'#f0f3f6', fg:'#5860
 function isReport(t){
   const s = t.subject || '';
   const rt = (t.recommendationType || '').toLowerCase();
-  return /\bsummary\b|\[coordinator\]|^weekly |^monthly |weekly (report|summary|backlink|sem|keyword)|monthly (report|summary|keyword)|daily briefing/i.test(s)
-      || /^report$|^summary$|^daily digest$|^daily briefing$/.test(rt);
+  return /\bsummary\b|\[coordinator\]|\[briefing\]|\[patterns?\]|^weekly |^monthly |weekly (report|summary|backlink|sem|keyword)|monthly (report|summary|keyword)|daily briefing/i.test(s)
+      || /^report$|^summary$|^daily digest$|^daily briefing$|^dashboard insight$/.test(rt);
 }
 
 function switchTab(view){
@@ -255,6 +260,49 @@ async function fetchTickets(view){
 }
 
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+// Parse content into ASK/WHY/IF YOU APPROVE/IF YOU REJECT sections when present.
+// Falls back to raw escaped content for unmigrated tickets.
+function renderTicketContent(content){
+  const raw = String(content || '');
+  if (!raw.trim()) return '(no detail)';
+  // Quick check: all four markers present, each at the start of a line
+  const hasAsk = /(^|\n)ASK\s*\n/.test(raw);
+  const hasWhy = /(^|\n)WHY\s*\n/.test(raw);
+  const hasApprove = /(^|\n)IF YOU APPROVE\s*\n/.test(raw);
+  if (!(hasAsk && hasWhy && hasApprove)) {
+    return escapeHtml(raw);
+  }
+  // Split on the four section headers, capturing the body between each.
+  // The order in the structured format is fixed: ASK, WHY, IF YOU APPROVE, IF YOU REJECT (reject optional for safety).
+  const re = /(^|\n)(ASK|WHY|IF YOU APPROVE|IF YOU REJECT)\s*\n/g;
+  const sections = {};
+  const matches = [];
+  let m;
+  while ((m = re.exec(raw)) !== null) {
+    // headerStart = where the leading newline (or string start) is — the boundary that ends the previous section
+    // bodyStart = where the section's body content begins (after the header and its trailing newline)
+    matches.push({label: m[2], headerStart: m.index, bodyStart: m.index + m[0].length});
+  }
+  for (let i = 0; i < matches.length; i++) {
+    const end = i + 1 < matches.length ? matches[i+1].headerStart : raw.length;
+    sections[matches[i].label] = raw.slice(matches[i].bodyStart, end).replace(/\s+$/, '');
+  }
+  let html = '';
+  if (sections['ASK']) {
+    html += `<div class="section"><div class="section-label">Ask</div><div class="section-body">${escapeHtml(sections['ASK'])}</div></div>`;
+  }
+  if (sections['WHY']) {
+    html += `<div class="section"><div class="section-label">Why</div><div class="section-body">${escapeHtml(sections['WHY'])}</div></div>`;
+  }
+  if (sections['IF YOU APPROVE']) {
+    html += `<div class="section-approve"><div class="section-label">If you approve</div><div class="section-body">${escapeHtml(sections['IF YOU APPROVE'])}</div></div>`;
+  }
+  if (sections['IF YOU REJECT']) {
+    html += `<div class="section-reject"><div class="section-label">If you reject</div><div class="section-body">${escapeHtml(sections['IF YOU REJECT'])}</div></div>`;
+  }
+  return html;
+}
 
 function ageLabel(hours){
   if (hours < 1) return 'just now';
@@ -448,7 +496,7 @@ function renderCard(t, mode){
     actionsHtml = `
     <div class="actions">
       <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional note for the agent…" oninput="autoGrow(this)"></textarea>
-      <button class="btn btn-ack" onclick="decide('${t.ticketId}','acknowledge',this)">Acknowledge</button>
+      <button class="btn btn-ack" onclick="decide('${t.ticketId}','acknowledge',this)" title="Mark as read — moves to Done">Acknowledge & Clear</button>
     </div>`;
   }
   let coordCtx = '';
@@ -477,7 +525,7 @@ function renderCard(t, mode){
       <span class="age ${ageCls}">${mode === 'done' ? stageLabel + ' · ' : ''}${ageLabel(t.ageHours||0)}</span>
     </div>
     ${coordCtx}
-    <div class="body">${escapeHtml(t.content || '(no detail)')}
+    <div class="body">${renderTicketContent(t.content)}
       ${t.recommendationDetail ? `<details><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Recommendation detail</summary><pre>${escapeHtml(t.recommendationDetail)}</pre></details>` : ''}
       ${t.outcomeNotes ? `<details open><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Outcome notes</summary><pre>${escapeHtml(t.outcomeNotes)}</pre></details>` : ''}
     </div>
@@ -509,12 +557,16 @@ async function decide(ticketId, decision, btn){
   card.querySelectorAll('button').forEach(b => b.disabled = true);
   card.classList.add('fading');
   // Optimistic
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
     const r = await fetch(`${API_BASE}/process-decision`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ticketId, decision, comment, deferDays: 3})
+      body: JSON.stringify({ticketId, decision, comment, deferDays: 3}),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const label = decision === 'conditional_approve' ? 'CONDITIONAL APPROVE' : decision.toUpperCase();
     toast(`${label} sent`, 'ok');
@@ -529,7 +581,12 @@ async function decide(ticketId, decision, btn){
       }
     }, 250);
   } catch (e) {
-    toast('Failed: '+e.message, 'err');
+    clearTimeout(timeoutId);
+    if (e.name === 'AbortError') {
+      toast('Timed out — try again, no decision was saved', 'err');
+    } else {
+      toast('Failed: '+e.message, 'err');
+    }
     card.classList.remove('fading');
     card.querySelectorAll('button').forEach(b => b.disabled = false);
   }
