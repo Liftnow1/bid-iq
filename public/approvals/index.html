@@ -158,9 +158,10 @@
 </header>
 
 <div class="tabs">
-  <button class="tab active" data-view="pending" onclick="switchTab('pending')">Pending <span class="count" id="count-pending"></span></button>
+  <button class="tab active" data-view="activity" onclick="switchTab('activity')">Activity <span class="count" id="count-activity"></span></button>
+  <button class="tab" data-view="pending" onclick="switchTab('pending')">Needs You <span class="count" id="count-pending"></span></button>
   <button class="tab" data-view="inbox" onclick="switchTab('inbox')">Inbox <span class="count" id="count-inbox"></span></button>
-  <button class="tab" data-view="done" onclick="switchTab('done')">Recently Done</button>
+  <button class="tab" data-view="done" onclick="switchTab('done')">All Done</button>
   <button class="tab" data-view="learnings" onclick="switchTab('learnings')">Learnings</button>
   <button class="tab" data-view="stats" onclick="switchTab('stats')">Stats</button>
 </div>
@@ -171,7 +172,7 @@
 
 <script>
 const API_BASE = 'https://agents.liftnowdirect.com/webhook';
-let currentView = 'pending';
+let currentView = 'activity';
 let cachedPending = null;
 let cachedInbox = null;
 let cachedDone = null;
@@ -223,6 +224,14 @@ async function loadCurrentTab(){
       const data = await fetchTickets('done');
       cachedDone = data;
       renderList(data, 'done');
+    } else if (currentView === 'activity') {
+      // Activity = autonomous agent receipts (stage 3 + outcome_notes contains AUTO_EXECUTED)
+      const data = await fetchTickets('done');
+      cachedDone = data;
+      const receipts = (data.tickets || []).filter(t => (t.outcomeNotes || '').includes('AUTO_EXECUTED'));
+      document.getElementById('count-activity').textContent = receipts.length || '';
+      document.getElementById('last-refresh').textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      renderList({tickets: receipts}, 'activity');
     } else {
       const data = await fetchTickets('pending');
       cachedPending = data;
@@ -463,8 +472,8 @@ function renderPending(tickets){
 function renderList(data, mode){
   const main = document.getElementById('main');
   const tickets = data.tickets || [];
-  const labels = {pending:'pending', inbox:'reports & summaries', done:'completed in last 7 days'};
-  const emptyMsg = {pending:'Inbox zero ✨', inbox:'No reports to read', done:'No completed items yet'};
+  const labels = {pending:'needs your call', inbox:'reports & summaries', done:'completed in last 7 days', activity:'autonomous actions in last 7 days'};
+  const emptyMsg = {pending:'Inbox zero ✨ — nothing needs you', inbox:'No reports to read', done:'No completed items yet', activity:'Agents have not run autonomously yet. Cron schedules every 5min–daily.'};
   let html = `<div class="toolbar"><span class="meta">${tickets.length} ${labels[mode]||''}</span></div>`;
   if (!tickets.length) {
     html += `<div class="empty">${emptyMsg[mode]||'Nothing here'}</div>`;
@@ -498,6 +507,12 @@ function renderCard(t, mode){
       <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional note for the agent…" oninput="autoGrow(this)"></textarea>
       <button class="btn btn-ack" onclick="decide('${t.ticketId}','acknowledge',this)" title="Mark as read — moves to Done">Acknowledge & Clear</button>
     </div>`;
+  } else if (mode === 'activity') {
+    actionsHtml = `
+    <div class="actions">
+      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Tell the agent what to do differently next time… (saved as a Learning)" oninput="autoGrow(this)"></textarea>
+      <button class="btn btn-ack" onclick="decide('${t.ticketId}','acknowledge',this)" title="File this receipt + feed the comment back to the agent">File &amp; Feedback</button>
+    </div>`;
   }
   let coordCtx = '';
   if (enriched) {
@@ -522,7 +537,7 @@ function renderCard(t, mode){
       <span class="agent-badge" style="--badge-bg:${c.bg};--badge-fg:${c.fg}">${escapeHtml(t.agent||'(unknown)')}</span>
       <span class="priority priority-${escapeHtml(t.priority||'LOW')}">${escapeHtml(t.priority||'LOW')}</span>
       <span class="subject">${escapeHtml(t.subject||'(no subject)')}</span>
-      <span class="age ${ageCls}">${mode === 'done' ? stageLabel + ' · ' : ''}${ageLabel(t.ageHours||0)}</span>
+      <span class="age ${ageCls}">${mode === 'done' ? stageLabel + ' · ' : ''}${mode === 'activity' ? '✓ done · ' : ''}${ageLabel(t.ageHours||0)}</span>
     </div>
     ${coordCtx}
     <div class="body">${renderTicketContent(t.content)}
