@@ -179,6 +179,62 @@
   .shortcut-hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(36,41,46,.92);color:#fff;padding:6px 14px;border-radius:18px;font-size:11px;z-index:999;font-family:ui-monospace,SFMono-Regular,monospace}
   .shortcut-hint.fade-out{opacity:0;transition:opacity 800ms ease-out}
 
+  /* === Team / Personas === */
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:8px}
+  .persona{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;position:relative;display:flex;flex-direction:column;gap:10px}
+  .persona:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+  .persona-head{display:flex;gap:12px;align-items:center}
+  .avatar{width:48px;height:48px;border-radius:50%;background:#f0f3f6;flex-shrink:0;overflow:hidden;border:1px solid var(--border)}
+  .avatar img{width:100%;height:100%;display:block}
+  .persona-name{font-weight:700;font-size:15px;color:var(--fg);line-height:1.2}
+  .persona-role{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+  .persona-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--fg-dim)}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
+  .status-dot.live{background:var(--ok);box-shadow:0 0 0 0 rgba(34,134,58,.6);animation:livepulse 2s infinite}
+  .status-dot.idle{background:#9ca3af}
+  .status-dot.stale{background:var(--warn)}
+  .status-dot.dead{background:var(--err)}
+  @keyframes livepulse{0%{box-shadow:0 0 0 0 rgba(34,134,58,.6)}70%{box-shadow:0 0 0 6px rgba(34,134,58,0)}100%{box-shadow:0 0 0 0 rgba(34,134,58,0)}}
+  .persona-tagline{font-size:12px;color:var(--fg-dim);line-height:1.4;flex:1}
+  .persona-foot{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:8px}
+  .persona-foot .schedule{font-variant-numeric:tabular-nums}
+  .comment-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(3,102,214,.12);color:var(--accent);padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600}
+  .comment-badge.zero{background:#f0f3f6;color:var(--muted)}
+
+  /* === Persona modal === */
+  .pmodal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px;animation:fadein .15s ease-out}
+  .pmodal-backdrop.show{display:flex}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  .pmodal{background:var(--card);border-radius:12px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.18)}
+  .pmodal-head{display:flex;gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1}
+  .pmodal .avatar{width:64px;height:64px}
+  .pmodal-title h2{margin:0;font-size:20px;font-weight:700;color:var(--fg);text-transform:none;letter-spacing:0}
+  .pmodal-title .role{color:var(--muted);font-size:13px;margin-top:3px}
+  .pmodal-close{margin-left:auto;background:none;border:none;font-size:24px;color:var(--muted);cursor:pointer;padding:4px 10px;border-radius:6px}
+  .pmodal-close:hover{background:#f0f3f6;color:var(--fg)}
+  .pmodal-body{padding:18px 22px 22px}
+  .pmodal-section{margin-bottom:18px}
+  .pmodal-section h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px;font-weight:600}
+  .pmodal-section p{margin:0;font-size:14px;line-height:1.5;color:var(--fg)}
+  .interact-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  .interact-chip{background:#f0f3f6;color:var(--fg-dim);padding:3px 10px;border-radius:14px;font-size:12px;cursor:pointer}
+  .interact-chip:hover{background:#e1e4e8;color:var(--fg)}
+  .interact-chip .arr{margin-right:5px;color:var(--muted)}
+  .activity-feed{max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:8px}
+  .activity-item{padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px}
+  .activity-item:last-child{border-bottom:none}
+  .activity-item .when{color:var(--muted);font-size:11px;margin-right:8px;font-variant-numeric:tabular-nums}
+  .activity-empty{padding:14px;text-align:center;color:var(--muted);font-size:13px}
+  .feedback-list{max-height:160px;overflow-y:auto;margin-bottom:8px}
+  .feedback-item{padding:6px 10px;background:#f6f8fa;border-radius:6px;margin-bottom:4px;font-size:13px}
+  .feedback-item .when{color:var(--muted);font-size:11px;display:block;margin-bottom:2px}
+  .feedback-empty{color:var(--muted);font-size:13px;font-style:italic;padding:6px 0}
+  .feedback-form{display:flex;flex-direction:column;gap:8px}
+  .feedback-form textarea{background:#fff;color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font:inherit;font-size:13px;resize:vertical;min-height:80px}
+  .feedback-form textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(3,102,214,.1)}
+  .feedback-form-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .feedback-form-row .hint{color:var(--muted);font-size:11px}
+
   /* === Mobile === */
   @media (max-width:640px){
     main{padding:12px}
@@ -187,6 +243,10 @@
     .actions{flex-direction:column}
     .comment{width:100%}
     .btn{width:100%}
+    .team-grid{grid-template-columns:1fr 1fr;gap:10px}
+    .pmodal{max-width:100%;max-height:96vh}
+    .pmodal-head{padding:14px 16px}
+    .pmodal-body{padding:14px 16px}
   }
 </style>
 </head>
@@ -202,6 +262,7 @@
 
 <div class="tabs">
   <button class="tab active" data-view="today" onclick="switchTab('today')">Today</button>
+  <button class="tab" data-view="team" onclick="switchTab('team')">Team</button>
   <button class="tab" data-view="activity" onclick="switchTab('activity')">Activity <span class="count" id="count-activity"></span></button>
   <button class="tab" data-view="pending" onclick="switchTab('pending')">Needs You <span class="count" id="count-pending"></span></button>
   <button class="tab" data-view="inbox" onclick="switchTab('inbox')">Inbox <span class="count" id="count-inbox"></span></button>
@@ -213,6 +274,11 @@
 <main id="main">
   <div class="loading">Loading…</div>
 </main>
+
+<!-- Persona modal -->
+<div class="pmodal-backdrop" id="pmodal" onclick="if(event.target===this)closePersona()">
+  <div class="pmodal" id="pmodal-content"></div>
+</div>
 
 <script>
 const API_BASE = 'https://agents.liftnowdirect.com/webhook';
@@ -264,6 +330,8 @@ async function loadCurrentTab(){
   try {
     if (currentView === 'today') {
       await renderToday();
+    } else if (currentView === 'team') {
+      await renderTeam();
     } else if (currentView === 'stats') {
       await renderStats();
     } else if (currentView === 'learnings') {
@@ -945,6 +1013,299 @@ async function renderLearnings(){
   }
   main.innerHTML = html;
 }
+
+// ============================================================
+// TEAM — Persona cards with feedback loop
+// ============================================================
+const PERSONAS = [
+  {id:'carla',  name:'Quill',    callsign:'The Writer',        role:'Content Producer',         match:'Content Producer',   schedule:'M–F · 9:00 AM ET',
+    tagline:'Drafts blog posts, anchor pages, and LinkedIn variants. Voice-obsessed, hates buzzwords.',
+    bio:"Quill is the writer. Picks each topic from the editorial calendar, drafts a complete WordPress-ready post, and produces 3 LinkedIn derivatives for Beacon to schedule. Self-rejects truncated or off-brand drafts before they ever reach you.",
+    listens_to:['Maestro','Tweak'],  feeds_to:['Beacon','Forge'],
+    avatar:'lorelei/carla-content'},
+  {id:'sam',    name:'Tweak',    callsign:'The Editor',        role:'SEO Optimizer',            match:'SEO Optimizer',      schedule:'Every 3 hrs',
+    tagline:'Audits published pages — title tags, meta descriptions, internal linking. Surgical.',
+    bio:"Tweak reads GSC data + Ahrefs signals, finds underperforming pages, and proposes specific edits. Reasonable changes auto-execute via Forge (WP PATCH); risky ones land in Needs You.",
+    listens_to:['Quill','Gardener'],  feeds_to:['Forge'],
+    avatar:'lorelei/sam-seo'},
+  {id:'max',    name:'Tally',    callsign:'The Analyst',       role:'SEM Manager (read-only)',  match:'SEM Manager',        schedule:'Every 2 hrs',
+    tagline:'Reads Google Ads performance and emails you suggested actions. Conservative, numbers-driven.',
+    bio:"Tally is the analyst. Studies the last 14 days of Google Ads data and writes recommendations to email — never mutates ad accounts. That's Maverick's job.",
+    listens_to:[],  feeds_to:['You (via email)','Maverick'],
+    avatar:'lorelei/max-sem'},
+  {id:'riley',  name:'Maverick', callsign:'The Trader',        role:'SEM Auto-Optimizer',       match:'SEM Manager',        schedule:'Every 4 hrs',
+    tagline:'Actually moves Google Ads budgets. Bold within strict ±25% / $100-day caps.',
+    bio:"Maverick reads Google + Microsoft Ads, decides budget changes, and HITS THE BUTTON. Gated to ±25% per change, $100/day total cap, max 1 mutation per campaign per UTC day. Files a receipt ticket every time.",
+    listens_to:['Tally'],  feeds_to:['Forge'],
+    avatar:'lorelei/riley-sem-auto'},
+  {id:'kai',    name:'Scout',    callsign:'The Pathfinder',    role:'Keyword Discovery',        match:'Keyword Discovery',  schedule:'Monthly · 6 AM',
+    tagline:'Hunts new keyword opportunities from search trends and competitor SERPs.',
+    bio:"Scout casts a wide net. Proposes new keywords for Tally / Maverick to consider testing. You'll see lists once a month — review and reject anything off-strategy.",
+    listens_to:['Periscope'],  feeds_to:['Tally','Maverick'],
+    avatar:'lorelei/kai-keyword'},
+  {id:'bran',   name:'Weaver',   callsign:'The Networker',     role:'Backlink Builder',         match:'Backlink Builder',   schedule:'Tue + Thu · 9:00 AM',
+    tagline:'Drafts personalized outreach emails to journalists, partners, gov procurement bodies.',
+    bio:"Weaver finds high-DR sites in your target verticals, writes warm outreach drafts, and sends them via partnerships@liftnow.com after Self-QA approval. BCC's you on every send.",
+    listens_to:['Periscope','Sonar'],  feeds_to:['Forge'],
+    avatar:'lorelei/bran-backlink'},
+  {id:'reed',   name:'Whisper',  callsign:'The Lurker',        role:'Community Engagement',     match:'Community Engagement', schedule:'Every 4 hrs · M–F',
+    tagline:'Lurks on Reddit + Quora. Drafts low-key comments where Liftnow has something useful to add.',
+    bio:"Whisper never sells. Finds threads where someone asks a real question Liftnow can answer, drafts a helpful comment in your voice, and queues it for your approval before posting.",
+    listens_to:['Sonar'],  feeds_to:['You (approval)'],
+    avatar:'lorelei/reed-community'},
+  {id:'lin',    name:'Beacon',   callsign:'The Spokesperson',  role:'LinkedIn Cadence',         match:'LinkedIn Cadence',   schedule:'M–F · 10 AM + 2 PM',
+    tagline:'Posts LinkedIn content. Founder-voice. Stays on brand pillars.',
+    bio:"Beacon schedules LinkedIn posts derived from Quill's drafts plus standalone industry commentary. Posts on your personal feed via OAuth once you approve.",
+    listens_to:['Quill','Maestro'],  feeds_to:['Forge'],
+    avatar:'lorelei/lin-linkedin'},
+  {id:'eve',    name:'Maestro',  callsign:'The Producer',      role:'Coordinator',              match:'Coordinator',        schedule:'M–F · 9 AM + 3 PM',
+    tagline:'Daily briefing. Surfaces what’s queued, blocked, or worth your eyes today.',
+    bio:"Maestro is the producer. Twice a day writes a Daily Briefing summarizing the team's state, conflicts between agents, and top-3 things to look at.",
+    listens_to:['Sift','Oracle','everyone'],  feeds_to:['You (top of Today)'],
+    avatar:'lorelei/eve-coordinator'},
+  {id:'uma',    name:'Lens',     callsign:'The Watcher',       role:'UI/UX Performance',        match:'UI/UX Performance',  schedule:'Mon + Thu · 7 AM',
+    tagline:'Audits liftnow.com pages for usability defects, accessibility, mobile bugs.',
+    bio:"Lens sweeps the site, finds broken layouts and confusing copy, and proposes specific fixes. Most fixes need your review since they're design judgement calls.",
+    listens_to:['Quill'],  feeds_to:['You (approval)'],
+    avatar:'lorelei/uma-uiux'},
+  {id:'dax',    name:'Gardener', callsign:'The Caretaker',     role:'Content Decay Detector',   match:'Content Decay Detector', schedule:'Mon + Thu · 7 AM',
+    tagline:'Finds old posts that have lost rankings. Suggests refreshes before they die.',
+    bio:"Gardener tends the published archive. Tracks how each page is doing over time and flags declining ones so Quill can refresh them.",
+    listens_to:['Quill'],  feeds_to:['Quill','Tweak'],
+    avatar:'lorelei/dax-decay'},
+  {id:'vex',    name:'Periscope',callsign:'The Spy',           role:'Competitor SERP Monitor',  match:'Competitor SERP Monitor', schedule:'Every 4 hrs',
+    tagline:'Watches what competitors are publishing and where they rank. Terse, factual.',
+    bio:"Periscope tracks 8 competitor domains across your priority keywords and notes anything new or rising. Doesn't draft responses — just intel.",
+    listens_to:[],  feeds_to:['Scout','Weaver','Maestro'],
+    avatar:'lorelei/vex-competitor'},
+  {id:'nox',    name:'Sonar',    callsign:'The Listener',      role:'Brand Listening',          match:'Brand Listening',    schedule:'Every 15 min',
+    tagline:'Monitors Reddit for Liftnow mentions. Surfaces everything quickly.',
+    bio:"Sonar is always on. Scans relevant Reddit subs every 15 minutes for mentions of Liftnow, your products, or competitor displacement opportunities.",
+    listens_to:[],  feeds_to:['Whisper','Weaver','Maestro'],
+    avatar:'lorelei/nox-listening'},
+  {id:'theo',   name:'Oracle',   callsign:'The Coach',         role:'Team Manager',             match:'Team Manager',       schedule:'Sun · 10 PM',
+    tagline:'Weekly review. Reads your feedback to each agent. Proposes team improvements.',
+    bio:"Oracle is the coach. Once a week reviews the team's tickets, your comments on each agent, and proposes changes — better prompts, new agents, retired ones. Weekly report goes to your Inbox.",
+    listens_to:['everyone','you'],  feeds_to:['You (weekly report)'],
+    avatar:'lorelei/theo-team-mgr'},
+  {id:'iris',   name:'Ledger',   callsign:'The Bookkeeper',    role:'Daily ROI Tracker',        match:'Daily ROI',          schedule:'Daily · midnight',
+    tagline:'Quietly tallies daily spend, clicks, conversions. Powers the ROI chart.',
+    bio:"Ledger doesn't propose anything. Just records the numbers each day from Google Ads (and soon Microsoft Ads) so you can see what the spend is actually buying.",
+    listens_to:[],  feeds_to:['Today dashboard chart'],
+    avatar:'lorelei/iris-roi'},
+  {id:'pip',    name:'Sift',     callsign:'The Receptionist',  role:'Ticket Triage Digest',     match:'Ticket Triage',      schedule:'Every 2 hrs',
+    tagline:'Bundles incoming tickets into a tight summary so nothing slips.',
+    bio:"Sift organizes the day's tickets and gives Maestro clean input for the briefing.",
+    listens_to:['everyone'],  feeds_to:['Maestro'],
+    avatar:'lorelei/pip-triage'},
+  {id:'sentinel', name:'Sentinel', callsign:'The Watchdog',    role:'Failure Alerts',           match:'Agent Failed',       schedule:'On any agent failure',
+    tagline:'Catches when other agents crash. Files an alert. Never sleeps.',
+    bio:"Sentinel is the watchdog. When any agent throws, Sentinel logs a failure ticket so you (and Oracle) know to fix it. Demoted to Inbox by default — never blocks your Needs You queue.",
+    listens_to:['everyone'],  feeds_to:['Inbox'],
+    avatar:'lorelei/sentinel-watchdog'},
+  {id:'forge',  name:'Forge',    callsign:'The Hands',         role:'Approval Executor',        match:'Approval Executor',  schedule:'Every 5 min',
+    tagline:'Takes your approvals and actually executes — WP publish, LinkedIn post, send email.',
+    bio:"Forge is the action layer. Every 5 minutes sweeps for tickets you've approved (stage 2), routes them by type, performs the real action, then marks them Done with a receipt.",
+    listens_to:['You (approvals)'],  feeds_to:['WordPress','LinkedIn','SMTP'],
+    avatar:'lorelei/forge-executor'}
+];
+
+function avatarUrl(seed){ return `https://api.dicebear.com/7.x/${seed.split('/')[0]}/svg?seed=${encodeURIComponent(seed.split('/')[1])}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4,c0fdca,fde2c0`; }
+
+function relativeAge(iso){
+  if(!iso) return '—';
+  const ms = Date.now() - new Date(iso).getTime();
+  const mins = Math.round(ms/60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.round(mins/60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.round(hrs/24);
+  return days + 'd ago';
+}
+
+function statusForLastSeen(iso){
+  if (!iso) return {cls:'idle', label:'no activity yet'};
+  const ms = Date.now() - new Date(iso).getTime();
+  const hrs = ms/3600000;
+  if (hrs < 1) return {cls:'live', label:'active'};
+  if (hrs < 12) return {cls:'idle', label:'idle'};
+  if (hrs < 48) return {cls:'stale', label:'quiet'};
+  return {cls:'dead', label:'silent'};
+}
+
+let cachedFeedbackCounts = null;
+
+async function loadFeedbackCounts(){
+  try {
+    const r = await fetch('https://agents.liftnowdirect.com/webhook/agent-feedback?action=read');
+    const j = await r.json();
+    cachedFeedbackCounts = j.feedbackCounts || {};
+    return cachedFeedbackCounts;
+  } catch (e) { cachedFeedbackCounts = {}; return {}; }
+}
+
+async function renderTeam(){
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="loading">Loading team…</div>';
+
+  // Fetch last activity per agent (use done view as superset of all recent tickets)
+  const [doneData, fbCounts] = await Promise.all([
+    fetchTickets('done'),
+    loadFeedbackCounts()
+  ]);
+  const tickets = (doneData.tickets || []);
+
+  // For each persona, find most recent ticket by matching agent_name fuzzy
+  const lastByPersona = {};
+  for (const p of PERSONAS) {
+    const t = tickets.find(t => (t.agent || '').includes(p.match) || (t.subject || '').includes(p.match));
+    if (t) lastByPersona[p.id] = t;
+  }
+
+  let html = '<h2 style="margin-top:0">Your Marketing Team</h2>';
+  html += '<div class="meta" style="margin-bottom:14px">Click any agent to see their profile, recent activity, and leave them a note. Theo reads all notes every Sunday night and adjusts the team accordingly.</div>';
+  html += '<div class="team-grid">';
+  for (const p of PERSONAS) {
+    const last = lastByPersona[p.id];
+    const lastAt = last ? last.createdAt : null;
+    const status = statusForLastSeen(lastAt);
+    const fbCount = fbCounts[p.id] || 0;
+    html += `<div class="persona" onclick="openPersona('${p.id}')">
+      <div class="persona-head">
+        <div class="avatar"><img src="${avatarUrl(p.avatar)}" alt="${p.name}" loading="lazy"></div>
+        <div>
+          <div class="persona-name">${p.name}</div>
+          <div class="persona-role">${p.callsign || ''} · ${p.role}</div>
+        </div>
+      </div>
+      <div class="persona-tagline">${p.tagline}</div>
+      <div class="persona-status"><span class="status-dot ${status.cls}"></span><span>${status.label} · last seen ${relativeAge(lastAt)}</span></div>
+      <div class="persona-foot">
+        <span class="schedule">${p.schedule}</span>
+        <span class="comment-badge ${fbCount===0?'zero':''}">\u{1F4AC} ${fbCount}</span>
+      </div>
+    </div>`;
+  }
+  html += '</div>';
+  main.innerHTML = html;
+}
+
+async function openPersona(pid){
+  const p = PERSONAS.find(x => x.id === pid);
+  if (!p) return;
+  const modal = document.getElementById('pmodal');
+  const content = document.getElementById('pmodal-content');
+
+  content.innerHTML = `<div class="pmodal-head">
+    <div class="avatar"><img src="${avatarUrl(p.avatar)}" alt="${p.name}"></div>
+    <div class="pmodal-title">
+      <h2>${p.name} <span style="color:var(--muted);font-weight:400;font-size:14px">— ${p.callsign || ''}</span></h2>
+      <div class="role">${p.role} · ${p.schedule}</div>
+    </div>
+    <button class="pmodal-close" onclick="closePersona()">×</button>
+  </div>
+  <div class="pmodal-body">
+    <div class="pmodal-section">
+      <h3>What ${p.name} does</h3>
+      <p>${p.bio}</p>
+    </div>
+    <div class="pmodal-section">
+      <h3>Listens to</h3>
+      <div class="interact-list">${p.listens_to.length ? p.listens_to.map(n => `<span class="interact-chip"><span class="arr">←</span>${n}</span>`).join('') : '<span class="meta">(self-directed)</span>'}</div>
+    </div>
+    <div class="pmodal-section">
+      <h3>Feeds work to</h3>
+      <div class="interact-list">${p.feeds_to.length ? p.feeds_to.map(n => `<span class="interact-chip"><span class="arr">→</span>${n}</span>`).join('') : '<span class="meta">(terminal)</span>'}</div>
+    </div>
+    <div class="pmodal-section">
+      <h3>Recent activity</h3>
+      <div id="pmodal-activity" class="activity-feed"><div class="activity-empty">Loading…</div></div>
+    </div>
+    <div class="pmodal-section">
+      <h3>Your notes to ${p.name}</h3>
+      <div id="pmodal-feedback-list" class="feedback-list"><div class="feedback-empty">Loading…</div></div>
+      <div class="feedback-form">
+        <textarea id="pmodal-comment" placeholder="Tell ${p.name} how to do better next time. e.g. 'stop using buzzwords' or 'bump AG4 budget more aggressively'…"></textarea>
+        <div class="feedback-form-row">
+          <span class="hint">Theo reads these every Sunday night and adjusts ${p.name}’s prompts.</span>
+          <button class="btn primary" onclick="submitPersonaComment('${p.id}', '${p.name}')">Send to ${p.name}</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  modal.classList.add('show');
+  // Lazy-load activity + feedback
+  loadPersonaActivity(p);
+  loadPersonaFeedback(p.id);
+}
+
+function closePersona(){ document.getElementById('pmodal').classList.remove('show'); }
+
+async function loadPersonaActivity(p){
+  try {
+    const data = await fetchTickets('done');
+    const tickets = (data.tickets || [])
+      .filter(t => (t.agent || '').includes(p.match) || (t.subject || '').includes(p.match))
+      .slice(0, 10);
+    const el = document.getElementById('pmodal-activity');
+    if (!el) return;
+    if (!tickets.length){ el.innerHTML = '<div class="activity-empty">No recent activity. Either ' + p.name + ' hasn’t fired yet today or the agent is paused.</div>'; return; }
+    el.innerHTML = tickets.map(t => `<div class="activity-item">
+      <span class="when">${relativeAge(t.createdAt)}</span>
+      ${escapeHtml((t.subject || '').slice(0, 110))}
+    </div>`).join('');
+  } catch (e) {
+    const el = document.getElementById('pmodal-activity');
+    if (el) el.innerHTML = '<div class="activity-empty">Couldn’t load activity.</div>';
+  }
+}
+
+async function loadPersonaFeedback(pid){
+  try {
+    const r = await fetch('https://agents.liftnowdirect.com/webhook/agent-feedback?action=read&agentId=' + encodeURIComponent(pid));
+    const j = await r.json();
+    const fb = (j.feedback || []).slice().reverse();
+    const el = document.getElementById('pmodal-feedback-list');
+    if (!el) return;
+    if (!fb.length){ el.innerHTML = '<div class="feedback-empty">No notes yet. Be the first.</div>'; return; }
+    el.innerHTML = fb.map(f => `<div class="feedback-item">
+      <span class="when">${relativeAge(f.at)}</span>
+      ${escapeHtml(f.comment)}
+    </div>`).join('');
+  } catch (e) {
+    const el = document.getElementById('pmodal-feedback-list');
+    if (el) el.innerHTML = '<div class="feedback-empty">Couldn’t load notes.</div>';
+  }
+}
+
+async function submitPersonaComment(pid, pname){
+  const ta = document.getElementById('pmodal-comment');
+  const comment = (ta.value || '').trim();
+  if (!comment){ toast('Type a note first.', 'err'); return; }
+  try {
+    const r = await fetch('https://agents.liftnowdirect.com/webhook/agent-feedback', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({agentId: pid, comment, source: 'ui'})
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    ta.value = '';
+    toast(`Note sent to ${pname}. Theo will pick it up Sunday.`, 'ok');
+    loadPersonaFeedback(pid);
+    cachedFeedbackCounts = null; // force refresh next time grid loads
+  } catch (e) {
+    toast('Send failed: ' + e.message, 'err');
+  }
+}
+
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// Close modal on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { const m = document.getElementById('pmodal'); if (m && m.classList.contains('show')) closePersona(); }
+});
 
 async function renderStats(){
   const main = document.getElementById('main');
