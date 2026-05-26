@@ -953,20 +953,107 @@ async function renderToday(){
     </div>`;
   }).join('');
 
-  // === Activity stream from heartbeats ===
+  // === News feed: heartbeats + tickets merged + grouped by hour, plain-English ===
   const heartbeats = (hb && hb.heartbeats) || [];
-  const activityHtml = heartbeats.length === 0 ? '<div class="meta" style="padding:8px 0">No heartbeats yet. The Heartbeat Aggregator runs every 5 min.</div>' :
-    heartbeats.slice(0, 20).map(h => {
-      const cls = h.outcome === 'error' ? 'alert' : h.outcome === 'action_taken' ? 'done' : 'info';
-      const icon = h.outcome === 'error' ? '!' : h.outcome === 'action_taken' ? '✓' : '·';
-      return `<div class="feed-item">
-        <div class="feed-icon ${cls}">${icon}</div>
-        <div class="feed-text"><b>${escapeHtml(h.agentName || h.agentId)}</b> · ${escapeHtml(h.summary || h.action)}</div>
-        <div class="feed-time">${relativeAge(h.at)}</div>
-      </div>`;
+
+  // Animal emoji lookup
+  const AGENT_EMOJI = {
+    carla:'🦉', sam:'🐝', max:'🦊', riley:'🦊', sem:'🦊',
+    kai:'🐕', bran:'🕷️', reed:'🦇', nox:'🦇', reddit:'🦇',
+    lin:'🦜', eve:'🐘', pip:'🐘', briefing:'🐘',
+    uma:'🦅', dax:'🐢', vex:'🐈', theo:'🐉',
+    sentinel:'🐺', forge:'🦫', iris:'🐿️'
+  };
+  function emojiFor(agentId){ return AGENT_EMOJI[agentId] || '🐾'; }
+
+  // Build news items from heartbeats (last 24h) + recent ticket activity
+  const newsItems = [];
+  for (const h of heartbeats.slice(0, 40)) {
+    newsItems.push({
+      when: new Date(h.at).getTime(),
+      emoji: emojiFor(h.agentId),
+      who: h.agentName,
+      what: h.summary || 'did some work',
+      outcome: h.outcome,
+      link: h.workflow_id && h.exec_id ? `https://agents.liftnowdirect.com/workflow/${h.workflow_id}/executions/${h.exec_id}` : null,
+      kind: 'fire'
+    });
+  }
+  // Add tickets created in last 24h as "produced something" items
+  for (const t of (doneData.tickets||[]).slice(0,30)) {
+    if (!t.createdAt) continue;
+    const ms = new Date(t.createdAt).getTime();
+    if (Date.now() - ms > 24*3600*1000) continue;
+    if (/^\[done\] sem auto/i.test(t.subject||'')) {
+      // Maverick mutation receipt — extract before/after
+      const m = (t.subject||'').match(/\$([\d.]+)[→\-\>]+\$([\d.]+)/);
+      newsItems.push({
+        when: ms, emoji: '🦊', who: 'Maverick',
+        what: m ? `Changed a Google Ads budget: $${m[1]} → $${m[2]} (real change in Google Ads)` : 'Made a Google Ads budget change',
+        outcome: 'action_taken', kind: 'artifact',
+        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
+      });
+    } else if (/\[suggestion\] sem/i.test(t.subject||'')) {
+      newsItems.push({
+        when: ms, emoji: '🦊', who: 'Maverick (suggestions)',
+        what: 'Emailed you a Google Ads suggestion (no change made — email only)',
+        outcome: 'info', kind: 'artifact',
+        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
+      });
+    } else if (/\[DRAFT FOR YOUR REVIEW\]/i.test(t.subject||'')) {
+      newsItems.push({
+        when: ms, emoji: '🕷️', who: 'Weaver',
+        what: `Drafted a backlink outreach email — waiting for your approval`,
+        outcome: 'action_taken', kind: 'artifact',
+        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
+      });
+    } else if (/\[BRIEFING\]|Daily/i.test(t.subject||'')) {
+      newsItems.push({
+        when: ms, emoji: '🐘', who: 'Maestro',
+        what: 'Wrote a Daily Briefing (top of this tab)',
+        outcome: 'info', kind: 'artifact',
+        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
+      });
+    } else if (/Content Producer|Content Draft/i.test(t.subject + ' ' + (t.recommendationType||''))) {
+      newsItems.push({
+        when: ms, emoji: '🦉', who: 'Quill',
+        what: `Drafted a content piece: "${(t.subject||'').replace(/^\[.*?\]\s*/,'').slice(0,60)}"`,
+        outcome: 'action_taken', kind: 'artifact',
+        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
+      });
+    }
+  }
+
+  // Sort + dedupe (within same agent within 1 min, keep the artifact over the heartbeat)
+  newsItems.sort((a,b) => b.when - a.when);
+  const dedup = [];
+  for (const item of newsItems) {
+    const collisions = dedup.filter(d => d.who === item.who && Math.abs(d.when - item.when) < 60000);
+    if (collisions.some(c => c.kind === 'artifact')) continue;
+    dedup.push(item);
+  }
+
+  // Compute today summary
+  const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+  const todayItems = dedup.filter(i => i.when >= startOfDay.getTime());
+  const todayActions = todayItems.filter(i => i.outcome === 'action_taken').length;
+  const todayChecks = todayItems.filter(i => i.outcome === 'no_op' || i.outcome === 'info').length;
+
+  const activityHtml = dedup.length === 0 ? '<div class="meta" style="padding:8px 0">No activity logged yet. The team is just waking up.</div>' :
+    dedup.slice(0, 25).map(item => {
+      const linkOpen = item.link ? `<a href="${item.link}" target="_blank" style="text-decoration:none;color:inherit;display:flex;gap:10px;width:100%;align-items:center;padding:8px 10px;border-radius:6px" onmouseover="this.style.background='#f6f8fa'" onmouseout="this.style.background='transparent'">` : '<div style="display:flex;gap:10px;width:100%;align-items:center;padding:8px 10px">';
+      const linkClose = item.link ? '</a>' : '</div>';
+      const bg = item.outcome === 'error' ? '#fff5f5' : item.kind === 'artifact' ? '#f0f7ff' : 'transparent';
+      return `${linkOpen}
+        <div style="font-size:20px;flex-shrink:0;width:32px;text-align:center">${item.emoji}</div>
+        <div style="flex:1;font-size:13px;line-height:1.45;color:var(--fg)">
+          <b>${item.who}</b> ${escapeHtml(item.what)}${item.link?' <span style="color:var(--accent);font-size:11px">→</span>':''}
+        </div>
+        <div style="color:var(--muted);font-size:11px;flex-shrink:0;font-variant-numeric:tabular-nums">${relativeAge(new Date(item.when).toISOString())}</div>
+      ${linkClose}`;
     }).join('');
-  const stats24h = (hb && hb.stats_24h) || {};
   const totalFires24h = hb ? hb.total_24h : 0;
+  const todaySummary = `${todayActions} action${todayActions===1?'':'s'} taken · ${todayChecks} check${todayChecks===1?'':'s'} (no action needed)`;
 
   // === Failure banner ===
   const failureBannerHtml = failures24h.length === 0 ? '' : `
@@ -1036,8 +1123,8 @@ async function renderToday(){
 
     <section class="panel">
       <div class="panel-head">
-        <h3 class="panel-title">Live agent heartbeat</h3>
-        <div class="panel-sub">${totalFires24h} fires across the team in last 24h · updates every 5 min</div>
+        <h3 class="panel-title">What your team did today</h3>
+        <div class="panel-sub">${todaySummary} · auto-updates · click any item to see the actual receipt</div>
       </div>
       <div class="recent-feed">${activityHtml}</div>
     </section>
@@ -1345,6 +1432,17 @@ function statusForLastSeen(iso){
 
 let cachedFeedbackCounts = null;
 
+// Some UI personas were MERGED from multiple underlying agents.
+// Heartbeats are still recorded under the original agent IDs, so map them back.
+const PERSONA_TO_AGENT_IDS = {
+  sem:      ['max', 'riley'],        // Tally + Maverick
+  reddit:   ['nox', 'reed'],          // Sonar + Whisper
+  briefing: ['eve', 'pip']            // Maestro + Sift
+};
+function agentIdsForPersona(pid){
+  return PERSONA_TO_AGENT_IDS[pid] || [pid];
+}
+
 async function loadFeedbackCounts(){
   try {
     const r = await fetch('https://agents.liftnowdirect.com/webhook/agent-feedback?action=read');
@@ -1401,7 +1499,8 @@ async function renderTeam(){
   const lastByPersona = {};
   const fireCountsByPersona = {};
   for (const p of allPersonas) {
-    const hbForP = heartbeats.filter(h => h.agentId === p.id);
+    const validIds = agentIdsForPersona(p.id);
+    const hbForP = heartbeats.filter(h => validIds.includes(h.agentId));
     fireCountsByPersona[p.id] = hbForP.length;
     const lastHb = hbForP[0]; // already reverse-chronological from webhook
     const lastTicket = tickets.find(t => matchTicket(p, t));
@@ -1495,13 +1594,13 @@ async function openPersona(pid){
       <div id="pmodal-activity" class="activity-feed"><div class="activity-empty">Loading…</div></div>
     </div>
     <div class="pmodal-section">
-      <h3>Your notes to ${p.name}</h3>
+      <h3>Tell ${p.name} what to do differently</h3>
       <div id="pmodal-feedback-list" class="feedback-list"><div class="feedback-empty">Loading…</div></div>
       <div class="feedback-form">
-        <textarea id="pmodal-comment" placeholder="Tell ${p.name} how to do better next time. e.g. 'stop using buzzwords' or 'bump AG4 budget more aggressively'…"></textarea>
+        <textarea id="pmodal-comment" placeholder="e.g. 'Stop using buzzwords.' / 'Be more aggressive on AG4 budget.' / 'Skip Reddit comments on r/marketing.'"></textarea>
         <div class="feedback-form-row">
-          <span class="hint">Theo reads these every Sunday night and adjusts ${p.name}’s prompts.</span>
-          <button class="btn primary" onclick="submitPersonaComment('${p.id}', '${p.name}')">Send to ${p.name}</button>
+          <span class="hint">Saved instantly. Oracle reviews every Sunday night and updates ${p.name}'s instructions.</span>
+          <button class="btn primary" onclick="submitPersonaComment('${p.id}', '${p.name}')">Save note for ${p.name}</button>
         </div>
       </div>
     </div>
@@ -1535,9 +1634,10 @@ async function loadPersonaActivity(p){
         link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
       }));
 
-    // Heartbeats matching this persona (by agentId)
+    // Heartbeats matching this persona (by agentId — including merged personas)
+    const validIds = agentIdsForPersona(p.id);
     const heartbeats = ((hbData && hbData.heartbeats) || [])
-      .filter(h => h.agentId === p.id)
+      .filter(h => validIds.includes(h.agentId))
       .map(h => ({
         kind: 'fire',
         when: new Date(h.at).getTime(),
@@ -1605,7 +1705,7 @@ async function submitPersonaComment(pid, pname){
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const j = await r.json();
     ta.value = '';
-    toast(`Note sent to ${pname}. Theo will pick it up Sunday.`, 'ok');
+    toast(`✓ Saved. ${pname} will pick this up on the next run. Oracle will incorporate it into ${pname}'s instructions this Sunday.`, 'ok');
     loadPersonaFeedback(pid);
     cachedFeedbackCounts = null; // force refresh next time grid loads
   } catch (e) {
