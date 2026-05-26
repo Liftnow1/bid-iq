@@ -179,6 +179,16 @@
   .shortcut-hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(36,41,46,.92);color:#fff;padding:6px 14px;border-radius:18px;font-size:11px;z-index:999;font-family:ui-monospace,SFMono-Regular,monospace}
   .shortcut-hint.fade-out{opacity:0;transition:opacity 800ms ease-out}
 
+  /* === Failure banner === */
+  .failure-banner{display:flex;align-items:center;gap:14px;background:rgba(176,136,0,.10);border:1px solid rgba(176,136,0,.35);border-radius:8px;padding:14px 18px;margin-bottom:14px;color:var(--fg)}
+  .failure-banner.urgent{background:rgba(215,58,73,.10);border-color:rgba(215,58,73,.5)}
+  .failure-banner .fb-icon{font-size:24px;flex-shrink:0}
+  .failure-banner .fb-text{flex:1}
+  .failure-banner .fb-title{font-weight:700;font-size:14px;color:var(--fg)}
+  .failure-banner .fb-sub{font-size:12px;color:var(--fg-dim);margin-top:2px}
+  .failure-banner .btn{flex-shrink:0;background:#fff;border:1px solid var(--border)}
+  .failure-banner.urgent .btn{border-color:var(--err);color:var(--err)}
+
   /* === Team / Personas === */
   .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:8px}
   .persona{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;position:relative;display:flex;flex-direction:column;gap:10px}
@@ -806,14 +816,23 @@ document.addEventListener('keydown', e => {
 async function renderToday(){
   const main = document.getElementById('main');
   // Fetch all data in parallel
-  const [pendingRes, doneRes, roiRes] = await Promise.allSettled([
+  const [pendingRes, doneRes, inboxRes, roiRes, hbRes] = await Promise.allSettled([
     fetchTickets('pending'),
     fetchTickets('done'),
-    fetch(`${API_BASE}/roi-data`).then(r => r.ok ? r.json() : null).catch(()=>null)
+    fetchTickets('inbox'),
+    fetch(`${API_BASE}/roi-data`).then(r => r.ok ? r.json() : null).catch(()=>null),
+    fetch(`${API_BASE}/agent-heartbeat?action=read&limit=30`).then(r => r.ok ? r.json() : null).catch(()=>null)
   ]);
   const pendingData = pendingRes.status === 'fulfilled' ? pendingRes.value : {tickets:[]};
   const doneData = doneRes.status === 'fulfilled' ? doneRes.value : {tickets:[]};
+  const inboxData = inboxRes.status === 'fulfilled' ? inboxRes.value : {tickets:[]};
   const roi = roiRes.status === 'fulfilled' ? roiRes.value : null;
+  const hb = hbRes.status === 'fulfilled' ? hbRes.value : null;
+
+  // Compute 24h failure count from inbox + pending
+  const allTickets = [...(inboxData.tickets||[]), ...(pendingData.tickets||[])];
+  const failures24h = allTickets.filter(t => /Agent Failed|ESCALATED/i.test(t.subject||'') && (t.ageHours||999) < 24);
+  const escalatedNow = (pendingData.tickets||[]).filter(t => /ESCALATED/i.test(t.subject||''));
 
   // Identify hero items: prefer Triage Digest's top5 ticket if present today; fall back to top 3 pending
   let heroItems = [];
@@ -887,7 +906,35 @@ async function renderToday(){
     </div>`;
   }).join('');
 
+  // === Activity stream from heartbeats ===
+  const heartbeats = (hb && hb.heartbeats) || [];
+  const activityHtml = heartbeats.length === 0 ? '<div class="meta" style="padding:8px 0">No heartbeats yet. The Heartbeat Aggregator runs every 5 min.</div>' :
+    heartbeats.slice(0, 20).map(h => {
+      const cls = h.outcome === 'error' ? 'alert' : h.outcome === 'action_taken' ? 'done' : 'info';
+      const icon = h.outcome === 'error' ? '!' : h.outcome === 'action_taken' ? '✓' : '·';
+      return `<div class="feed-item">
+        <div class="feed-icon ${cls}">${icon}</div>
+        <div class="feed-text"><b>${escapeHtml(h.agentName || h.agentId)}</b> · ${escapeHtml(h.summary || h.action)}</div>
+        <div class="feed-time">${relativeAge(h.at)}</div>
+      </div>`;
+    }).join('');
+  const stats24h = (hb && hb.stats_24h) || {};
+  const totalFires24h = hb ? hb.total_24h : 0;
+
+  // === Failure banner ===
+  const failureBannerHtml = failures24h.length === 0 ? '' : `
+    <section class="failure-banner${escalatedNow.length > 0 ? ' urgent' : ''}">
+      <div class="fb-icon">${escalatedNow.length > 0 ? '\u{1F6A8}' : '\u{26A0}️'}</div>
+      <div class="fb-text">
+        <div class="fb-title">${failures24h.length} agent failure${failures24h.length===1?'':'s'} in last 24h${escalatedNow.length > 0 ? ' · '+escalatedNow.length+' ESCALATED to Needs You' : ''}</div>
+        <div class="fb-sub">Sentinel filed these. ${escalatedNow.length > 0 ? 'Same error fired 3+ times — needs your attention.' : 'Hidden in Inbox so they don’t block your morning. Open Inbox to review.'}</div>
+      </div>
+      <button class="btn" onclick="switchTab('${escalatedNow.length > 0 ? 'pending' : 'inbox'}')">Open</button>
+    </section>`;
+
   main.innerHTML = `
+    ${failureBannerHtml}
+
     <section class="hero-do">
       <h2>Do these today</h2>
       <div class="hero-sub">${heroItems.length > 0 ? 'Top items from your morning triage. Click to jump to the ticket.' : 'Nothing pressing — the agents have it covered.'}</div>
@@ -910,9 +957,17 @@ async function renderToday(){
     <section class="panel">
       <div class="panel-head">
         <h3 class="panel-title">Recent agent activity</h3>
-        <div class="panel-sub">${autoExec.length} actions in the last 7 days</div>
+        <div class="panel-sub">${autoExec.length} actions completed in last 7 days</div>
       </div>
       <div class="recent-feed">${feedHtml}</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h3 class="panel-title">Live agent heartbeat</h3>
+        <div class="panel-sub">${totalFires24h} fires across the team in last 24h · updates every 5 min</div>
+      </div>
+      <div class="recent-feed">${activityHtml}</div>
     </section>
 
     <section class="health-strip">
@@ -1037,97 +1092,90 @@ async function renderLearnings(){
 // ============================================================
 // TEAM — Persona cards with feedback loop
 // ============================================================
+// Marketing team (11 personas) — these are the agents you converse with
 const PERSONAS = [
-  {id:'carla',  name:'Quill',    callsign:'The Writer',        role:'Content Producer',         match:'Content Producer',   schedule:'M–F · 9:00 AM ET',
+  {id:'carla',  name:'Quill',    callsign:'The Writer',        role:'Content Producer',  match:'Content Producer', schedule:'M–F · 9:00 AM ET',
     tagline:'Drafts blog posts, anchor pages, and LinkedIn variants. Voice-obsessed, hates buzzwords.',
     bio:"Quill is the writer. Picks each topic from the editorial calendar, drafts a complete WordPress-ready post, and produces 3 LinkedIn derivatives for Beacon to schedule. Self-rejects truncated or off-brand drafts before they ever reach you.",
-    listens_to:['Maestro','Tweak'],  feeds_to:['Beacon','Forge'],
+    listens_to:['Briefing','Tweak'],  feeds_to:['Beacon','Forge'],
     avatar:'lorelei/carla-content'},
-  {id:'sam',    name:'Tweak',    callsign:'The Editor',        role:'SEO Optimizer',            match:'SEO Optimizer',      schedule:'Every 3 hrs',
+  {id:'sam',    name:'Tweak',    callsign:'The Editor',        role:'SEO Optimizer',     match:'SEO Optimizer',    schedule:'Every 3 hrs',
     tagline:'Audits published pages — title tags, meta descriptions, internal linking. Surgical.',
     bio:"Tweak reads GSC data + Ahrefs signals, finds underperforming pages, and proposes specific edits. Reasonable changes auto-execute via Forge (WP PATCH); risky ones land in Needs You.",
     listens_to:['Quill','Gardener'],  feeds_to:['Forge'],
     avatar:'lorelei/sam-seo'},
-  {id:'max',    name:'Tally',    callsign:'The Analyst',       role:'SEM Manager (read-only)',  match:'SEM Manager',        schedule:'Every 2 hrs',
-    tagline:'Reads Google Ads performance and emails you suggested actions. Conservative, numbers-driven.',
-    bio:"Tally is the analyst. Studies the last 14 days of Google Ads data and writes recommendations to email — never mutates ad accounts. That's Maverick's job.",
-    listens_to:[],  feeds_to:['You (via email)','Maverick'],
-    avatar:'lorelei/max-sem'},
-  {id:'riley',  name:'Maverick', callsign:'The Trader',        role:'SEM Auto-Optimizer',       match:'SEM Manager',        schedule:'Every 4 hrs',
-    tagline:'Actually moves Google Ads budgets. Bold within strict ±25% / $100-day caps.',
-    bio:"Maverick reads Google + Microsoft Ads, decides budget changes, and HITS THE BUTTON. Gated to ±25% per change, $100/day total cap, max 1 mutation per campaign per UTC day. Files a receipt ticket every time.",
-    listens_to:['Tally'],  feeds_to:['Forge'],
+  // MERGED: Tally (read-only) + Maverick (real $) → one SEM persona
+  {id:'sem',    name:'Maverick', callsign:'The Trader',        role:'SEM (suggestions + auto-execute)', match:'SEM Manager', schedule:'Every 2–4 hrs',
+    tagline:'Suggests Google Ads moves AND auto-mutates budgets (within ±25% / $100-day caps).',
+    bio:"Two modes: Analyst mode reads Google Ads every 2 hrs and emails you suggested keyword/bid changes (no Google Ads write). Trader mode reads Google + Microsoft every 4 hrs and executes real budget changes within strict safety gates. Files a receipt ticket every time.",
+    listens_to:[],  feeds_to:['You (suggestions)','Google Ads (mutations)','Forge'],
     avatar:'lorelei/riley-sem-auto'},
-  {id:'kai',    name:'Scout',    callsign:'The Pathfinder',    role:'Keyword Discovery',        match:'Keyword Discovery',  schedule:'Monthly · 6 AM',
+  {id:'kai',    name:'Scout',    callsign:'The Pathfinder',    role:'Keyword Discovery', match:'Keyword Discovery', schedule:'Monthly · 6 AM',
     tagline:'Hunts new keyword opportunities from search trends and competitor SERPs.',
-    bio:"Scout casts a wide net. Proposes new keywords for Tally / Maverick to consider testing. You'll see lists once a month — review and reject anything off-strategy.",
-    listens_to:['Periscope'],  feeds_to:['Tally','Maverick'],
+    bio:"Scout casts a wide net. Proposes new keywords for Maverick to consider testing. You'll see lists once a month — review and reject anything off-strategy.",
+    listens_to:['Periscope'],  feeds_to:['Maverick'],
     avatar:'lorelei/kai-keyword'},
-  {id:'bran',   name:'Weaver',   callsign:'The Networker',     role:'Backlink Builder',         match:'Backlink Builder',   schedule:'Tue + Thu · 9:00 AM',
+  {id:'bran',   name:'Weaver',   callsign:'The Networker',     role:'Backlink Builder',  match:'Backlink Builder',  schedule:'Tue + Thu · 9:00 AM',
     tagline:'Drafts personalized outreach emails to journalists, partners, gov procurement bodies.',
     bio:"Weaver finds high-DR sites in your target verticals, writes warm outreach drafts, and sends them via partnerships@liftnow.com after Self-QA approval. BCC's you on every send.",
-    listens_to:['Periscope','Sonar'],  feeds_to:['Forge'],
+    listens_to:['Periscope','Reddit'],  feeds_to:['Forge'],
     avatar:'lorelei/bran-backlink'},
-  {id:'reed',   name:'Whisper',  callsign:'The Lurker',        role:'Community Engagement',     match:'Community Engagement', schedule:'Every 4 hrs · M–F',
-    tagline:'Lurks on Reddit + Quora. Drafts low-key comments where Liftnow has something useful to add.',
-    bio:"Whisper never sells. Finds threads where someone asks a real question Liftnow can answer, drafts a helpful comment in your voice, and queues it for your approval before posting.",
-    listens_to:['Sonar'],  feeds_to:['You (approval)'],
-    avatar:'lorelei/reed-community'},
-  {id:'lin',    name:'Beacon',   callsign:'The Spokesperson',  role:'LinkedIn Cadence',         match:'LinkedIn Cadence',   schedule:'M–F · 10 AM + 2 PM',
+  // MERGED: Whisper (Reddit drafts) + Sonar (Reddit listening) → one Reddit persona
+  {id:'reddit', name:'Sonar',    callsign:'The Listener+Lurker', role:'Reddit (listen + reply)', match:'Reddit',     schedule:'Listening 15 min · Drafting 4 hrs',
+    tagline:'Always-on Reddit monitor. Drafts helpful comments where Liftnow has something useful to add.',
+    bio:"Two layers: every 15 min scans relevant subs for Liftnow / competitor / product mentions. Every 4 hrs, picks promising threads and drafts a non-salesy reply in your voice. You approve before any post goes live.",
+    listens_to:[],  feeds_to:['Weaver','Briefing','You (approval)'],
+    avatar:'lorelei/nox-listening'},
+  {id:'lin',    name:'Beacon',   callsign:'The Spokesperson',  role:'LinkedIn Cadence',  match:'LinkedIn Cadence',  schedule:'M–F · 10 AM + 2 PM',
     tagline:'Posts LinkedIn content. Founder-voice. Stays on brand pillars.',
     bio:"Beacon schedules LinkedIn posts derived from Quill's drafts plus standalone industry commentary. Posts on your personal feed via OAuth once you approve.",
-    listens_to:['Quill','Maestro'],  feeds_to:['Forge'],
+    listens_to:['Quill','Briefing'],  feeds_to:['Forge'],
     avatar:'lorelei/lin-linkedin'},
-  {id:'eve',    name:'Maestro',  callsign:'The Producer',      role:'Coordinator',              match:'Coordinator',        schedule:'M–F · 9 AM + 3 PM',
-    tagline:'Daily briefing. Surfaces what’s queued, blocked, or worth your eyes today.',
-    bio:"Maestro is the producer. Twice a day writes a Daily Briefing summarizing the team's state, conflicts between agents, and top-3 things to look at.",
-    listens_to:['Sift','Oracle','everyone'],  feeds_to:['You (top of Today)'],
+  // MERGED: Sift (triage) + Maestro (briefing) → one Briefing persona
+  {id:'briefing', name:'Maestro', callsign:'The Producer',     role:'Daily Briefing (triage + summary)', match:'Coordinator|Ticket Triage', schedule:'M–F · 9 AM + 3 PM (+ hourly triage)',
+    tagline:'Bundles the team’s output every 2 hrs, writes a Daily Briefing twice a day.',
+    bio:"The producer. Sift the receptionist sorts every incoming ticket; Maestro the producer turns it into a daily briefing. You see Maestro's output on top of the Today tab — surfaces what's queued, blocked, and worth your eyes today.",
+    listens_to:['everyone'],  feeds_to:['You (top of Today)'],
     avatar:'lorelei/eve-coordinator'},
-  {id:'uma',    name:'Lens',     callsign:'The Watcher',       role:'UI/UX Performance',        match:'UI/UX Performance',  schedule:'Mon + Thu · 7 AM',
+  {id:'uma',    name:'Lens',     callsign:'The Watcher',       role:'UI/UX Performance', match:'UI/UX Performance', schedule:'Mon + Thu · 7 AM',
     tagline:'Audits liftnow.com pages for usability defects, accessibility, mobile bugs.',
     bio:"Lens sweeps the site, finds broken layouts and confusing copy, and proposes specific fixes. Most fixes need your review since they're design judgement calls.",
     listens_to:['Quill'],  feeds_to:['You (approval)'],
     avatar:'lorelei/uma-uiux'},
-  {id:'dax',    name:'Gardener', callsign:'The Caretaker',     role:'Content Decay Detector',   match:'Content Decay Detector', schedule:'Mon + Thu · 7 AM',
+  {id:'dax',    name:'Gardener', callsign:'The Caretaker',     role:'Content Decay Detector', match:'Content Decay Detector', schedule:'Mon + Thu · 7 AM',
     tagline:'Finds old posts that have lost rankings. Suggests refreshes before they die.',
     bio:"Gardener tends the published archive. Tracks how each page is doing over time and flags declining ones so Quill can refresh them.",
     listens_to:['Quill'],  feeds_to:['Quill','Tweak'],
     avatar:'lorelei/dax-decay'},
-  {id:'vex',    name:'Periscope',callsign:'The Spy',           role:'Competitor SERP Monitor',  match:'Competitor SERP Monitor', schedule:'Every 4 hrs',
+  {id:'vex',    name:'Periscope',callsign:'The Spy',           role:'Competitor SERP Monitor', match:'Competitor SERP Monitor', schedule:'Every 4 hrs',
     tagline:'Watches what competitors are publishing and where they rank. Terse, factual.',
     bio:"Periscope tracks 8 competitor domains across your priority keywords and notes anything new or rising. Doesn't draft responses — just intel.",
-    listens_to:[],  feeds_to:['Scout','Weaver','Maestro'],
+    listens_to:[],  feeds_to:['Scout','Weaver','Briefing'],
     avatar:'lorelei/vex-competitor'},
-  {id:'nox',    name:'Sonar',    callsign:'The Listener',      role:'Brand Listening',          match:'Brand Listening',    schedule:'Every 15 min',
-    tagline:'Monitors Reddit for Liftnow mentions. Surfaces everything quickly.',
-    bio:"Sonar is always on. Scans relevant Reddit subs every 15 minutes for mentions of Liftnow, your products, or competitor displacement opportunities.",
-    listens_to:[],  feeds_to:['Whisper','Weaver','Maestro'],
-    avatar:'lorelei/nox-listening'},
-  {id:'theo',   name:'Oracle',   callsign:'The Coach',         role:'Team Manager',             match:'Team Manager',       schedule:'Sun · 10 PM',
+  {id:'theo',   name:'Oracle',   callsign:'The Coach',         role:'Team Manager',      match:'Team Manager',      schedule:'Sun · 10 PM',
     tagline:'Weekly review. Reads your feedback to each agent. Proposes team improvements.',
     bio:"Oracle is the coach. Once a week reviews the team's tickets, your comments on each agent, and proposes changes — better prompts, new agents, retired ones. Weekly report goes to your Inbox.",
     listens_to:['everyone','you'],  feeds_to:['You (weekly report)'],
-    avatar:'lorelei/theo-team-mgr'},
-  {id:'iris',   name:'Ledger',   callsign:'The Bookkeeper',    role:'Daily ROI Tracker',        match:'Daily ROI',          schedule:'Daily · midnight',
-    tagline:'Quietly tallies daily spend, clicks, conversions. Powers the ROI chart.',
-    bio:"Ledger doesn't propose anything. Just records the numbers each day from Google Ads (and soon Microsoft Ads) so you can see what the spend is actually buying.",
-    listens_to:[],  feeds_to:['Today dashboard chart'],
-    avatar:'lorelei/iris-roi'},
-  {id:'pip',    name:'Sift',     callsign:'The Receptionist',  role:'Ticket Triage Digest',     match:'Ticket Triage',      schedule:'Every 2 hrs',
-    tagline:'Bundles incoming tickets into a tight summary so nothing slips.',
-    bio:"Sift organizes the day's tickets and gives Maestro clean input for the briefing.",
-    listens_to:['everyone'],  feeds_to:['Maestro'],
-    avatar:'lorelei/pip-triage'},
-  {id:'sentinel', name:'Sentinel', callsign:'The Watchdog',    role:'Failure Alerts',           match:'Agent Failed',       schedule:'On any agent failure',
-    tagline:'Catches when other agents crash. Files an alert. Never sleeps.',
-    bio:"Sentinel is the watchdog. When any agent throws, Sentinel logs a failure ticket so you (and Oracle) know to fix it. Demoted to Inbox by default — never blocks your Needs You queue.",
-    listens_to:['everyone'],  feeds_to:['Inbox'],
+    avatar:'lorelei/theo-team-mgr'}
+];
+
+// System layer (3 personas) — plumbing, not interactive agents
+const SYSTEM_PERSONAS = [
+  {id:'sentinel', name:'Sentinel', callsign:'The Watchdog', role:'Failure Alerts', match:'Agent Failed', schedule:'On every agent failure',
+    tagline:'Catches when agents crash. Escalates same-error 3x/hr to Needs You.',
+    bio:"When any agent throws, Sentinel logs a failure ticket. Most go to Inbox quietly. If the same error fires 3+ times within an hour, Sentinel ESCALATES one ticket to Needs You so it can't hide.",
+    listens_to:['everyone'],  feeds_to:['Inbox','Needs You (on repeat)'],
     avatar:'lorelei/sentinel-watchdog'},
-  {id:'forge',  name:'Forge',    callsign:'The Hands',         role:'Approval Executor',        match:'Approval Executor',  schedule:'Every 5 min',
-    tagline:'Takes your approvals and actually executes — WP publish, LinkedIn post, send email.',
-    bio:"Forge is the action layer. Every 5 minutes sweeps for tickets you've approved (stage 2), routes them by type, performs the real action, then marks them Done with a receipt.",
+  {id:'forge',  name:'Forge',    callsign:'The Hands', role:'Approval Executor', match:'Approval Executor', schedule:'Every 5 min',
+    tagline:'The action layer. Executes your approved tickets (WP publish, LinkedIn post, etc).',
+    bio:"Every 5 minutes sweeps for tickets you've approved (stage 2), routes them by type, performs the real action, then marks them Done with a receipt.",
     listens_to:['You (approvals)'],  feeds_to:['WordPress','LinkedIn','SMTP'],
-    avatar:'lorelei/forge-executor'}
+    avatar:'lorelei/forge-executor'},
+  {id:'iris',   name:'Ledger',   callsign:'The Bookkeeper', role:'Daily ROI Tracker', match:'Daily ROI', schedule:'Daily · midnight',
+    tagline:'Records daily spend/conversions. Powers the Today chart.',
+    bio:"Records the numbers each day from Google Ads + Microsoft Ads daily-budget snapshot so the Today chart has data.",
+    listens_to:[],  feeds_to:['Today chart'],
+    avatar:'lorelei/iris-roi'}
 ];
 
 function avatarUrl(seed){ return `https://api.dicebear.com/7.x/${seed.split('/')[0]}/svg?seed=${encodeURIComponent(seed.split('/')[1])}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4,c0fdca,fde2c0`; }
@@ -1165,46 +1213,57 @@ async function loadFeedbackCounts(){
   } catch (e) { cachedFeedbackCounts = {}; return {}; }
 }
 
+// Unified persona matcher used by both grid and modal
+function matchTicket(p, t){
+  const subj = (t.subject || '').toLowerCase();
+  const notes = (t.outcomeNotes || '').toLowerCase();
+  const agent = (t.agent || '').toLowerCase();
+  // SEM — merged Tally + Maverick
+  if (p.id === 'sem') {
+    return subj.includes('sem auto') || subj.includes('sem ag') ||
+           notes.includes('google ads budget mutated') || notes.includes('email_sent') || notes.includes('sent sem email');
+  }
+  // Reddit — merged Whisper + Sonar (both Reddit/community)
+  if (p.id === 'reddit') {
+    return agent.includes('community engagement') || agent.includes('brand listening') ||
+           subj.includes('reddit') || subj.includes('community engagement') || subj.includes('brand listening');
+  }
+  // Briefing — merged Sift + Maestro
+  if (p.id === 'briefing') {
+    return agent.includes('coordinator') || agent.includes('daily briefing') || agent.includes('ticket triage') ||
+           subj.includes('[briefing]') || subj.includes('[coordinator]') || subj.includes('[triage]');
+  }
+  // System personas
+  if (p.id === 'sentinel') return subj.includes('agent failed') || subj.includes('failure');
+  if (p.id === 'forge') return notes.includes('auto_executed') && (subj.includes('wp ') || subj.includes('linkedin') || subj.includes('email'));
+  if (p.id === 'iris') return false; // Ledger has no tickets (data only)
+  // Generic fuzzy
+  return agent.includes(p.match.toLowerCase()) || subj.includes(p.match.toLowerCase());
+}
+
 async function renderTeam(){
   const main = document.getElementById('main');
   main.innerHTML = '<div class="loading">Loading team…</div>';
 
-  // Fetch last activity per agent (use done view as superset of all recent tickets)
   const [doneData, fbCounts] = await Promise.all([
     fetchTickets('done'),
     loadFeedbackCounts()
   ]);
   const tickets = (doneData.tickets || []);
 
-  // For each persona, find most recent ticket using persona-specific matchers
-  // Tally and Maverick both tag agent_name="SEM Manager" but their outcome_notes/subject differ.
-  function matchTicket(p, t){
-    const subj = (t.subject || '').toLowerCase();
-    const notes = (t.outcomeNotes || '').toLowerCase();
-    const agent = (t.agent || '').toLowerCase();
-    // Maverick — only the SEM Auto-Optimizer (real Google Ads mutations)
-    if (p.id === 'riley') return subj.includes('sem auto') || notes.includes('google ads budget mutated');
-    // Tally — read-only SEM Manager (emails only)
-    if (p.id === 'max')   return (subj.includes('sem ag') || notes.includes('email_sent') || notes.includes('sent sem email'))
-                                && !subj.includes('sem auto');
-    // Default: fuzzy match by agent_name or subject
-    return agent.includes(p.match.toLowerCase()) || subj.includes(p.match.toLowerCase());
-  }
+  const allPersonas = [...PERSONAS, ...SYSTEM_PERSONAS];
   const lastByPersona = {};
-  for (const p of PERSONAS) {
+  for (const p of allPersonas) {
     const t = tickets.find(t => matchTicket(p, t));
     if (t) lastByPersona[p.id] = t;
   }
 
-  let html = '<h2 style="margin-top:0">Your Marketing Team</h2>';
-  html += '<div class="meta" style="margin-bottom:14px">Click any agent to see their profile, recent activity, and leave them a note. Theo reads all notes every Sunday night and adjusts the team accordingly.</div>';
-  html += '<div class="team-grid">';
-  for (const p of PERSONAS) {
+  function personaCardHtml(p) {
     const last = lastByPersona[p.id];
     const lastAt = last ? last.createdAt : null;
     const status = statusForLastSeen(lastAt);
     const fbCount = fbCounts[p.id] || 0;
-    html += `<div class="persona" onclick="openPersona('${p.id}')">
+    return `<div class="persona" onclick="openPersona('${p.id}')">
       <div class="persona-head">
         <div class="avatar"><img src="${avatarUrl(p.avatar)}" alt="${p.name}" loading="lazy"></div>
         <div>
@@ -1220,12 +1279,27 @@ async function renderTeam(){
       </div>
     </div>`;
   }
+
+  let html = '<h2 style="margin-top:0">Your Marketing Team</h2>';
+  html += '<div class="meta" style="margin-bottom:14px">Click any agent to see their profile, recent activity, and leave them a note. Oracle reads all notes every Sunday night and adjusts the team accordingly.</div>';
+  html += '<div class="team-grid">';
+  for (const p of PERSONAS) html += personaCardHtml(p);
   html += '</div>';
+
+  html += '<h2 style="margin-top:28px">System layer</h2>';
+  html += '<div class="meta" style="margin-bottom:14px">Plumbing — these run quietly in the background. Sentinel catches crashes, Forge executes your approvals, Ledger powers the chart.</div>';
+  html += '<div class="team-grid">';
+  for (const p of SYSTEM_PERSONAS) html += personaCardHtml(p);
+  html += '</div>';
+
   main.innerHTML = html;
 }
 
+// Expose ALL personas (marketing + system) for openPersona lookup
+function allPersonasList(){ return [...PERSONAS, ...SYSTEM_PERSONAS]; }
+
 async function openPersona(pid){
-  const p = PERSONAS.find(x => x.id === pid);
+  const p = allPersonasList().find(x => x.id === pid);
   if (!p) return;
   const modal = document.getElementById('pmodal');
   const content = document.getElementById('pmodal-content');
@@ -1278,15 +1352,6 @@ function closePersona(){ document.getElementById('pmodal').classList.remove('sho
 async function loadPersonaActivity(p){
   try {
     const data = await fetchTickets('done');
-    function matchTicket(p, t){
-      const subj = (t.subject || '').toLowerCase();
-      const notes = (t.outcomeNotes || '').toLowerCase();
-      const agent = (t.agent || '').toLowerCase();
-      if (p.id === 'riley') return subj.includes('sem auto') || notes.includes('google ads budget mutated');
-      if (p.id === 'max')   return (subj.includes('sem ag') || notes.includes('email_sent') || notes.includes('sent sem email'))
-                                  && !subj.includes('sem auto');
-      return agent.includes(p.match.toLowerCase()) || subj.includes(p.match.toLowerCase());
-    }
     const tickets = (data.tickets || [])
       .filter(t => matchTicket(p, t))
       .slice(0, 10);
