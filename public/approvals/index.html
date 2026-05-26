@@ -216,6 +216,7 @@
 
 <script>
 const API_BASE = 'https://agents.liftnowdirect.com/webhook';
+const AGENT_SECRET = 'LiftnowAgentTeam_kS9-bGq2_xVtN4mP';  // shared with n8n auth guard
 let currentView = 'today';
 let roiChart = null;  // Chart.js instance
 let cachedPending = null;
@@ -624,8 +625,8 @@ async function decide(ticketId, decision, btn){
   try {
     const r = await fetch(`${API_BASE}/process-decision`, {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ticketId, decision, comment, deferDays: 3}),
+      headers: {'Content-Type':'application/json', 'x-agent-secret': AGENT_SECRET},
+      body: JSON.stringify({ticketId, decision, comment, deferDays: 3, secret: AGENT_SECRET}),
       signal: controller.signal
     });
     clearTimeout(timeoutId);
@@ -662,6 +663,26 @@ function advanceFocus(removedId){
     next.classList.add('focused');
     focusedTicketId = next.dataset.ticket;
     next.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+}
+
+async function triggerKillSwitch(){
+  const action = confirm('PAUSE ALL EMAIL + EXECUTION AGENTS?\n\nThis will deactivate 8 agents: SEM Manager, Backlink Builder, Backlink Poster, LinkedIn Cadence, Content Producer, SEO Optimizer, UI/UX Performance, Content Decay.\n\nThey will stop firing until you reactivate.\n\nClick OK to deactivate, Cancel to abort.');
+  if (!action) return;
+  const btn = document.getElementById('kill-switch-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Pausing…'; }
+  try {
+    const r = await fetch(`${API_BASE}/kill-switch`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'x-agent-secret': AGENT_SECRET},
+      body: JSON.stringify({action: 'deactivate', secret: AGENT_SECRET})
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    toast('All risky agents PAUSED. Reactivate from n8n UI when ready.', 'ok');
+    if (btn) { btn.textContent = 'All agents paused'; btn.style.background = '#fff5f5'; }
+  } catch (e) {
+    toast(`Kill switch failed: ${e.message}`, 'err');
+    if (btn) { btn.disabled = false; btn.textContent = 'Emergency: pause all agents'; }
   }
 }
 
@@ -829,6 +850,8 @@ async function renderToday(){
     <section class="health-strip">
       <span class="dot ok"></span>
       Marketing team online. <a href="https://agents.liftnowdirect.com" target="_blank" style="color:var(--accent);text-decoration:none">Open n8n</a> to inspect workflows directly.
+      <span style="flex:1"></span>
+      <button class="btn" id="kill-switch-btn" onclick="triggerKillSwitch()" style="border-color:var(--err);color:var(--err)">Emergency: pause all agents</button>
     </section>
   `;
 
@@ -959,10 +982,10 @@ async function renderStats(){
 loadCurrentTab();
 let pollInterval = setInterval(() => {
   if (document.hidden) return;
-  if (currentView === 'pending') loadCurrentTab();
+  if (['pending','today','activity'].includes(currentView)) loadCurrentTab();
 }, 60000);
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && currentView === 'pending') loadCurrentTab();
+  if (!document.hidden && ['pending','today','activity'].includes(currentView)) loadCurrentTab();
 });
 </script>
 </body>

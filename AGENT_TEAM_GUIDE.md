@@ -195,18 +195,19 @@ Wait for Sunday 10 PM ET. The **Team Manager** files a `[META] Weekly Team Revie
 ## When Something Goes Wrong
 
 ### Spam — too many emails or duplicate cards
-**Kill switch.** Send this from your phone/computer:
-```
-POST https://agents.liftnowdirect.com/webhook/kill-switch
-Body: {"action":"deactivate"}
-```
+**Kill switch — easiest path: button in the dashboard.**
 
-Or just curl from terminal:
+In the bottom-right of the Today tab there's a red "**Emergency: pause all agents**" button. Click it, confirm the popup, done. Pauses 8 agents.
+
+**If the dashboard is down, use curl:**
 ```bash
 curl -X POST https://agents.liftnowdirect.com/webhook/kill-switch \
   -H "Content-Type: application/json" \
+  -H "x-agent-secret: LiftnowAgentTeam_kS9-bGq2_xVtN4mP" \
   -d '{"action":"deactivate"}'
 ```
+
+The `x-agent-secret` header is required as of the security hardening pass. Save the secret somewhere accessible (password manager). It's also baked into the dashboard so the UI button just works.
 
 This stops these 8 agents instantly: SEM, Backlink, Backlink Poster, LinkedIn, Content Producer, SEO, UI/UX, Content Decay.
 
@@ -214,6 +215,7 @@ Reactivate when ready:
 ```bash
 curl -X POST https://agents.liftnowdirect.com/webhook/kill-switch \
   -H "Content-Type: application/json" \
+  -H "x-agent-secret: LiftnowAgentTeam_kS9-bGq2_xVtN4mP" \
   -d '{"action":"activate"}'
 ```
 
