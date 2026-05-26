@@ -1156,10 +1156,23 @@ async function renderTeam(){
   ]);
   const tickets = (doneData.tickets || []);
 
-  // For each persona, find most recent ticket by matching agent_name fuzzy
+  // For each persona, find most recent ticket using persona-specific matchers
+  // Tally and Maverick both tag agent_name="SEM Manager" but their outcome_notes/subject differ.
+  function matchTicket(p, t){
+    const subj = (t.subject || '').toLowerCase();
+    const notes = (t.outcomeNotes || '').toLowerCase();
+    const agent = (t.agent || '').toLowerCase();
+    // Maverick — only the SEM Auto-Optimizer (real Google Ads mutations)
+    if (p.id === 'riley') return subj.includes('sem auto') || notes.includes('google ads budget mutated');
+    // Tally — read-only SEM Manager (emails only)
+    if (p.id === 'max')   return (subj.includes('sem ag') || notes.includes('email_sent') || notes.includes('sent sem email'))
+                                && !subj.includes('sem auto');
+    // Default: fuzzy match by agent_name or subject
+    return agent.includes(p.match.toLowerCase()) || subj.includes(p.match.toLowerCase());
+  }
   const lastByPersona = {};
   for (const p of PERSONAS) {
-    const t = tickets.find(t => (t.agent || '').includes(p.match) || (t.subject || '').includes(p.match));
+    const t = tickets.find(t => matchTicket(p, t));
     if (t) lastByPersona[p.id] = t;
   }
 
@@ -1245,8 +1258,17 @@ function closePersona(){ document.getElementById('pmodal').classList.remove('sho
 async function loadPersonaActivity(p){
   try {
     const data = await fetchTickets('done');
+    function matchTicket(p, t){
+      const subj = (t.subject || '').toLowerCase();
+      const notes = (t.outcomeNotes || '').toLowerCase();
+      const agent = (t.agent || '').toLowerCase();
+      if (p.id === 'riley') return subj.includes('sem auto') || notes.includes('google ads budget mutated');
+      if (p.id === 'max')   return (subj.includes('sem ag') || notes.includes('email_sent') || notes.includes('sent sem email'))
+                                  && !subj.includes('sem auto');
+      return agent.includes(p.match.toLowerCase()) || subj.includes(p.match.toLowerCase());
+    }
     const tickets = (data.tickets || [])
-      .filter(t => (t.agent || '').includes(p.match) || (t.subject || '').includes(p.match))
+      .filter(t => matchTicket(p, t))
       .slice(0, 10);
     const el = document.getElementById('pmodal-activity');
     if (!el) return;
