@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Liftnow Agent Approvals</title>
+<title>Liftnow Agent Team — Today</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root{
     --bg:#fafbfc; --card:#ffffff; --border:#e1e4e8; --muted:#6a737d;
@@ -115,6 +116,48 @@
   .btn-ack:hover{background:#024ea4}
   .btn.refresh{padding:5px 10px}
 
+  /* === NEW: Today dashboard === */
+  .hero-do{background:linear-gradient(135deg,#0366d6 0%,#0846a8 100%);color:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;box-shadow:0 4px 14px rgba(3,102,214,.18)}
+  .hero-do h2{margin:0 0 4px;font-size:20px;font-weight:700;letter-spacing:-.01em}
+  .hero-do .hero-sub{opacity:.85;font-size:13px;margin-bottom:14px}
+  .hero-list{display:flex;flex-direction:column;gap:8px}
+  .hero-item{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform 120ms,background 120ms}
+  .hero-item:hover{background:rgba(255,255,255,.2);transform:translateX(4px)}
+  .hero-num{width:28px;height:28px;border-radius:50%;background:#fff;color:#0366d6;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .hero-text{flex:1;font-size:14px}
+  .hero-text .label{opacity:.75;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+  .hero-empty{text-align:center;padding:18px;opacity:.85;font-size:14px}
+
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+  .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .kpi-value{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+  .kpi-trend{font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums}
+  .kpi-trend.up{color:var(--ok)}
+  .kpi-trend.down{color:var(--err)}
+  .kpi-trend.flat{color:var(--muted)}
+
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .panel-title{font-size:14px;font-weight:600;color:var(--fg);margin:0}
+  .panel-sub{font-size:12px;color:var(--muted)}
+  #roi-chart-wrap{position:relative;height:260px}
+  #roi-source-notice{font-size:11px;color:var(--muted);margin-top:6px;text-align:center}
+
+  .recent-feed{display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto}
+  .feed-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f6f8fa;border-radius:6px;font-size:13px}
+  .feed-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+  .feed-icon.done{background:rgba(34,134,58,.15);color:var(--ok)}
+  .feed-icon.alert{background:rgba(215,58,73,.15);color:var(--err)}
+  .feed-icon.info{background:rgba(3,102,214,.15);color:var(--accent)}
+  .feed-text{flex:1;color:var(--fg)}
+  .feed-time{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+  .health-strip{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;font-size:13px;color:var(--fg-dim)}
+  .health-strip .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .health-strip .dot.ok{background:var(--ok)}
+  .health-strip .dot.err{background:var(--err)}
+
   /* === Toast === */
   .toast{position:fixed;right:24px;bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;animation:slidein .2s ease-out;max-width:320px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,.08)}
   .toast.ok{border-color:var(--ok)}
@@ -158,7 +201,8 @@
 </header>
 
 <div class="tabs">
-  <button class="tab active" data-view="activity" onclick="switchTab('activity')">Activity <span class="count" id="count-activity"></span></button>
+  <button class="tab active" data-view="today" onclick="switchTab('today')">Today</button>
+  <button class="tab" data-view="activity" onclick="switchTab('activity')">Activity <span class="count" id="count-activity"></span></button>
   <button class="tab" data-view="pending" onclick="switchTab('pending')">Needs You <span class="count" id="count-pending"></span></button>
   <button class="tab" data-view="inbox" onclick="switchTab('inbox')">Inbox <span class="count" id="count-inbox"></span></button>
   <button class="tab" data-view="done" onclick="switchTab('done')">All Done</button>
@@ -172,7 +216,8 @@
 
 <script>
 const API_BASE = 'https://agents.liftnowdirect.com/webhook';
-let currentView = 'activity';
+let currentView = 'today';
+let roiChart = null;  // Chart.js instance
 let cachedPending = null;
 let cachedInbox = null;
 let cachedDone = null;
@@ -216,7 +261,9 @@ async function loadCurrentTab(){
   const main = document.getElementById('main');
   main.innerHTML = '<div class="loading">Loading…</div>';
   try {
-    if (currentView === 'stats') {
+    if (currentView === 'today') {
+      await renderToday();
+    } else if (currentView === 'stats') {
       await renderStats();
     } else if (currentView === 'learnings') {
       await renderLearnings();
@@ -667,6 +714,180 @@ document.addEventListener('keydown', e => {
 });
 
 // === Tabs renderers ===
+async function renderToday(){
+  const main = document.getElementById('main');
+  // Fetch all data in parallel
+  const [pendingRes, doneRes, roiRes] = await Promise.allSettled([
+    fetchTickets('pending'),
+    fetchTickets('done'),
+    fetch(`${API_BASE}/roi-data`).then(r => r.ok ? r.json() : null).catch(()=>null)
+  ]);
+  const pendingData = pendingRes.status === 'fulfilled' ? pendingRes.value : {tickets:[]};
+  const doneData = doneRes.status === 'fulfilled' ? doneRes.value : {tickets:[]};
+  const roi = roiRes.status === 'fulfilled' ? roiRes.value : null;
+
+  // Identify hero items: prefer Triage Digest's top5 ticket if present today; fall back to top 3 pending
+  let heroItems = [];
+  const triageT = (pendingData.tickets || []).concat(doneData.tickets || []).find(t => /^\[TRIAGE\]/i.test(t.subject||''));
+  if (triageT) {
+    try {
+      const detail = JSON.parse(triageT.recommendationDetail || '{}');
+      const ids = detail.top5_ids || [];
+      const lookup = {};
+      (pendingData.tickets || []).forEach(t => { lookup[t.ticketId] = t; });
+      heroItems = ids.slice(0, 3).map(id => lookup[id]).filter(Boolean);
+    } catch(e){}
+  }
+  if (heroItems.length === 0) {
+    // Fallback: top 3 by priority/age from pending (skip reports)
+    heroItems = (pendingData.tickets || [])
+      .filter(t => !isReport(t))
+      .sort((a,b) => {
+        const pw = {HIGH:3,MEDIUM:2,LOW:1};
+        return (pw[(b.priority||'LOW').toUpperCase()]||1) - (pw[(a.priority||'LOW').toUpperCase()]||1);
+      })
+      .slice(0, 3);
+  }
+
+  // Compute KPIs
+  const allDone = doneData.tickets || [];
+  const autoExec = allDone.filter(t => /AUTO_EXECUTED/.test(t.outcomeNotes || ''));
+  const sevenDayMs = 7 * 86400000;
+  const recentAuto = autoExec.filter(t => (t.ageHours||999) < 24*7);
+  const todayMs = 24 * 3600 * 1000;
+  const todayAuto = autoExec.filter(t => (t.ageHours||999) < 24);
+
+  const kpiHtml = roi && roi.ok ? `
+    <div class="kpi"><div class="kpi-label">30d ad spend</div><div class="kpi-value">$${(roi.totals_30d?.spend_usd ?? 0).toLocaleString()}</div></div>
+    <div class="kpi"><div class="kpi-label">30d conversions</div><div class="kpi-value">${(roi.totals_30d?.conversions ?? 0)}</div></div>
+    <div class="kpi"><div class="kpi-label">CPA</div><div class="kpi-value">${roi.totals_30d?.cpa_usd ? '$'+roi.totals_30d.cpa_usd : '—'}</div></div>
+    <div class="kpi"><div class="kpi-label">CTR</div><div class="kpi-value">${roi.totals_30d?.ctr_pct ? roi.totals_30d.ctr_pct+'%' : '—'}</div></div>
+    <div class="kpi"><div class="kpi-label">Auto-actions 7d</div><div class="kpi-value">${recentAuto.length}</div></div>
+  ` : `
+    <div class="kpi"><div class="kpi-label">Ad spend</div><div class="kpi-value">—</div><div class="kpi-trend flat">ROI data not yet pulled</div></div>
+    <div class="kpi"><div class="kpi-label">Auto-actions 7d</div><div class="kpi-value">${recentAuto.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Auto-actions today</div><div class="kpi-value">${todayAuto.length}</div></div>
+    <div class="kpi"><div class="kpi-label">Pending</div><div class="kpi-value">${(pendingData.tickets||[]).filter(t=>!isReport(t)).length}</div></div>
+  `;
+
+  // Build hero HTML
+  let heroHtml = '';
+  if (heroItems.length === 0) {
+    heroHtml = '<div class="hero-empty">Inbox zero. Nothing requires you right now. ✨</div>';
+  } else {
+    heroHtml = `<div class="hero-list">` + heroItems.map((t, i) => `
+      <div class="hero-item" onclick="switchTab('pending'); setTimeout(()=>scrollToTicket('${t.ticketId}'),300)">
+        <div class="hero-num">${i+1}</div>
+        <div class="hero-text">
+          <div class="label">${escapeHtml(t.agent||'')} · ${escapeHtml(t.recommendationType||'')}</div>
+          ${escapeHtml((t.subject||'').slice(0,100))}
+        </div>
+      </div>
+    `).join('') + `</div>`;
+  }
+
+  // Build recent feed (last 10 auto-executed)
+  const recentItems = autoExec.slice(0, 10);
+  const feedHtml = recentItems.length === 0 ? '<div class="meta">No agent activity in the last week yet.</div>' : recentItems.map(t => {
+    const icon = /failed|error/i.test(t.subject||'') ? 'alert' : /briefing|coordinator|patterns/i.test(t.subject||'') ? 'info' : 'done';
+    const iconChar = icon === 'alert' ? '!' : icon === 'info' ? 'i' : '✓';
+    return `<div class="feed-item">
+      <div class="feed-icon ${icon}">${iconChar}</div>
+      <div class="feed-text">${escapeHtml((t.subject||'').slice(0,110))}</div>
+      <div class="feed-time">${ageLabel(t.ageHours||0)}</div>
+    </div>`;
+  }).join('');
+
+  main.innerHTML = `
+    <section class="hero-do">
+      <h2>Do these today</h2>
+      <div class="hero-sub">${heroItems.length > 0 ? 'Top items from your morning triage. Click to jump to the ticket.' : 'Nothing pressing — the agents have it covered.'}</div>
+      ${heroHtml}
+    </section>
+
+    <section class="kpis">${kpiHtml}</section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h3 class="panel-title">Daily ad spend & conversions</h3>
+        <div class="panel-sub">${roi && roi.ok ? `Last ${roi.window_days||30} days · sources: ${(roi.sources||['google_ads']).join(', ')}` : 'No data yet'}</div>
+      </div>
+      <div id="roi-chart-wrap">
+        ${roi && roi.ok ? '<canvas id="roi-chart"></canvas>' : '<div class="meta" style="text-align:center;padding:40px">No ad data yet. Trigger: <code>POST /webhook/fire-roi-tracker</code></div>'}
+      </div>
+      ${roi && roi.ok ? `<div id="roi-source-notice">Updated ${new Date(roi.updated_at).toLocaleString()}${roi.notes ? ' · '+roi.notes : ''}</div>` : ''}
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h3 class="panel-title">Recent agent activity</h3>
+        <div class="panel-sub">${autoExec.length} actions in the last 7 days</div>
+      </div>
+      <div class="recent-feed">${feedHtml}</div>
+    </section>
+
+    <section class="health-strip">
+      <span class="dot ok"></span>
+      Marketing team online. <a href="https://agents.liftnowdirect.com" target="_blank" style="color:var(--accent);text-decoration:none">Open n8n</a> to inspect workflows directly.
+    </section>
+  `;
+
+  // Render chart if we have data
+  if (roi && roi.ok && roi.daily && roi.daily.length > 0) {
+    setTimeout(() => {
+      const ctx = document.getElementById('roi-chart');
+      if (!ctx) return;
+      if (roiChart) roiChart.destroy();
+      const labels = roi.daily.map(d => d.date.slice(5));  // MM-DD
+      const spend = roi.daily.map(d => d.spend);
+      const conv = roi.daily.map(d => d.conversions);
+      roiChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Spend ($)',
+              data: spend,
+              backgroundColor: 'rgba(3, 102, 214, 0.65)',
+              borderColor: 'rgba(3, 102, 214, 1)',
+              borderWidth: 1,
+              yAxisID: 'y1',
+              order: 2
+            },
+            {
+              label: 'Conversions',
+              data: conv,
+              type: 'line',
+              borderColor: 'rgba(34, 134, 58, 1)',
+              backgroundColor: 'rgba(34, 134, 58, 0.1)',
+              yAxisID: 'y2',
+              tension: 0.3,
+              borderWidth: 2,
+              pointRadius: 4,
+              order: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 12 } } },
+            tooltip: { callbacks: { label: ctx => ctx.dataset.label === 'Spend ($)' ? `Spend: $${ctx.parsed.y.toFixed(2)}` : `Conversions: ${ctx.parsed.y}` } }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y1: { type: 'linear', position: 'left', title: { display: true, text: 'Spend ($)' }, beginAtZero: true },
+            y2: { type: 'linear', position: 'right', title: { display: true, text: 'Conversions' }, beginAtZero: true, grid: { display: false }, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+    }, 50);
+  }
+}
+
 async function renderLearnings(){
   const main = document.getElementById('main');
   const done = await fetchTickets('done');
