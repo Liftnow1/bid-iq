@@ -78,10 +78,11 @@ function normalizeDate(raw: string): string | null {
   return null;
 }
 
-function parseCsv(csv: string): { daily: Record<string, MsRow>; rowsParsed: number; header: string; sample_dates: string[] } {
+function parseCsv(csv: string): { daily: Record<string, MsRow>; rowsParsed: number; header: string; sample_dates: string[]; sample_rows: string[] } {
   const lines = csv.split(/\r?\n/).filter((l) => l.trim().length);
-  if (lines.length < 2) return { daily: {}, rowsParsed: 0, header: lines[0] || "", sample_dates: [] };
+  if (lines.length < 2) return { daily: {}, rowsParsed: 0, header: lines[0] || "", sample_dates: [], sample_rows: [] };
   const header = lines[0].split(",").map((s) => s.replace(/^"|"$/g, "").trim());
+  const sample_rows = lines.slice(1, 4);  // capture first 3 data rows for debugging
   const idx = {
     date: header.indexOf("TimePeriod"),
     spend: header.indexOf("Spend"),
@@ -118,7 +119,7 @@ function parseCsv(csv: string): { daily: Record<string, MsRow>; rowsParsed: numb
     daily[d].conversions = Math.round(daily[d].conversions * 100) / 100;
     daily[d].revenue = Math.round(daily[d].revenue * 100) / 100;
   }
-  return { daily, rowsParsed, header: header.join(","), sample_dates };
+  return { daily, rowsParsed, header: header.join(","), sample_dates, sample_rows };
 }
 
 export async function POST(req: NextRequest) {
@@ -173,6 +174,7 @@ export async function POST(req: NextRequest) {
     rows_parsed: parsed.rowsParsed,
     sample_csv_header: parsed.header,
     sample_dates_seen: parsed.sample_dates,
+    sample_rows_seen: parsed.sample_rows,
     daily: parsed.daily,
   });
 }
