@@ -177,8 +177,10 @@ export async function POST(req: NextRequest) {
     csv_lines: csv.split(/\r?\n/).filter((l) => l.trim().length).length,
     rows_parsed: parsed.rowsParsed,
     sample_csv_header: parsed.header,
+    sample_csv_header_hex: Buffer.from(parsed.header, "utf-8").slice(0, 30).toString("hex"),
     sample_dates_seen: parsed.sample_dates,
     sample_rows_seen: parsed.sample_rows,
+    raw_first_50_bytes_hex: csv.slice(0, 50).split("").map((c) => c.charCodeAt(0).toString(16).padStart(2,"0")).join(""),
     daily: parsed.daily,
   });
 }
