@@ -58,9 +58,29 @@ function parseZip(buf: Buffer): string {
   return texts.join("\n");
 }
 
-function parseCsv(csv: string): { daily: Record<string, MsRow>; rowsParsed: number; header: string } {
+// Normalize various date formats to YYYY-MM-DD.
+// Microsoft Ads CSV reports commonly emit M/D/YYYY, MM/DD/YYYY, or ISO.
+function normalizeDate(raw: string): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  // ISO already
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) return trimmed.slice(0, 10);
+  // US M/D/YYYY or MM/DD/YYYY
+  const us = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (us) {
+    const m = us[1].padStart(2, "0");
+    const d = us[2].padStart(2, "0");
+    return `${us[3]}-${m}-${d}`;
+  }
+  // YYYYMMDD
+  const compact = trimmed.match(/^(\d{4})(\d{2})(\d{2})$/);
+  if (compact) return `${compact[1]}-${compact[2]}-${compact[3]}`;
+  return null;
+}
+
+function parseCsv(csv: string): { daily: Record<string, MsRow>; rowsParsed: number; header: string; sample_dates: string[] } {
   const lines = csv.split(/\r?\n/).filter((l) => l.trim().length);
-  if (lines.length < 2) return { daily: {}, rowsParsed: 0, header: lines[0] || "" };
+  if (lines.length < 2) return { daily: {}, rowsParsed: 0, header: lines[0] || "", sample_dates: [] };
   const header = lines[0].split(",").map((s) => s.replace(/^"|"$/g, "").trim());
   const idx = {
     date: header.indexOf("TimePeriod"),
@@ -72,10 +92,13 @@ function parseCsv(csv: string): { daily: Record<string, MsRow>; rowsParsed: numb
   };
   const daily: Record<string, MsRow> = {};
   let rowsParsed = 0;
+  const sample_dates: string[] = [];
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(",").map((s) => s.replace(/^"|"$/g, "").trim());
-    const date = (cols[idx.date] || "").slice(0, 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+    const rawDate = cols[idx.date] || "";
+    if (sample_dates.length < 3) sample_dates.push(rawDate);
+    const date = normalizeDate(rawDate);
+    if (!date) continue;
     const spend = parseFloat((cols[idx.spend] || "0").replace(/[$,]/g, "")) || 0;
     const conv = parseFloat((cols[idx.conv] || "0").replace(/,/g, "")) || 0;
     const clicks = parseInt((cols[idx.clicks] || "0").replace(/,/g, "")) || 0;
@@ -95,7 +118,7 @@ function parseCsv(csv: string): { daily: Record<string, MsRow>; rowsParsed: numb
     daily[d].conversions = Math.round(daily[d].conversions * 100) / 100;
     daily[d].revenue = Math.round(daily[d].revenue * 100) / 100;
   }
-  return { daily, rowsParsed, header: header.join(",") };
+  return { daily, rowsParsed, header: header.join(","), sample_dates };
 }
 
 export async function POST(req: NextRequest) {
@@ -149,6 +172,7 @@ export async function POST(req: NextRequest) {
     csv_lines: csv.split(/\r?\n/).filter((l) => l.trim().length).length,
     rows_parsed: parsed.rowsParsed,
     sample_csv_header: parsed.header,
+    sample_dates_seen: parsed.sample_dates,
     daily: parsed.daily,
   });
 }
