@@ -1484,17 +1484,58 @@ function closePersona(){ document.getElementById('pmodal').classList.remove('sho
 
 async function loadPersonaActivity(p){
   try {
-    const data = await fetchTickets('done');
-    const tickets = (data.tickets || [])
+    // Pull tickets AND heartbeats in parallel
+    const [doneData, hbData] = await Promise.all([
+      fetchTickets('done'),
+      fetch(`${API_BASE}/agent-heartbeat?action=read&limit=100`).then(r => r.ok ? r.json() : null).catch(()=>null)
+    ]);
+
+    // Tickets matching this persona
+    const tickets = (doneData.tickets || [])
       .filter(t => matchTicket(p, t))
-      .slice(0, 10);
+      .map(t => ({
+        kind: 'ticket',
+        when: new Date(t.createdAt).getTime(),
+        when_iso: t.createdAt,
+        label: (t.subject || '').slice(0, 110),
+        sub: (t.outcomeNotes || '').slice(0, 80),
+        outcome: /Failed|ERROR/i.test(t.subject||'') ? 'error' : /\[done\]|AUTO_EXECUTED/i.test(t.subject || t.outcomeNotes || '') ? 'action' : 'info',
+        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
+      }));
+
+    // Heartbeats matching this persona (by agentId)
+    const heartbeats = ((hbData && hbData.heartbeats) || [])
+      .filter(h => h.agentId === p.id)
+      .map(h => ({
+        kind: 'fire',
+        when: new Date(h.at).getTime(),
+        when_iso: h.at,
+        label: '⚡ ' + (h.summary || h.action || 'fired'),
+        sub: h.outcome === 'error' ? 'errored' : h.outcome === 'action_taken' ? 'success' : 'no-op',
+        outcome: h.outcome === 'error' ? 'error' : h.outcome === 'action_taken' ? 'action' : 'noop',
+        link: h.workflow_id && h.exec_id ? `https://agents.liftnowdirect.com/workflow/${h.workflow_id}/executions/${h.exec_id}` : null
+      }));
+
+    // Merge + sort reverse-chronological + cap
+    const merged = [...tickets, ...heartbeats].sort((a,b) => b.when - a.when).slice(0, 25);
+
     const el = document.getElementById('pmodal-activity');
     if (!el) return;
-    if (!tickets.length){ el.innerHTML = '<div class="activity-empty">No recent activity. Either ' + p.name + ' hasn’t fired yet today or the agent is paused.</div>'; return; }
-    el.innerHTML = tickets.map(t => `<div class="activity-item">
-      <span class="when">${relativeAge(t.createdAt)}</span>
-      ${escapeHtml((t.subject || '').slice(0, 110))}
-    </div>`).join('');
+    if (!merged.length){
+      el.innerHTML = '<div class="activity-empty">No recent activity. Either ' + p.name + ' hasn’t fired yet today or the agent is paused.</div>';
+      return;
+    }
+    el.innerHTML = merged.map(item => {
+      const dot = item.outcome === 'error' ? '🔴' : item.outcome === 'action' ? '✅' : item.outcome === 'noop' ? '○' : 'ℹ️';
+      const linkOpen = item.link ? `<a href="${item.link}" target="_blank" style="text-decoration:none;color:inherit">` : '';
+      const linkClose = item.link ? '</a>' : '';
+      return `<div class="activity-item">
+        ${linkOpen}<span class="when">${dot} ${relativeAge(item.when_iso)}</span>
+        ${escapeHtml(item.label)}
+        ${item.sub ? '<div style="color:var(--muted);font-size:11px;margin-top:2px">'+escapeHtml(item.sub)+'</div>' : ''}
+        ${linkClose}
+      </div>`;
+    }).join('');
   } catch (e) {
     const el = document.getElementById('pmodal-activity');
     if (el) el.innerHTML = '<div class="activity-empty">Couldn’t load activity.</div>';
