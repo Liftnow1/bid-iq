@@ -79,9 +79,13 @@ function normalizeDate(raw: string): string | null {
 }
 
 function parseCsv(csv: string): { daily: Record<string, MsRow>; rowsParsed: number; header: string; sample_dates: string[]; sample_rows: string[] } {
+  // Strip UTF-8 BOM if present (Microsoft Ads CSV reports include it)
+  if (csv.charCodeAt(0) === 0xfeff) csv = csv.slice(1);
   const lines = csv.split(/\r?\n/).filter((l) => l.trim().length);
   if (lines.length < 2) return { daily: {}, rowsParsed: 0, header: lines[0] || "", sample_dates: [], sample_rows: [] };
-  const header = lines[0].split(",").map((s) => s.replace(/^"|"$/g, "").trim());
+  // Robust quote-strip: remove leading/trailing whitespace and ALL surrounding quote chars
+  const stripQuotes = (s: string) => s.trim().replace(/^["'“”]+|["'“”]+$/g, "").trim();
+  const header = lines[0].split(",").map(stripQuotes);
   const sample_rows = lines.slice(1, 4);  // capture first 3 data rows for debugging
   const idx = {
     date: header.indexOf("TimePeriod"),
@@ -95,7 +99,7 @@ function parseCsv(csv: string): { daily: Record<string, MsRow>; rowsParsed: numb
   let rowsParsed = 0;
   const sample_dates: string[] = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(",").map((s) => s.replace(/^"|"$/g, "").trim());
+    const cols = lines[i].split(",").map(stripQuotes);
     const rawDate = cols[idx.date] || "";
     if (sample_dates.length < 3) sample_dates.push(rawDate);
     const date = normalizeDate(rawDate);
