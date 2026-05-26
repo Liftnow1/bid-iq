@@ -899,12 +899,12 @@ async function renderToday(){
     <section class="panel">
       <div class="panel-head">
         <h3 class="panel-title">Daily ad spend & conversions</h3>
-        <div class="panel-sub">${roi && roi.ok ? `Last ${roi.window_days||30} days · sources: ${(roi.sources||['google_ads']).join(', ')}` : 'No data yet'}</div>
+        <div class="panel-sub">${roi && roi.ok ? `Last ${roi.window_days||30} days · Google: actual spend${roi.microsoft_status==='ok' ? ` · Microsoft: $${roi.microsoft_daily_budget_total.toFixed(2)}/day budget allocation` : ''}` : 'No data yet'}</div>
       </div>
       <div id="roi-chart-wrap">
         ${roi && roi.ok ? '<canvas id="roi-chart"></canvas>' : '<div class="meta" style="text-align:center;padding:40px">No ad data yet. Trigger: <code>POST /webhook/fire-roi-tracker</code></div>'}
       </div>
-      ${roi && roi.ok ? `<div id="roi-source-notice">Updated ${new Date(roi.updated_at).toLocaleString()}${roi.notes ? ' · '+roi.notes : ''}</div>` : ''}
+      ${roi && roi.ok ? `<div id="roi-source-notice">Updated ${new Date(roi.updated_at).toLocaleString()}${roi.notes ? ' · '+roi.notes : ''}${roi.microsoft_status === 'ok' ? ` · MS Ads campaigns: ${roi.microsoft_campaigns.length} (${roi.microsoft_campaigns.filter(c=>c.status==='Active').length} active)` : ''}</div>` : ''}
     </section>
 
     <section class="panel">
@@ -932,41 +932,61 @@ async function renderToday(){
       const labels = roi.daily.map(d => d.date.slice(5));  // MM-DD
       const spend = roi.daily.map(d => d.spend);
       const conv = roi.daily.map(d => d.conversions);
+      const msDailyBudget = roi.microsoft_daily_budget_total || 0;
+      const datasets = [
+        {
+          label: 'Google Ads spend ($)',
+          data: spend,
+          backgroundColor: 'rgba(3, 102, 214, 0.65)',
+          borderColor: 'rgba(3, 102, 214, 1)',
+          borderWidth: 1,
+          yAxisID: 'y1',
+          order: 3
+        },
+        {
+          label: 'Conversions',
+          data: conv,
+          type: 'line',
+          borderColor: 'rgba(34, 134, 58, 1)',
+          backgroundColor: 'rgba(34, 134, 58, 0.1)',
+          yAxisID: 'y2',
+          tension: 0.3,
+          borderWidth: 2,
+          pointRadius: 4,
+          order: 1
+        }
+      ];
+      // Add Microsoft daily budget as a flat reference line
+      if (msDailyBudget > 0) {
+        datasets.push({
+          label: `MS Ads daily budget cap ($${msDailyBudget.toFixed(0)})`,
+          data: labels.map(() => msDailyBudget),
+          type: 'line',
+          borderColor: 'rgba(217, 119, 6, 1)',  // amber
+          backgroundColor: 'rgba(217, 119, 6, 0.08)',
+          borderDash: [6, 4],
+          yAxisID: 'y1',
+          tension: 0,
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false,
+          order: 2
+        });
+      }
       roiChart = new Chart(ctx, {
         type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Spend ($)',
-              data: spend,
-              backgroundColor: 'rgba(3, 102, 214, 0.65)',
-              borderColor: 'rgba(3, 102, 214, 1)',
-              borderWidth: 1,
-              yAxisID: 'y1',
-              order: 2
-            },
-            {
-              label: 'Conversions',
-              data: conv,
-              type: 'line',
-              borderColor: 'rgba(34, 134, 58, 1)',
-              backgroundColor: 'rgba(34, 134, 58, 0.1)',
-              yAxisID: 'y2',
-              tension: 0.3,
-              borderWidth: 2,
-              pointRadius: 4,
-              order: 1
-            }
-          ]
-        },
+        data: { labels: labels, datasets: datasets },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { position: 'top', labels: { boxWidth: 12, font: { size: 12 } } },
-            tooltip: { callbacks: { label: ctx => ctx.dataset.label === 'Spend ($)' ? `Spend: $${ctx.parsed.y.toFixed(2)}` : `Conversions: ${ctx.parsed.y}` } }
+            tooltip: { callbacks: { label: ctx => {
+              if (ctx.dataset.label.startsWith('Google Ads spend')) return `Google Ads spend: $${ctx.parsed.y.toFixed(2)}`;
+              if (ctx.dataset.label.startsWith('MS Ads daily budget')) return `MS Ads daily budget allocated: $${ctx.parsed.y.toFixed(2)}`;
+              return `${ctx.dataset.label}: ${ctx.parsed.y}`;
+            }}}
           },
           scales: {
             x: { grid: { display: false } },
