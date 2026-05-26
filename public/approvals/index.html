@@ -1013,11 +1013,11 @@ async function renderToday(){
             <div style="color:var(--muted)">${(roi.totals&&roi.totals.google_ads_cpa)?'$'+roi.totals.google_ads_cpa+' CPA':'no conversions yet'}</div>
           </div>
           <div>
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;margin-bottom:6px">Microsoft Ads · current snapshot</div>
-            <div><b>$${(roi.microsoft_daily_budget_total||0).toFixed(2)}/day</b> budget allocated</div>
-            <div style="color:var(--muted)">$${(((roi.microsoft_daily_budget_total||0)*30)||0).toFixed(0)}/month potential at full spend</div>
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;margin-bottom:6px">Microsoft Ads · actual</div>
+            <div><b>$${(roi.daily||[]).reduce((s,d)=>s+((d.by_source?.microsoft_ads?.spend)||0),0).toFixed(0)}</b> actually spent in window</div>
+            <div style="color:var(--muted)">${(roi.daily||[]).filter(d=>(d.by_source?.microsoft_ads?.spend||0)>0).length} days with spend (via Vercel)</div>
+            <div style="color:var(--muted)">$${(roi.microsoft_daily_budget_total||0).toFixed(2)}/day current budget cap</div>
             <div style="color:var(--muted)">${(roi.microsoft_campaigns||[]).filter(c=>c.status==='Active').length} active · ${(roi.microsoft_campaigns||[]).filter(c=>c.status==='BudgetPaused').length} paused campaigns</div>
-            <div style="color:var(--muted)">Historical spend not yet wired (Reporting API limitation)</div>
           </div>
         </div>
         <div style="margin-top:14px;padding:10px 12px;background:#f6f8fa;border-radius:6px;font-size:12px;color:var(--fg-dim)">
@@ -1105,70 +1105,55 @@ function renderRoiChart(view) {
       order: 1
     });
   } else if (view === 'microsoft') {
-    // Microsoft: no historical spend data yet, but show daily budget allocation per campaign as horizontal bars + a note
-    const campaigns = roi.microsoft_campaigns || [];
-    // Show ONE day (today) as horizontal bars per campaign
-    const campLabels = campaigns.map(c => c.name.replace(/^Liftnow\s*-\s*/, '').slice(0, 32));
-    const campBudgets = campaigns.map(c => c.daily_budget);
-    const campColors = campaigns.map((c, i) => {
-      const palette = ['rgba(217,119,6,0.8)','rgba(147,51,234,0.8)','rgba(13,148,136,0.8)','rgba(190,24,93,0.8)','rgba(0,128,0,0.8)'];
-      return palette[i % palette.length];
-    });
+    // Microsoft: REAL historical daily spend (via Vercel /api/ms-ads-unzip) — same chart shape as Google view
+    const msSpend = roi.daily.map(d => (d.by_source?.microsoft_ads?.spend) ?? 0);
+    const msClicks = roi.daily.map(d => (d.by_source?.microsoft_ads?.clicks) ?? 0);
     datasets.push({
-      label: 'Daily budget allocation ($)',
-      data: campBudgets,
-      backgroundColor: campColors,
-      borderColor: campColors.map(c => c.replace('0.8','1')),
+      label: 'Microsoft Ads spend ($)',
+      data: msSpend,
+      backgroundColor: 'rgba(217, 119, 6, 0.75)',
+      borderColor: 'rgba(217, 119, 6, 1)',
       borderWidth: 1,
-      yAxisID: 'y1'
+      yAxisID: 'y1',
+      order: 2
     });
-    // Re-set labels to campaign names for this view
-    roiChart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels: campLabels, datasets: datasets },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: c => `$${c.parsed.x.toFixed(2)}/day` } },
-          title: { display: true, text: 'Microsoft Ads: current daily budget per campaign', font:{size:13,weight:'600'}, padding: {bottom: 10}}
-        },
-        scales: {
-          x: { beginAtZero: true, title: { display: true, text: 'Daily budget ($)' }, grid: { display: true, color: 'rgba(0,0,0,0.05)' } },
-          y: { grid: { display: false } }
-        }
-      }
-    });
-    return;
-  } else if (view === 'compare') {
-    // Apples-to-apples: grouped bars showing daily spend (Google actual) and daily budget allocation (MS) side by side
-    // Both as vertical bars, same Y axis, daily view
     datasets.push({
-      label: 'Google: actual daily spend',
+      label: 'Microsoft Ads clicks',
+      data: msClicks,
+      type: 'line',
+      borderColor: 'rgba(0, 0, 0, 0.6)',
+      backgroundColor: 'rgba(0, 0, 0, 0.05)',
+      yAxisID: 'y2',
+      tension: 0.3,
+      borderWidth: 2,
+      pointRadius: 3,
+      order: 1
+    });
+  } else if (view === 'compare') {
+    // Apples-to-apples: stacked bars per day showing Google + Microsoft actual spend
+    const msSpend = roi.daily.map(d => (d.by_source?.microsoft_ads?.spend) ?? 0);
+    datasets.push({
+      label: 'Google Ads spend',
       data: googleSpend,
       backgroundColor: 'rgba(3, 102, 214, 0.75)',
       borderColor: 'rgba(3, 102, 214, 1)',
       borderWidth: 1,
       yAxisID: 'y1',
-      order: 2,
-      stack: 'spend'
+      stack: 'total',
+      order: 3
     });
-    if (msDailyBudget > 0) {
-      datasets.push({
-        label: `Microsoft: daily budget allocation ($${msDailyBudget.toFixed(2)}/day)`,
-        data: labels.map(() => msDailyBudget),
-        backgroundColor: 'rgba(217, 119, 6, 0.55)',
-        borderColor: 'rgba(217, 119, 6, 1)',
-        borderWidth: 1,
-        yAxisID: 'y1',
-        order: 3,
-        stack: 'budget'  // separate stack so they sit side-by-side
-      });
-    }
     datasets.push({
-      label: 'Conversions (Google)',
+      label: 'Microsoft Ads spend',
+      data: msSpend,
+      backgroundColor: 'rgba(217, 119, 6, 0.75)',
+      borderColor: 'rgba(217, 119, 6, 1)',
+      borderWidth: 1,
+      yAxisID: 'y1',
+      stack: 'total',
+      order: 2
+    });
+    datasets.push({
+      label: 'Conversions',
       data: conv,
       type: 'line',
       borderColor: 'rgba(34, 134, 58, 1)',
