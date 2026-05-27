@@ -1040,27 +1040,35 @@ async function renderToday(){
     dedup.push(item);
   }
 
-  // Compute today summary
+  // Compute today summary using REAL outcomes
   const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
   const todayItems = dedup.filter(i => i.when >= startOfDay.getTime());
-  const todayActions = todayItems.filter(i => i.outcome === 'action_taken').length;
-  const todayChecks = todayItems.filter(i => i.outcome === 'no_op' || i.outcome === 'info').length;
+  const todayActions = todayItems.filter(i => i.outcome === 'produced_artifact' || i.outcome === 'action_taken' || i.kind === 'artifact').length;
+  const todaySkipped = todayItems.filter(i => i.outcome === 'skipped_by_gate').length;
+  const todayChecks  = todayItems.filter(i => i.outcome === 'ran_no_output' || i.outcome === 'no_op' || i.outcome === 'info').length;
+  const todayErrors  = todayItems.filter(i => i.outcome === 'error').length;
 
+  // Color-code each item by REAL outcome (not fake "success")
   const activityHtml = dedup.length === 0 ? '<div class="meta" style="padding:8px 0">No activity logged yet. The team is just waking up.</div>' :
     dedup.slice(0, 25).map(item => {
-      const linkOpen = item.link ? `<a href="${item.link}" target="_blank" style="text-decoration:none;color:inherit;display:flex;gap:10px;width:100%;align-items:center;padding:8px 10px;border-radius:6px" onmouseover="this.style.background='#f6f8fa'" onmouseout="this.style.background='transparent'">` : '<div style="display:flex;gap:10px;width:100%;align-items:center;padding:8px 10px">';
+      const linkOpen = item.link ? `<a href="${item.link}" target="_blank" style="text-decoration:none;color:inherit;display:flex;gap:10px;width:100%;align-items:center;padding:8px 10px;border-radius:6px;border-left:3px solid transparent" onmouseover="this.style.background='#f6f8fa'" onmouseout="this.style.background='transparent'">` : '<div style="display:flex;gap:10px;width:100%;align-items:center;padding:8px 10px;border-left:3px solid transparent">';
       const linkClose = item.link ? '</a>' : '</div>';
-      const bg = item.outcome === 'error' ? '#fff5f5' : item.kind === 'artifact' ? '#f0f7ff' : 'transparent';
+      const tag = item.outcome === 'error' ? `<span style="color:var(--err);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">⚠ Error</span>`
+                : item.outcome === 'produced_artifact' || item.kind === 'artifact' ? `<span style="color:var(--ok);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">✓ Produced</span>`
+                : item.outcome === 'skipped_by_gate' ? `<span style="color:#9333ea;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">⊘ Skipped</span>`
+                : item.outcome === 'ran_no_output' ? `<span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">○ No Work</span>`
+                : `<span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">·</span>`;
       return `${linkOpen}
         <div style="font-size:20px;flex-shrink:0;width:32px;text-align:center">${item.emoji}</div>
         <div style="flex:1;font-size:13px;line-height:1.45;color:var(--fg)">
-          <b>${item.who}</b> ${escapeHtml(item.what)}${item.link?' <span style="color:var(--accent);font-size:11px">→</span>':''}
+          <div style="display:flex;align-items:center;gap:8px">${tag}<b>${item.who}</b></div>
+          <div style="margin-top:2px">${escapeHtml(item.what)}${item.link?' <span style="color:var(--accent);font-size:11px">→</span>':''}</div>
         </div>
         <div style="color:var(--muted);font-size:11px;flex-shrink:0;font-variant-numeric:tabular-nums">${relativeAge(new Date(item.when).toISOString())}</div>
       ${linkClose}`;
     }).join('');
   const totalFires24h = hb ? hb.total_24h : 0;
-  const todaySummary = `${todayActions} action${todayActions===1?'':'s'} taken · ${todayChecks} check${todayChecks===1?'':'s'} (no action needed)`;
+  const todaySummary = `<b>${todayActions}</b> Produced · <b>${todaySkipped}</b> Skipped By Self-QA · <b>${todayChecks}</b> Ran But No Work To Do · <b>${todayErrors}</b> Error${todayErrors===1?'':'s'}`;
 
   // === Failure banner ===
   const failureBannerHtml = failures24h.length === 0 ? '' : `
@@ -1207,12 +1215,13 @@ async function renderToday(){
     <div style="margin-top:16px;padding:12px 14px;background:#f6f8fa;border-radius:8px;font-size:12px;line-height:1.6;color:var(--fg-dim)">
       <div style="font-weight:600;color:var(--fg);font-size:13px;margin-bottom:8px">Brutal Honesty About What's NOT Happening Yet</div>
       <ul style="margin:0;padding-left:20px">
-        <li><b>Your feedback to agents is saved but does NOT auto-update their instructions.</b> When you type a note to an animal, it's stored. Dragon reads ALL notes every Sunday and DRAFTS proposed prompt changes in a weekly Inbox ticket. You (or Claude) must manually apply those changes to each agent's workflow. Nothing is hot-reloaded into "the agent's brain."</li>
-        <li><b>Fox auto-mutates Google Ads campaign BUDGETS only.</b> Bid changes at the keyword/ad-group level are NOT wired. Microsoft Ads mutations are NOT wired either — Fox only reads MS Ads for the safety-cap math.</li>
-        <li><b>No conversion attribution from agent actions to revenue.</b> The dashboard shows Google + MS ad spend and conversions, but there is no link between "Owl drafted a piece" or "Spider sent an outreach" and "we closed a deal." That would need CRM integration.</li>
-        <li><b>Squirrel's chart data is hourly snapshot, not real-time.</b> Refresh the page to pull a new ROI snapshot. The chart doesn't auto-update.</li>
-        <li><b>Sentinel filters duplicate failures to Inbox</b> so you don't get spam, but means short-lived bugs can hide. Same-error-3×-in-1-hr escalates to Needs You.</li>
-        <li><b>Bat (Reddit) fires every 10 min but produces zero tickets in current data.</b> Either Liftnow truly has no Reddit mentions, OR the keyword filter is too narrow. Worth a manual check on r/Trucks, r/diesel, r/govcon for actual mentions.</li>
+        <li><b>Your feedback to agents is saved but does NOT auto-update their instructions.</b> Your note is stored. 🐉 Dragon reads ALL notes every Sunday and DRAFTS proposed prompt changes in a weekly Inbox ticket. <i>You must manually approve and apply each change</i> — nothing is hot-reloaded into "the agent's brain." This is intentional for safety.</li>
+        <li><b>🦊 Fox auto-mutates Google Ads campaign BUDGETS only.</b> Keyword-level bid changes are NOT wired. Microsoft Ads mutations are NOT wired — Fox only reads Microsoft Ads for the safety-cap math.</li>
+        <li><b>No conversion attribution from agent actions to revenue.</b> The dashboard shows Google + Microsoft ad spend and conversions, but no link from "Owl drafted X" or "Spider sent outreach Y" → "we closed deal Z". Needs CRM integration.</li>
+        <li><b>🐿️ Squirrel's chart is hourly snapshot, not real-time.</b> Refresh the page to pull a new ROI snapshot. The chart doesn't push updates.</li>
+        <li><b>🐺 Wolf now ATTEMPTS auto-retry on transient errors</b> (timeouts, 503s, connection-aborted). Wolf waits 30 sec, re-fires the failed workflow once, and updates the failure ticket with the retry outcome. <i>Wolf does NOT retry persistent bugs</i> (syntax errors, auth failures) — those need you. Max one auto-retry per workflow per hour to prevent retry storms.</li>
+        <li><b>🦇 Bat fires every 10 min but produces zero tickets in current data.</b> Either Liftnow has no Reddit mentions in the watched subs, OR the keyword filter is too narrow. Needs a manual sanity-check on r/Trucks, r/diesel, r/govcon, r/sweatystartup for actual mentions.</li>
+        <li><b>🐝 Bee fires hourly but produces zero tickets.</b> Per the upgraded heartbeat aggregator, you'll now see whether Bee actually scanned + found nothing (legitimate no-op) vs ran but skipped due to Decision Memory rejections — instead of a blanket "audited" lie.</li>
       </ul>
     </div>
   </section>`;
