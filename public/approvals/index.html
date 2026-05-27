@@ -316,15 +316,28 @@
 </header>
 
 <div class="tabs">
-  <button class="tab active" data-view="today" onclick="switchTab('today')">Today</button>
-  <button class="tab" data-view="team" onclick="switchTab('team')">Team</button>
-  <button class="tab" data-view="activity" onclick="switchTab('activity')">Activity <span class="count" id="count-activity"></span></button>
-  <button class="tab" data-view="pending" onclick="switchTab('pending')">Needs You <span class="count" id="count-pending"></span></button>
-  <button class="tab" data-view="inbox" onclick="switchTab('inbox')">Inbox <span class="count" id="count-inbox"></span></button>
-  <button class="tab" data-view="done" onclick="switchTab('done')">All Done</button>
-  <button class="tab" data-view="learnings" onclick="switchTab('learnings')">Learnings</button>
-  <button class="tab" data-view="stats" onclick="switchTab('stats')">Stats</button>
+  <button class="tab active" data-view="today" onclick="switchTab('today')">🏠 Today <span class="tab-sub" id="sub-today"></span></button>
+  <button class="tab" data-view="decide" onclick="switchTab('decide')">✋ Decide <span class="count" id="count-decide"></span></button>
+  <button class="tab" data-view="progress" onclick="switchTab('progress')">📊 Progress</button>
 </div>
+<style>
+  .tab-sub { font-size: 11px; color: var(--muted); margin-left: 4px; }
+  .outcome-row { display: flex; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .outcome-row:last-child { border-bottom: none; }
+  .outcome-icon { font-size: 22px; line-height: 1; flex-shrink: 0; width: 28px; text-align: center; }
+  .outcome-body { flex: 1; min-width: 0; }
+  .outcome-headline { font-weight: 600; font-size: 14px; color: var(--fg); line-height: 1.4; }
+  .outcome-detail { font-size: 12px; color: var(--fg-dim); margin-top: 4px; line-height: 1.5; }
+  .outcome-meta { font-size: 11px; color: var(--muted); margin-top: 6px; display: flex; gap: 12px; align-items: center; }
+  .outcome-meta a { color: var(--link); text-decoration: none; }
+  .outcome-meta a:hover { text-decoration: underline; }
+  .outcome-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .outcome-badge.live { background: #dcfce7; color: #166534; }
+  .outcome-badge.draft { background: #fef3c7; color: #92400e; }
+  .outcome-badge.auto { background: #dbeafe; color: #1e40af; }
+  .outcome-badge.needs { background: #fee2e2; color: #991b1b; }
+  .day-divider { padding: 14px 0 8px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 2px solid var(--border); margin-bottom: 8px; }
+</style>
 
 <main id="main">
   <div class="loading">Loading…</div>
@@ -383,45 +396,361 @@ async function loadCurrentTab(){
   const main = document.getElementById('main');
   main.innerHTML = '<div class="loading">Loading…</div>';
   try {
+    document.getElementById('last-refresh').textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     if (currentView === 'today') {
-      await renderToday();
-    } else if (currentView === 'team') {
-      await renderTeam();
-    } else if (currentView === 'stats') {
-      await renderStats();
-    } else if (currentView === 'learnings') {
-      await renderLearnings();
-    } else if (currentView === 'done') {
-      const data = await fetchTickets('done');
-      cachedDone = data;
-      renderList(data, 'done');
-    } else if (currentView === 'activity') {
-      // Activity = autonomous agent receipts (stage 3 + outcome_notes contains AUTO_EXECUTED)
-      const data = await fetchTickets('done');
-      cachedDone = data;
-      const receipts = (data.tickets || []).filter(t => (t.outcomeNotes || '').includes('AUTO_EXECUTED'));
-      document.getElementById('count-activity').textContent = receipts.length || '';
-      document.getElementById('last-refresh').textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      renderList({tickets: receipts}, 'activity');
+      await renderTodayOutcomes();
+    } else if (currentView === 'decide') {
+      await renderDecide();
+    } else if (currentView === 'progress') {
+      await renderProgress();
     } else {
-      const data = await fetchTickets('pending');
-      cachedPending = data;
-      const reports = (data.tickets || []).filter(isReport);
-      const proposals = (data.tickets || []).filter(t => !isReport(t));
-      // Extract Coordinator brief from pending or inbox
-      const coordTicket = (data.tickets || []).find(t => t.agent === 'Coordinator' && (t.recommendationType||'').toLowerCase().includes('briefing'));
-      coordinatorBrief = parseCoordinatorBrief(coordTicket);
-      document.getElementById('count-pending').textContent = proposals.length || '';
-      document.getElementById('count-inbox').textContent = reports.length || '';
-      document.getElementById('last-refresh').textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      if (currentView === 'inbox') {
-        renderList({tickets: reports}, 'inbox');
-      } else {
-        renderPending(proposals);
-      }
+      // Legacy tab name fell through — default to today
+      currentView = 'today';
+      await renderTodayOutcomes();
     }
   } catch (e) {
     main.innerHTML = `<div class="empty">Error: ${escapeHtml(e.message)}<br><br><button class="btn" onclick="loadCurrentTab()">Retry</button></div>`;
+  }
+}
+
+// =================================================================
+// NEW UI v4 — three tabs answering one question each
+//   Today:    "What did my agents DO?"
+//   Decide:   "What needs me?"
+//   Progress: "Is it actually working?"
+// =================================================================
+
+// Map ticket / heartbeat into an outcome row with a clear "what happened" headline.
+function classifyOutcome(t) {
+  const subj = (t.subject || '');
+  const subjLow = subj.toLowerCase();
+  const agent = (t.agent || '').toLowerCase();
+  const notes = (t.outcomeNotes || '').toLowerCase();
+  const rd = (() => { try { return JSON.parse(t.recommendationDetail || '{}'); } catch { return {}; } })();
+
+  // Auto-executed wins (Eagle PATCHed, Maverick mutated, etc.)
+  if (notes.includes('wp page') && notes.includes('updated')) {
+    const m = notes.match(/wp page (\d+) updated/i);
+    const pageId = m ? m[1] : null;
+    const url = rd.url || (pageId ? `https://liftnow.com/?p=${pageId}` : null);
+    return {
+      icon: '🐝', kind: 'wp_patch', badge: 'live',
+      headline: 'Bee updated a WordPress page',
+      detail: subj.replace(/^SEO fix for /,'').replace(/ — page \d+.*$/, '') + (rd.opportunity ? ` (${rd.opportunity})` : ''),
+      links: url ? [{label:'View page →', href: url}] : []
+    };
+  }
+  if (notes.includes('budget') && (notes.includes('mutated') || notes.includes('applied'))) {
+    return {
+      icon: '🦊', kind: 'ads_mutate', badge: 'live',
+      headline: 'Maverick adjusted a Google Ads budget',
+      detail: subj.replace(/^Google Ads:\s*/, ''),
+      links: [{label: 'See campaign in Google Ads →', href: 'https://ads.google.com/'}]
+    };
+  }
+  if (agent.includes('ui/ux') && (notes.includes('auto-fix') || subjLow.includes('auto-fixed') || subjLow.includes('eagle scan'))) {
+    return {
+      icon: '🦅', kind: 'eagle_fix', badge: rd.auto_fixed_count > 0 ? 'live' : 'auto',
+      headline: rd.auto_fixed_count > 0
+        ? `Eagle auto-fixed ${rd.auto_fixed_count} structural defects across ${rd.pages_auto_fixed || '?'} pages`
+        : 'Eagle scanned /resources/ pages',
+      detail: subj,
+      links: []
+    };
+  }
+  if (subjLow.includes('reddit submission draft')) {
+    return {
+      icon: '🐦‍⬛', kind: 'crow_draft', badge: 'draft',
+      headline: 'Crow drafted a Reddit post (needs your manual paste)',
+      detail: subj.replace(/^Reddit submission draft — /, ''),
+      links: [{label: 'See draft & post URL →', href: `https://app.hubspot.com/contacts/24043196/record/0-5/${t.ticketId}`}]
+    };
+  }
+  if (subjLow.includes('reddit reply')) {
+    return {
+      icon: '🦇', kind: 'reed_draft', badge: 'draft',
+      headline: 'Bat-Reply drafted a Reddit reply (needs your manual paste)',
+      detail: subj.replace(/^Reddit reply.*?— /, ''),
+      links: [{label: 'See draft + thread →', href: `https://app.hubspot.com/contacts/24043196/record/0-5/${t.ticketId}`}]
+    };
+  }
+  if (agent.includes('brand listening') || subjLow.startsWith('news mention') || subjLow.startsWith('hn discussion')) {
+    return {
+      icon: '🦇', kind: 'mention', badge: 'auto',
+      headline: subjLow.startsWith('hn') ? 'HN discussion picked up' : 'News mention picked up',
+      detail: subj.replace(/^(News mention|HN discussion): /, ''),
+      links: rd.url ? [{label: 'Read source →', href: rd.url}] : []
+    };
+  }
+  if (agent.includes('seo optimizer') && subjLow.includes('seo fix for')) {
+    return {
+      icon: '🐝', kind: 'seo_draft', badge: 'needs',
+      headline: 'Bee proposed an SEO fix (needs your approval)',
+      detail: subj.replace(/^SEO fix for /, ''),
+      links: [{label: 'Review & approve →', href: `https://bid-iq-neon.vercel.app/approvals?tab=decide#t-${t.ticketId}`}]
+    };
+  }
+  if (agent.includes('content producer') || subjLow.includes('publish anchor:') || subjLow.includes('publish cluster page:')) {
+    return {
+      icon: '🦉', kind: 'owl_draft', badge: 'needs',
+      headline: 'Owl drafted a new article (needs your approval)',
+      detail: subj.replace(/^(Publish anchor:|Publish cluster page:)\s*/i, ''),
+      links: []
+    };
+  }
+  if (agent.includes('linkedin')) {
+    return {
+      icon: '🦜', kind: 'linkedin', badge: 'draft',
+      headline: 'Beacon drafted a LinkedIn post',
+      detail: subj,
+      links: []
+    };
+  }
+  if (agent.includes('competitor serp') || subjLow.startsWith('competitor moved') || subjLow.includes('top 3 for')) {
+    return {
+      icon: '🐈', kind: 'serp', badge: 'auto',
+      headline: 'Cat spotted competitor SERP movement',
+      detail: subj,
+      links: rd.url ? [{label: 'Source →', href: rd.url}] : []
+    };
+  }
+  if (agent.includes('content decay') || subjLow.startsWith('refresh ')) {
+    return {
+      icon: '🐢', kind: 'decay', badge: 'needs',
+      headline: 'Turtle flagged a decaying page',
+      detail: subj.replace(/^Refresh /, '').replace(/^"|"$/g, ''),
+      links: rd.url ? [{label: 'View page →', href: rd.url}] : []
+    };
+  }
+  if (agent.includes('coordinator') && (subjLow.includes('today\'s top') || subjLow.includes('morning briefing'))) {
+    return {
+      icon: '🐘', kind: 'briefing', badge: 'auto',
+      headline: subj,
+      detail: 'Daily briefing — top items to look at today',
+      links: []
+    };
+  }
+  if (agent.includes('coordinator') && (subjLow.includes('escalated') || subjLow.includes('heads-up'))) {
+    return {
+      icon: '🐺', kind: 'wolf_alert', badge: 'needs',
+      headline: subj,
+      detail: t.content ? String(t.content).split('\n')[0].slice(0, 160) : '',
+      links: []
+    };
+  }
+  // Generic catch-all
+  return {
+    icon: '·', kind: 'other', badge: 'auto',
+    headline: subj,
+    detail: agent || 'agent',
+    links: []
+  };
+}
+
+async function renderTodayOutcomes(){
+  const main = document.getElementById('main');
+  // Pull recent done + pending in parallel — combine into one chronological feed
+  const [doneData, pendingData] = await Promise.all([
+    fetchTickets('all').catch(()=>({tickets:[]})),
+    fetchTickets('pending').catch(()=>({tickets:[]}))
+  ]);
+  const allTickets = [...(doneData.tickets || []), ...(pendingData.tickets || [])];
+  // Dedupe by ticketId
+  const seen = new Set();
+  const unique = [];
+  for (const t of allTickets) {
+    if (seen.has(t.ticketId)) continue;
+    seen.add(t.ticketId);
+    unique.push(t);
+  }
+  // Sort newest first
+  unique.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+  // Classify each + group by day
+  const outcomes = unique.slice(0, 50).map(t => ({...classifyOutcome(t), ticket: t, createdAt: t.createdAt, age: t.ageHours}));
+
+  // Group by day
+  const groups = {};
+  for (const o of outcomes) {
+    const d = new Date(o.createdAt);
+    const key = d.toLocaleDateString(undefined, {weekday: 'long', month: 'short', day: 'numeric'});
+    (groups[key] = groups[key] || []).push(o);
+  }
+
+  // Count today's "live wins" for the tab sub-label
+  const todayKey = new Date().toLocaleDateString(undefined, {weekday: 'long', month: 'short', day: 'numeric'});
+  const todayLiveWins = (groups[todayKey] || []).filter(o => o.badge === 'live').length;
+  document.getElementById('sub-today').textContent = todayLiveWins > 0 ? `· ${todayLiveWins} live` : '';
+
+  let html = `
+    <section style="margin-bottom:24px">
+      <h1 style="margin:0 0 6px;font-size:24px">Today's outcomes</h1>
+      <p style="margin:0;color:var(--fg-dim);font-size:14px">Chronological feed of what your agents actually did. Live = change pushed to liftnow.com/Ads. Draft = waiting for your manual paste. Auto = agent acted on its own (no approval needed). Needs = waiting on your approval (go to Decide tab).</p>
+    </section>
+
+    <section class="panel" style="border-left:4px solid var(--ok)">
+      <div class="panel-head" style="margin-bottom:0">
+        <h3 class="panel-title">Recent activity</h3>
+        <div class="panel-sub">${outcomes.length} items across the last ${Object.keys(groups).length} day${Object.keys(groups).length===1?'':'s'}</div>
+      </div>
+  `;
+
+  for (const day of Object.keys(groups)) {
+    html += `<div class="day-divider">${day}</div>`;
+    for (const o of groups[day]) {
+      const ageStr = o.age < 24 ? `${o.age}h ago` : `${Math.round(o.age/24)}d ago`;
+      const linkBits = o.links.map(l => `<a href="${l.href}" target="_blank" rel="noopener">${l.label}</a>`).join(' · ');
+      html += `
+        <div class="outcome-row">
+          <div class="outcome-icon">${o.icon}</div>
+          <div class="outcome-body">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span class="outcome-badge ${o.badge}">${o.badge}</span>
+              <span class="outcome-headline">${escapeHtml(o.headline)}</span>
+            </div>
+            <div class="outcome-detail">${escapeHtml(o.detail || '')}</div>
+            <div class="outcome-meta">
+              <span>${ageStr}</span>
+              ${linkBits ? `<span>${linkBits}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (outcomes.length === 0) {
+    html += `<div class="empty" style="padding:32px;text-align:center;color:var(--muted)">No agent activity yet. Agents fire on schedule — first outcomes typically arrive within an hour.</div>`;
+  }
+  html += `</section>`;
+
+  main.innerHTML = html;
+}
+
+async function renderDecide(){
+  const main = document.getElementById('main');
+  const data = await fetchTickets('pending');
+  cachedPending = data;
+  const tickets = (data.tickets || []).filter(t => !isReport(t));
+  document.getElementById('count-decide').textContent = tickets.length || '';
+
+  if (tickets.length === 0) {
+    main.innerHTML = `
+      <section style="margin-bottom:20px">
+        <h1 style="margin:0 0 6px;font-size:24px">✓ Nothing to decide</h1>
+        <p style="margin:0;color:var(--fg-dim);font-size:14px">Your agents are working in the background. When they need your input, items appear here. Check Today to see what's been happening.</p>
+      </section>
+      <div class="empty" style="padding:48px;text-align:center;color:var(--muted);background:#f6f8fa;border-radius:8px">
+        <div style="font-size:48px;margin-bottom:12px">🌱</div>
+        <div>No pending approvals right now.</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Group by leverage — content edits, ad changes, drafts to paste, etc.
+  let html = `
+    <section style="margin-bottom:20px">
+      <h1 style="margin:0 0 6px;font-size:24px">${tickets.length} item${tickets.length===1?'':'s'} need your call</h1>
+      <p style="margin:0;color:var(--fg-dim);font-size:14px">Each card shows ASK / WHY / IF YOU APPROVE / IF YOU REJECT. Click Approve to ship the change. Reject if it shouldn't happen.</p>
+    </section>
+  `;
+  // Delegate to existing renderPending since the card UX is already built
+  const tmpMain = document.createElement('div');
+  // renderPending writes to #main directly — render manually here
+  main.innerHTML = html;
+  renderPending(tickets);
+}
+
+async function renderProgress(){
+  const main = document.getElementById('main');
+  main.innerHTML = '<div class="loading">Loading progress...</div>';
+  // Reuse existing renderStats data + add a "shipped this week" counter
+  const [doneData, roi] = await Promise.all([
+    fetchTickets('all').catch(()=>({tickets:[]})),
+    fetch(`${API_BASE}/roi-data`).then(r => r.ok ? r.json() : null).catch(()=>null)
+  ]);
+  const tickets = doneData.tickets || [];
+  // Compute counters
+  const oneWeekAgo = Date.now() - 7 * 86400 * 1000;
+  const oneDayAgo = Date.now() - 86400 * 1000;
+  const liveThisWeek = tickets.filter(t => {
+    const c = new Date(t.createdAt || 0).getTime();
+    if (c < oneWeekAgo) return false;
+    const notes = (t.outcomeNotes || '').toLowerCase();
+    return (notes.includes('wp page') && notes.includes('updated')) ||
+           (notes.includes('budget') && (notes.includes('mutated') || notes.includes('applied'))) ||
+           (notes.includes('auto-fix') || notes.includes('auto_executed'));
+  }).length;
+  const draftsThisWeek = tickets.filter(t => {
+    const c = new Date(t.createdAt || 0).getTime();
+    if (c < oneWeekAgo) return false;
+    const s = (t.subject || '').toLowerCase();
+    return s.includes('draft') || s.includes('publish anchor') || s.includes('publish cluster');
+  }).length;
+  const stage3 = tickets.filter(t => t.stage === '3').length;  // approved
+  const stage4 = tickets.filter(t => t.stage === '4').length;  // rejected
+  const approvalRate = (stage3 + stage4) > 0 ? Math.round(stage3 / (stage3 + stage4) * 100) : null;
+
+  // ROI chart data
+  let roiHtml = '';
+  if (roi && roi.daily && Object.keys(roi.daily).length > 0) {
+    roiHtml = `
+      <section class="panel" style="margin-top:20px">
+        <div class="panel-head"><h3 class="panel-title">Ad spend → conversions (last 30 days)</h3></div>
+        <canvas id="roi-chart" height="80"></canvas>
+        <div style="margin-top:10px;font-size:11px;color:var(--muted)">Google Ads + Microsoft Ads combined. Green bars = conversions, blue line = spend.</div>
+      </section>
+    `;
+  } else {
+    roiHtml = `
+      <section class="panel" style="margin-top:20px;background:#fafbfc">
+        <div class="panel-head"><h3 class="panel-title">Ad spend → conversions</h3></div>
+        <div style="padding:16px;color:var(--muted);font-size:13px">ROI data not loaded yet. Squirrel (Daily ROI Tracker) runs every hour to refresh — check back shortly.</div>
+      </section>
+    `;
+  }
+
+  main.innerHTML = `
+    <section style="margin-bottom:20px">
+      <h1 style="margin:0 0 6px;font-size:24px">Is it working?</h1>
+      <p style="margin:0;color:var(--fg-dim);font-size:14px">Concrete output of your agent team. Live = change pushed to your site/ads. Drafts = work the agents prepared but waiting on you (or manual paste, for Reddit).</p>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px">
+      <div class="kpi-card" style="padding:18px;border:1px solid var(--border);border-radius:8px;background:#f0fff4">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Live changes this week</div>
+        <div style="font-size:34px;font-weight:600;color:var(--ok);margin-top:6px">${liveThisWeek}</div>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px">WP pages patched, ad budgets mutated, auto-fixes shipped</div>
+      </div>
+      <div class="kpi-card" style="padding:18px;border:1px solid var(--border);border-radius:8px;background:#fffaf0">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Drafts produced this week</div>
+        <div style="font-size:34px;font-weight:600;color:var(--warn);margin-top:6px">${draftsThisWeek}</div>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px">Content drafts, Reddit posts, LinkedIn variants — waiting for your call</div>
+      </div>
+      <div class="kpi-card" style="padding:18px;border:1px solid var(--border);border-radius:8px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Your trust trend</div>
+        <div style="font-size:34px;font-weight:600;margin-top:6px">${approvalRate === null ? '—' : approvalRate + '%'}</div>
+        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px">${approvalRate === null ? 'No decisions yet' : approvalRate >= 70 ? 'You approve most things — trust building' : approvalRate >= 40 ? 'Mixed — agents still learning your taste' : 'You reject most — agents need recalibration'}</div>
+      </div>
+    </section>
+
+    ${roiHtml}
+
+    <section class="panel" style="margin-top:20px">
+      <div class="panel-head"><h3 class="panel-title">What's NOT working yet (honest list)</h3></div>
+      <ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.7;color:var(--fg-dim)">
+        <li><b>Reddit posting is manual paste.</b> Reddit closed self-service API access in 2026. Crow + Bat-Reply draft for you; you copy + paste. No way around it without a registered Reddit API app (which had to be approved by Reddit).</li>
+        <li><b>Content body edits aren't fully wired yet.</b> Bee can change title + meta description directly via WP REST. New H2 section appending still requires a fetch-then-update flow — coming next session.</li>
+        <li><b>LinkedIn auto-post is disabled.</b> Beacon drafts in your voice but the actual posting node is off until you decide to wire LinkedIn's API.</li>
+        <li><b>No conversion attribution.</b> The Live counter shows changes shipped, but doesn't yet tie "Bee changed page X → traffic went up Y%" together. That's the next-level dashboard.</li>
+      </ul>
+    </section>
+  `;
+
+  // Render the ROI chart if we have data
+  if (roi && roi.daily) {
+    setTimeout(() => renderRoiChart('combined'), 50);
   }
 }
 
@@ -925,7 +1254,7 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') e.target.blur();
     return;
   }
-  if (currentView !== 'pending') return;
+  if (currentView !== 'decide') return;
   const cards = Array.from(document.querySelectorAll('.card[data-ticket]'));
   if (!cards.length) return;
   const focused = focusedTicketId ? cards.find(c => c.dataset.ticket === focusedTicketId) : null;
@@ -1021,7 +1350,7 @@ async function renderToday(){
     heroHtml = '<div class="hero-empty">Inbox zero. Nothing requires you right now. ✨</div>';
   } else {
     heroHtml = `<div class="hero-list">` + heroItems.map((t, i) => `
-      <div class="hero-item" onclick="switchTab('pending'); setTimeout(()=>scrollToTicket('${t.ticketId}'),300)">
+      <div class="hero-item" onclick="switchTab('decide'); setTimeout(()=>scrollToTicket('${t.ticketId}'),300)">
         <div class="hero-num">${i+1}</div>
         <div class="hero-text">
           <div class="label">${escapeHtml(t.agent||'')} · ${escapeHtml(t.recommendationType||'')}</div>
@@ -1168,7 +1497,7 @@ async function renderToday(){
         <div class="fb-title">${failures24h.length} agent failure${failures24h.length===1?'':'s'} in last 24h${escalatedNow.length > 0 ? ' · '+escalatedNow.length+' ESCALATED to Needs You' : ''}</div>
         <div class="fb-sub">Sentinel filed these. ${escalatedNow.length > 0 ? 'Same error fired 3+ times — needs your attention.' : 'Hidden in Inbox so they don’t block your morning. Open Inbox to review.'}</div>
       </div>
-      <button class="btn" onclick="switchTab('${escalatedNow.length > 0 ? 'pending' : 'inbox'}')">Open</button>
+      <button class="btn" onclick="switchTab('decide')">Open</button>
     </section>`;
 
   // === Box score: last 24h numbers in plain English ===
@@ -1230,7 +1559,7 @@ async function renderToday(){
   const quietHtml = quietAgents.length === 0 ? '' : `<section class="panel" style="background:#fafbfc">
     <div class="panel-head" style="margin-bottom:8px"><h3 class="panel-title">Quiet Zones · Agents Not Firing Right Now</h3><div class="panel-sub">By design — these have specific schedules. Click any to see when they next fire.</div></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
-      ${quietAgents.map(q => `<div style="padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer" onclick="switchTab('team')">
+      ${quietAgents.map(q => `<div style="padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer" onclick="switchTab('progress')">
         <div style="font-weight:600">${q.name}</div>
         <div style="color:var(--muted);font-size:11px;margin-top:2px">${q.schedule}</div>
         <div style="color:var(--muted);font-size:11px;margin-top:2px">Last Fired: ${q.lastMs?relativeAge(new Date(q.lastMs).toISOString()):'Never'}</div>
@@ -2155,10 +2484,10 @@ async function renderStats(){
 loadCurrentTab();
 let pollInterval = setInterval(() => {
   if (document.hidden) return;
-  if (['pending','today','activity'].includes(currentView)) loadCurrentTab();
+  if (['today','decide','progress'].includes(currentView)) loadCurrentTab();
 }, 60000);
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && ['pending','today','activity'].includes(currentView)) loadCurrentTab();
+  if (!document.hidden && ['today','decide','progress'].includes(currentView)) loadCurrentTab();
 });
 </script>
 </body>
