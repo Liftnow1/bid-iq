@@ -436,7 +436,37 @@ function parseCoordinatorBrief(ticket){
 async function fetchTickets(view){
   const r = await fetch(`${API_BASE}/agent-proposals?view=${view}`);
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return r.json();
+  const data = await r.json();
+  // Filter out non-marketing tickets that may have leaked in via Wolf
+  // before its exclusion list was added (Phase 5 Quote Watcher, CF7 form
+  // bridge, duplicate detectors, etc.) These are operational/sales
+  // infrastructure, not part of the marketing agent team.
+  const NON_MARKETING_PATTERNS = [
+    /quote\s*watcher/i,
+    /phase\s*5/i,
+    /cf7\s*form/i,
+    /duplicate\s*workflow/i,
+    /master\s*kill\s*switch/i,
+    /daily\s*health\s*check/i,
+    /webhook[:\s].*decision\s*memory/i,
+    /webhook[:\s].*agent\s*proposals/i,
+    /webhook[:\s].*process\s*decision/i,
+    /silent\s*failure\s*detector/i,
+    /agent\s*heartbeat\s*store/i,
+    /agent\s*feedback\s*store/i,
+  ];
+  const isNonMarketing = (t) => {
+    const haystack = [(t.subject || ''), (t.outcomeNotes || ''), (t.content || '').slice(0, 500)].join(' ');
+    return NON_MARKETING_PATTERNS.some((re) => re.test(haystack));
+  };
+  if (Array.isArray(data?.tickets)) {
+    const before = data.tickets.length;
+    data.tickets = data.tickets.filter((t) => !isNonMarketing(t));
+    if (before !== data.tickets.length) {
+      console.log(`[ui-filter] hid ${before - data.tickets.length} non-marketing tickets`);
+    }
+  }
+  return data;
 }
 
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
