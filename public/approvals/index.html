@@ -471,8 +471,60 @@ async function fetchTickets(view){
     if (before !== data.tickets.length) {
       console.log(`[ui-filter] hid ${before - data.tickets.length} non-marketing tickets`);
     }
+    // Pretty-print legacy subjects that pre-date the humanize sweep.
+    // The agents themselves now produce plain English, but old tickets in
+    // the queue still carry the bracket-prefixed forms. Translate at render.
+    data.tickets = data.tickets.map((t) => ({...t, subject: humanizeSubject(t.subject)}));
   }
   return data;
+}
+
+// Translate legacy bracket-prefixed subjects to plain English. New tickets
+// (post-humanize sweep) bypass this because they already match a 'no bracket prefix' shape.
+function humanizeSubject(subj){
+  if (!subj) return subj;
+  let s = String(subj);
+  // Strip leading status markers like [done] / [suggestion] / [review] / [SEM] / [META] / [PATTERNS] / [TRIAGE] / [BRIEFING] / [BEE] / [SERP type] / [GOOGLE_NEWS] / [HN]
+  // and rephrase them into plain language.
+  // Order matters — match the most specific patterns first.
+  s = s.replace(/^\[SERP\s+top_3_entry\]\s*([^\s]+)\s+on\s+"([^"]+)"\s+—\s+(.+?)\s*→\s*(\d+)/i,
+    (_, dom, kw, prev, cur) => `Competitor moved into top 3 for "${kw}" — ${dom.replace(/\.com$/,'').replace(/-/g,' ')} now #${cur}`);
+  s = s.replace(/^\[SERP\s+top_3_exit\]\s*([^\s]+)\s+on\s+"([^"]+)"\s+—\s+\d+\s*→\s*(\d+)/i,
+    (_, dom, kw, cur) => `${dom.replace(/\.com$/,'').replace(/-/g,' ')} dropped out of top 3 for "${kw}" — now #${cur}`);
+  s = s.replace(/^\[SERP\s+new_entrant\]\s*([^\s]+)\s+on\s+"([^"]+)"\s+—\s+new\s*→\s*(\d+)/i,
+    (_, dom, kw, cur) => `New competitor for "${kw}" — ${dom.replace(/\.com$/,'').replace(/-/g,' ')} just appeared at #${cur}`);
+  s = s.replace(/^\[SERP\s+position_jump\]\s*([^\s]+)\s+on\s+"([^"]+)"\s+—\s+(\d+)\s*→\s*(\d+)/i, (_, dom, kw, prev, cur) => {
+    const dir = parseInt(cur) < parseInt(prev) ? 'up' : 'down';
+    return `${dom.replace(/\.com$/,'').replace(/-/g,' ')} moved ${Math.abs(prev - cur)} spots ${dir} for "${kw}" — now #${cur}`;
+  });
+  s = s.replace(/^\[GOOGLE_NEWS\]\s*/i, 'News mention: ');
+  s = s.replace(/^\[HN\]\s*/i, 'HN discussion: ');
+  s = s.replace(/^\[Reddit Engagement\]\s*r\/([^\s:]+):\s*(.+)$/i, (_, sub, title) => `Reddit reply draft — r/${sub}: ${title}`);
+  s = s.replace(/^\[ESCALATED\]\s*n8n Agent Failed:\s*(.+)$/i, (_, name) => `Escalated: ${name.replace(/[\s—-]+$/, '').trim()} failed repeatedly`);
+  s = s.replace(/^n8n Agent Failed:\s*(.+)$/i, (_, name) => `Heads-up: ${name.replace(/[\s—-]+$/, '').trim()} hit an error`);
+  s = s.replace(/^\[TRIAGE\]\s*Today's top (\d+)\s*-\s*(.+)$/i, (_, n, date) => `Today's top ${n} items to look at — ${date}`);
+  s = s.replace(/^\[META\]\s*Weekly Team Review\s*-\s*(.+?)\s*-\s*(\d+)\s+failures,\s*(\d+)\s+opportunities$/i,
+    (_, date, fails, opps) => `Weekly team review (${date}) — ${fails} agents struggled, ${opps} new opportunities`);
+  s = s.replace(/^\[PATTERNS\]\s*Weekly review\s*-\s*(.+?)\s*\((no patterns|.+? themes?)\)$/i, (_, date, themes) => {
+    if (/^no patterns$/i.test(themes)) return `Weekly patterns from your decisions (${date}) — no themes this week`;
+    return `Weekly patterns from your decisions (${date}) — ${themes} worth seeing`;
+  });
+  s = s.replace(/^\[BRIEFING\]\s*Daily\s*—\s*(.+?)\s*\((\d+)\s+items\)$/i, (_, date, n) => `Today's morning briefing — ${date} (${n} items)`);
+  s = s.replace(/^\[BEE\]\s*Daily baseline report\s*—\s*(\d+)\s+pages still collecting data$/i, (_, n) => `Bee baseline check-in — ${n} pages still gathering search data`);
+  s = s.replace(/^\[done\]\s*Drafted:\s*/i, 'Article draft ready — ');
+  s = s.replace(/^\[done\]\s*Posted on LinkedIn:\s*/i, 'LinkedIn post draft ready — ');
+  s = s.replace(/^\[done\]\s*SEM Auto:\s*/i, 'Google Ads: budget ');
+  s = s.replace(/^\[suggestion\]\s*/i, 'Google Ads suggestion — ');
+  s = s.replace(/^\[review\]\s*SEM:\s*/i, 'Google Ads change needs your approval: ');
+  // Strip leftover generic [TAG] prefixes
+  s = s.replace(/^\[[A-Z][A-Z_]+\]\s*/, '');
+  // Content decay raw URL form: "Content decay: https://...../slug/ — -X% clicks, Y positions"
+  s = s.replace(/^Content decay:\s*https?:\/\/[^/]+\/(.+?)\/?\s*—\s*(-?\d+(?:\.\d+)?)%\s*clicks,\s*(-?\d+(?:\.\d+)?)\s*positions?$/i,
+    (_, path, clicks, pos) => {
+      const slug = path.split('/').filter(Boolean).pop() || path;
+      return `Refresh "${slug}" — losing traffic (${clicks}% clicks, ${pos} spots)`;
+    });
+  return s;
 }
 
 function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
