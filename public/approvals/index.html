@@ -511,6 +511,8 @@ function humanizeSubject(subj){
   });
   s = s.replace(/^\[BRIEFING\]\s*Daily\s*—\s*(.+?)\s*\((\d+)\s+items\)$/i, (_, date, n) => `Today's morning briefing — ${date} (${n} items)`);
   s = s.replace(/^\[BEE\]\s*Daily baseline report\s*—\s*(\d+)\s+pages still collecting data$/i, (_, n) => `Bee baseline check-in — ${n} pages still gathering search data`);
+  s = s.replace(/^\[COORDINATOR\]\s*Weekly Summary\s*-\s*(.+)$/i, (_, date) => `Weekly summary — ${date}`);
+  s = s.replace(/^\[SILENT FAILURE\]\s*(.+?)\s+fired\s+\d+× \/ 24h,\s*0 HubSpot tickets$/i, (_, name) => `${name} fires constantly but produced 0 tickets in last 24h`);
   s = s.replace(/^\[done\]\s*Drafted:\s*/i, 'Article draft ready — ');
   s = s.replace(/^\[done\]\s*Posted on LinkedIn:\s*/i, 'LinkedIn post draft ready — ');
   s = s.replace(/^\[done\]\s*SEM Auto:\s*/i, 'Google Ads: budget ');
