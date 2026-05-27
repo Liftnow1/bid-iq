@@ -454,6 +454,12 @@ async function fetchTickets(view){
     /silent\s*failure\s*detector/i,
     /agent\s*heartbeat\s*store/i,
     /agent\s*feedback\s*store/i,
+    // Legacy Eagle (UI/UX) per-page spam tickets. Pre-fix Eagle filed one
+    // empty ticket per scanned page with subject "[UI/UX] 0 defects on ?"
+    // or "[UI/UX] N defects on <slug>" using stale $json after a Decision
+    // Memory HTTP shadow swallowed the original data. New Eagle posts a
+    // single digest ticket: "[UI/UX] HIGH-PRIORITY N defects across M /resources/ pages".
+    /^\[UI\/UX\]\s+0\s+defects\s+on\s+\?$/i,
   ];
   const isNonMarketing = (t) => {
     const haystack = [(t.subject || ''), (t.outcomeNotes || ''), (t.content || '').slice(0, 500)].join(' ');
