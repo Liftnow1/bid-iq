@@ -1248,7 +1248,11 @@ async function renderToday(){
     'Content Producer': ['carla'], 'SEM Manager': ['max','riley'], 'SEO Optimizer': ['sam'],
     'Keyword Discovery': ['kai'], 'Backlink Builder': ['bran'], 'LinkedIn Cadence': ['lin'],
     'Coordinator': ['eve'], 'UI/UX Performance': ['uma'], 'Content Decay Detector': ['dax'],
-    'Competitor SERP Monitor': ['vex'], 'Brand Listening': ['nox'], 'Community Engagement': ['reed'],
+    'Competitor SERP Monitor': ['vex'], 'Brand Listening': ['nox'],
+    // Both Reed (reply drafter) and Crow (thought-leadership submitter) use
+    // 'Community Engagement' as their HubSpot agent_name. matchTicket() splits
+    // them by ticket content (reddit_submission vs reddit_reply action_type).
+    'Community Engagement': ['reed', 'crow'],
     'Team Manager': ['theo'], 'Daily ROI': ['iris'], 'Ticket Triage': ['pip']
   };
   const honestyRows = [];
@@ -1656,12 +1660,15 @@ const PERSONAS = [
     bio:"Three Google News RSS feeds (liftnow brand + competitors + gov fleet procurement) plus two HackerNews Algolia queries (fleet electrification + govcon procurement) every 30 min. Dedupes against a rolling 2k-URL seen set. Top 3 relevant items per run become HubSpot Inbox tickets. Reddit will rejoin as a fourth source once Paul finishes registering the OAuth app.",
     listens_to:[], feeds_to:['Spider (story context)','Owl (content angles)','Elephant','You (Inbox)']},
   {id:'reed', name:'Bat (Reply Drafter)', emoji:'🦇', color:'#78716c',
-    role:'Community Engagement', match:'Community Engagement', schedule:'PAUSED — Reddit OAuth required',
-    status:'paused',
-    pauseReason:'This agent specifically drafts Reddit thread replies, which requires Reddit OAuth. Paul is registering the app. Auto-resumes once the credential ID is wired into the workflow.',
-    tagline:'PAUSED — needs Reddit OAuth for thread replies.',
-    bio:"Once Reddit OAuth is wired, picks promising fleet/govcon Reddit threads M/W/F 11AM ET and drafts non-salesy reply variants for your approval. Until then, honestly paused.",
+    role:'Community Engagement (draft-and-paste)', match:'Community Engagement', schedule:'M/W/F · 11 AM ET',
+    tagline:'Finds fleet/govcon Reddit threads via Brave Search, drafts non-salesy replies in your Peer Vendor voice. You paste-and-post manually — Reddit blocks reply-via-API for everyone now.',
+    bio:"Picks an anchor (M/W/F 11AM ET), searches Reddit via Brave Search proxy for fleet/govcon threads matching anchor-relevance keywords, drafts a reply in your Peer Vendor voice, runs Self-QA to drop irrelevant matches, files a HubSpot ticket with the thread URL and drafted reply. You click the URL, paste the reply, post from u/liftnowpartnerships. ~60 sec per real reply. Why manual: Reddit locked down their comment-reply API in 2026 — no 3rd-party tool (Buffer, Postiz, Zapier) supports comment-reply anymore. Auto-post requires direct Reddit OAuth which is now approval-only.",
     listens_to:[], feeds_to:['Spider','Elephant','You (approval)']},
+  {id:'crow', name:'Crow', emoji:'🐦‍⬛', color:'#1f2937',
+    role:'Reddit Thought-Leadership', match:'Community Engagement', schedule:'Tue + Fri · 10 AM ET',
+    tagline:'Authors native Reddit POSTS (not replies) to fleet/govcon subreddits. Auto-submits via Postiz once approved.',
+    bio:"Picks an anchor (Tue + Fri 10 AM ET), drafts a long-form Reddit submission (250-700 words) in your Article voice for r/transit, r/fleetmanagement, r/PublicAdministration, r/SchoolBus, r/govfleets, r/civilengineering, etc. Self-QA filters drafts that read like marketing. Files HubSpot ticket for your approval. On approve, Approval Executor POSTs to Postiz API → Postiz submits to Reddit. Different from Bat: Crow writes NEW POSTS (authentic native contribution), Bat REPLIES to existing threads (which still requires manual paste).",
+    listens_to:['Owl (anchor content)'], feeds_to:['Forge (auto-submit on approval)','You (approval)']},
   {id:'lin', name:'Parrot', emoji:'🦜', color:'#15803d',
     role:'LinkedIn Cadence', match:'LinkedIn Cadence', schedule:'M–F · 10 AM + 2 PM',
     tagline:'Posts LinkedIn content in founder voice. Stays on brand pillars.',
@@ -1774,10 +1781,25 @@ function matchTicket(p, t){
     return subj.includes('sem auto') || subj.includes('sem ag') ||
            notes.includes('google ads budget mutated') || notes.includes('email_sent') || notes.includes('sent sem email');
   }
-  // Reddit — merged Whisper + Sonar (both Reddit/community)
+  // Reddit — merged Whisper + Sonar (legacy; both nox and reed exist as separate personas now)
   if (p.id === 'reddit') {
     return agent.includes('community engagement') || agent.includes('brand listening') ||
            subj.includes('reddit') || subj.includes('community engagement') || subj.includes('brand listening');
+  }
+  // Crow = thought-leadership Reddit SUBMISSIONS (new posts). Tickets carry
+  // action_type='reddit_submission' inside recommendation_detail.
+  if (p.id === 'crow') {
+    const detailStr = String(t.recommendationDetail || '');
+    return /reddit_submission/i.test(detailStr) ||
+           /reddit submission draft/i.test(subj);
+  }
+  // Reed = REPLY drafter (existing threads). NOT submissions.
+  if (p.id === 'reed') {
+    const detailStr = String(t.recommendationDetail || '');
+    if (/reddit_submission/i.test(detailStr)) return false;  // belongs to Crow
+    return agent.includes('community engagement') ||
+           /reddit reply/i.test(subj) ||
+           /reddit reply ready/i.test(subj);
   }
   // Briefing — merged Sift + Maestro
   if (p.id === 'briefing') {
