@@ -956,7 +956,7 @@ async function renderToday(){
   // === News feed: heartbeats + tickets merged + grouped by hour, plain-English ===
   const heartbeats = (hb && hb.heartbeats) || [];
 
-  // Animal emoji lookup
+  // Animal emoji + display-name lookup (used by news feed)
   const AGENT_EMOJI = {
     carla:'🦉', sam:'🐝', max:'🦊', riley:'🦊', sem:'🦊',
     kai:'🐕', bran:'🕷️', reed:'🦇', nox:'🦇', reddit:'🦇',
@@ -964,7 +964,15 @@ async function renderToday(){
     uma:'🦅', dax:'🐢', vex:'🐈', theo:'🐉',
     sentinel:'🐺', forge:'🦫', iris:'🐿️'
   };
+  const AGENT_ANIMAL_NAME = {
+    carla:'Owl', sam:'Bee', max:'Fox', riley:'Fox', sem:'Fox',
+    kai:'Hound', bran:'Spider', reed:'Bat', nox:'Bat', reddit:'Bat',
+    lin:'Parrot', eve:'Elephant', pip:'Elephant', briefing:'Elephant',
+    uma:'Eagle', dax:'Turtle', vex:'Cat', theo:'Dragon',
+    sentinel:'Wolf', forge:'Beaver', iris:'Squirrel'
+  };
   function emojiFor(agentId){ return AGENT_EMOJI[agentId] || '🐾'; }
+  function animalFor(agentId){ return AGENT_ANIMAL_NAME[agentId] || agentId; }
 
   // Build news items from heartbeats (last 24h) + recent ticket activity
   const newsItems = [];
@@ -972,7 +980,7 @@ async function renderToday(){
     newsItems.push({
       when: new Date(h.at).getTime(),
       emoji: emojiFor(h.agentId),
-      who: h.agentName,
+      who: animalFor(h.agentId),
       what: h.summary || 'did some work',
       outcome: h.outcome,
       link: h.workflow_id && h.exec_id ? `https://agents.liftnowdirect.com/workflow/${h.workflow_id}/executions/${h.exec_id}` : null,
@@ -985,38 +993,37 @@ async function renderToday(){
     const ms = new Date(t.createdAt).getTime();
     if (Date.now() - ms > 24*3600*1000) continue;
     if (/^\[done\] sem auto/i.test(t.subject||'')) {
-      // Maverick mutation receipt — extract before/after
       const m = (t.subject||'').match(/\$([\d.]+)[→\-\>]+\$([\d.]+)/);
       newsItems.push({
-        when: ms, emoji: '🦊', who: 'Maverick',
-        what: m ? `Changed a Google Ads budget: $${m[1]} → $${m[2]} (real change in Google Ads)` : 'Made a Google Ads budget change',
+        when: ms, emoji: '🦊', who: 'Fox',
+        what: m ? `Changed a Google Ads budget: $${m[1]} → $${m[2]} (Real Change in Google Ads)` : 'Made a Google Ads budget change',
         outcome: 'action_taken', kind: 'artifact',
         link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
       });
     } else if (/\[suggestion\] sem/i.test(t.subject||'')) {
       newsItems.push({
-        when: ms, emoji: '🦊', who: 'Maverick (suggestions)',
+        when: ms, emoji: '🦊', who: 'Fox',
         what: 'Emailed you a Google Ads suggestion (no change made — email only)',
         outcome: 'info', kind: 'artifact',
         link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
       });
     } else if (/\[DRAFT FOR YOUR REVIEW\]/i.test(t.subject||'')) {
       newsItems.push({
-        when: ms, emoji: '🕷️', who: 'Weaver',
+        when: ms, emoji: '🕷️', who: 'Spider',
         what: `Drafted a backlink outreach email — waiting for your approval`,
         outcome: 'action_taken', kind: 'artifact',
         link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
       });
     } else if (/\[BRIEFING\]|Daily/i.test(t.subject||'')) {
       newsItems.push({
-        when: ms, emoji: '🐘', who: 'Maestro',
+        when: ms, emoji: '🐘', who: 'Elephant',
         what: 'Wrote a Daily Briefing (top of this tab)',
         outcome: 'info', kind: 'artifact',
         link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
       });
     } else if (/Content Producer|Content Draft/i.test(t.subject + ' ' + (t.recommendationType||''))) {
       newsItems.push({
-        when: ms, emoji: '🦉', who: 'Quill',
+        when: ms, emoji: '🦉', who: 'Owl',
         what: `Drafted a content piece: "${(t.subject||'').replace(/^\[.*?\]\s*/,'').slice(0,60)}"`,
         outcome: 'action_taken', kind: 'artifact',
         link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
@@ -1082,13 +1089,13 @@ async function renderToday(){
   const yMs = yEntry?.by_source?.microsoft_ads?.spend || 0;
 
   const boxScoreHtml = `<section class="panel" style="background:linear-gradient(135deg,#fafbfc 0%,#f6f8fa 100%);border-left:4px solid var(--accent)">
-    <div class="panel-head" style="margin-bottom:8px"><h3 class="panel-title">Yesterday's box score · ${yesterday.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</h3></div>
+    <div class="panel-head" style="margin-bottom:8px"><h3 class="panel-title">Yesterday's Box Score · ${yesterday.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</h3></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;font-size:13px;line-height:1.5">
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ad spend</div><div style="font-size:18px;font-weight:700">$${ySpend.toFixed(2)}</div><div style="color:var(--muted);font-size:11px">Google $${yGoogle.toFixed(2)} · MS $${yMs.toFixed(2)}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ad changes (Maverick)</div><div style="font-size:18px;font-weight:700">${mutationsLast24}</div><div style="color:var(--muted);font-size:11px">${mutationsLast24===0?'no auto-budget changes':'real Google Ads writes'}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Content drafted</div><div style="font-size:18px;font-weight:700">${draftsLast24}</div><div style="color:var(--muted);font-size:11px">${draftsLast24===0?'no new drafts':'piece(s) in your queue'}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Outreach drafted</div><div style="font-size:18px;font-weight:700">${outreachLast24}</div><div style="color:var(--muted);font-size:11px">${outreachLast24===0?'no new outreach':'email(s) awaiting approval'}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Team health</div><div style="font-size:18px;font-weight:700;color:${failuresLast24===0?'var(--ok)':'var(--warn)'}">${failuresLast24===0?'✓ All good':failuresLast24+' fail'+(failuresLast24===1?'':'s')}</div><div style="color:var(--muted);font-size:11px">${failuresLast24===0?'no agent crashes':'see Inbox'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ad Spend</div><div style="font-size:18px;font-weight:700">$${ySpend.toFixed(2)}</div><div style="color:var(--muted);font-size:11px">Google $${yGoogle.toFixed(2)} · Microsoft $${yMs.toFixed(2)}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Budget Changes (🦊 Fox)</div><div style="font-size:18px;font-weight:700">${mutationsLast24}</div><div style="color:var(--muted);font-size:11px">${mutationsLast24===0?'No Auto-Budget Changes':'Real Google Ads Writes'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Content Drafted (🦉 Owl)</div><div style="font-size:18px;font-weight:700">${draftsLast24}</div><div style="color:var(--muted);font-size:11px">${draftsLast24===0?'No New Drafts':'Piece(s) In Your Queue'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Outreach Drafted (🕷️ Spider)</div><div style="font-size:18px;font-weight:700">${outreachLast24}</div><div style="color:var(--muted);font-size:11px">${outreachLast24===0?'No New Outreach':'Email(s) Awaiting Approval'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Team Health</div><div style="font-size:18px;font-weight:700;color:${failuresLast24===0?'var(--ok)':'var(--warn)'}">${failuresLast24===0?'✓ All Good':failuresLast24+' Fail'+(failuresLast24===1?'':'s')}</div><div style="color:var(--muted);font-size:11px">${failuresLast24===0?'No Agent Crashes':'See Inbox'}</div></div>
     </div>
   </section>`;
 
@@ -1099,21 +1106,21 @@ async function renderToday(){
     if (!lastFireByAgentId[h.agentId] || t > lastFireByAgentId[h.agentId]) lastFireByAgentId[h.agentId] = t;
   }
   const PERSONA_BY_AGENT_ID = {
-    carla:'Quill 🦉', sam:'Tweak 🐝', max:'Tally 🦊', riley:'Maverick 🦊',
-    kai:'Scout 🐕', bran:'Weaver 🕷️', reed:'Whisper 🦇', nox:'Sonar 🦇',
-    lin:'Beacon 🦜', eve:'Maestro 🐘', pip:'Sift 🐘',
-    uma:'Lens 🦅', dax:'Gardener 🐢', vex:'Periscope 🐈',
-    theo:'Oracle 🐉', iris:'Ledger 🐿️', sentinel:'Sentinel 🐺', forge:'Forge 🦫'
+    carla:'🦉 Owl', sam:'🐝 Bee', max:'🦊 Fox', riley:'🦊 Fox',
+    kai:'🐕 Hound', bran:'🕷️ Spider', reed:'🦇 Bat', nox:'🦇 Bat',
+    lin:'🦜 Parrot', eve:'🐘 Elephant', pip:'🐘 Elephant',
+    uma:'🦅 Eagle', dax:'🐢 Turtle', vex:'🐈 Cat',
+    theo:'🐉 Dragon', iris:'🐿️ Squirrel', sentinel:'🐺 Wolf', forge:'🦫 Beaver'
   };
   const SCHEDULE_BY_AGENT_ID = {
-    kai:'Monthly (1st of month, 6 AM)',
-    theo:'Weekly (Sunday 10 PM)',
-    uma:'Daily M–F 8 AM',
-    dax:'Daily M–F 8 AM',
-    carla:'M–F 9 AM, 1 PM, 5 PM',
-    bran:'M–F 9 AM + 2 PM',
-    lin:'M–F 10 AM + 2 PM',
-    eve:'M–F 9, 12, 3, 6 PM'
+    kai:'Monthly · 1st @ 6 AM',
+    theo:'Weekly · Sunday 10 PM',
+    uma:'Daily M–F · 8 AM',
+    dax:'Daily M–F · 8 AM',
+    carla:'M–F · 9 AM, 1 PM, 5 PM',
+    bran:'M–F · 9 AM + 2 PM',
+    lin:'M–F · 10 AM + 2 PM',
+    eve:'M–F · 9, 12, 3, 6 PM'
   };
   const quietAgents = [];
   for (const aid of Object.keys(PERSONA_BY_AGENT_ID)) {
@@ -1123,13 +1130,90 @@ async function renderToday(){
     }
   }
   const quietHtml = quietAgents.length === 0 ? '' : `<section class="panel" style="background:#fafbfc">
-    <div class="panel-head" style="margin-bottom:8px"><h3 class="panel-title">Quiet zones · agents not firing right now</h3><div class="panel-sub">By design — these have specific schedules. Click any to see when they next fire.</div></div>
+    <div class="panel-head" style="margin-bottom:8px"><h3 class="panel-title">Quiet Zones · Agents Not Firing Right Now</h3><div class="panel-sub">By design — these have specific schedules. Click any to see when they next fire.</div></div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
       ${quietAgents.map(q => `<div style="padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer" onclick="switchTab('team')">
         <div style="font-weight:600">${q.name}</div>
         <div style="color:var(--muted);font-size:11px;margin-top:2px">${q.schedule}</div>
-        <div style="color:var(--muted);font-size:11px;margin-top:2px">Last fired: ${q.lastMs?relativeAge(new Date(q.lastMs).toISOString()):'never'}</div>
+        <div style="color:var(--muted);font-size:11px;margin-top:2px">Last Fired: ${q.lastMs?relativeAge(new Date(q.lastMs).toISOString()):'Never'}</div>
       </div>`).join('')}
+    </div>
+  </section>`;
+
+  // === Honesty Panel: fires vs tickets, and what's NOT working ===
+  // Build fire-vs-ticket count per agent ID
+  const ticketCountByAgentName = {};
+  for (const t of (doneData.tickets||[])) {
+    const an = (t.agent || '').trim();
+    if (!an) continue;
+    ticketCountByAgentName[an] = (ticketCountByAgentName[an] || 0) + 1;
+  }
+  const AGENT_NAME_TO_IDS = {
+    'Content Producer': ['carla'], 'SEM Manager': ['max','riley'], 'SEO Optimizer': ['sam'],
+    'Keyword Discovery': ['kai'], 'Backlink Builder': ['bran'], 'LinkedIn Cadence': ['lin'],
+    'Coordinator': ['eve'], 'UI/UX Performance': ['uma'], 'Content Decay Detector': ['dax'],
+    'Competitor SERP Monitor': ['vex'], 'Brand Listening': ['nox'], 'Community Engagement': ['reed'],
+    'Team Manager': ['theo'], 'Daily ROI': ['iris'], 'Ticket Triage': ['pip']
+  };
+  const honestyRows = [];
+  const seenIds = new Set();
+  // Compute fires per agent
+  const firesPerAgent = {};
+  for (const h of heartbeats) firesPerAgent[h.agentId] = (firesPerAgent[h.agentId] || 0) + 1;
+
+  for (const [an, ids] of Object.entries(AGENT_NAME_TO_IDS)) {
+    const fires = ids.reduce((s,i) => s + (firesPerAgent[i]||0), 0);
+    const tickets = ticketCountByAgentName[an] || 0;
+    const animal = PERSONA_BY_AGENT_ID[ids[0]] || an;
+    ids.forEach(i => seenIds.add(i));
+    let verdict, level;
+    if (fires === 0 && tickets > 0) { verdict = 'Tickets exist, no fires in last 24h (scheduled cadence — by design)'; level = 'info'; }
+    else if (fires === 0 && tickets === 0) { verdict = 'Sleeping (scheduled cadence — by design)'; level = 'info'; }
+    else if (tickets > 0) { verdict = `Producing real output (${tickets} ticket${tickets===1?'':'s'} in last 24h)`; level = 'good'; }
+    else if (fires > 15 && tickets === 0) { verdict = `Fires ${fires}× / 24h but has produced ZERO tickets — either nothing meets the threshold OR detection is broken. Worth a manual sanity-check.`; level = 'warn'; }
+    else if (fires > 0 && tickets === 0) { verdict = `Fires ${fires}× / 24h, no tickets. Likely "no work needed" but could be too restrictive.`; level = 'caution'; }
+    else { verdict = `${fires} fires, ${tickets} tickets`; level = 'info'; }
+    honestyRows.push({animal, agent_name: an, fires, tickets, verdict, level, ids});
+  }
+
+  // Sort: warn first, then caution, then good
+  const sortOrder = {warn:0, caution:1, good:2, info:3};
+  honestyRows.sort((a,b) => (sortOrder[a.level]||4) - (sortOrder[b.level]||4));
+
+  const levelStyle = {
+    warn: 'background:#fff5f5;border-left-color:var(--err)',
+    caution: 'background:#fffaf0;border-left-color:var(--warn)',
+    good: 'background:#f0fff4;border-left-color:var(--ok)',
+    info: 'background:#fafbfc;border-left-color:var(--border)'
+  };
+  const levelIcon = {warn:'⚠️', caution:'⚠', good:'✅', info:'·'};
+
+  const honestyHtml = `<section class="panel" style="border-left:4px solid var(--warn)">
+    <div class="panel-head" style="margin-bottom:8px">
+      <h3 class="panel-title">Honesty Panel · What's Actually Working</h3>
+      <div class="panel-sub">Cross-checks agent fires against tickets produced. Auto-flags agents that look busy but aren't delivering.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+      ${honestyRows.map(r => `<div style="display:flex;gap:10px;align-items:center;padding:8px 12px;border-left:3px solid;${levelStyle[r.level]};border-radius:4px">
+        <div style="font-size:16px;width:24px;text-align:center">${levelIcon[r.level]}</div>
+        <div style="flex:1">
+          <div style="font-weight:600">${r.animal}</div>
+          <div style="color:var(--fg-dim);font-size:12px;margin-top:2px">${r.verdict}</div>
+        </div>
+        <div style="color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;text-align:right">${r.fires} fires · ${r.tickets} tickets</div>
+      </div>`).join('')}
+    </div>
+
+    <div style="margin-top:16px;padding:12px 14px;background:#f6f8fa;border-radius:8px;font-size:12px;line-height:1.6;color:var(--fg-dim)">
+      <div style="font-weight:600;color:var(--fg);font-size:13px;margin-bottom:8px">Brutal Honesty About What's NOT Happening Yet</div>
+      <ul style="margin:0;padding-left:20px">
+        <li><b>Your feedback to agents is saved but does NOT auto-update their instructions.</b> When you type a note to an animal, it's stored. Dragon reads ALL notes every Sunday and DRAFTS proposed prompt changes in a weekly Inbox ticket. You (or Claude) must manually apply those changes to each agent's workflow. Nothing is hot-reloaded into "the agent's brain."</li>
+        <li><b>Fox auto-mutates Google Ads campaign BUDGETS only.</b> Bid changes at the keyword/ad-group level are NOT wired. Microsoft Ads mutations are NOT wired either — Fox only reads MS Ads for the safety-cap math.</li>
+        <li><b>No conversion attribution from agent actions to revenue.</b> The dashboard shows Google + MS ad spend and conversions, but there is no link between "Owl drafted a piece" or "Spider sent an outreach" and "we closed a deal." That would need CRM integration.</li>
+        <li><b>Squirrel's chart data is hourly snapshot, not real-time.</b> Refresh the page to pull a new ROI snapshot. The chart doesn't auto-update.</li>
+        <li><b>Sentinel filters duplicate failures to Inbox</b> so you don't get spam, but means short-lived bugs can hide. Same-error-3×-in-1-hr escalates to Needs You.</li>
+        <li><b>Bat (Reddit) fires every 10 min but produces zero tickets in current data.</b> Either Liftnow truly has no Reddit mentions, OR the keyword filter is too narrow. Worth a manual check on r/Trucks, r/diesel, r/govcon for actual mentions.</li>
+      </ul>
     </div>
   </section>`;
 
@@ -1138,8 +1222,8 @@ async function renderToday(){
     ${boxScoreHtml}
 
     <section class="hero-do">
-      <h2>Do these today</h2>
-      <div class="hero-sub">${heroItems.length > 0 ? 'Top items from your morning triage. Click to jump to the ticket.' : 'Nothing pressing — the agents have it covered.'}</div>
+      <h2>Do These Today</h2>
+      <div class="hero-sub">${heroItems.length > 0 ? 'Top items from your morning triage. Click to jump to the ticket.' : 'Nothing Pressing — The Team Has It Covered.'}</div>
       ${heroHtml}
     </section>
 
@@ -1147,7 +1231,7 @@ async function renderToday(){
 
     <section class="panel">
       <div class="panel-head">
-        <h3 class="panel-title">Ad spend & conversions</h3>
+        <h3 class="panel-title">Ad Spend & Conversions</h3>
         <div class="seg-toggle" id="chart-toggle">
           <button class="seg-btn active" data-view="google" onclick="setChartView('google')">Google</button>
           <button class="seg-btn" data-view="microsoft" onclick="setChartView('microsoft')">Microsoft</button>
@@ -1191,11 +1275,13 @@ async function renderToday(){
 
     <section class="panel">
       <div class="panel-head">
-        <h3 class="panel-title">What your team did today</h3>
+        <h3 class="panel-title">What Your Team Did Today</h3>
         <div class="panel-sub">${todaySummary} · auto-updates · click any item to see the actual receipt</div>
       </div>
       <div class="recent-feed">${activityHtml}</div>
     </section>
+
+    ${honestyHtml}
 
     ${quietHtml}
 
@@ -1388,84 +1474,84 @@ async function renderLearnings(){
 // ============================================================
 // TEAM — Persona cards with feedback loop
 // ============================================================
-// Marketing team (12 personas) — each gets a cute animal emoji
+// Marketing team — each is just an Animal. Internal `id` is still its workflow handle.
 const PERSONAS = [
-  {id:'carla', name:'Quill', emoji:'🦉', color:'#0366d6',
-    callsign:'The Owl',  role:'Content Producer', match:'Content Producer', schedule:'M–F · 9 AM + 1 PM + 5 PM ET',
+  {id:'carla', name:'Owl', emoji:'🦉', color:'#0366d6',
+    role:'Content Producer', match:'Content Producer', schedule:'M–F · 9 AM + 1 PM + 5 PM ET',
     tagline:'Drafts blog posts, anchor pages, and LinkedIn variants. Voice-obsessed, hates buzzwords.',
-    bio:"Picks each topic from the editorial calendar, drafts a complete WordPress-ready post, and produces 3 LinkedIn derivatives for Beacon. Self-rejects truncated or off-brand drafts before they reach you.",
-    listens_to:['Briefing','Tweak'], feeds_to:['Beacon','Forge']},
-  {id:'sam', name:'Tweak', emoji:'🐝', color:'#d97706',
-    callsign:'The Bee', role:'SEO Optimizer', match:'SEO Optimizer', schedule:'Every 1 hr',
+    bio:"Picks each topic from the editorial calendar, drafts a complete WordPress-ready post, and produces 3 LinkedIn derivatives for Parrot. Self-rejects truncated or off-brand drafts before they reach you.",
+    listens_to:['Elephant','Bee'], feeds_to:['Parrot','Beaver']},
+  {id:'sam', name:'Bee', emoji:'🐝', color:'#d97706',
+    role:'SEO Optimizer', match:'SEO Optimizer', schedule:'Every 1 Hr',
     tagline:'Audits published pages — title tags, meta descriptions, internal linking. Surgical.',
-    bio:"Reads GSC data + Ahrefs signals, finds underperforming pages, proposes specific edits. Reasonable changes auto-execute via Forge (WP PATCH); risky ones land in Needs You.",
-    listens_to:['Quill','Gardener'], feeds_to:['Forge']},
-  {id:'sem', name:'Maverick', emoji:'🦊', color:'#dc2626',
-    callsign:'The Fox', role:'SEM (suggestions + auto-execute)', match:'SEM Manager', schedule:'Suggestions every 1 hr · Auto-execute every 2 hrs',
+    bio:"Reads GSC + Ahrefs signals, finds underperforming pages, proposes edits. Reasonable changes auto-execute via Beaver (WordPress PATCH); risky ones land in Needs You.",
+    listens_to:['Owl','Turtle'], feeds_to:['Beaver']},
+  {id:'sem', name:'Fox', emoji:'🦊', color:'#dc2626',
+    role:'SEM Manager', match:'SEM Manager', schedule:'Suggestions Every 1 Hr · Auto-Execute Every 2 Hrs',
     tagline:'Suggests Google Ads moves AND auto-mutates budgets (within ±25% / $100-day caps).',
-    bio:"Two modes: Analyst mode reads Google Ads every 1 hr and emails you suggested keyword/bid changes (no Google Ads write). Trader mode reads Google + Microsoft every 2 hrs and executes real budget changes within strict safety gates.",
-    listens_to:[], feeds_to:['You (suggestions)','Google Ads (mutations)','Forge']},
-  {id:'kai', name:'Scout', emoji:'🐕', color:'#be185d',
-    callsign:'The Hound', role:'Keyword Discovery', match:'Keyword Discovery', schedule:'Monthly · 6 AM',
+    bio:"Two modes. Analyst mode reads Google Ads every 1 hr and emails you suggested keyword/bid changes (no Google Ads write). Trader mode reads Google + Microsoft every 2 hrs and executes real budget changes within strict safety gates.",
+    listens_to:[], feeds_to:['You (suggestions)','Google Ads (mutations)','Beaver']},
+  {id:'kai', name:'Hound', emoji:'🐕', color:'#be185d',
+    role:'Keyword Discovery', match:'Keyword Discovery', schedule:'Monthly · 6 AM',
     tagline:'Hunts new keyword opportunities from search trends and competitor SERPs.',
-    bio:"Casts a wide net. Proposes new keywords for Maverick to consider testing. You'll see lists once a month — review and reject anything off-strategy.",
-    listens_to:['Periscope'], feeds_to:['Maverick']},
-  {id:'bran', name:'Weaver', emoji:'🕷️', color:'#7c3aed',
-    callsign:'The Spider', role:'Backlink Builder', match:'Backlink Builder', schedule:'M–F · 9 AM + 2 PM',
+    bio:"Casts a wide net. Proposes new keywords for Fox to consider testing. You'll see lists once a month — review and reject anything off-strategy.",
+    listens_to:['Cat'], feeds_to:['Fox']},
+  {id:'bran', name:'Spider', emoji:'🕷️', color:'#7c3aed',
+    role:'Backlink Builder', match:'Backlink Builder', schedule:'M–F · 9 AM + 2 PM',
     tagline:'Drafts personalized outreach emails to journalists, partners, gov procurement bodies.',
-    bio:"Finds high-DR sites in your target verticals, writes warm outreach drafts, and sends them via partnerships@liftnow.com after Self-QA approval. BCC's you on every send.",
-    listens_to:['Periscope','Sonar'], feeds_to:['Forge']},
-  {id:'reddit', name:'Sonar', emoji:'🦇', color:'#78716c',
-    callsign:'The Bat', role:'Reddit (listen + reply)', match:'Reddit', schedule:'Listening every 10 min · Replies every 2 hrs',
+    bio:"Finds high-DR sites in your target verticals, writes warm outreach drafts, sends them via partnerships@liftnow.com after Self-QA approval. BCCs you on every send.",
+    listens_to:['Cat','Bat'], feeds_to:['Beaver']},
+  {id:'reddit', name:'Bat', emoji:'🦇', color:'#78716c',
+    role:'Reddit Listener + Reply Drafter', match:'Reddit', schedule:'Listening Every 10 Min · Replies Every 2 Hrs',
     tagline:'Always-on Reddit monitor. Drafts helpful comments where Liftnow has something useful to add.',
     bio:"Every 10 min scans relevant subs for Liftnow / competitor / product mentions. Every 2 hrs picks promising threads and drafts a non-salesy reply in your voice. You approve before any post goes live.",
-    listens_to:[], feeds_to:['Weaver','Briefing','You (approval)']},
-  {id:'lin', name:'Beacon', emoji:'🦜', color:'#15803d',
-    callsign:'The Parrot', role:'LinkedIn Cadence', match:'LinkedIn Cadence', schedule:'M–F · 10 AM + 2 PM',
-    tagline:'Posts LinkedIn content. Founder-voice. Stays on brand pillars.',
-    bio:"Schedules LinkedIn posts derived from Quill's drafts plus standalone industry commentary. Posts on your personal feed via OAuth once you approve.",
-    listens_to:['Quill','Briefing'], feeds_to:['Forge']},
-  {id:'briefing', name:'Maestro', emoji:'🐘', color:'#1f2937',
-    callsign:'The Elephant', role:'Daily Briefing (triage + summary)', match:'Coordinator|Ticket Triage', schedule:'M–F · 9, 12, 3, 6 PM ET · Triage every 1 hr',
-    tagline:'Bundles the team’s output every hour, writes a Daily Briefing 4× a day.',
-    bio:"Sift the receptionist sorts every incoming ticket hourly; Maestro the producer turns it into a daily briefing 4 times a day. Surfaces what's queued, blocked, and worth your eyes today.",
+    listens_to:[], feeds_to:['Spider','Elephant','You (approval)']},
+  {id:'lin', name:'Parrot', emoji:'🦜', color:'#15803d',
+    role:'LinkedIn Cadence', match:'LinkedIn Cadence', schedule:'M–F · 10 AM + 2 PM',
+    tagline:'Posts LinkedIn content in founder voice. Stays on brand pillars.',
+    bio:"Schedules LinkedIn posts derived from Owl's drafts plus standalone industry commentary. Posts on your personal feed via OAuth once you approve.",
+    listens_to:['Owl','Elephant'], feeds_to:['Beaver']},
+  {id:'briefing', name:'Elephant', emoji:'🐘', color:'#1f2937',
+    role:'Daily Briefing + Triage', match:'Coordinator|Ticket Triage', schedule:'M–F · 9, 12, 3, 6 PM ET · Triage Every 1 Hr',
+    tagline:'Bundles the team’s output every hour and writes a Daily Briefing 4× a day.',
+    bio:"Sorts every incoming ticket hourly and turns it into a Daily Briefing 4 times a day. Surfaces what's queued, blocked, and worth your eyes today.",
     listens_to:['everyone'], feeds_to:['You (top of Today)']},
-  {id:'uma', name:'Lens', emoji:'🦅', color:'#0d9488',
-    callsign:'The Eagle', role:'UI/UX Performance', match:'UI/UX Performance', schedule:'Daily M–F · 8 AM',
+  {id:'uma', name:'Eagle', emoji:'🦅', color:'#0d9488',
+    role:'UI/UX Performance', match:'UI/UX Performance', schedule:'Daily M–F · 8 AM',
     tagline:'Audits liftnow.com pages for usability defects, accessibility, mobile bugs.',
     bio:"Sweeps the site, finds broken layouts and confusing copy, proposes specific fixes. Most fixes need your review since they're design judgement calls.",
-    listens_to:['Quill'], feeds_to:['You (approval)']},
-  {id:'dax', name:'Gardener', emoji:'🐢', color:'#16a34a',
-    callsign:'The Turtle', role:'Content Decay Detector', match:'Content Decay Detector', schedule:'Daily M–F · 8 AM',
+    listens_to:['Owl'], feeds_to:['You (approval)']},
+  {id:'dax', name:'Turtle', emoji:'🐢', color:'#16a34a',
+    role:'Content Decay Detector', match:'Content Decay Detector', schedule:'Daily M–F · 8 AM',
     tagline:'Finds old posts that have lost rankings. Suggests refreshes before they die.',
-    bio:"Tends the published archive. Tracks how each page is doing over time and flags declining ones so Quill can refresh them.",
-    listens_to:['Quill'], feeds_to:['Quill','Tweak']},
-  {id:'vex', name:'Periscope', emoji:'🐈', color:'#9333ea',
-    callsign:'The Cat', role:'Competitor SERP Monitor', match:'Competitor SERP Monitor', schedule:'Every 2 hrs',
+    bio:"Tends the published archive. Tracks how each page is doing over time and flags declining ones so Owl can refresh them.",
+    listens_to:['Owl'], feeds_to:['Owl','Bee']},
+  {id:'vex', name:'Cat', emoji:'🐈', color:'#9333ea',
+    role:'Competitor SERP Monitor', match:'Competitor SERP Monitor', schedule:'Every 2 Hrs',
     tagline:'Watches what competitors are publishing and where they rank. Terse, factual.',
     bio:"Tracks 8 competitor domains across your priority keywords and notes anything new or rising. Doesn't draft responses — just intel.",
-    listens_to:[], feeds_to:['Scout','Weaver','Briefing']},
-  {id:'theo', name:'Oracle', emoji:'🐉', color:'#be185d',
-    callsign:'The Dragon', role:'Team Manager', match:'Team Manager', schedule:'Sun · 10 PM ET',
-    tagline:'Weekly review. Reads your feedback to each agent. Proposes team improvements.',
-    bio:"Once a week reviews the team's tickets, your comments on each agent, and proposes changes — better prompts, new agents, retired ones. Weekly report goes to your Inbox.",
+    listens_to:[], feeds_to:['Hound','Spider','Elephant']},
+  {id:'theo', name:'Dragon', emoji:'🐉', color:'#be185d',
+    role:'Team Manager', match:'Team Manager', schedule:'Sun · 10 PM ET',
+    tagline:'Weekly review. Reads your feedback to each agent. Drafts proposed changes — you apply them.',
+    bio:"Once a week reviews the team's tickets, your comments on each agent, and DRAFTS proposed changes — better prompts, new agents, retired ones. Drops a weekly report in your Inbox. You decide what to apply.",
     listens_to:['everyone','you'], feeds_to:['You (weekly report)']}
 ];
 
-// System layer (3 personas)
+// System layer
 const SYSTEM_PERSONAS = [
-  {id:'sentinel', name:'Sentinel', emoji:'🐺', color:'#dc2626',
-    callsign:'The Wolf', role:'Failure Alerts', match:'Agent Failed', schedule:'Every agent failure (auto-escalate 3x in 1 hr)',
-    tagline:'Catches when agents crash. Escalates same-error 3x/hr to Needs You.',
+  {id:'sentinel', name:'Wolf', emoji:'🐺', color:'#dc2626',
+    role:'Failure Alerts', match:'Agent Failed', schedule:'On Every Agent Failure',
+    tagline:'Catches when agents crash. Escalates same-error 3×/hr to Needs You.',
     bio:"When any agent throws, logs a failure ticket. Most go to Inbox quietly. If the same error fires 3+ times within an hour, escalates one ticket to Needs You so it can't hide.",
     listens_to:['everyone'], feeds_to:['Inbox','Needs You (on repeat)']},
-  {id:'forge', name:'Forge', emoji:'🦫', color:'#52525b',
-    callsign:'The Beaver', role:'Approval Executor', match:'Approval Executor', schedule:'Every 5 min',
+  {id:'forge', name:'Beaver', emoji:'🦫', color:'#52525b',
+    role:'Approval Executor', match:'Approval Executor', schedule:'Every 5 Min',
     tagline:'The hands. Executes your approved tickets (WP publish, LinkedIn post, send email).',
     bio:"Every 5 minutes sweeps for tickets you've approved (stage 2), routes them by type, performs the real action, then marks them Done with a receipt.",
     listens_to:['You (approvals)'], feeds_to:['WordPress','LinkedIn','SMTP']},
-  {id:'iris', name:'Ledger', emoji:'🐿️', color:'#a16207',
-    callsign:'The Squirrel', role:'Daily ROI Tracker', match:'Daily ROI', schedule:'Every 1 hr',
+  {id:'iris', name:'Squirrel', emoji:'🐿️', color:'#a16207',
+    role:'Daily ROI Tracker', match:'Daily ROI', schedule:'Every 1 Hr',
     tagline:'Records daily spend/conversions. Powers the Today chart.',
     bio:"Records the numbers each hour from Google Ads + Microsoft Ads daily-budget snapshot so the Today chart has fresh data.",
     listens_to:[], feeds_to:['Today chart']}
@@ -1599,7 +1685,7 @@ async function renderTeam(){
         ${avatarHtml(p)}
         <div>
           <div class="persona-name">${p.name}</div>
-          <div class="persona-role">${p.callsign || ''} · ${p.role}</div>
+          <div class="persona-role">${p.role}</div>
         </div>
       </div>
       <div class="persona-tagline">${p.tagline}</div>
@@ -1615,13 +1701,13 @@ async function renderTeam(){
   }
 
   let html = '<h2 style="margin-top:0">Your Marketing Team</h2>';
-  html += '<div class="meta" style="margin-bottom:14px">Click any agent to see their profile, recent activity, and leave them a note. Oracle reads all notes every Sunday night and adjusts the team accordingly.</div>';
+  html += '<div class="meta" style="margin-bottom:14px">Click any animal to see their profile, recent work, and leave them a note. Notes are saved instantly. Dragon (🐉) reads all notes every Sunday night and drafts proposed instruction updates for your review — they don\'t auto-apply.</div>';
   html += '<div class="team-grid">';
   for (const p of PERSONAS) html += personaCardHtml(p);
   html += '</div>';
 
-  html += '<h2 style="margin-top:28px">System layer</h2>';
-  html += '<div class="meta" style="margin-bottom:14px">Plumbing — these run quietly in the background. Sentinel catches crashes, Forge executes your approvals, Ledger powers the chart.</div>';
+  html += '<h2 style="margin-top:28px">System Layer</h2>';
+  html += '<div class="meta" style="margin-bottom:14px">Plumbing — runs quietly in the background. Wolf catches crashes, Beaver executes your approvals, Squirrel powers the chart.</div>';
   html += '<div class="team-grid">';
   for (const p of SYSTEM_PERSONAS) html += personaCardHtml(p);
   html += '</div>';
@@ -1641,36 +1727,36 @@ async function openPersona(pid){
   content.innerHTML = `<div class="pmodal-head">
     ${avatarHtml(p)}
     <div class="pmodal-title">
-      <h2>${p.name} <span style="color:var(--muted);font-weight:400;font-size:14px">— ${p.callsign || ''}</span></h2>
+      <h2>${p.name}</h2>
       <div class="role">${p.role} · ${p.schedule}</div>
     </div>
     <button class="pmodal-close" onclick="closePersona()">×</button>
   </div>
   <div class="pmodal-body">
     <div class="pmodal-section">
-      <h3>What ${p.name} does</h3>
+      <h3>What ${p.name} Does</h3>
       <p>${p.bio}</p>
     </div>
     <div class="pmodal-section">
-      <h3>Listens to</h3>
-      <div class="interact-list">${p.listens_to.length ? p.listens_to.map(n => `<span class="interact-chip"><span class="arr">←</span>${n}</span>`).join('') : '<span class="meta">(self-directed)</span>'}</div>
+      <h3>Listens To</h3>
+      <div class="interact-list">${p.listens_to.length ? p.listens_to.map(n => `<span class="interact-chip"><span class="arr">←</span>${n}</span>`).join('') : '<span class="meta">(Self-Directed)</span>'}</div>
     </div>
     <div class="pmodal-section">
-      <h3>Feeds work to</h3>
-      <div class="interact-list">${p.feeds_to.length ? p.feeds_to.map(n => `<span class="interact-chip"><span class="arr">→</span>${n}</span>`).join('') : '<span class="meta">(terminal)</span>'}</div>
+      <h3>Feeds Work To</h3>
+      <div class="interact-list">${p.feeds_to.length ? p.feeds_to.map(n => `<span class="interact-chip"><span class="arr">→</span>${n}</span>`).join('') : '<span class="meta">(Terminal)</span>'}</div>
     </div>
     <div class="pmodal-section">
-      <h3>Recent activity</h3>
+      <h3>Recent Activity</h3>
       <div id="pmodal-activity" class="activity-feed"><div class="activity-empty">Loading…</div></div>
     </div>
     <div class="pmodal-section">
-      <h3>Tell ${p.name} what to do differently</h3>
+      <h3>Tell ${p.name} What To Do Differently</h3>
       <div id="pmodal-feedback-list" class="feedback-list"><div class="feedback-empty">Loading…</div></div>
       <div class="feedback-form">
         <textarea id="pmodal-comment" placeholder="e.g. 'Stop using buzzwords.' / 'Be more aggressive on AG4 budget.' / 'Skip Reddit comments on r/marketing.'"></textarea>
         <div class="feedback-form-row">
-          <span class="hint">Saved instantly. Oracle reviews every Sunday night and updates ${p.name}'s instructions.</span>
-          <button class="btn primary" onclick="submitPersonaComment('${p.id}', '${p.name}')">Save note for ${p.name}</button>
+          <span class="hint" style="line-height:1.4"><b>Honest about what this does:</b> Your note is saved instantly. Sunday 10 PM, 🐉 Dragon reads ALL notes across the team and DRAFTS proposed instruction changes into your Inbox. You must manually approve each one — nothing is hot-reloaded into ${p.name}'s "brain" automatically. This is intentional, for safety.</span>
+          <button class="btn primary" onclick="submitPersonaComment('${p.id}', '${p.name}')">Save Note For ${p.name}</button>
         </div>
       </div>
     </div>
@@ -1829,7 +1915,7 @@ async function submitPersonaComment(pid, pname){
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const j = await r.json();
     ta.value = '';
-    toast(`✓ Saved. ${pname} will pick this up on the next run. Oracle will incorporate it into ${pname}'s instructions this Sunday.`, 'ok');
+    toast(`✓ Note saved for ${pname}. Dragon will turn it into a proposed instruction change this Sunday (10 PM ET). You'll see the draft in your Inbox — apply or skip then.`, 'ok');
     loadPersonaFeedback(pid);
     cachedFeedbackCounts = null; // force refresh next time grid loads
   } catch (e) {
