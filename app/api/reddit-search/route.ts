@@ -1,53 +1,88 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Reddit search proxy.
+ * Reddit search — Plan B (Brave Search API with site:reddit.com filter).
  *
- * Reddit returns 403 + HTML when called from many VPS hosting providers
- * (including the one running our self-hosted n8n at agents.liftnowdirect.com)
- * regardless of User-Agent. Vercel's IP pool is not on Reddit's blocklist,
- * so we route Reddit calls through here.
+ * Original plan: direct Reddit JSON API. But Reddit blocks every cloud IP
+ * (n8n's Hetzner + Vercel both 403'd) for unauthenticated calls, and the
+ * Reddit dev portal app-creation page silently fails for Paul.
  *
- * Two modes:
- *   POST { q: string, sort?: "new"|"hot"|"top"|"relevance", t?: "hour"|"day"|"week"|"month"|"year"|"all", limit?: number }
- *   POST { queries: string[], ... }  // fetch multiple queries in one request
+ * Plan B routes through Brave Search Web API (free tier, no Reddit account
+ * needed) with `site:reddit.com` filter, returning the same shape so
+ * downstream n8n parsers work unchanged.
  *
- * Response: { ok: true, results: [{ q, data: { children: [...] } }, ...] }
+ * Env: BRAVE_SEARCH_API_KEY  (free key at https://api.search.brave.com/)
+ *
+ * POST { q: string, sort?, t?, limit? }  OR  { queries: string[], ... }
+ * Response: { ok: true, results: [{ q, ok, data: { children: [{data:{...}}] } }] }
+ *
+ * If BRAVE_SEARCH_API_KEY isn't set, returns a clear error so the upstream
+ * n8n HTML-guard surfaces it instead of silently failing.
  */
 export const maxDuration = 60;
 
-const REDDIT_UA = "liftnow-marketing-bot/1.0 (contact: paulj@liftnow.com)";
+const BRAVE_API_KEY = process.env.BRAVE_SEARCH_API_KEY || "";
 
-async function searchOne(q: string, sort: string, t: string, limit: number) {
-  const url = new URL("https://www.reddit.com/search.json");
-  url.searchParams.set("q", q);
-  url.searchParams.set("sort", sort);
-  url.searchParams.set("t", t);
-  url.searchParams.set("limit", String(limit));
-  url.searchParams.set("raw_json", "1");
-
-  const res = await fetch(url.toString(), {
-    headers: {
-      "User-Agent": REDDIT_UA,
-      Accept: "application/json",
-    },
-    // Vercel edge fetch — keep simple
-    cache: "no-store",
-  });
-
-  const ctype = res.headers.get("content-type") || "";
-  if (!res.ok || !ctype.includes("application/json")) {
-    const sample = (await res.text()).slice(0, 200);
+async function braveSearchReddit(q: string, limit: number) {
+  if (!BRAVE_API_KEY) {
     return {
       q,
       ok: false,
-      status: res.status,
-      content_type: ctype,
-      sample,
+      status: 500,
+      content_type: "application/json",
+      sample: "BRAVE_SEARCH_API_KEY not configured on Vercel — add it in Vercel env vars",
     };
   }
+  const url = new URL("https://api.search.brave.com/res/v1/web/search");
+  url.searchParams.set("q", `site:reddit.com ${q}`);
+  url.searchParams.set("count", String(Math.min(limit, 20)));
+  url.searchParams.set("safesearch", "moderate");
+  url.searchParams.set("freshness", "pw"); // past week
+
+  const res = await fetch(url.toString(), {
+    headers: {
+      "X-Subscription-Token": BRAVE_API_KEY,
+      Accept: "application/json",
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    const sample = (await res.text()).slice(0, 200);
+    return { q, ok: false, status: res.status, content_type: res.headers.get("content-type") || "", sample };
+  }
+
   const json = await res.json();
-  return { q, ok: true, data: json.data || {} };
+  const webResults = (json.web && json.web.results) || [];
+
+  // Reshape into Reddit-API-compatible structure so n8n parsers don't need changes.
+  // Each Brave result becomes a `children` entry with data.{permalink, title, ...}.
+  const children = webResults
+    .filter((r: any) => r.url && r.url.includes("reddit.com/r/"))
+    .map((r: any) => {
+      // r.url looks like https://www.reddit.com/r/SchoolBus/comments/abc123/title-slug/
+      const m = r.url.match(/reddit\.com\/r\/([^/]+)\/comments\/([^/]+)/);
+      const subreddit = m ? m[1] : "";
+      const permalink = r.url.replace(/^https?:\/\/(?:www\.|old\.)?reddit\.com/, "");
+      return {
+        kind: "t3",
+        data: {
+          permalink,
+          subreddit,
+          title: r.title || "",
+          selftext: (r.description || "").slice(0, 500),
+          author: "(via brave-search)",
+          score: 0,
+          num_comments: 0,
+          created_utc: r.page_age ? Math.floor(new Date(r.page_age).getTime() / 1000) : Math.floor(Date.now() / 1000) - 86400 * 3,
+          is_self: true,
+          over_18: false,
+          url: r.url,
+        },
+      };
+    });
+
+  return { q, ok: true, data: { children } };
 }
 
 export async function POST(req: NextRequest) {
@@ -58,17 +93,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "invalid JSON body" }, { status: 400 });
   }
 
-  const sort = String(body.sort || "new");
-  const t = String(body.t || "week");
-  const limit = Math.min(Number(body.limit) || 15, 100);
+  const limit = Math.min(Number(body.limit) || 15, 20);
 
-  // Single query mode
   if (typeof body.q === "string") {
-    const r = await searchOne(body.q, sort, t, limit);
+    const r = await braveSearchReddit(body.q, limit);
     return NextResponse.json({ ok: true, results: [r] });
   }
 
-  // Multi-query mode
   const queries = Array.isArray(body.queries) ? body.queries : null;
   if (!queries || queries.length === 0) {
     return NextResponse.json(
@@ -77,13 +108,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Fetch sequentially with small delay to avoid hitting Reddit's per-IP rate limit
+  // Brave free tier allows ~1 qps. Sequence with small gap.
   const results: any[] = [];
   for (const q of queries) {
     if (typeof q !== "string" || !q.trim()) continue;
-    const r = await searchOne(q.trim(), sort, t, limit);
+    const r = await braveSearchReddit(q.trim(), limit);
     results.push(r);
-    // gentle delay (Reddit allows 60 req/min for anon)
     await new Promise((res) => setTimeout(res, 1100));
   }
 
@@ -93,6 +123,8 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     ok: true,
-    usage: 'POST { q: string OR queries: string[], sort?, t?, limit? }',
+    provider: "brave-search",
+    note: "POST { q: string } OR { queries: string[] }. Set BRAVE_SEARCH_API_KEY in Vercel env to enable.",
+    key_configured: BRAVE_API_KEY ? true : false,
   });
 }
