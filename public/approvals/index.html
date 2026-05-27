@@ -1220,8 +1220,10 @@ async function renderToday(){
         <li><b>No conversion attribution from agent actions to revenue.</b> The dashboard shows Google + Microsoft ad spend and conversions, but no link from "Owl drafted X" or "Spider sent outreach Y" → "we closed deal Z". Needs CRM integration.</li>
         <li><b>🐿️ Squirrel's chart is hourly snapshot, not real-time.</b> Refresh the page to pull a new ROI snapshot. The chart doesn't push updates.</li>
         <li><b>🐺 Wolf now ATTEMPTS auto-retry on transient errors</b> (timeouts, 503s, connection-aborted). Wolf waits 30 sec, re-fires the failed workflow once, and updates the failure ticket with the retry outcome. <i>Wolf does NOT retry persistent bugs</i> (syntax errors, auth failures) — those need you. Max one auto-retry per workflow per hour to prevent retry storms.</li>
-        <li><b>🦇 Bat fires every 10 min but produces zero tickets in current data.</b> Either Liftnow has no Reddit mentions in the watched subs, OR the keyword filter is too narrow. Needs a manual sanity-check on r/Trucks, r/diesel, r/govcon, r/sweatystartup for actual mentions.</li>
-        <li><b>🐝 Bee fires hourly but produces zero tickets.</b> Per the upgraded heartbeat aggregator, you'll now see whether Bee actually scanned + found nothing (legitimate no-op) vs ran but skipped due to Decision Memory rejections — instead of a blanket "audited" lie.</li>
+        <li><b>🦇 Bat is PAUSED.</b> Today's audit found that Reddit blocks every cloud/serverless IP (n8n's host AND Vercel proxy) for unauthenticated calls regardless of User-Agent. Both Bat workflows are deactivated in n8n until Paul registers a Reddit OAuth app — no more silently-failed "no new mentions" heartbeats.</li>
+        <li><b>🐝 Bee runs but currently has nothing to flag.</b> Pillar pages were published 16–32 days ago. Bee's SEO diagnostics need 60+ days of GSC data per page to fire (TITLE_META_FIX needs &gt;50 impressions, ONPAGE_SURGERY needs &gt;60 days, CONTENT_EXPANSION needs &gt;90 days). Bee will start producing candidates as content ages. Honest no-op — not a bug.</li>
+        <li><b>🐈 Cat needs two consecutive daily runs to detect SERP movements.</b> The IF-gate bug that was silently filtering everything was fixed today — Cat now runs to completion. First real movement detection happens once it has yesterday's snapshot to compare against today's.</li>
+        <li><b>5 silent-failure IF gates fixed today (May 27).</b> Across Bat-Listen, Bat-Reply, Cat, and Asset Review Gate, four IF nodes were reading JSON properties (<code>$json.new</code>, <code>$json.alerts</code>, etc.) that the upstream code never emitted — they always evaluated false even when real work was found. Every gate was rewritten to read what the upstream actually produces and verified by re-firing the agents.</li>
       </ul>
     </div>
   </section>`;
@@ -1511,9 +1513,11 @@ const PERSONAS = [
     bio:"Finds high-DR sites in your target verticals, writes warm outreach drafts, sends them via partnerships@liftnow.com after Self-QA approval. BCCs you on every send.",
     listens_to:['Cat','Bat'], feeds_to:['Beaver']},
   {id:'reddit', name:'Bat', emoji:'🦇', color:'#78716c',
-    role:'Reddit Listener + Reply Drafter', match:'Reddit', schedule:'Listening Every 10 Min · Replies Every 2 Hrs',
-    tagline:'Always-on Reddit monitor. Drafts helpful comments where Liftnow has something useful to add.',
-    bio:"Every 10 min scans relevant subs for Liftnow / competitor / product mentions. Every 2 hrs picks promising threads and drafts a non-salesy reply in your voice. You approve before any post goes live.",
+    role:'Reddit Listener + Reply Drafter', match:'Reddit', schedule:'PAUSED — awaiting Reddit OAuth credential',
+    status:'paused',
+    pauseReason:'Reddit blocks all our hosting IPs (n8n + Vercel) for unauthenticated calls regardless of User-Agent. Needs a registered Reddit OAuth app and an n8n credential — Paul is setting this up. Both Bat workflows are deactivated in n8n so no more fake "no new mentions" heartbeats.',
+    tagline:'PAUSED — Reddit blocks our IPs. Needs OAuth app registered before this agent can actually run.',
+    bio:"Once Reddit OAuth is wired, every 10 min scans relevant subs for Liftnow/competitor/product mentions, and every 2 hrs picks promising threads to draft non-salesy replies. Until then this is honestly paused — no fake activity.",
     listens_to:[], feeds_to:['Spider','Elephant','You (approval)']},
   {id:'lin', name:'Parrot', emoji:'🦜', color:'#15803d',
     role:'LinkedIn Cadence', match:'LinkedIn Cadence', schedule:'M–F · 10 AM + 2 PM',
@@ -1682,23 +1686,32 @@ async function renderTeam(){
   function personaCardHtml(p) {
     const last = lastByPersona[p.id];
     const lastAt = last ? last.when_iso : null;
-    const status = statusForLastSeen(lastAt);
+    const isPaused = p.status === 'paused';
+    const status = isPaused
+      ? { cls: 'idle', label: 'Paused' }
+      : statusForLastSeen(lastAt);
     const fbCount = fbCounts[p.id] || 0;
     const fireCount = fireCountsByPersona[p.id] || 0;
-    const summary = !last ? 'no activity yet'
+    const summary = isPaused
+      ? '🛑 deactivated in n8n — no fake heartbeats'
+      : !last ? 'no activity yet'
       : last.type === 'fire'
         ? `${last.outcome === 'error' ? '⚠️' : last.outcome === 'action_taken' ? '✓' : '○'} ${(last.summary || '').slice(0, 50)}`
         : `📋 ${(last.subject || '').slice(0, 50)}`;
-    return `<div class="persona" onclick="openPersona('${p.id}')">
+    const pauseBanner = isPaused
+      ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.18);border-radius:6px;font-size:11px;color:#991b1b;line-height:1.4"><b>PAUSED.</b> ${p.pauseReason || 'See agent profile.'}</div>`
+      : '';
+    return `<div class="persona ${isPaused ? 'persona-paused' : ''}" onclick="openPersona('${p.id}')" style="${isPaused ? 'opacity:.78' : ''}">
       <div class="persona-head">
         ${avatarHtml(p)}
         <div>
-          <div class="persona-name">${p.name}</div>
+          <div class="persona-name">${p.name}${isPaused ? ' <span style="font-size:11px;color:#991b1b;font-weight:600">· PAUSED</span>' : ''}</div>
           <div class="persona-role">${p.role}</div>
         </div>
       </div>
       <div class="persona-tagline">${p.tagline}</div>
-      <div class="persona-status"><span class="status-dot ${status.cls}"></span><span>${status.label} · ${relativeAge(lastAt)} · ${summary}</span></div>
+      <div class="persona-status"><span class="status-dot ${status.cls}"></span><span>${status.label}${isPaused ? '' : ' · ' + relativeAge(lastAt)} · ${summary}</span></div>
+      ${pauseBanner}
       <div class="persona-foot">
         <span class="schedule">${p.schedule}</span>
         <span style="display:flex;gap:6px">
