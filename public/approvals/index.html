@@ -1066,8 +1066,76 @@ async function renderToday(){
       <button class="btn" onclick="switchTab('${escalatedNow.length > 0 ? 'pending' : 'inbox'}')">Open</button>
     </section>`;
 
+  // === Box score: last 24h numbers in plain English ===
+  const last24Ms = Date.now() - 24*3600*1000;
+  const last24Tickets = (doneData.tickets || []).filter(t => t.createdAt && new Date(t.createdAt).getTime() >= last24Ms);
+  const mutationsLast24 = last24Tickets.filter(t => /\[done\] sem auto/i.test(t.subject||'')).length;
+  const draftsLast24 = last24Tickets.filter(t => /Content Producer|Anchor|Content Draft/i.test(t.subject + ' ' + (t.recommendationType||''))).length;
+  const outreachLast24 = last24Tickets.filter(t => /\[DRAFT FOR YOUR REVIEW\]|Backlink Outreach/i.test(t.subject||'')).length;
+  const failuresLast24 = last24Tickets.filter(t => /Agent Failed|Failure/i.test(t.subject||'')).length;
+  // Yesterday's spend from ROI daily
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1); yesterday.setHours(0,0,0,0);
+  const yDay = yesterday.toISOString().slice(0,10);
+  const yEntry = (roi && roi.daily || []).find(d => d.date === yDay);
+  const ySpend = yEntry ? yEntry.spend : 0;
+  const yGoogle = yEntry?.by_source?.google_ads?.spend || 0;
+  const yMs = yEntry?.by_source?.microsoft_ads?.spend || 0;
+
+  const boxScoreHtml = `<section class="panel" style="background:linear-gradient(135deg,#fafbfc 0%,#f6f8fa 100%);border-left:4px solid var(--accent)">
+    <div class="panel-head" style="margin-bottom:8px"><h3 class="panel-title">Yesterday's box score · ${yesterday.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</h3></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;font-size:13px;line-height:1.5">
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ad spend</div><div style="font-size:18px;font-weight:700">$${ySpend.toFixed(2)}</div><div style="color:var(--muted);font-size:11px">Google $${yGoogle.toFixed(2)} · MS $${yMs.toFixed(2)}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ad changes (Maverick)</div><div style="font-size:18px;font-weight:700">${mutationsLast24}</div><div style="color:var(--muted);font-size:11px">${mutationsLast24===0?'no auto-budget changes':'real Google Ads writes'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Content drafted</div><div style="font-size:18px;font-weight:700">${draftsLast24}</div><div style="color:var(--muted);font-size:11px">${draftsLast24===0?'no new drafts':'piece(s) in your queue'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Outreach drafted</div><div style="font-size:18px;font-weight:700">${outreachLast24}</div><div style="color:var(--muted);font-size:11px">${outreachLast24===0?'no new outreach':'email(s) awaiting approval'}</div></div>
+      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Team health</div><div style="font-size:18px;font-weight:700;color:${failuresLast24===0?'var(--ok)':'var(--warn)'}">${failuresLast24===0?'✓ All good':failuresLast24+' fail'+(failuresLast24===1?'':'s')}</div><div style="color:var(--muted);font-size:11px">${failuresLast24===0?'no agent crashes':'see Inbox'}</div></div>
+    </div>
+  </section>`;
+
+  // === Quiet zones: agents that haven't fired in last 24h (sleeping per their schedule) ===
+  const lastFireByAgentId = {};
+  for (const h of heartbeats) {
+    const t = new Date(h.at).getTime();
+    if (!lastFireByAgentId[h.agentId] || t > lastFireByAgentId[h.agentId]) lastFireByAgentId[h.agentId] = t;
+  }
+  const PERSONA_BY_AGENT_ID = {
+    carla:'Quill 🦉', sam:'Tweak 🐝', max:'Tally 🦊', riley:'Maverick 🦊',
+    kai:'Scout 🐕', bran:'Weaver 🕷️', reed:'Whisper 🦇', nox:'Sonar 🦇',
+    lin:'Beacon 🦜', eve:'Maestro 🐘', pip:'Sift 🐘',
+    uma:'Lens 🦅', dax:'Gardener 🐢', vex:'Periscope 🐈',
+    theo:'Oracle 🐉', iris:'Ledger 🐿️', sentinel:'Sentinel 🐺', forge:'Forge 🦫'
+  };
+  const SCHEDULE_BY_AGENT_ID = {
+    kai:'Monthly (1st of month, 6 AM)',
+    theo:'Weekly (Sunday 10 PM)',
+    uma:'Daily M–F 8 AM',
+    dax:'Daily M–F 8 AM',
+    carla:'M–F 9 AM, 1 PM, 5 PM',
+    bran:'M–F 9 AM + 2 PM',
+    lin:'M–F 10 AM + 2 PM',
+    eve:'M–F 9, 12, 3, 6 PM'
+  };
+  const quietAgents = [];
+  for (const aid of Object.keys(PERSONA_BY_AGENT_ID)) {
+    const last = lastFireByAgentId[aid];
+    if (!last || (Date.now() - last) > 24*3600*1000) {
+      quietAgents.push({ id: aid, name: PERSONA_BY_AGENT_ID[aid], schedule: SCHEDULE_BY_AGENT_ID[aid] || 'see Team tab', lastMs: last });
+    }
+  }
+  const quietHtml = quietAgents.length === 0 ? '' : `<section class="panel" style="background:#fafbfc">
+    <div class="panel-head" style="margin-bottom:8px"><h3 class="panel-title">Quiet zones · agents not firing right now</h3><div class="panel-sub">By design — these have specific schedules. Click any to see when they next fire.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+      ${quietAgents.map(q => `<div style="padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer" onclick="switchTab('team')">
+        <div style="font-weight:600">${q.name}</div>
+        <div style="color:var(--muted);font-size:11px;margin-top:2px">${q.schedule}</div>
+        <div style="color:var(--muted);font-size:11px;margin-top:2px">Last fired: ${q.lastMs?relativeAge(new Date(q.lastMs).toISOString()):'never'}</div>
+      </div>`).join('')}
+    </div>
+  </section>`;
+
   main.innerHTML = `
     ${failureBannerHtml}
+    ${boxScoreHtml}
 
     <section class="hero-do">
       <h2>Do these today</h2>
@@ -1128,6 +1196,8 @@ async function renderToday(){
       </div>
       <div class="recent-feed">${activityHtml}</div>
     </section>
+
+    ${quietHtml}
 
     <section class="health-strip">
       <span class="dot ok"></span>
@@ -1621,6 +1691,55 @@ async function loadPersonaActivity(p){
       fetch(`${API_BASE}/agent-heartbeat?action=read&limit=100`).then(r => r.ok ? r.json() : null).catch(()=>null)
     ]);
 
+    // Extract a concrete preview from a ticket
+    function extractPreview(t){
+      const subj = t.subject || '';
+      const notes = t.outcomeNotes || '';
+      const content = t.content || '';
+      let recDetail = {};
+      try { recDetail = JSON.parse(t.recommendationDetail || '{}'); } catch(e) {}
+
+      // Maverick budget change
+      if (/\[done\] sem auto/i.test(subj)) {
+        const m = subj.match(/\$([\d.]+)[→\-\>]+\$([\d.]+)/);
+        if (m) return `Changed campaign budget from $${m[1]}/day to $${m[2]}/day (real Google Ads write). Reason: ${(recDetail.reasoning||'').slice(0,180)}`;
+        return content.slice(0, 200);
+      }
+      // Tally suggestion
+      if (/\[suggestion\] sem/i.test(subj)) {
+        return `Emailed Paul a suggestion (no Google Ads change). Action: ${recDetail.action||'?'} on "${recDetail.keyword||'?'}" in ${recDetail.ag||'?'}. Reason: ${(recDetail.rationale||'').slice(0,150)}`;
+      }
+      // Content Producer draft
+      if (/Content Producer|Content Draft|Anchor/i.test(subj + ' ' + (t.recommendationType||''))) {
+        const title = recDetail.pick?.title || subj.replace(/^\[[^\]]+\]\s*/,'').slice(0,80);
+        const wordCount = recDetail.word_count || recDetail.draft_word_count;
+        const preview = (recDetail.draft_preview || recDetail.draft_excerpt || content || '').slice(0, 240);
+        return `Drafted: "${title}"${wordCount ? ` (${wordCount} words)` : ''}\n\n${preview}…`;
+      }
+      // Backlink outreach
+      if (/\[DRAFT FOR YOUR REVIEW\]|Backlink/i.test(subj)) {
+        const domain = recDetail.target_domain || '?';
+        const subjLine = recDetail.subject_line || '?';
+        const body = (recDetail.draft_email || '').slice(0, 200);
+        return `Outreach to ${domain}\nSubject: ${subjLine}\n\n${body}…`;
+      }
+      // Briefing
+      if (/\[BRIEFING\]|\[COORDINATOR\]/i.test(subj)) {
+        return (content || recDetail.summary || '').slice(0, 280);
+      }
+      // LinkedIn
+      if (/LinkedIn/i.test(subj + ' ' + (t.recommendationType||''))) {
+        const v = recDetail.variants?.[0] || recDetail.draft || '';
+        return v ? `Drafted LinkedIn post:\n\n"${v.slice(0,240)}…"` : content.slice(0,200);
+      }
+      // Reddit/Community
+      if (/Community Engagement|Reddit/i.test(subj + ' ' + (t.agent||''))) {
+        return recDetail.draft_comment ? `Drafted reply for r/${recDetail.subreddit||'?'}:\n\n"${recDetail.draft_comment.slice(0,200)}…"` : content.slice(0,200);
+      }
+      // Default
+      return content.slice(0, 200) || notes.slice(0, 200);
+    }
+
     // Tickets matching this persona
     const tickets = (doneData.tickets || [])
       .filter(t => matchTicket(p, t))
@@ -1629,6 +1748,7 @@ async function loadPersonaActivity(p){
         when: new Date(t.createdAt).getTime(),
         when_iso: t.createdAt,
         label: (t.subject || '').slice(0, 110),
+        preview: extractPreview(t),
         sub: (t.outcomeNotes || '').slice(0, 80),
         outcome: /Failed|ERROR/i.test(t.subject||'') ? 'error' : /\[done\]|AUTO_EXECUTED/i.test(t.subject || t.outcomeNotes || '') ? 'action' : 'info',
         link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
@@ -1661,10 +1781,14 @@ async function loadPersonaActivity(p){
       const dot = item.outcome === 'error' ? '🔴' : item.outcome === 'action' ? '✅' : item.outcome === 'noop' ? '○' : 'ℹ️';
       const linkOpen = item.link ? `<a href="${item.link}" target="_blank" style="text-decoration:none;color:inherit">` : '';
       const linkClose = item.link ? '</a>' : '';
+      const previewHtml = item.preview && item.kind === 'ticket'
+        ? `<div style="margin-top:6px;padding:8px 10px;background:#f6f8fa;border-left:3px solid var(--accent);border-radius:4px;font-size:12px;color:var(--fg);white-space:pre-wrap;line-height:1.45">${escapeHtml(item.preview)}</div>`
+        : '';
       return `<div class="activity-item">
         ${linkOpen}<span class="when">${dot} ${relativeAge(item.when_iso)}</span>
         ${escapeHtml(item.label)}
         ${item.sub ? '<div style="color:var(--muted);font-size:11px;margin-top:2px">'+escapeHtml(item.sub)+'</div>' : ''}
+        ${previewHtml}
         ${linkClose}
       </div>`;
     }).join('');
