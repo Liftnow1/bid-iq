@@ -1196,10 +1196,56 @@ async function renderToday(){
   };
   const levelIcon = {warn:'⚠️', caution:'⚠', good:'✅', info:'·'};
 
+  // === Trust scoreboard rows — same data, richer per-agent metrics ===
+  const trustRows = honestyRows.map(r => {
+    const rate = r.fires > 0 ? Math.round((r.tickets / r.fires) * 1000) / 10 : null;
+    // Health score: green if rate>2%, yellow if 0<rate<=2%, red if rate=0 with fires>15, grey if dormant
+    let health;
+    if (r.fires === 0) health = 'dormant';
+    else if (r.tickets === 0 && r.fires > 15) health = 'red';
+    else if (rate !== null && rate < 2) health = 'yellow';
+    else health = 'green';
+    // HubSpot filtered link by agent_name (rough but useful)
+    const hsLink = `https://app.hubspot.com/contacts/24043196/objects/0-5/views/all/list?query=${encodeURIComponent(r.agent_name)}`;
+    return {...r, rate, health, hsLink};
+  });
+  // Sort by health: red > yellow > green > dormant
+  const healthOrder = {red:0, yellow:1, green:2, dormant:3};
+  trustRows.sort((a,b) => (healthOrder[a.health]||4) - (healthOrder[b.health]||4));
+
+  const healthBg = { red:'#fff5f5', yellow:'#fffaf0', green:'#f0fff4', dormant:'#fafbfc' };
+  const healthBorder = { red:'#dc2626', yellow:'#d97706', green:'#16a34a', dormant:'#9ca3af' };
+  const healthLabel = { red:'NEEDS LOOK', yellow:'LOW YIELD', green:'PRODUCING', dormant:'DORMANT' };
+
+  const trustHtml = `<section class="panel" style="border-left:4px solid #16a34a;margin-bottom:20px">
+    <div class="panel-head" style="margin-bottom:10px">
+      <h3 class="panel-title">Trust Scoreboard · Fires vs Real Artifacts (24h)</h3>
+      <div class="panel-sub">For each agent: how many times it fired vs how many HubSpot tickets actually got created. Click any row to see that agent's tickets in HubSpot directly.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;font-size:13px">
+      ${trustRows.map(r => `<a href="${r.hsLink}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
+        <div style="padding:10px 12px;background:${healthBg[r.health]};border-left:3px solid ${healthBorder[r.health]};border-radius:6px;cursor:pointer;transition:transform .12s ease" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <div style="font-weight:600;font-size:13px">${r.animal}</div>
+            <div style="font-size:10px;font-weight:700;color:${healthBorder[r.health]};letter-spacing:.5px">${healthLabel[r.health]}</div>
+          </div>
+          <div style="margin-top:6px;display:flex;gap:14px;font-variant-numeric:tabular-nums">
+            <div style="font-size:11px;color:var(--muted)"><span style="font-size:14px;font-weight:600;color:var(--fg)">${r.fires}</span> fires</div>
+            <div style="font-size:11px;color:var(--muted)"><span style="font-size:14px;font-weight:600;color:var(--fg)">${r.tickets}</span> tickets</div>
+            <div style="font-size:11px;color:var(--muted)"><span style="font-size:14px;font-weight:600;color:${healthBorder[r.health]}">${r.rate === null ? '—' : r.rate + '%'}</span> rate</div>
+          </div>
+        </div>
+      </a>`).join('')}
+    </div>
+    <div style="margin-top:10px;padding:8px 12px;background:#f6f8fa;border-radius:6px;font-size:11px;color:var(--muted);line-height:1.5">
+      <b>How to read:</b> Fires = scheduled triggers in last 24h (from n8n executions). Tickets = HubSpot tickets created by that agent in last 24h. Rate = tickets ÷ fires. <span style="color:${healthBorder.red}">RED</span> means an agent fires constantly but produces nothing — usually a bug. <span style="color:${healthBorder.yellow}">YELLOW</span> means under 2% — could be honest "no work found" or could be a gate filtering too tightly. <span style="color:${healthBorder.green}">GREEN</span> means &gt;2% conversion. <span style="color:${healthBorder.dormant}">DORMANT</span> means it didn't fire in the window (scheduled cadence — fine).
+    </div>
+  </section>`;
+
   const honestyHtml = `<section class="panel" style="border-left:4px solid var(--warn)">
     <div class="panel-head" style="margin-bottom:8px">
-      <h3 class="panel-title">Honesty Panel · What's Actually Working</h3>
-      <div class="panel-sub">Cross-checks agent fires against tickets produced. Auto-flags agents that look busy but aren't delivering.</div>
+      <h3 class="panel-title">Honesty Panel · Per-agent verdict</h3>
+      <div class="panel-sub">Same data with plain-English verdicts and the "what's NOT yet working" list below.</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
       ${honestyRows.map(r => `<div style="display:flex;gap:10px;align-items:center;padding:8px 12px;border-left:3px solid;${levelStyle[r.level]};border-radius:4px">
@@ -1291,6 +1337,8 @@ async function renderToday(){
       </div>
       <div class="recent-feed">${activityHtml}</div>
     </section>
+
+    ${trustHtml}
 
     ${honestyHtml}
 
@@ -1512,12 +1560,17 @@ const PERSONAS = [
     tagline:'Drafts personalized outreach emails to journalists, partners, gov procurement bodies.',
     bio:"Finds high-DR sites in your target verticals, writes warm outreach drafts, sends them via partnerships@liftnow.com after Self-QA approval. BCCs you on every send.",
     listens_to:['Cat','Bat'], feeds_to:['Beaver']},
-  {id:'reddit', name:'Bat', emoji:'🦇', color:'#78716c',
-    role:'Reddit Listener + Reply Drafter', match:'Reddit', schedule:'PAUSED — awaiting Reddit OAuth credential',
+  {id:'nox', name:'Bat', emoji:'🦇', color:'#78716c',
+    role:'Brand Listening (multi-source)', match:'Brand Listening', schedule:'Every 30 Min',
+    tagline:'Watches Google News + HackerNews for brand mentions, competitor news, fleet-electrification stories. Reddit added once OAuth is wired.',
+    bio:"Three Google News RSS feeds (liftnow brand + competitors + gov fleet procurement) plus two HackerNews Algolia queries (fleet electrification + govcon procurement) every 30 min. Dedupes against a rolling 2k-URL seen set. Top 3 relevant items per run become HubSpot Inbox tickets. Reddit will rejoin as a fourth source once Paul finishes registering the OAuth app.",
+    listens_to:[], feeds_to:['Spider (story context)','Owl (content angles)','Elephant','You (Inbox)']},
+  {id:'reed', name:'Bat (Reply Drafter)', emoji:'🦇', color:'#78716c',
+    role:'Community Engagement', match:'Community Engagement', schedule:'PAUSED — Reddit OAuth required',
     status:'paused',
-    pauseReason:'Reddit blocks all our hosting IPs (n8n + Vercel) for unauthenticated calls regardless of User-Agent. Needs a registered Reddit OAuth app and an n8n credential — Paul is setting this up. Both Bat workflows are deactivated in n8n so no more fake "no new mentions" heartbeats.',
-    tagline:'PAUSED — Reddit blocks our IPs. Needs OAuth app registered before this agent can actually run.',
-    bio:"Once Reddit OAuth is wired, every 10 min scans relevant subs for Liftnow/competitor/product mentions, and every 2 hrs picks promising threads to draft non-salesy replies. Until then this is honestly paused — no fake activity.",
+    pauseReason:'This agent specifically drafts Reddit thread replies, which requires Reddit OAuth. Paul is registering the app. Auto-resumes once the credential ID is wired into the workflow.',
+    tagline:'PAUSED — needs Reddit OAuth for thread replies.',
+    bio:"Once Reddit OAuth is wired, picks promising fleet/govcon Reddit threads M/W/F 11AM ET and drafts non-salesy reply variants for your approval. Until then, honestly paused.",
     listens_to:[], feeds_to:['Spider','Elephant','You (approval)']},
   {id:'lin', name:'Parrot', emoji:'🦜', color:'#15803d',
     role:'LinkedIn Cadence', match:'LinkedIn Cadence', schedule:'M–F · 10 AM + 2 PM',
@@ -1605,7 +1658,7 @@ let cachedFeedbackCounts = null;
 // Heartbeats are still recorded under the original agent IDs, so map them back.
 const PERSONA_TO_AGENT_IDS = {
   sem:      ['max', 'riley'],        // Tally + Maverick
-  reddit:   ['nox', 'reed'],          // Sonar + Whisper
+  // Bat is now SPLIT back to two personas (nox = Brand Listening multi-source; reed = Community Engagement paused awaiting OAuth)
   briefing: ['eve', 'pip']            // Maestro + Sift
 };
 function agentIdsForPersona(pid){
