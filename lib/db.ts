@@ -214,5 +214,34 @@ export async function ensureSchema() {
     FOR EACH ROW EXECUTE FUNCTION bump_product_updated_at_from_pd()
   `;
 
+  // ---------- agent_handoffs ----------
+  // Typed contract for cross-agent handoffs. Replaces the fragile
+  // `HANDOFF:{json}` regex marker embedded in HubSpot ticket outcome_notes.
+  // Written by Approval Executor's Write Handoffs Code node after a ticket
+  // is approved and its action item has a `handoffTo` field. Read by the
+  // receiving agent at the top of its cycle.
+  //
+  // Idempotency: UNIQUE(source_ticket_id, kind) prevents AE from re-writing
+  // a handoff for the same ticket. consumed_at + consumed_by_execution_id
+  // let the receiving agent claim a handoff exactly once.
+  await sql`
+    CREATE TABLE IF NOT EXISTS agent_handoffs (
+      id BIGSERIAL PRIMARY KEY,
+      from_agent TEXT NOT NULL,
+      to_agent TEXT NOT NULL,
+      kind TEXT NOT NULL,
+      payload JSONB NOT NULL,
+      source_ticket_id TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      consumed_at TIMESTAMPTZ,
+      consumed_by_execution_id TEXT,
+      result TEXT,
+      CONSTRAINT agent_handoffs_unique_source UNIQUE (source_ticket_id, kind)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_handoffs_pending ON agent_handoffs (to_agent, created_at) WHERE consumed_at IS NULL`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_handoffs_source_ticket ON agent_handoffs (source_ticket_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_handoffs_to_agent ON agent_handoffs (to_agent)`;
+
   schemaReady = true;
 }
