@@ -353,3 +353,29 @@ Only Owl + Bee had the HARMFUL version (per-run duplicate side effects). Checked
 - process-decision: 16 + 8 = 24 dupes/stale closed, 0 errors; queue 36→12
 - fan-out sweep output (Owl+Bee harmful, Eagle benign, rest benign)
 - backup: .tmp_n8n/bee_backup_pre_chain.json
+
+
+---
+
+## CHECKPOINT 18:10 ET — Owl fetch-explosion (executeOnce) + Hunter product-page decision
+
+### 🔴 Honest correction to an EARLIER "verified" claim (Law 5)
+When I verified the spawned session's Owl chain fix (execs 8593/8626) I checked Pick Next Piece + Generate Draft ran 1× and called it done. **I missed the fetch layer.** The spawned session chained Owl's fetches WITHOUT `executeOnce`, so each HTTP fetch still ran once per input item: Fetch Published Pages→GSC→Posts→**Fetch Refresh Queue ran 1302×** → Neon **"deadlock detected"** on /api/agent-handoffs. Pick Next Piece reads `.first()` so it collapsed to 1× and hid the explosion from my earlier check. Surfaced today when FRQ returned `{ok:false, error:"deadlock detected"}` and Owl couldn't read a handoff.
+
+### Fix (verified)
+Set `executeOnce:true` + `alwaysOutputData:true` on Owl's 4 chained fetches (Fetch Published Pages, GSC Anchor Performance, Fetch Published Posts, Fetch Refresh Queue) — the same fix Bee needed. Receipt: exec 8862 — Fetch Refresh Queue items=**1** (was 1302), ok=true, handoffs=1; no deadlock. Owl was making **thousands of redundant HTTP calls per run**; now one each.
+
+### Hunter product-page exception — mechanism in place, but Owl is the wrong tool
+Paul: Hunter sold locally (not via co-op contracts); update Hunter product pages OK; Hunter ONLY (other kill-list brands stay off-limits).
+- Implemented: Owl Self-Reject Gate `banned_competitors` + `closing_tagline` now Hunter-aware (`_isHunterRefresh`), + draft-prompt HARD RULE (reference Hunter OK, omit Sourcewell/NASPO/FSA). Memory updated (liftnow_master_plan_priorities.md).
+- Receipt exec 8862: Owl now PICKS the Hunter handoff (refresh_handoff_id=5), drafts (mentions Hunter, 2122 chars), consumes the handoff (no churn). **But the draft fails the gate**: (a) Claude still emitted the Sourcewell tagline despite my rule — Owl's prompt elsewhere REQUIRES it, conflicting instruction won; (b) the article-shaped checks (byline/TOC/FAQ/word_count) don't fit a ~350-word product-page refresh.
+- **Conclusion**: Owl is a long-form ARTICLE writer; a Hunter tire-changer product page isn't an article. The right tool is **Bee** (already patches product_cat title/meta/description). Recommend re-routing product-page refreshes (Hunter + any product_cat) from Turtle→Owl to Turtle→Bee. Flagged to Paul; NOT auto-wired (routing change deserves a deliberate decision).
+
+### State
+- agent_handoffs pending: 0 (test handoff id=5 consumed). Owl no longer deadlocks. Bee fixed earlier (1 ticket/run).
+
+### Receipts attached
+- exec 8851: FRQ deadlock (`{ok:false,"deadlock detected"}`), 1302 items, Owl fell to cluster picker
+- exec 8862: FRQ items=1 ok=true, Owl picked Hunter handoff, drafted, self-rejected (article gate), consumed handoff
+- Owl fetches executeOnce=true ×4 confirmed
+- backup: .tmp_n8n/owl_backup_pre_hunter.json
