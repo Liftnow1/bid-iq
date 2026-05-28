@@ -83,3 +83,41 @@ Phase 1 reconnaissance only. No behavioral changes until audit/00-08 exist.
 - Owl latest error pulled live: 2026-05-27T20:38:41 Fetch Refresh Queue credential
 - Eagle latest error pulled live: 2026-05-27T15:11:40 Fetch Rendered HTML
 - Bucket bug confirmed via two curls returning identical results
+
+
+---
+
+## CHECKPOINT 21:41 ET (local) — Block 1 complete
+
+### Completed since last checkpoint (verified, with receipts)
+- **URGENT-1 (Owl handoffUrl scope bug)** — removed misplaced REFRESH_QUEUE_COMPETITOR_FILTER block from Pick Next Piece. Receipt: Owl exec 2026-05-28T01:34:53 succeeded (5m 19s) after multiple prior errors stopped at the same line 54.
+- **URGENT-2 (Eagle Fetch Rendered HTML)** — defensive URL with $('Filter Content Pages').itemMatching($itemIndex) + continueOnFail + neverError. Receipt: Eagle exec 2026-05-28T01:36:10 succeeded in 9s.
+- **URGENT-3 (agent-proposals view=done filter)** — added 1363043699 to done/all stage lists + accept bucket alias. Receipt: curl shows 50 tickets including 8 in stage 1363043699 (Auto-Applied).
+- **P0-A SFD activated** — patched: continueOnFail on 2 HTTP fetches + trimmed WF_TO_AGENT to 4 active producers. Receipt: manual fire returned `Scanned 4 producers: 250 fires, 100 tickets — all clean`.
+- **P0-A AFA activated** — workflow JSON already correct (httpHeaderAuth credentials, no $json clobber). errorWorkflow=qMeBXIjguVuaKLLF was already set on all 5 active workflows. Receipt: workflow API now shows active=True.
+
+### Active workflow count: 13 → 15 (added SFD + AFA)
+
+### Honest corrections (Law 5)
+- I initially flagged Owl's credential type mismatch as URGENT-1 from stale execution data. Re-pulling the workflow JSON showed the credential was already correct — the actual current bug was a different one (the scope error). The real fix targeted the actual current bug, not the stale finding.
+- I initially curl'd `?bucket=done` and concluded the filter was broken site-wide. Reading dashboard code showed dashboard uses `?view=done` — bucket was my own param error. Real bug was the stage list missing 1363043699.
+
+### In progress
+- (about to start P0-B: agent_handoffs Neon table + dual-write)
+
+### Blocked / Needs Paul
+- None blocking Phase 3 work.
+- Yoast mu-plugin v3 verification (P2-E) still pending Paul-side confirmation that v3 file was uploaded. Not blocking other work.
+
+### Next 90 min plan (Block 2)
+- P0-B step 1: add agent_handoffs table to lib/db.ts schema + migration
+- P0-B step 2: add /api/agent-handoffs REST endpoints (POST/GET/consume)
+- P0-B step 3: update AE Write Handoffs node to dual-write (legacy marker + new table)
+- P0-B step 4: update Owl Fetch Refresh Queue to call new endpoint
+- P0-B step 5: dry run — fresh Turtle ticket → approve → confirm row in agent_handoffs + Owl consumes
+
+### Receipts attached
+- n8n exec list: Owl 8013 (error, pre-fix), Owl post-fix at 01:34:53 success
+- Eagle exec 01:36:10 success
+- SFD activation: 200; manual fire response body Scanned 4 producers
+- AFA activation: 200; active=True confirmed via workflow API
