@@ -1,0 +1,617 @@
+{
+  "updatedAt": "2026-05-28T02:19:03.836Z",
+  "createdAt": "2026-05-28T02:15:48.606Z",
+  "id": "vZEd1pkEHX6L0jGB",
+  "name": "Vercel Helpers Watchdog",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "cron-trigger",
+      "name": "Every 15 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -600,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "manual-fire-webhook",
+      "name": "Manual Fire",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -600,
+        200
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fire-vercel-watchdog",
+        "responseMode": "onReceived",
+        "responseData": "noData",
+        "options": {}
+      },
+      "webhookId": "vercel-watchdog-manual-fire"
+    },
+    {
+      "id": "probe-check-redirect",
+      "name": "Probe Check-Redirect",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -300,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://bid-iq-neon.vercel.app/api/check-redirect?url=https%3A%2F%2Fliftnow.com%2Fproducts%2Fvehicle-lifts%2F",
+        "authentication": "none",
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "probe-known-models",
+      "name": "Probe Known-Models",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -300,
+        200
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://bid-iq-neon.vercel.app/api/known-models?brands=challenger",
+        "authentication": "none",
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "validate-responses",
+      "name": "Validate Responses",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {
+        "jsCode": "let unhealthy = false;\nconst reasons = [];\n\n// Check-Redirect probe\nlet cr = null;\ntry { cr = $('Probe Check-Redirect').first().json; } catch (e) {}\nconst crStatus = (cr && cr.statusCode) || (cr && cr.status) || 0;\nconst crBody = (cr && (cr.body || cr.data)) || cr || {};\nif (crStatus < 200 || crStatus >= 300) {\n  unhealthy = true; reasons.push('check-redirect HTTP ' + crStatus);\n} else if (typeof crBody === 'object' && crBody.ok === false) {\n  unhealthy = true; reasons.push('check-redirect ok:false ' + (crBody.error || ''));\n}\n\n// Known-Models probe\nlet km = null;\ntry { km = $('Probe Known-Models').first().json; } catch (e) {}\nconst kmStatus = (km && km.statusCode) || (km && km.status) || 0;\nconst kmBody = (km && (km.body || km.data)) || km || {};\nif (kmStatus < 200 || kmStatus >= 300) {\n  unhealthy = true; reasons.push('known-models HTTP ' + kmStatus);\n} else {\n  // Expect kmBody.brands.challenger.models to be a non-empty array\n  const chal = kmBody && kmBody.brands && kmBody.brands.challenger;\n  const models = (chal && chal.models) || [];\n  if (!Array.isArray(models) || models.length === 0) {\n    unhealthy = true;\n    reasons.push('known-models returned 0 challenger models');\n  }\n}\n\nreturn [{json: {\n  unhealthy,\n  reason: reasons.join(' + ') || 'all green',\n  check_redirect_status: crStatus,\n  known_models_status: kmStatus,\n  challenger_model_count: (function() {\n    try { return ($('Probe Known-Models').first().json.body.brands.challenger.models || []).length; }\n    catch (e) { return 0; }\n  })(),\n  checked_at: new Date().toISOString(),\n}}];\n"
+      }
+    },
+    {
+      "id": "if-unhealthy",
+      "name": "If Unhealthy?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond-unhealthy",
+              "leftValue": "={{ $json.unhealthy }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "build-alert-body",
+      "name": "Build Alert Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst subject = 'P0: Vercel helper outage detected';\nconst content = [\n  'ASK',\n  'Vercel Helpers Watchdog detected a /api endpoint outage. Bee depends on these helpers for safe drafting \u2014 drafts produced during the outage may have missing model data or wrong URLs.',\n  '',\n  'WHY',\n  'Reason: ' + j.reason,\n  'check-redirect HTTP: ' + j.check_redirect_status,\n  'known-models  HTTP: ' + j.known_models_status,\n  'Checked at: ' + j.checked_at,\n  '',\n  'IF YOU APPROVE',\n  '(no automated execution \u2014 informational). I will continue checking every 15 min and auto-close this ticket when helpers recover.',\n  '',\n  'IF YOU REJECT',\n  'Mute the watchdog for 60 min by setting staticData.muted_until.',\n].join('\\n');\nconst properties = {\n  subject: subject,\n  content: content,\n  agent_name: 'Vercel Helpers Watchdog',\n  recommendation_type: 'Infrastructure Alert',\n  hs_pipeline: '0',\n  hs_pipeline_stage: '1',\n  hs_ticket_priority: 'HIGH',\n  outcome_notes: 'Filed by Vercel Helpers Watchdog. Self-clears when helpers recover.',\n  recommendation_detail: JSON.stringify({\n    reason: j.reason,\n    check_redirect_status: j.check_redirect_status,\n    known_models_status: j.known_models_status,\n    checked_at: j.checked_at,\n  }),\n};\nreturn [{json: {body_str: JSON.stringify({properties})}}];\n"
+      }
+    },
+    {
+      "id": "create-hubspot-ticket",
+      "name": "Create HubSpot Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/tickets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body_str }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      }
+    },
+    {
+      "id": "log-all-clean",
+      "name": "Log All Clean",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        600,
+        200
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "status",
+              "value": "all_helpers_green",
+              "type": "string"
+            },
+            {
+              "id": "2",
+              "name": "checked_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Every 15 Min": {
+      "main": [
+        [
+          {
+            "node": "Probe Check-Redirect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Fire": {
+      "main": [
+        [
+          {
+            "node": "Probe Check-Redirect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Probe Check-Redirect": {
+      "main": [
+        [
+          {
+            "node": "Probe Known-Models",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Probe Known-Models": {
+      "main": [
+        [
+          {
+            "node": "Validate Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Responses": {
+      "main": [
+        [
+          {
+            "node": "If Unhealthy?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Unhealthy?": {
+      "main": [
+        [
+          {
+            "node": "Build Alert Body",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log All Clean",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Alert Body": {
+      "main": [
+        [
+          {
+            "node": "Create HubSpot Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "qMeBXIjguVuaKLLF"
+  },
+  "staticData": {
+    "node:Every 15 Min": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "540c476e-4e40-48e3-b8b2-2ea9383336e9",
+  "activeVersionId": "540c476e-4e40-48e3-b8b2-2ea9383336e9",
+  "versionCounter": 5,
+  "triggerCount": 2,
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-28T02:19:03.838Z",
+    "createdAt": "2026-05-28T02:19:03.838Z",
+    "versionId": "540c476e-4e40-48e3-b8b2-2ea9383336e9",
+    "workflowId": "vZEd1pkEHX6L0jGB",
+    "nodes": [
+      {
+        "id": "cron-trigger",
+        "name": "Every 15 Min",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -600,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 15
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "manual-fire-webhook",
+        "name": "Manual Fire",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -600,
+          200
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "fire-vercel-watchdog",
+          "responseMode": "onReceived",
+          "responseData": "noData",
+          "options": {}
+        },
+        "webhookId": "vercel-watchdog-manual-fire"
+      },
+      {
+        "id": "probe-check-redirect",
+        "name": "Probe Check-Redirect",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -300,
+          0
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://bid-iq-neon.vercel.app/api/check-redirect?url=https%3A%2F%2Fliftnow.com%2Fproducts%2Fvehicle-lifts%2F",
+          "authentication": "none",
+          "options": {
+            "timeout": 15000,
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": true
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "probe-known-models",
+        "name": "Probe Known-Models",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -300,
+          200
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://bid-iq-neon.vercel.app/api/known-models?brands=challenger",
+          "authentication": "none",
+          "options": {
+            "timeout": 15000,
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": true
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "validate-responses",
+        "name": "Validate Responses",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          0,
+          100
+        ],
+        "parameters": {
+          "jsCode": "let unhealthy = false;\nconst reasons = [];\n\n// Check-Redirect probe\nlet cr = null;\ntry { cr = $('Probe Check-Redirect').first().json; } catch (e) {}\nconst crStatus = (cr && cr.statusCode) || (cr && cr.status) || 0;\nconst crBody = (cr && (cr.body || cr.data)) || cr || {};\nif (crStatus < 200 || crStatus >= 300) {\n  unhealthy = true; reasons.push('check-redirect HTTP ' + crStatus);\n} else if (typeof crBody === 'object' && crBody.ok === false) {\n  unhealthy = true; reasons.push('check-redirect ok:false ' + (crBody.error || ''));\n}\n\n// Known-Models probe\nlet km = null;\ntry { km = $('Probe Known-Models').first().json; } catch (e) {}\nconst kmStatus = (km && km.statusCode) || (km && km.status) || 0;\nconst kmBody = (km && (km.body || km.data)) || km || {};\nif (kmStatus < 200 || kmStatus >= 300) {\n  unhealthy = true; reasons.push('known-models HTTP ' + kmStatus);\n} else {\n  // Expect kmBody.brands.challenger.models to be a non-empty array\n  const chal = kmBody && kmBody.brands && kmBody.brands.challenger;\n  const models = (chal && chal.models) || [];\n  if (!Array.isArray(models) || models.length === 0) {\n    unhealthy = true;\n    reasons.push('known-models returned 0 challenger models');\n  }\n}\n\nreturn [{json: {\n  unhealthy,\n  reason: reasons.join(' + ') || 'all green',\n  check_redirect_status: crStatus,\n  known_models_status: kmStatus,\n  challenger_model_count: (function() {\n    try { return ($('Probe Known-Models').first().json.body.brands.challenger.models || []).length; }\n    catch (e) { return 0; }\n  })(),\n  checked_at: new Date().toISOString(),\n}}];\n"
+        }
+      },
+      {
+        "id": "if-unhealthy",
+        "name": "If Unhealthy?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          300,
+          100
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "id": "cond-unhealthy",
+                "leftValue": "={{ $json.unhealthy }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        }
+      },
+      {
+        "id": "build-alert-body",
+        "name": "Build Alert Body",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          600,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const j = $input.first().json;\nconst subject = 'P0: Vercel helper outage detected';\nconst content = [\n  'ASK',\n  'Vercel Helpers Watchdog detected a /api endpoint outage. Bee depends on these helpers for safe drafting \u2014 drafts produced during the outage may have missing model data or wrong URLs.',\n  '',\n  'WHY',\n  'Reason: ' + j.reason,\n  'check-redirect HTTP: ' + j.check_redirect_status,\n  'known-models  HTTP: ' + j.known_models_status,\n  'Checked at: ' + j.checked_at,\n  '',\n  'IF YOU APPROVE',\n  '(no automated execution \u2014 informational). I will continue checking every 15 min and auto-close this ticket when helpers recover.',\n  '',\n  'IF YOU REJECT',\n  'Mute the watchdog for 60 min by setting staticData.muted_until.',\n].join('\\n');\nconst properties = {\n  subject: subject,\n  content: content,\n  agent_name: 'Vercel Helpers Watchdog',\n  recommendation_type: 'Infrastructure Alert',\n  hs_pipeline: '0',\n  hs_pipeline_stage: '1',\n  hs_ticket_priority: 'HIGH',\n  outcome_notes: 'Filed by Vercel Helpers Watchdog. Self-clears when helpers recover.',\n  recommendation_detail: JSON.stringify({\n    reason: j.reason,\n    check_redirect_status: j.check_redirect_status,\n    known_models_status: j.known_models_status,\n    checked_at: j.checked_at,\n  }),\n};\nreturn [{json: {body_str: JSON.stringify({properties})}}];\n"
+        }
+      },
+      {
+        "id": "create-hubspot-ticket",
+        "name": "Create HubSpot Ticket",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          900,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.hubapi.com/crm/v3/objects/tickets",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.body_str }}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        }
+      },
+      {
+        "id": "log-all-clean",
+        "name": "Log All Clean",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          600,
+          200
+        ],
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "1",
+                "name": "status",
+                "value": "all_helpers_green",
+                "type": "string"
+              },
+              {
+                "id": "2",
+                "name": "checked_at",
+                "value": "={{ $now.toISO() }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Every 15 Min": {
+        "main": [
+          [
+            {
+              "node": "Probe Check-Redirect",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual Fire": {
+        "main": [
+          [
+            {
+              "node": "Probe Check-Redirect",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Probe Check-Redirect": {
+        "main": [
+          [
+            {
+              "node": "Probe Known-Models",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Probe Known-Models": {
+        "main": [
+          [
+            {
+              "node": "Validate Responses",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validate Responses": {
+        "main": [
+          [
+            {
+              "node": "If Unhealthy?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If Unhealthy?": {
+        "main": [
+          [
+            {
+              "node": "Build Alert Body",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Log All Clean",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Alert Body": {
+        "main": [
+          [
+            {
+              "node": "Create HubSpot Ticket",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  }
+}

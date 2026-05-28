@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-28T00:45:50.914Z",
+  "updatedAt": "2026-05-28T01:48:45.943Z",
   "createdAt": "2026-05-20T16:29:29.701Z",
   "id": "hpgbBAmRmqtsfr6g",
   "name": "Approval Executor - Coordinator Brain",
@@ -390,7 +390,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Pass-through: embed handoff info inside executionNotes so Mark Tickets\n// Executed writes it into outcome_notes. Receiving agents (Owl, Tally) query\n// HubSpot directly for these notes at start of cycle. No external webhook\n// required.\n\nconst items = $input.all();\nfor (const it of items) {\n  const j = it.json || {};\n  if (j.handoffTo) {\n    const payload = JSON.stringify({to: j.handoffTo, payload: j.handoffPayload || {}});\n    j.executionNotes = (j.executionNotes || '') + ` HANDOFF:${payload}`;\n  }\n}\nreturn items;\n"
+        "jsCode": "// Dual-write handoffs: legacy outcome_notes marker (30-day transition) +\n// new typed REST handoff to /api/agent-handoffs.\n//\n// Legacy marker stays \u2014 Owl/Tally still parse it from HubSpot outcome_notes today.\n// New REST write is best-effort: errors are logged into executionNotes but DO NOT\n// fail the chain (defense-in-depth so a Vercel outage can't break AE).\n//\n// AE item shape (from Process & Route):\n//   ticketId, agentName (full role), handoffTo (nickname),\n//   handoffPayload = { kind, ...other }\n\nconst NICKNAME_TO_ROLE = {\n  'Owl': 'Content Producer',\n  'Tally': 'SEM Manager',\n  'Bee': 'SEO Optimizer',\n  'Eagle': 'UI/UX Performance',\n  'Spider': 'Backlink Builder',\n  'Nox': 'Brand Listening',\n  'Beacon': 'LinkedIn Cadence',\n};\n\nconst HANDOFF_API = 'https://bid-iq-neon.vercel.app/api/agent-handoffs';\nconst HANDOFF_SECRET = 'LiftnowAgentTeam_kS9-bGq2_xVtN4mP';\n\nconst items = $input.all();\n\nfor (const it of items) {\n  const j = it.json || {};\n  if (!j.handoffTo) continue;\n\n  // === 1. Legacy marker (kept for 30-day transition) ===\n  const legacyPayload = JSON.stringify({to: j.handoffTo, payload: j.handoffPayload || {}});\n  j.executionNotes = (j.executionNotes || '') + ` HANDOFF:${legacyPayload}`;\n\n  // === 2. New typed handoff (best-effort POST) ===\n  const toRole = NICKNAME_TO_ROLE[j.handoffTo] || j.handoffTo;\n  const kind = (j.handoffPayload && j.handoffPayload.kind) || '';\n  const sourceTicketId = String(j.ticketId || '').trim();\n  const fromAgent = j.agentName || 'Unknown';\n\n  if (!kind || !sourceTicketId) {\n    j.executionNotes += ` [handoff REST skipped: missing ${!kind ? 'kind' : 'ticketId'}]`;\n    continue;\n  }\n\n  try {\n    const resp = await this.helpers.httpRequest({\n      method: 'POST',\n      url: HANDOFF_API,\n      headers: {\n        'Content-Type': 'application/json',\n        'x-agent-secret': HANDOFF_SECRET,\n      },\n      body: {\n        from_agent: fromAgent,\n        to_agent: toRole,\n        kind: kind,\n        payload: j.handoffPayload || {},\n        source_ticket_id: sourceTicketId,\n      },\n      json: true,\n      timeout: 8000,\n    });\n    if (resp && resp.ok && resp.id) {\n      j.handoffRestId = resp.id;\n      j.handoffRestAction = resp.action || 'unknown';\n      j.executionNotes += ` [handoff REST ok: id=${resp.id} ${resp.action || ''}]`;\n    } else {\n      j.executionNotes += ` [handoff REST non-OK: ${JSON.stringify(resp || {}).slice(0,120)}]`;\n    }\n  } catch (e) {\n    j.executionNotes += ` [handoff REST error: ${String((e && e.message) || e).slice(0,120)}]`;\n  }\n}\n\nreturn items;\n"
       },
       "id": "write-handoffs-node",
       "name": "Write Handoffs",
@@ -666,34 +666,15 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
-  "activeVersionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
-  "versionCounter": 218,
+  "versionId": "9bdbdded-f8e1-41ff-9093-b783ac3d489a",
+  "activeVersionId": "9bdbdded-f8e1-41ff-9093-b783ac3d489a",
+  "versionCounter": 219,
   "triggerCount": 2,
-  "shared": [
-    {
-      "updatedAt": "2026-05-20T16:29:29.701Z",
-      "createdAt": "2026-05-20T16:29:29.701Z",
-      "role": "workflow:owner",
-      "workflowId": "hpgbBAmRmqtsfr6g",
-      "projectId": "9rLUju41pxF01khS",
-      "project": {
-        "updatedAt": "2026-05-18T14:07:07.992Z",
-        "createdAt": "2026-05-18T13:55:16.416Z",
-        "id": "9rLUju41pxF01khS",
-        "name": "Paul Stern <paulj@liftnow.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
-      }
-    }
-  ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-28T00:45:50.919Z",
-    "createdAt": "2026-05-28T00:45:50.919Z",
-    "versionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
+    "updatedAt": "2026-05-28T01:48:45.945Z",
+    "createdAt": "2026-05-28T01:48:45.945Z",
+    "versionId": "9bdbdded-f8e1-41ff-9093-b783ac3d489a",
     "workflowId": "hpgbBAmRmqtsfr6g",
     "nodes": [
       {
@@ -1079,7 +1060,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Pass-through: embed handoff info inside executionNotes so Mark Tickets\n// Executed writes it into outcome_notes. Receiving agents (Owl, Tally) query\n// HubSpot directly for these notes at start of cycle. No external webhook\n// required.\n\nconst items = $input.all();\nfor (const it of items) {\n  const j = it.json || {};\n  if (j.handoffTo) {\n    const payload = JSON.stringify({to: j.handoffTo, payload: j.handoffPayload || {}});\n    j.executionNotes = (j.executionNotes || '') + ` HANDOFF:${payload}`;\n  }\n}\nreturn items;\n"
+          "jsCode": "// Dual-write handoffs: legacy outcome_notes marker (30-day transition) +\n// new typed REST handoff to /api/agent-handoffs.\n//\n// Legacy marker stays \u2014 Owl/Tally still parse it from HubSpot outcome_notes today.\n// New REST write is best-effort: errors are logged into executionNotes but DO NOT\n// fail the chain (defense-in-depth so a Vercel outage can't break AE).\n//\n// AE item shape (from Process & Route):\n//   ticketId, agentName (full role), handoffTo (nickname),\n//   handoffPayload = { kind, ...other }\n\nconst NICKNAME_TO_ROLE = {\n  'Owl': 'Content Producer',\n  'Tally': 'SEM Manager',\n  'Bee': 'SEO Optimizer',\n  'Eagle': 'UI/UX Performance',\n  'Spider': 'Backlink Builder',\n  'Nox': 'Brand Listening',\n  'Beacon': 'LinkedIn Cadence',\n};\n\nconst HANDOFF_API = 'https://bid-iq-neon.vercel.app/api/agent-handoffs';\nconst HANDOFF_SECRET = 'LiftnowAgentTeam_kS9-bGq2_xVtN4mP';\n\nconst items = $input.all();\n\nfor (const it of items) {\n  const j = it.json || {};\n  if (!j.handoffTo) continue;\n\n  // === 1. Legacy marker (kept for 30-day transition) ===\n  const legacyPayload = JSON.stringify({to: j.handoffTo, payload: j.handoffPayload || {}});\n  j.executionNotes = (j.executionNotes || '') + ` HANDOFF:${legacyPayload}`;\n\n  // === 2. New typed handoff (best-effort POST) ===\n  const toRole = NICKNAME_TO_ROLE[j.handoffTo] || j.handoffTo;\n  const kind = (j.handoffPayload && j.handoffPayload.kind) || '';\n  const sourceTicketId = String(j.ticketId || '').trim();\n  const fromAgent = j.agentName || 'Unknown';\n\n  if (!kind || !sourceTicketId) {\n    j.executionNotes += ` [handoff REST skipped: missing ${!kind ? 'kind' : 'ticketId'}]`;\n    continue;\n  }\n\n  try {\n    const resp = await this.helpers.httpRequest({\n      method: 'POST',\n      url: HANDOFF_API,\n      headers: {\n        'Content-Type': 'application/json',\n        'x-agent-secret': HANDOFF_SECRET,\n      },\n      body: {\n        from_agent: fromAgent,\n        to_agent: toRole,\n        kind: kind,\n        payload: j.handoffPayload || {},\n        source_ticket_id: sourceTicketId,\n      },\n      json: true,\n      timeout: 8000,\n    });\n    if (resp && resp.ok && resp.id) {\n      j.handoffRestId = resp.id;\n      j.handoffRestAction = resp.action || 'unknown';\n      j.executionNotes += ` [handoff REST ok: id=${resp.id} ${resp.action || ''}]`;\n    } else {\n      j.executionNotes += ` [handoff REST non-OK: ${JSON.stringify(resp || {}).slice(0,120)}]`;\n    }\n  } catch (e) {\n    j.executionNotes += ` [handoff REST error: ${String((e && e.message) || e).slice(0,120)}]`;\n  }\n}\n\nreturn items;\n"
         },
         "id": "write-handoffs-node",
         "name": "Write Handoffs",
@@ -1343,24 +1324,6 @@
     "authors": "Paul Stern",
     "name": null,
     "description": null,
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-05-28T00:45:51.014Z",
-        "id": 1042,
-        "workflowId": "hpgbBAmRmqtsfr6g",
-        "versionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
-        "event": "deactivated",
-        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
-      },
-      {
-        "createdAt": "2026-05-28T00:45:51.079Z",
-        "id": 1043,
-        "workflowId": "hpgbBAmRmqtsfr6g",
-        "versionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
-        "event": "activated",
-        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
-      }
-    ]
+    "autosaved": false
   }
 }

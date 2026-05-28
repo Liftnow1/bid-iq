@@ -310,7 +310,7 @@
 <header>
   <div>
     <h1>Liftnow Agent Approvals</h1>
-    <div class="sub">10-agent marketing team · <span id="last-refresh">connecting…</span></div>
+    <div class="sub">4 agents active · 23 paused · <span id="last-refresh">connecting…</span></div>
   </div>
   <button class="btn refresh" onclick="loadCurrentTab()">Refresh</button>
 </header>
@@ -395,6 +395,16 @@ function switchTab(view){
 async function loadCurrentTab(){
   const main = document.getElementById('main');
   main.innerHTML = '<div class="loading">Loading…</div>';
+
+  // 15s watchdog — if Loading is still showing, replace with a friendly error.
+  // (P1-G UX fix: don't leave Paul staring at "Loading…" forever on a hung fetch.)
+  const loadingWatchdog = setTimeout(() => {
+    const stillLoading = main.querySelector('.loading');
+    if (stillLoading) {
+      main.innerHTML = `<div class="empty">Still loading after 15s — the agent backend might be slow or unreachable.<br><br><button class="btn" onclick="loadCurrentTab()">Retry</button></div>`;
+    }
+  }, 15000);
+
   try {
     document.getElementById('last-refresh').textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
     if (currentView === 'today') {
@@ -410,6 +420,8 @@ async function loadCurrentTab(){
     }
   } catch (e) {
     main.innerHTML = `<div class="empty">Error: ${escapeHtml(e.message)}<br><br><button class="btn" onclick="loadCurrentTab()">Retry</button></div>`;
+  } finally {
+    clearTimeout(loadingWatchdog);
   }
 }
 

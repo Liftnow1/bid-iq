@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-27T18:40:35.754Z",
+  "updatedAt": "2026-05-28T02:29:01.842Z",
   "createdAt": "2026-05-22T22:45:59.219Z",
   "id": "alik1C8sXr857rY7",
   "name": "Agent 8 \u2014 Eagle v3 (Auto-PATCH UI/UX)",
@@ -100,7 +100,7 @@
       ],
       "parameters": {
         "method": "GET",
-        "url": "={{ $json.fetchedUrl }}",
+        "url": "={{ $('Filter Content Pages').itemMatching($itemIndex).json.fetchedUrl || $json.fetchedUrl || 'about:blank' }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -122,7 +122,8 @@
       },
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 5000,
+      "continueOnFail": true
     },
     {
       "id": "preserve",
@@ -250,7 +251,7 @@
         200
       ],
       "parameters": {
-        "jsCode": "// Process ALL pages \u2014 emit one item per page with patchPayload (or noAutoFix flag)\nconst BYLINE_HTML = \"<p><em>By Paul Stern, VP of Public Sector Sales \\u2014 Liftnow</em></p>\\n\\n\";\nconst CTA_HTML = \"\\n<hr/>\\n<div class=\\\"liftnow-cta\\\">\\n  <h3>Ready to spec your fleet's lifts?</h3>\\n  <p>Send your vehicle list and bay dimensions to <a href=\\\"mailto:gov@liftnow.com\\\">gov@liftnow.com</a>. Or call <a href=\\\"tel:18005438669\\\">1-800-LIFT-NOW</a>.</p>\\n</div>\\n\";\nconst CONTRACTS_TAGLINE_HTML = \"\\n<p style=\\\"font-size:0.85em;color:#666;margin-top:2em\\\">\\n<strong>Liftnow contracts:</strong> Sourcewell 121223-LFT \\u00b7 NASPO CW7258 \\u00b7 Florida Sheriffs FSA23-EQU21.0\\n</p>\\n\";\n\nconst out = [];\nfor (const item of $input.all()) {\n  const r = item.json;\n  let patchedHtml = r.currentHtml || '';\n  const autoFixesApplied = [];\n\n  for (const d of (r.defects || [])) {\n    if (!d.autoFixable) continue;\n    if (d.type === 'MISSING_BYLINE') {\n      const headingMatch = patchedHtml.match(/<h1[^>]*>[\\s\\S]*?<\\/h1>/i);\n      if (headingMatch) {\n        const idx = headingMatch.index + headingMatch[0].length;\n        patchedHtml = patchedHtml.slice(0, idx) + '\\n\\n' + BYLINE_HTML + patchedHtml.slice(idx);\n      } else {\n        patchedHtml = BYLINE_HTML + patchedHtml;\n      }\n      autoFixesApplied.push('MISSING_BYLINE');\n    } else if (d.type === 'MISSING_CTA') {\n      patchedHtml = patchedHtml + '\\n\\n' + CTA_HTML;\n      autoFixesApplied.push('MISSING_CTA');\n    } else if (d.type === 'MISSING_CONTRACTS_TAGLINE') {\n      patchedHtml = patchedHtml + '\\n\\n' + CONTRACTS_TAGLINE_HTML;\n      autoFixesApplied.push('MISSING_CONTRACTS_TAGLINE');\n    }\n  }\n\n  if (!autoFixesApplied.length) {\n    out.push({json: {noAutoFix: true, ...r}});\n  } else {\n    out.push({json: {\n      ...r,\n      autoFixesApplied,\n      patchedHtml,\n      patchPayload: { content: patchedHtml }\n    }});\n  }\n}\nreturn out;\n"
+        "jsCode": "// Process ALL pages \u2014 emit one item per page with patchPayload (or noAutoFix flag).\n// P1-B AUTHORITY BOUNDS:\n//   MAX_AUTO_PATCHES_PER_RUN = 25 (cap total fixes across all pages in this run)\n//   MAX_AUTO_PATCHES_PER_PAGE = 3 (cap per-page fixes; defends against runaway page)\n// When a cap is hit, remaining defects/pages are skipped with a reason.\nconst MAX_AUTO_PATCHES_PER_RUN = 25;\nconst MAX_AUTO_PATCHES_PER_PAGE = 3;\n\nconst BYLINE_HTML = \"<p><em>By Paul Stern, VP of Public Sector Sales \u2014 Liftnow</em></p>\\n\\n\";\nconst CTA_HTML = \"\\n<hr/>\\n<div class=\\\"liftnow-cta\\\">\\n  <h3>Ready to spec your fleet's lifts?</h3>\\n  <p>Send your vehicle list and bay dimensions to <a href=\\\"mailto:gov@liftnow.com\\\">gov@liftnow.com</a>. Or call <a href=\\\"tel:18005438669\\\">1-800-LIFT-NOW</a>.</p>\\n</div>\\n\";\nconst CONTRACTS_TAGLINE_HTML = \"\\n<p style=\\\"font-size:0.85em;color:#666;margin-top:2em\\\">\\n<strong>Liftnow contracts:</strong> Sourcewell 121223-LFT \u00b7 NASPO CW7258 \u00b7 Florida Sheriffs FSA23-EQU21.0\\n</p>\\n\";\n\nconst out = [];\nlet runTotal = 0;\nlet runSkippedByCap = 0;\n\nfor (const item of $input.all()) {\n  const r = item.json;\n  let patchedHtml = r.currentHtml || '';\n  const autoFixesApplied = [];\n  const autoFixesSkippedByCap = [];\n\n  // If per-run cap already hit, mark this page as noAutoFix\n  if (runTotal >= MAX_AUTO_PATCHES_PER_RUN) {\n    out.push({json: {noAutoFix: true, capReason: 'per_run_cap_hit', runTotal, ...r}});\n    continue;\n  }\n\n  for (const d of (r.defects || [])) {\n    if (!d.autoFixable) continue;\n\n    // Per-page cap\n    if (autoFixesApplied.length >= MAX_AUTO_PATCHES_PER_PAGE) {\n      autoFixesSkippedByCap.push({type: d.type, reason: 'per_page_cap'});\n      continue;\n    }\n    // Per-run cap\n    if (runTotal >= MAX_AUTO_PATCHES_PER_RUN) {\n      autoFixesSkippedByCap.push({type: d.type, reason: 'per_run_cap'});\n      runSkippedByCap += 1;\n      continue;\n    }\n\n    if (d.type === 'MISSING_BYLINE') {\n      const headingMatch = patchedHtml.match(/<h1[^>]*>[\\s\\S]*?<\\/h1>/i);\n      if (headingMatch) {\n        const idx = headingMatch.index + headingMatch[0].length;\n        patchedHtml = patchedHtml.slice(0, idx) + '\\n\\n' + BYLINE_HTML + patchedHtml.slice(idx);\n      } else {\n        patchedHtml = BYLINE_HTML + patchedHtml;\n      }\n      autoFixesApplied.push('MISSING_BYLINE');\n      runTotal += 1;\n    } else if (d.type === 'MISSING_CTA') {\n      patchedHtml = patchedHtml + '\\n\\n' + CTA_HTML;\n      autoFixesApplied.push('MISSING_CTA');\n      runTotal += 1;\n    } else if (d.type === 'MISSING_CONTRACTS_TAGLINE') {\n      patchedHtml = patchedHtml + '\\n\\n' + CONTRACTS_TAGLINE_HTML;\n      autoFixesApplied.push('MISSING_CONTRACTS_TAGLINE');\n      runTotal += 1;\n    }\n  }\n\n  if (!autoFixesApplied.length) {\n    out.push({json: {noAutoFix: true, autoFixesSkippedByCap, ...r}});\n  } else {\n    out.push({json: {\n      ...r,\n      autoFixesApplied,\n      autoFixesSkippedByCap,\n      patchedHtml,\n      patchPayload: { content: patchedHtml },\n      _authority_caps: { MAX_AUTO_PATCHES_PER_RUN, MAX_AUTO_PATCHES_PER_PAGE, runTotalAfter: runTotal },\n    }});\n  }\n}\n\n// Attach run-level summary to the first item so Build Summary Ticket can read it\nif (out.length > 0) {\n  out[0].json._runStats = {\n    autoPatchesAppliedThisRun: runTotal,\n    autoPatchesSkippedByCapThisRun: runSkippedByCap,\n    cap_per_run: MAX_AUTO_PATCHES_PER_RUN,\n    cap_per_page: MAX_AUTO_PATCHES_PER_PAGE,\n  };\n}\n\nreturn out;\n"
       }
     },
     {
@@ -590,34 +591,15 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
-  "activeVersionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
-  "versionCounter": 192,
+  "versionId": "0c69ec1a-8c1f-4c86-af91-4a39ce685e4c",
+  "activeVersionId": "0c69ec1a-8c1f-4c86-af91-4a39ce685e4c",
+  "versionCounter": 196,
   "triggerCount": 2,
-  "shared": [
-    {
-      "updatedAt": "2026-05-22T22:45:59.219Z",
-      "createdAt": "2026-05-22T22:45:59.219Z",
-      "role": "workflow:owner",
-      "workflowId": "alik1C8sXr857rY7",
-      "projectId": "9rLUju41pxF01khS",
-      "project": {
-        "updatedAt": "2026-05-18T14:07:07.992Z",
-        "createdAt": "2026-05-18T13:55:16.416Z",
-        "id": "9rLUju41pxF01khS",
-        "name": "Paul Stern <paulj@liftnow.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
-      }
-    }
-  ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-27T18:40:35.757Z",
-    "createdAt": "2026-05-27T18:40:35.757Z",
-    "versionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
+    "updatedAt": "2026-05-28T02:29:01.846Z",
+    "createdAt": "2026-05-28T02:29:01.846Z",
+    "versionId": "0c69ec1a-8c1f-4c86-af91-4a39ce685e4c",
     "workflowId": "alik1C8sXr857rY7",
     "nodes": [
       {
@@ -713,7 +695,7 @@
         ],
         "parameters": {
           "method": "GET",
-          "url": "={{ $json.fetchedUrl }}",
+          "url": "={{ $('Filter Content Pages').itemMatching($itemIndex).json.fetchedUrl || $json.fetchedUrl || 'about:blank' }}",
           "sendHeaders": true,
           "headerParameters": {
             "parameters": [
@@ -735,7 +717,8 @@
         },
         "retryOnFail": true,
         "maxTries": 3,
-        "waitBetweenTries": 5000
+        "waitBetweenTries": 5000,
+        "continueOnFail": true
       },
       {
         "id": "preserve",
@@ -863,7 +846,7 @@
           200
         ],
         "parameters": {
-          "jsCode": "// Process ALL pages \u2014 emit one item per page with patchPayload (or noAutoFix flag)\nconst BYLINE_HTML = \"<p><em>By Paul Stern, VP of Public Sector Sales \\u2014 Liftnow</em></p>\\n\\n\";\nconst CTA_HTML = \"\\n<hr/>\\n<div class=\\\"liftnow-cta\\\">\\n  <h3>Ready to spec your fleet's lifts?</h3>\\n  <p>Send your vehicle list and bay dimensions to <a href=\\\"mailto:gov@liftnow.com\\\">gov@liftnow.com</a>. Or call <a href=\\\"tel:18005438669\\\">1-800-LIFT-NOW</a>.</p>\\n</div>\\n\";\nconst CONTRACTS_TAGLINE_HTML = \"\\n<p style=\\\"font-size:0.85em;color:#666;margin-top:2em\\\">\\n<strong>Liftnow contracts:</strong> Sourcewell 121223-LFT \\u00b7 NASPO CW7258 \\u00b7 Florida Sheriffs FSA23-EQU21.0\\n</p>\\n\";\n\nconst out = [];\nfor (const item of $input.all()) {\n  const r = item.json;\n  let patchedHtml = r.currentHtml || '';\n  const autoFixesApplied = [];\n\n  for (const d of (r.defects || [])) {\n    if (!d.autoFixable) continue;\n    if (d.type === 'MISSING_BYLINE') {\n      const headingMatch = patchedHtml.match(/<h1[^>]*>[\\s\\S]*?<\\/h1>/i);\n      if (headingMatch) {\n        const idx = headingMatch.index + headingMatch[0].length;\n        patchedHtml = patchedHtml.slice(0, idx) + '\\n\\n' + BYLINE_HTML + patchedHtml.slice(idx);\n      } else {\n        patchedHtml = BYLINE_HTML + patchedHtml;\n      }\n      autoFixesApplied.push('MISSING_BYLINE');\n    } else if (d.type === 'MISSING_CTA') {\n      patchedHtml = patchedHtml + '\\n\\n' + CTA_HTML;\n      autoFixesApplied.push('MISSING_CTA');\n    } else if (d.type === 'MISSING_CONTRACTS_TAGLINE') {\n      patchedHtml = patchedHtml + '\\n\\n' + CONTRACTS_TAGLINE_HTML;\n      autoFixesApplied.push('MISSING_CONTRACTS_TAGLINE');\n    }\n  }\n\n  if (!autoFixesApplied.length) {\n    out.push({json: {noAutoFix: true, ...r}});\n  } else {\n    out.push({json: {\n      ...r,\n      autoFixesApplied,\n      patchedHtml,\n      patchPayload: { content: patchedHtml }\n    }});\n  }\n}\nreturn out;\n"
+          "jsCode": "// Process ALL pages \u2014 emit one item per page with patchPayload (or noAutoFix flag).\n// P1-B AUTHORITY BOUNDS:\n//   MAX_AUTO_PATCHES_PER_RUN = 25 (cap total fixes across all pages in this run)\n//   MAX_AUTO_PATCHES_PER_PAGE = 3 (cap per-page fixes; defends against runaway page)\n// When a cap is hit, remaining defects/pages are skipped with a reason.\nconst MAX_AUTO_PATCHES_PER_RUN = 25;\nconst MAX_AUTO_PATCHES_PER_PAGE = 3;\n\nconst BYLINE_HTML = \"<p><em>By Paul Stern, VP of Public Sector Sales \u2014 Liftnow</em></p>\\n\\n\";\nconst CTA_HTML = \"\\n<hr/>\\n<div class=\\\"liftnow-cta\\\">\\n  <h3>Ready to spec your fleet's lifts?</h3>\\n  <p>Send your vehicle list and bay dimensions to <a href=\\\"mailto:gov@liftnow.com\\\">gov@liftnow.com</a>. Or call <a href=\\\"tel:18005438669\\\">1-800-LIFT-NOW</a>.</p>\\n</div>\\n\";\nconst CONTRACTS_TAGLINE_HTML = \"\\n<p style=\\\"font-size:0.85em;color:#666;margin-top:2em\\\">\\n<strong>Liftnow contracts:</strong> Sourcewell 121223-LFT \u00b7 NASPO CW7258 \u00b7 Florida Sheriffs FSA23-EQU21.0\\n</p>\\n\";\n\nconst out = [];\nlet runTotal = 0;\nlet runSkippedByCap = 0;\n\nfor (const item of $input.all()) {\n  const r = item.json;\n  let patchedHtml = r.currentHtml || '';\n  const autoFixesApplied = [];\n  const autoFixesSkippedByCap = [];\n\n  // If per-run cap already hit, mark this page as noAutoFix\n  if (runTotal >= MAX_AUTO_PATCHES_PER_RUN) {\n    out.push({json: {noAutoFix: true, capReason: 'per_run_cap_hit', runTotal, ...r}});\n    continue;\n  }\n\n  for (const d of (r.defects || [])) {\n    if (!d.autoFixable) continue;\n\n    // Per-page cap\n    if (autoFixesApplied.length >= MAX_AUTO_PATCHES_PER_PAGE) {\n      autoFixesSkippedByCap.push({type: d.type, reason: 'per_page_cap'});\n      continue;\n    }\n    // Per-run cap\n    if (runTotal >= MAX_AUTO_PATCHES_PER_RUN) {\n      autoFixesSkippedByCap.push({type: d.type, reason: 'per_run_cap'});\n      runSkippedByCap += 1;\n      continue;\n    }\n\n    if (d.type === 'MISSING_BYLINE') {\n      const headingMatch = patchedHtml.match(/<h1[^>]*>[\\s\\S]*?<\\/h1>/i);\n      if (headingMatch) {\n        const idx = headingMatch.index + headingMatch[0].length;\n        patchedHtml = patchedHtml.slice(0, idx) + '\\n\\n' + BYLINE_HTML + patchedHtml.slice(idx);\n      } else {\n        patchedHtml = BYLINE_HTML + patchedHtml;\n      }\n      autoFixesApplied.push('MISSING_BYLINE');\n      runTotal += 1;\n    } else if (d.type === 'MISSING_CTA') {\n      patchedHtml = patchedHtml + '\\n\\n' + CTA_HTML;\n      autoFixesApplied.push('MISSING_CTA');\n      runTotal += 1;\n    } else if (d.type === 'MISSING_CONTRACTS_TAGLINE') {\n      patchedHtml = patchedHtml + '\\n\\n' + CONTRACTS_TAGLINE_HTML;\n      autoFixesApplied.push('MISSING_CONTRACTS_TAGLINE');\n      runTotal += 1;\n    }\n  }\n\n  if (!autoFixesApplied.length) {\n    out.push({json: {noAutoFix: true, autoFixesSkippedByCap, ...r}});\n  } else {\n    out.push({json: {\n      ...r,\n      autoFixesApplied,\n      autoFixesSkippedByCap,\n      patchedHtml,\n      patchPayload: { content: patchedHtml },\n      _authority_caps: { MAX_AUTO_PATCHES_PER_RUN, MAX_AUTO_PATCHES_PER_PAGE, runTotalAfter: runTotal },\n    }});\n  }\n}\n\n// Attach run-level summary to the first item so Build Summary Ticket can read it\nif (out.length > 0) {\n  out[0].json._runStats = {\n    autoPatchesAppliedThisRun: runTotal,\n    autoPatchesSkippedByCapThisRun: runSkippedByCap,\n    cap_per_run: MAX_AUTO_PATCHES_PER_RUN,\n    cap_per_page: MAX_AUTO_PATCHES_PER_PAGE,\n  };\n}\n\nreturn out;\n"
         }
       },
       {
@@ -1195,24 +1178,6 @@
     "authors": "Paul Stern",
     "name": null,
     "description": null,
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-05-27T18:40:35.804Z",
-        "id": 890,
-        "workflowId": "alik1C8sXr857rY7",
-        "versionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
-        "event": "deactivated",
-        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
-      },
-      {
-        "createdAt": "2026-05-27T18:40:35.821Z",
-        "id": 891,
-        "workflowId": "alik1C8sXr857rY7",
-        "versionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
-        "event": "activated",
-        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
-      }
-    ]
+    "autosaved": false
   }
 }

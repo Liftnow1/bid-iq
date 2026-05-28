@@ -243,5 +243,29 @@ export async function ensureSchema() {
   await sql`CREATE INDEX IF NOT EXISTS idx_handoffs_source_ticket ON agent_handoffs (source_ticket_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_handoffs_to_agent ON agent_handoffs (to_agent)`;
 
+  // ---------- self_reject_log ----------
+  // Owl (Content Producer) and other content agents file rejected drafts here
+  // so we can build a top-failed-checks aggregate view. Replaces the previous
+  // staticData-only logging that was invisible outside n8n.
+  // Schema per audit/09-fix-plan.md P1-D.
+  await sql`
+    CREATE TABLE IF NOT EXISTS self_reject_log (
+      id BIGSERIAL PRIMARY KEY,
+      agent TEXT NOT NULL,
+      piece_type TEXT,
+      url TEXT,
+      title TEXT,
+      draft_preview TEXT,
+      word_count INT,
+      failed_checks JSONB NOT NULL,
+      checks_full JSONB,
+      n8n_execution_id TEXT,
+      source_handoff_id BIGINT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_self_reject_created ON self_reject_log (created_at DESC)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_self_reject_agent ON self_reject_log (agent, created_at DESC)`;
+
   schemaReady = true;
 }

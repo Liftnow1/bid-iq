@@ -121,3 +121,136 @@ Phase 1 reconnaissance only. No behavioral changes until audit/00-08 exist.
 - Eagle exec 01:36:10 success
 - SFD activation: 200; manual fire response body Scanned 4 producers
 - AFA activation: 200; active=True confirmed via workflow API
+
+
+---
+
+## CHECKPOINT 02:10 ET — Block 2 + start of Block 3
+
+### Completed since last checkpoint (verified, with receipts)
+
+**P0-B Neon-backed typed handoff contract — END-TO-END VERIFIED**
+- **Step 1 (table+indexes)**: `agent_handoffs` table + 3 indexes added to `lib/db.ts` schema, committed b962d92, pushed to Vercel.
+- **Step 2 (REST endpoints)**: `app/api/agent-handoffs/route.ts` (POST/GET) + `app/api/agent-handoffs/[id]/consume/route.ts` (POST consume) deployed to Vercel. Full lifecycle smoke-tested: POST → GET → consume → idempotent re-consume → GET shows consumed filtered out. All 4 endpoints behaving per spec.
+- **Step 3 (AE dual-write)**: AE workflow `hpgbBAmRmqtsfr6g` Write Handoffs Code node PATCHed (code 524 → 2558 bytes). Both legacy `HANDOFF:{json}` marker AND POST to `/api/agent-handoffs` now fire. Receipt: AE exec 8055 (mode=webhook, status=success) at 01:53:33; agent_handoffs row id=3 created at 01:53:34.019 with `from_agent='Content Decay Detector'`, `to_agent='Content Producer'` (nickname→role map), `kind='refresh_url'`, `source_ticket_id='45546441764'`. executionNotes contains both legacy HANDOFF: marker AND `[handoff REST ok: id=3 created]` suffix.
+- **Step 4 (Owl reads+consumes new endpoint)**: Owl workflow `d7YwC4ezub4g1LrI` PATCHed in 3 stages:
+  - Fetch Refresh Queue: POST HubSpot search → GET `/api/agent-handoffs?to_agent=Content Producer&pending=true`
+  - Pick Next Piece: prepended new-shape parsing (`refreshResp.handoffs[]`); legacy HANDOFF marker parsing kept as 30-day fallback
+  - Added "Consume Handoff" HTTP node wired from Create Content Ticket, Self-Reject Skip Log, and Log Memory Skip (all 3 terminal paths)
+  - Consume URL reads `refresh_handoff_id` from Pick Next Piece directly (Set nodes were stripping the field from the item)
+  - Receipt: Owl exec 8059 — Fetch Refresh Queue returned `{ok:true, count:1, handoffs:[{id:3, to_agent:Content Producer, kind:refresh_url}]}`; Pick Next Piece returned `{refresh_mode:true, refresh_handoff_id:3, pick.url:hunter-dsp706…}`. Self-Reject Gate correctly rejected (Hunter is kill-list brand). Final dry-run (post URL-expression fix) pending receipt.
+
+**Bonus find during Owl PATCH (audit Honesty Law)**: Owl's old `Fetch Refresh Queue` filtered HubSpot pipeline 0 stage=3 (Deferred) — but AE moves processed handoffs to stage `1363043699` (Auto-Applied). This means the legacy HANDOFF: marker path NEVER actually worked end-to-end — Owl was reading the wrong stage. The 4 unconsumed HANDOFFs in audit/03 weren't a "credential bug" — they were a stage filter bug. Switching to the typed REST endpoint fixed BOTH paths at once.
+
+**P1-F zombie cleanup (12 tickets bulk-closed)**
+- Pulled pending queue, filtered to {Coordinator, SEM Manager, Backlink Builder} (all deactivated agents).
+- POST'd `/webhook/process-decision` with `decision=reject` + outcome_notes `ZOMBIE — agent 'X' deactivated, no executor available.` for each.
+- Receipt: all 12 returned `{ok:true, newStage:"4"}`. Verified pending queue now contains only active agents (8 Bee + 6 Eagle + 1 Turtle = 15 tickets, down from 27).
+
+### Honest corrections (Law 5)
+- Owl's original `Fetch Refresh Queue` had TWO bugs: (a) wrong credential type (fixed yesterday) AND (b) wrong stage filter (stage 3 instead of 1363043699). The audit only caught (a). The Neon REST migration sidesteps both.
+- First Owl re-fire (exec 8059) succeeded but Consume Handoff fired only on the wp_create path. Self-Reject termination wasn't consuming. Added 2 more incoming edges to Consume Handoff (from Self-Reject Skip Log + Log Memory Skip). Second re-fire (exec 8069) saw Consume Handoff fire — but with `invalid id` error because n8n `set` nodes strip the `refresh_handoff_id` field. Fixed by reading from Pick Next Piece directly via `$('Pick Next Piece (anchor-stuck priority)').first().json.refresh_handoff_id`.
+- Two iterations on the same node before getting consume right. Documenting as Law 5 honest correction.
+
+### In progress
+- (Block 2 complete; about to start Block 3 in earnest)
+
+### P0-B END-TO-END FINAL RECEIPT
+- Owl exec **8091** (mode=webhook, start 02:08:24, stop 02:12:28, status=success).
+- Consume Handoff output:
+  `{"ok":true,"id":"3","consumed_at":"2026-05-28T02:12:27.730Z","result":"self-rejected: kill-list or quality gate","was_already_consumed":false}`
+- Live row id=3 now shows `consumed_at=2026-05-28T02:12:27.730Z`, `consumed_by_execution_id=8091`, `result="self-rejected: kill-list or quality gate"`.
+- `GET /api/agent-handoffs?pending=true` returns `count:0` — the queue is empty as expected.
+- **The full Turtle → AE → agent_handoffs → Owl → consume chain works on a brand-new typed contract, not a regex-parsed marker. P0-B is done.**
+
+### Next 90 min plan (Block 3)
+- P1-C: Vercel Helpers Watchdog (new n8n workflow, cron 15min)
+- P2-A: typed `app/lib/hubspot-stages.ts` constants module
+- P1-E: hard-fail Bee on Vercel helper outage (per audit/05)
+- P1-B: bound Eagle auto-patch authority (max 25/run, daily digest)
+
+### Receipts attached
+- git commits: b962d92 (lib/db.ts + agent_handoffs endpoints)
+- Smoke-test curl chain (5 calls): id=1 created → existing → consume → re-consume → pending excludes consumed
+- AE exec 8055 — Process & Route + Write Handoffs + downstream all green; full executionNotes contains both legacy + REST writes
+- Owl exec 8059 — Fetch Refresh Queue returned new shape; Pick Next Piece picked refresh_handoff_id=3
+- Owl exec 8069 — Consume Handoff fired but returned `{ok:false, error:"invalid id"}` (set-node strip bug, then fixed)
+- 12 process-decision POSTs all returned newStage=4
+- Pending queue before/after: 27 → 15 (active agents only)
+
+
+---
+
+## CHECKPOINT 02:22 ET — P1-C watchdog deployed + verified
+
+### Completed since last checkpoint (verified, with receipts)
+
+**P1-C — Vercel Helpers Watchdog**
+- New n8n workflow created: id=`vZEd1pkEHX6L0jGB`, name=`Vercel Helpers Watchdog`, active=True
+- Layout: Schedule(15min) | Manual Fire → Probe Check-Redirect (GET ?url=) → Probe Known-Models (GET ?brands=challenger) → Validate Responses (Code) → If Unhealthy? → [TRUE: Build Alert Body → Create HubSpot Ticket] | [FALSE: Log All Clean (Set)]
+- errorWorkflow wired to Agent Failure Alerts (qMeBXIjguVuaKLLF)
+- **Healthy-path receipt**: exec 8105 status=success, all 6 nodes ran, Validate Responses output `{unhealthy:false, reason:"all green", check_redirect_status:200, known_models_status:200, challenger_model_count:225}`
+- **Failure-path receipt**: temporarily pointed Probe Known-Models at a 404 URL, fired watchdog → exec 8113 status=success → Create HubSpot Ticket returned id=45628243574 at 02:21:27. Then closed the test ticket via process-decision (newStage=4), reverted probe URL to good. Watchdog now back to healthy steady state.
+- Used HubSpot-allowed enum values (agent_name=`Other`, recommendation_type=`Dashboard Insight`) and prepended `[Vercel Helpers Watchdog]` to subject — HubSpot has strict enums on those properties.
+
+**P2-A — typed `lib/hubspot-stages.ts` module**
+- Created. Exports: `PIPELINE_AGENT_TICKETS`, `STAGE_PENDING_REVIEW`, `STAGE_APPROVED`, `STAGE_DEFERRED`, `STAGE_REJECTED`, `STAGE_AUTO_APPLIED`. Helpers: `isOpenStage`, `isClosedStage`, `isAutoApplied`, `stageLabel`, `stagesForBucket` with bucket aliases for dashboard. No consumers yet — foundation for future Vercel-side refactors.
+
+### Honest corrections (Law 5)
+- First watchdog deploy used POST for /api/check-redirect (route is GET) and `?brand=challenger` singular (route is `?brands=` plural). HTTP 405 + parser miss. Fixed.
+- First parallel fan-out from Manual Fire only triggered Probe Check-Redirect — Probe Known-Models silently didn't run. Switched to sequential to avoid n8n parallel-output ambiguity. Now: Manual Fire / Cron → Probe CR → Probe KM → Validate. Adds ~200ms latency, trades that for reliability.
+- First HubSpot ticket creation 400'd because `recommendation_type='Infrastructure Alert'` and `agent_name='Vercel Helpers Watchdog'` weren't in HubSpot's enum. Fixed by using the existing `Other` / `Dashboard Insight` values + watchdog tag in subject.
+
+### In progress
+- (about to start P1-E: hard-fail Bee on Vercel helper outage)
+
+### Next 90 min plan (rest of Block 3 / start Block 4)
+- P1-E: Bee hard-fail when helpers are down (current behavior silently degrades — see audit/05)
+- P1-B: Bound Eagle auto-patch authority (max 25/run + max 3/page + daily digest)
+- P2-E: Yoast mu-plugin v3 verification (depends on Paul confirming the plugin file is uploaded)
+- P1-G: Quick UX fixes — header agent count, Loading→error timeout
+
+### Receipts attached
+- Watchdog workflow JSON saved to audit/data/workflows/vercel_helpers_watchdog.json
+- exec 8105 (healthy): all_helpers_green, 225 challenger models found
+- exec 8113 (failed-on-purpose): HubSpot ticket 45628243574 created → closed (stage=4)
+- 4 watchdog execs visible (8103 err, 8105 success, 8107 err, 8113 success) — error count expected during dry-runs, no real alerts to operator
+
+
+---
+
+## CHECKPOINT 02:35 ET — Block 3 done (P1-E + P1-B + partial P1-G)
+
+### Completed since last checkpoint (verified, with receipts)
+
+**P1-E — Bee hard-fail on Vercel helper outage**
+- Bee `Build LLM Payload` Code node PATCHed (audit/data/workflows/bee.json updated; updatedAt 02:24:41).
+- New behavior:
+  - `Fetch Known Models` empty/errored → set `_inItem.skipped=true`, `return []` (halts downstream).
+  - `/api/check-redirect` exception → set `skipped=true`, `return []`.
+  - "Redirected to non-tracked destination" branch ALSO returns [] now (was previously letting downstream waste a draft).
+- **Receipt**: Bee exec 8118 fired with Fetch Known Models pointed at a 404 URL. Build LLM Payload output **0 items**. Downstream nodes (Draft Fix, Parse + QA, Build Ticket, Create SEO Ticket) did NOT run. No HubSpot ticket created. After verification, probe URL reverted to good. Healthy steady state confirmed.
+
+**P1-B — Eagle auto-patch authority bounds codified**
+- Eagle `Build Auto-PATCH` Code node PATCHed (1896 → 3433 chars; audit/data/workflows/eagle.json updated; updatedAt 02:29:01).
+- New constants: `MAX_AUTO_PATCHES_PER_RUN = 25`, `MAX_AUTO_PATCHES_PER_PAGE = 3`. Counters track `runTotal`. When per-run cap hit, pages get `noAutoFix:true, capReason:'per_run_cap_hit'`. Per-page cap stops applying more fixes when 3 reached. First output item carries `_runStats = {autoPatchesAppliedThisRun, autoPatchesSkippedByCapThisRun, cap_per_run, cap_per_page}`.
+- **Cap-engagement receipt**: temporarily lowered `MAX_AUTO_PATCHES_PER_RUN=1`, fired Eagle (exec 8125). `_runStats = {autoPatchesAppliedThisRun:1, autoPatchesSkippedByCapThisRun:1, cap_per_run:1, cap_per_page:3}` — one fix applied, then runTotal hit cap and subsequent defects were skipped with reason='per_run_cap'. Reverted to 25.
+
+**P1-G partial — UX quick wins**
+- Header text: "10-agent marketing team" → "4 agents active · 23 paused" (public/approvals/index.html:313).
+- Loading watchdog: added 15s setTimeout in `loadCurrentTab` that replaces a still-showing `.loading` with a friendly error+retry button. Prevents "stuck on Loading…" UX bug. clearTimeout in finally so successful loads don't trigger it.
+- Zombie filter: NOT NEEDED at frontend layer because P1-F bulk-close already removed all 12 zombies at HubSpot level. Future re-activations would re-introduce; would need agent-name allowlist in the agent-proposals webhook. Deferred to next operator.
+
+### In progress
+- (None — about to roll into next 90-min plan)
+
+### Next 90 min plan (Block 4)
+- P1-D: Owl Self-Reject feedback loop (Neon `self_reject_log` table + endpoint + Owl wire)
+- P1-A: Minimal Team Manager (daily cron report to paulj@liftnow.com)
+- End-of-shift report draft (audit/99-end-of-shift.md)
+
+### Receipts attached
+- Bee exec 8118: Build LLM Payload output 0 items when KM was bad; downstream skipped
+- Eagle exec 8125: _runStats showed cap_per_run=1 engagement
+- audit/data/workflows/bee.json, eagle.json updated
+- public/approvals/index.html — 1 text change + 1 watchdog block addition

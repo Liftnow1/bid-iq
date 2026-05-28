@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-27T22:32:44.080Z",
+  "updatedAt": "2026-05-28T02:08:23.846Z",
   "createdAt": "2026-05-22T22:53:28.370Z",
   "id": "d7YwC4ezub4g1LrI",
   "name": "Agent 1 \u2014 Content Producer v2",
@@ -120,7 +120,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Refresh-queue priority branch (added 2026-05): check approved Turtle handoffs first.\nconst refreshResp = (() => { try { return $(\"Fetch Refresh Queue\").first().json; } catch(e) { return null; }})();\nconst refreshResults = (refreshResp && refreshResp.results) || [];\nlet refreshPick = null;\nfor (const t of refreshResults) {\n  const props = t.properties || {};\n  const notes = props.outcome_notes || \"\";\n  const idx = notes.indexOf(\"HANDOFF:\");\n  if (idx < 0) continue;\n  const tail = notes.slice(idx + \"HANDOFF:\".length).trim();\n  // Try to parse a JSON object starting at the first '{'.\n  const start = tail.indexOf(\"{\");\n  if (start < 0) continue;\n  // Balance braces to find the end of the JSON object.\n  let depth = 0, end = -1;\n  for (let i = start; i < tail.length; i++) {\n    const ch = tail[i];\n    if (ch === \"{\") depth++;\n    else if (ch === \"}\") { depth--; if (depth === 0) { end = i; break; } }\n  }\n  if (end < 0) continue;\n  let handoff = null;\n  try { handoff = JSON.parse(tail.slice(start, end + 1)); } catch(e) { continue; }\n  if (!handoff || handoff.to !== \"Owl\") continue;\n  const payload = handoff.payload || {};\n  if (payload.kind !== \"refresh_url\" || !payload.url) continue;\n  refreshPick = {\n    piece_type: \"refresh\",\n    url: payload.url,\n    title: payload.title || props.subject || \"(refresh) \" + payload.url,\n    click_drop_pct: payload.click_drop_pct,\n    position_drop: payload.position_drop,\n    source_ticket_id: t.id || props.id,\n    source_agent: \"Content Decay Detector\",\n    target_keyword: payload.target_keyword || null,\n    parent_anchor_url: payload.parent_anchor_url || null,\n  };\n  break;\n}\nif (refreshPick) {\n  return [{json:{\n    pick: refreshPick,\n    refresh_mode: true,\n    total_candidates: 1,\n    refresh_queue_count: refreshResults.length,\n    note: \"Picked refresh request from approved Turtle handoff; bypassing cluster backlog.\",\n  }}];\n}\n\n// --- Fallback: existing anchor-stuck cluster picker (unchanged behavior) ---\nconst wpResp=$(\"Fetch Published Pages\").first().json;const gscResp=$(\"GSC Anchor Performance\").first().json;const list=Array.isArray(wpResp)?wpResp:(wpResp.results||[]);const publishedAnchors=list.filter(p=>(p.link||\"\").includes(\"/resources/\")).map(p=>({slug:p.slug,link:p.link,title:(p.title&&p.title.rendered)||p.slug,date:p.date}));const gscRows=gscResp.rows||[];const positionByUrl={};for(const r of gscRows){const url=r.keys?.[0];\n      // REFRESH_QUEUE_COMPETITOR_FILTER \u2014 skip URLs that contain competitor brand slugs\n      const COMPETITOR_SLUGS = /(hunter|mohawk|stertil|rotary|snap-on|ari-hetra|whip|bendpak|challenger)/i;\n      if (COMPETITOR_SLUGS.test(handoffUrl || '')) {\n        // Skip this ticket \u2014 Owl can't refresh a competitor-branded page (voice violation)\n        continue;\n      }if(!url)continue;positionByUrl[url]=positionByUrl[url]||{positionSum:0,impressions:0};positionByUrl[url].positionSum+=(r.position||0)*(r.impressions||1);positionByUrl[url].impressions+=(r.impressions||1);}const anchorStatus=publishedAnchors.map(a=>{const p=positionByUrl[a.link]||{};const avgPos=p.impressions?p.positionSum/p.impressions:null;return{...a,avg_position:avgPos,impressions:p.impressions||0,is_stuck:avgPos!==null&&avgPos>=11&&avgPos<=20};});const anchor6Live=publishedAnchors.some(a=>/anchor-6|anchor6/.test(a.slug.toLowerCase())||/^\\/resources\\/[a-z0-9-]+\\/$/.test(a.link)&&publishedAnchors.length>=6);const CLUSTER_BACKLOG={1:[{title:\"Two-Post vs Four-Post HD Lifts: Decision Framework for Fleet Bays\",target_keyword:\"two post vs four post heavy duty lift\"},{title:\"Heavy-Duty Truck Lift Capacity Guide: Sizing for Specific Vehicle Classes\",target_keyword:\"heavy duty truck lift capacity\"},{title:\"Buy America Act and Heavy-Duty Truck Lift Procurement\",target_keyword:\"buy america vehicle lift\"}],2:[{title:\"Mobile Column Lift Capacity Calculator: Sizing for Transit Fleet Vehicles\",target_keyword:\"mobile column lift capacity transit\"},{title:\"Wireless vs Cabled Mobile Column Lifts: When Each Makes Sense\",target_keyword:\"wireless mobile column lifts\"},{title:\"School District Bus Maintenance: Multi-Depot Mobile Column Strategies\",target_keyword:\"school district mobile column lift\"},{title:\"Challenger CLHM vs Stertil-Koni Mobile Columns Spec Comparison\",target_keyword:\"clhm mobile column comparison\"}],3:[{title:\"Parallelogram vs Cassette In-Ground Lifts: Heavy-Duty Comparison\",target_keyword:\"parallelogram vs cassette in-ground lift\"},{title:\"Pit Lift Retrofit: When It Works, When It Does Not\",target_keyword:\"pit lift retrofit\"},{title:\"In-Ground Lift Inspection Requirements for Government Fleets\",target_keyword:\"in-ground lift inspection\"}],4:[{title:\"NASPO ValuePoint vs Sourcewell: Which Cooperative Contract Fits Your Fleet?\",target_keyword:\"naspo vs sourcewell vehicle lift\"},{title:\"Florida Sheriffs Association FSA23-EQU21.0: How Florida Agencies Buy Garage Equipment\",target_keyword:\"fsa garage equipment contract\"},{title:\"Buy America Compliance for Vehicle Lift Procurement\",target_keyword:\"buy america vehicle lift compliance\"}],5:[{title:\"Articulated Bus Service: Equipment Considerations for 60-Foot Vehicles\",target_keyword:\"articulated bus lift\"},{title:\"School Bus Service Bay Design: Equipment for Type C and Type D Buses\",target_keyword:\"school bus service bay design\"},{title:\"Transit Bus Maintenance Equipment: Beyond the Lift\",target_keyword:\"transit bus maintenance equipment\"}]};let pick;let pickType;if(!anchor6Live){pickType=\"anchor\";pick={piece_type:\"anchor\",title:\"Anchor #6 \u2014 TBD per Paul drafting\",target_keyword:\"(to be confirmed)\",pillar:\"TBD\",parent_anchor_url:null,note:\"Anchor #6 not detected in WP. Default: Paul drafts but agent shadow-drafts a cluster page below instead. Set 'agent_drafts_anchor_6=true' in staticData to override.\"};const sd=$getWorkflowStaticData(\"global\");if(sd.agent_drafts_anchor_6!==true){pickType=\"cluster_page_shadow\";}}const stuckAnchors=anchorStatus.filter(a=>a.is_stuck).sort((a,b)=>(a.avg_position||0)-(b.avg_position||0));const candidates=[];const URL_TO_ID={\"/resources/heavy-duty-truck-lifts-fleet-service-bays/\":1,\"/resources/mobile-column-lifts-transit-bus-heavy-duty-fleet/\":2,\"/resources/in-ground-and-pit-lifts/\":3,\"/resources/sourcewell-vehicle-lifts-buyers-guide/\":4,\"/resources/bus-lifts-vs-truck-lifts/\":5};const order=stuckAnchors.length?stuckAnchors.map(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]).filter(Boolean):[1,2,3,4,5];for(const anchorId of order){const clusters=CLUSTER_BACKLOG[anchorId]||[];const anchor=anchorStatus.find(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]===anchorId);if(!anchor)continue;for(const c of clusters){const slug=c.title.toLowerCase().replace(/[^a-z0-9]+/g,\"-\").slice(0,60);const alreadyLive=publishedAnchors.some(p=>p.slug.includes(slug.slice(0,30)));if(alreadyLive)continue;candidates.push({...c,piece_type:\"cluster_page\",parent_anchor_id:anchorId,parent_anchor_url:anchor.link,parent_anchor_title:anchor.title,parent_anchor_avg_position:anchor.avg_position,parent_anchor_is_stuck:anchor.is_stuck});}}if(pickType===\"cluster_page_shadow\"||pickType!==\"anchor\"){pick=candidates[0]||{piece_type:\"cluster_page\",title:\"(no candidate)\",note:\"All cluster pages from master plan \u00a74 backlog appear to be published.\"};}return [{json:{pick,refresh_mode:false,total_candidates:candidates.length,stuck_anchors:stuckAnchors.map(a=>({slug:a.slug,avg_position:a.avg_position})),anchor_6_live:anchor6Live}}];\n"
+        "jsCode": "// Refresh-queue priority branch (2026-05-28): prefers new /api/agent-handoffs shape,\n// falls back to legacy HubSpot HANDOFF: marker for the 30-day transition.\nconst refreshResp = (() => { try { return $(\"Fetch Refresh Queue\").first().json; } catch(e) { return null; }})();\nconst handoffRows = (refreshResp && refreshResp.handoffs) || [];\nconst refreshResults = (refreshResp && refreshResp.results) || [];\n\nlet refreshPick = null;\nlet refreshHandoffId = null;\n\n// === NEW shape: typed REST handoff queue ===\nfor (const row of handoffRows) {\n  if ((row.kind || \"\") !== \"refresh_url\") continue;\n  const payload = row.payload || {};\n  if (!payload.url) continue;\n  refreshPick = {\n    piece_type: \"refresh\",\n    url: payload.url,\n    title: payload.title || \"(refresh) \" + payload.url,\n    click_drop_pct: payload.click_drop_pct,\n    position_drop: payload.position_drop,\n    source_ticket_id: row.source_ticket_id || null,\n    source_agent: row.from_agent || \"Content Decay Detector\",\n    target_keyword: payload.target_keyword || null,\n    parent_anchor_url: payload.parent_anchor_url || null,\n  };\n  refreshHandoffId = row.id;\n  break;\n}\n\n// === LEGACY fallback: HubSpot tickets w/ HANDOFF: marker in outcome_notes ===\nif (!refreshPick) {\n  for (const t of refreshResults) {\n    const props = t.properties || {};\n    const notes = props.outcome_notes || \"\";\n    const idx = notes.indexOf(\"HANDOFF:\");\n    if (idx < 0) continue;\n    const tail = notes.slice(idx + \"HANDOFF:\".length).trim();\n    const start = tail.indexOf(\"{\");\n    if (start < 0) continue;\n    let depth = 0, end = -1;\n    for (let i = start; i < tail.length; i++) {\n      const ch = tail[i];\n      if (ch === \"{\") depth++;\n      else if (ch === \"}\") { depth--; if (depth === 0) { end = i; break; } }\n    }\n    if (end < 0) continue;\n    let handoff = null;\n    try { handoff = JSON.parse(tail.slice(start, end + 1)); } catch(e) { continue; }\n    if (!handoff || handoff.to !== \"Owl\") continue;\n    const payload = handoff.payload || {};\n    if (payload.kind !== \"refresh_url\" || !payload.url) continue;\n    refreshPick = {\n      piece_type: \"refresh\",\n      url: payload.url,\n      title: payload.title || props.subject || \"(refresh) \" + payload.url,\n      click_drop_pct: payload.click_drop_pct,\n      position_drop: payload.position_drop,\n      source_ticket_id: t.id || props.id,\n      source_agent: \"Content Decay Detector\",\n      target_keyword: payload.target_keyword || null,\n      parent_anchor_url: payload.parent_anchor_url || null,\n    };\n    break;\n  }\n}\n\nif (refreshPick) {\n  return [{json:{\n    pick: refreshPick,\n    refresh_mode: true,\n    refresh_handoff_id: refreshHandoffId,\n    total_candidates: 1,\n    refresh_queue_count: handoffRows.length || refreshResults.length,\n    note: refreshHandoffId\n      ? \"Picked refresh from /api/agent-handoffs row \" + refreshHandoffId\n      : \"Picked refresh from legacy HubSpot HANDOFF marker (transition fallback).\",\n  }}];\n}\n\n// --- Fallback: existing anchor-stuck cluster picker (unchanged behavior) ---\n// --- Fallback: existing anchor-stuck cluster picker (unchanged behavior) ---\nconst wpResp=$(\"Fetch Published Pages\").first().json;const gscResp=$(\"GSC Anchor Performance\").first().json;const list=Array.isArray(wpResp)?wpResp:(wpResp.results||[]);const publishedAnchors=list.filter(p=>(p.link||\"\").includes(\"/resources/\")).map(p=>({slug:p.slug,link:p.link,title:(p.title&&p.title.rendered)||p.slug,date:p.date}));const gscRows=gscResp.rows||[];const positionByUrl={};for(const r of gscRows){const url=r.keys?.[0];if(!url)continue;positionByUrl[url]=positionByUrl[url]||{positionSum:0,impressions:0};positionByUrl[url].positionSum+=(r.position||0)*(r.impressions||1);positionByUrl[url].impressions+=(r.impressions||1);}const anchorStatus=publishedAnchors.map(a=>{const p=positionByUrl[a.link]||{};const avgPos=p.impressions?p.positionSum/p.impressions:null;return{...a,avg_position:avgPos,impressions:p.impressions||0,is_stuck:avgPos!==null&&avgPos>=11&&avgPos<=20};});const anchor6Live=publishedAnchors.some(a=>/anchor-6|anchor6/.test(a.slug.toLowerCase())||/^\\/resources\\/[a-z0-9-]+\\/$/.test(a.link)&&publishedAnchors.length>=6);const CLUSTER_BACKLOG={1:[{title:\"Two-Post vs Four-Post HD Lifts: Decision Framework for Fleet Bays\",target_keyword:\"two post vs four post heavy duty lift\"},{title:\"Heavy-Duty Truck Lift Capacity Guide: Sizing for Specific Vehicle Classes\",target_keyword:\"heavy duty truck lift capacity\"},{title:\"Buy America Act and Heavy-Duty Truck Lift Procurement\",target_keyword:\"buy america vehicle lift\"}],2:[{title:\"Mobile Column Lift Capacity Calculator: Sizing for Transit Fleet Vehicles\",target_keyword:\"mobile column lift capacity transit\"},{title:\"Wireless vs Cabled Mobile Column Lifts: When Each Makes Sense\",target_keyword:\"wireless mobile column lifts\"},{title:\"School District Bus Maintenance: Multi-Depot Mobile Column Strategies\",target_keyword:\"school district mobile column lift\"},{title:\"Challenger CLHM vs Stertil-Koni Mobile Columns Spec Comparison\",target_keyword:\"clhm mobile column comparison\"}],3:[{title:\"Parallelogram vs Cassette In-Ground Lifts: Heavy-Duty Comparison\",target_keyword:\"parallelogram vs cassette in-ground lift\"},{title:\"Pit Lift Retrofit: When It Works, When It Does Not\",target_keyword:\"pit lift retrofit\"},{title:\"In-Ground Lift Inspection Requirements for Government Fleets\",target_keyword:\"in-ground lift inspection\"}],4:[{title:\"NASPO ValuePoint vs Sourcewell: Which Cooperative Contract Fits Your Fleet?\",target_keyword:\"naspo vs sourcewell vehicle lift\"},{title:\"Florida Sheriffs Association FSA23-EQU21.0: How Florida Agencies Buy Garage Equipment\",target_keyword:\"fsa garage equipment contract\"},{title:\"Buy America Compliance for Vehicle Lift Procurement\",target_keyword:\"buy america vehicle lift compliance\"}],5:[{title:\"Articulated Bus Service: Equipment Considerations for 60-Foot Vehicles\",target_keyword:\"articulated bus lift\"},{title:\"School Bus Service Bay Design: Equipment for Type C and Type D Buses\",target_keyword:\"school bus service bay design\"},{title:\"Transit Bus Maintenance Equipment: Beyond the Lift\",target_keyword:\"transit bus maintenance equipment\"}]};let pick;let pickType;if(!anchor6Live){pickType=\"anchor\";pick={piece_type:\"anchor\",title:\"Anchor #6 \u2014 TBD per Paul drafting\",target_keyword:\"(to be confirmed)\",pillar:\"TBD\",parent_anchor_url:null,note:\"Anchor #6 not detected in WP. Default: Paul drafts but agent shadow-drafts a cluster page below instead. Set 'agent_drafts_anchor_6=true' in staticData to override.\"};const sd=$getWorkflowStaticData(\"global\");if(sd.agent_drafts_anchor_6!==true){pickType=\"cluster_page_shadow\";}}const stuckAnchors=anchorStatus.filter(a=>a.is_stuck).sort((a,b)=>(a.avg_position||0)-(b.avg_position||0));const candidates=[];const URL_TO_ID={\"/resources/heavy-duty-truck-lifts-fleet-service-bays/\":1,\"/resources/mobile-column-lifts-transit-bus-heavy-duty-fleet/\":2,\"/resources/in-ground-and-pit-lifts/\":3,\"/resources/sourcewell-vehicle-lifts-buyers-guide/\":4,\"/resources/bus-lifts-vs-truck-lifts/\":5};const order=stuckAnchors.length?stuckAnchors.map(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]).filter(Boolean):[1,2,3,4,5];for(const anchorId of order){const clusters=CLUSTER_BACKLOG[anchorId]||[];const anchor=anchorStatus.find(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]===anchorId);if(!anchor)continue;for(const c of clusters){const slug=c.title.toLowerCase().replace(/[^a-z0-9]+/g,\"-\").slice(0,60);const alreadyLive=publishedAnchors.some(p=>p.slug.includes(slug.slice(0,30)));if(alreadyLive)continue;candidates.push({...c,piece_type:\"cluster_page\",parent_anchor_id:anchorId,parent_anchor_url:anchor.link,parent_anchor_title:anchor.title,parent_anchor_avg_position:anchor.avg_position,parent_anchor_is_stuck:anchor.is_stuck});}}if(pickType===\"cluster_page_shadow\"||pickType!==\"anchor\"){pick=candidates[0]||{piece_type:\"cluster_page\",title:\"(no candidate)\",note:\"All cluster pages from master plan \u00a74 backlog appear to be published.\"};}return [{json:{pick,refresh_mode:false,total_candidates:candidates.length,stuck_anchors:stuckAnchors.map(a=>({slug:a.slug,avg_position:a.avg_position})),anchor_6_live:anchor6Live}}];\n"
       },
       "id": "pick",
       "name": "Pick Next Piece (anchor-stuck priority)",
@@ -497,15 +497,63 @@
         100
       ],
       "parameters": {
+        "method": "GET",
+        "url": "https://bid-iq-neon.vercel.app/api/agent-handoffs?to_agent=Content%20Producer&pending=true&limit=5",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-agent-secret",
+              "value": "LiftnowAgentTeam_kS9-bGq2_xVtN4mP"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "consume-handoff-node",
+      "name": "Consume Handoff",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1800,
+        504
+      ],
+      "parameters": {
         "method": "POST",
-        "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "httpHeaderAuth",
+        "url": "={{ $('Pick Next Piece (anchor-stuck priority)').first().json.refresh_handoff_id ? ('https://bid-iq-neon.vercel.app/api/agent-handoffs/' + $('Pick Next Piece (anchor-stuck priority)').first().json.refresh_handoff_id + '/consume') : 'https://bid-iq-neon.vercel.app/api/agent-handoffs/0/consume' }}",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-agent-secret",
+              "value": "LiftnowAgentTeam_kS9-bGq2_xVtN4mP"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({filterGroups:[{filters:[{propertyName:\"hs_pipeline\",operator:\"EQ\",value:\"0\"},{propertyName:\"hs_pipeline_stage\",operator:\"EQ\",value:\"3\"},{propertyName:\"agent_name\",operator:\"EQ\",value:\"Content Decay Detector\"},{propertyName:\"hs_lastmodifieddate\",operator:\"GTE\",value:String($now.minus({days:14}).toMillis())}]}],properties:[\"id\",\"subject\",\"outcome_notes\",\"recommendation_detail\"],limit:5}) }}",
+        "jsonBody": "={{ JSON.stringify({execution_id: $execution.id, result: (  $('Create Content Ticket').isExecuted     ? ('drafted ticket ' + ($('Create Content Ticket').first().json.id || '?'))   : $('Self-Reject Skip Log').isExecuted     ? 'self-rejected: kill-list or quality gate'   : $('Log Memory Skip').isExecuted     ? 'memory-skipped: previously seen'   : 'unknown-terminal')}) }}",
         "options": {
-          "timeout": 30000,
+          "timeout": 8000,
           "response": {
             "response": {
               "neverError": true
@@ -513,12 +561,7 @@
           }
         }
       },
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "S7YZNtmkHgtF72gN",
-          "name": "HubSpot Private App"
-        }
-      }
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
@@ -714,6 +757,39 @@
           }
         ]
       ]
+    },
+    "Create Content Ticket": {
+      "main": [
+        [
+          {
+            "node": "Consume Handoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Self-Reject Skip Log": {
+      "main": [
+        [
+          {
+            "node": "Consume Handoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Memory Skip": {
+      "main": [
+        [
+          {
+            "node": "Consume Handoff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -728,34 +804,15 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
-  "activeVersionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
-  "versionCounter": 283,
+  "versionId": "cc2e7fb9-7ac9-4d72-b367-6f2d87cb36c0",
+  "activeVersionId": "cc2e7fb9-7ac9-4d72-b367-6f2d87cb36c0",
+  "versionCounter": 293,
   "triggerCount": 2,
-  "shared": [
-    {
-      "updatedAt": "2026-05-22T22:53:28.370Z",
-      "createdAt": "2026-05-22T22:53:28.370Z",
-      "role": "workflow:owner",
-      "workflowId": "d7YwC4ezub4g1LrI",
-      "projectId": "9rLUju41pxF01khS",
-      "project": {
-        "updatedAt": "2026-05-18T14:07:07.992Z",
-        "createdAt": "2026-05-18T13:55:16.416Z",
-        "id": "9rLUju41pxF01khS",
-        "name": "Paul Stern <paulj@liftnow.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
-      }
-    }
-  ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-27T22:32:44.083Z",
-    "createdAt": "2026-05-27T22:32:44.083Z",
-    "versionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
+    "updatedAt": "2026-05-28T02:08:23.849Z",
+    "createdAt": "2026-05-28T02:08:23.849Z",
+    "versionId": "cc2e7fb9-7ac9-4d72-b367-6f2d87cb36c0",
     "workflowId": "d7YwC4ezub4g1LrI",
     "nodes": [
       {
@@ -871,7 +928,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Refresh-queue priority branch (added 2026-05): check approved Turtle handoffs first.\nconst refreshResp = (() => { try { return $(\"Fetch Refresh Queue\").first().json; } catch(e) { return null; }})();\nconst refreshResults = (refreshResp && refreshResp.results) || [];\nlet refreshPick = null;\nfor (const t of refreshResults) {\n  const props = t.properties || {};\n  const notes = props.outcome_notes || \"\";\n  const idx = notes.indexOf(\"HANDOFF:\");\n  if (idx < 0) continue;\n  const tail = notes.slice(idx + \"HANDOFF:\".length).trim();\n  // Try to parse a JSON object starting at the first '{'.\n  const start = tail.indexOf(\"{\");\n  if (start < 0) continue;\n  // Balance braces to find the end of the JSON object.\n  let depth = 0, end = -1;\n  for (let i = start; i < tail.length; i++) {\n    const ch = tail[i];\n    if (ch === \"{\") depth++;\n    else if (ch === \"}\") { depth--; if (depth === 0) { end = i; break; } }\n  }\n  if (end < 0) continue;\n  let handoff = null;\n  try { handoff = JSON.parse(tail.slice(start, end + 1)); } catch(e) { continue; }\n  if (!handoff || handoff.to !== \"Owl\") continue;\n  const payload = handoff.payload || {};\n  if (payload.kind !== \"refresh_url\" || !payload.url) continue;\n  refreshPick = {\n    piece_type: \"refresh\",\n    url: payload.url,\n    title: payload.title || props.subject || \"(refresh) \" + payload.url,\n    click_drop_pct: payload.click_drop_pct,\n    position_drop: payload.position_drop,\n    source_ticket_id: t.id || props.id,\n    source_agent: \"Content Decay Detector\",\n    target_keyword: payload.target_keyword || null,\n    parent_anchor_url: payload.parent_anchor_url || null,\n  };\n  break;\n}\nif (refreshPick) {\n  return [{json:{\n    pick: refreshPick,\n    refresh_mode: true,\n    total_candidates: 1,\n    refresh_queue_count: refreshResults.length,\n    note: \"Picked refresh request from approved Turtle handoff; bypassing cluster backlog.\",\n  }}];\n}\n\n// --- Fallback: existing anchor-stuck cluster picker (unchanged behavior) ---\nconst wpResp=$(\"Fetch Published Pages\").first().json;const gscResp=$(\"GSC Anchor Performance\").first().json;const list=Array.isArray(wpResp)?wpResp:(wpResp.results||[]);const publishedAnchors=list.filter(p=>(p.link||\"\").includes(\"/resources/\")).map(p=>({slug:p.slug,link:p.link,title:(p.title&&p.title.rendered)||p.slug,date:p.date}));const gscRows=gscResp.rows||[];const positionByUrl={};for(const r of gscRows){const url=r.keys?.[0];\n      // REFRESH_QUEUE_COMPETITOR_FILTER \u2014 skip URLs that contain competitor brand slugs\n      const COMPETITOR_SLUGS = /(hunter|mohawk|stertil|rotary|snap-on|ari-hetra|whip|bendpak|challenger)/i;\n      if (COMPETITOR_SLUGS.test(handoffUrl || '')) {\n        // Skip this ticket \u2014 Owl can't refresh a competitor-branded page (voice violation)\n        continue;\n      }if(!url)continue;positionByUrl[url]=positionByUrl[url]||{positionSum:0,impressions:0};positionByUrl[url].positionSum+=(r.position||0)*(r.impressions||1);positionByUrl[url].impressions+=(r.impressions||1);}const anchorStatus=publishedAnchors.map(a=>{const p=positionByUrl[a.link]||{};const avgPos=p.impressions?p.positionSum/p.impressions:null;return{...a,avg_position:avgPos,impressions:p.impressions||0,is_stuck:avgPos!==null&&avgPos>=11&&avgPos<=20};});const anchor6Live=publishedAnchors.some(a=>/anchor-6|anchor6/.test(a.slug.toLowerCase())||/^\\/resources\\/[a-z0-9-]+\\/$/.test(a.link)&&publishedAnchors.length>=6);const CLUSTER_BACKLOG={1:[{title:\"Two-Post vs Four-Post HD Lifts: Decision Framework for Fleet Bays\",target_keyword:\"two post vs four post heavy duty lift\"},{title:\"Heavy-Duty Truck Lift Capacity Guide: Sizing for Specific Vehicle Classes\",target_keyword:\"heavy duty truck lift capacity\"},{title:\"Buy America Act and Heavy-Duty Truck Lift Procurement\",target_keyword:\"buy america vehicle lift\"}],2:[{title:\"Mobile Column Lift Capacity Calculator: Sizing for Transit Fleet Vehicles\",target_keyword:\"mobile column lift capacity transit\"},{title:\"Wireless vs Cabled Mobile Column Lifts: When Each Makes Sense\",target_keyword:\"wireless mobile column lifts\"},{title:\"School District Bus Maintenance: Multi-Depot Mobile Column Strategies\",target_keyword:\"school district mobile column lift\"},{title:\"Challenger CLHM vs Stertil-Koni Mobile Columns Spec Comparison\",target_keyword:\"clhm mobile column comparison\"}],3:[{title:\"Parallelogram vs Cassette In-Ground Lifts: Heavy-Duty Comparison\",target_keyword:\"parallelogram vs cassette in-ground lift\"},{title:\"Pit Lift Retrofit: When It Works, When It Does Not\",target_keyword:\"pit lift retrofit\"},{title:\"In-Ground Lift Inspection Requirements for Government Fleets\",target_keyword:\"in-ground lift inspection\"}],4:[{title:\"NASPO ValuePoint vs Sourcewell: Which Cooperative Contract Fits Your Fleet?\",target_keyword:\"naspo vs sourcewell vehicle lift\"},{title:\"Florida Sheriffs Association FSA23-EQU21.0: How Florida Agencies Buy Garage Equipment\",target_keyword:\"fsa garage equipment contract\"},{title:\"Buy America Compliance for Vehicle Lift Procurement\",target_keyword:\"buy america vehicle lift compliance\"}],5:[{title:\"Articulated Bus Service: Equipment Considerations for 60-Foot Vehicles\",target_keyword:\"articulated bus lift\"},{title:\"School Bus Service Bay Design: Equipment for Type C and Type D Buses\",target_keyword:\"school bus service bay design\"},{title:\"Transit Bus Maintenance Equipment: Beyond the Lift\",target_keyword:\"transit bus maintenance equipment\"}]};let pick;let pickType;if(!anchor6Live){pickType=\"anchor\";pick={piece_type:\"anchor\",title:\"Anchor #6 \u2014 TBD per Paul drafting\",target_keyword:\"(to be confirmed)\",pillar:\"TBD\",parent_anchor_url:null,note:\"Anchor #6 not detected in WP. Default: Paul drafts but agent shadow-drafts a cluster page below instead. Set 'agent_drafts_anchor_6=true' in staticData to override.\"};const sd=$getWorkflowStaticData(\"global\");if(sd.agent_drafts_anchor_6!==true){pickType=\"cluster_page_shadow\";}}const stuckAnchors=anchorStatus.filter(a=>a.is_stuck).sort((a,b)=>(a.avg_position||0)-(b.avg_position||0));const candidates=[];const URL_TO_ID={\"/resources/heavy-duty-truck-lifts-fleet-service-bays/\":1,\"/resources/mobile-column-lifts-transit-bus-heavy-duty-fleet/\":2,\"/resources/in-ground-and-pit-lifts/\":3,\"/resources/sourcewell-vehicle-lifts-buyers-guide/\":4,\"/resources/bus-lifts-vs-truck-lifts/\":5};const order=stuckAnchors.length?stuckAnchors.map(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]).filter(Boolean):[1,2,3,4,5];for(const anchorId of order){const clusters=CLUSTER_BACKLOG[anchorId]||[];const anchor=anchorStatus.find(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]===anchorId);if(!anchor)continue;for(const c of clusters){const slug=c.title.toLowerCase().replace(/[^a-z0-9]+/g,\"-\").slice(0,60);const alreadyLive=publishedAnchors.some(p=>p.slug.includes(slug.slice(0,30)));if(alreadyLive)continue;candidates.push({...c,piece_type:\"cluster_page\",parent_anchor_id:anchorId,parent_anchor_url:anchor.link,parent_anchor_title:anchor.title,parent_anchor_avg_position:anchor.avg_position,parent_anchor_is_stuck:anchor.is_stuck});}}if(pickType===\"cluster_page_shadow\"||pickType!==\"anchor\"){pick=candidates[0]||{piece_type:\"cluster_page\",title:\"(no candidate)\",note:\"All cluster pages from master plan \u00a74 backlog appear to be published.\"};}return [{json:{pick,refresh_mode:false,total_candidates:candidates.length,stuck_anchors:stuckAnchors.map(a=>({slug:a.slug,avg_position:a.avg_position})),anchor_6_live:anchor6Live}}];\n"
+          "jsCode": "// Refresh-queue priority branch (2026-05-28): prefers new /api/agent-handoffs shape,\n// falls back to legacy HubSpot HANDOFF: marker for the 30-day transition.\nconst refreshResp = (() => { try { return $(\"Fetch Refresh Queue\").first().json; } catch(e) { return null; }})();\nconst handoffRows = (refreshResp && refreshResp.handoffs) || [];\nconst refreshResults = (refreshResp && refreshResp.results) || [];\n\nlet refreshPick = null;\nlet refreshHandoffId = null;\n\n// === NEW shape: typed REST handoff queue ===\nfor (const row of handoffRows) {\n  if ((row.kind || \"\") !== \"refresh_url\") continue;\n  const payload = row.payload || {};\n  if (!payload.url) continue;\n  refreshPick = {\n    piece_type: \"refresh\",\n    url: payload.url,\n    title: payload.title || \"(refresh) \" + payload.url,\n    click_drop_pct: payload.click_drop_pct,\n    position_drop: payload.position_drop,\n    source_ticket_id: row.source_ticket_id || null,\n    source_agent: row.from_agent || \"Content Decay Detector\",\n    target_keyword: payload.target_keyword || null,\n    parent_anchor_url: payload.parent_anchor_url || null,\n  };\n  refreshHandoffId = row.id;\n  break;\n}\n\n// === LEGACY fallback: HubSpot tickets w/ HANDOFF: marker in outcome_notes ===\nif (!refreshPick) {\n  for (const t of refreshResults) {\n    const props = t.properties || {};\n    const notes = props.outcome_notes || \"\";\n    const idx = notes.indexOf(\"HANDOFF:\");\n    if (idx < 0) continue;\n    const tail = notes.slice(idx + \"HANDOFF:\".length).trim();\n    const start = tail.indexOf(\"{\");\n    if (start < 0) continue;\n    let depth = 0, end = -1;\n    for (let i = start; i < tail.length; i++) {\n      const ch = tail[i];\n      if (ch === \"{\") depth++;\n      else if (ch === \"}\") { depth--; if (depth === 0) { end = i; break; } }\n    }\n    if (end < 0) continue;\n    let handoff = null;\n    try { handoff = JSON.parse(tail.slice(start, end + 1)); } catch(e) { continue; }\n    if (!handoff || handoff.to !== \"Owl\") continue;\n    const payload = handoff.payload || {};\n    if (payload.kind !== \"refresh_url\" || !payload.url) continue;\n    refreshPick = {\n      piece_type: \"refresh\",\n      url: payload.url,\n      title: payload.title || props.subject || \"(refresh) \" + payload.url,\n      click_drop_pct: payload.click_drop_pct,\n      position_drop: payload.position_drop,\n      source_ticket_id: t.id || props.id,\n      source_agent: \"Content Decay Detector\",\n      target_keyword: payload.target_keyword || null,\n      parent_anchor_url: payload.parent_anchor_url || null,\n    };\n    break;\n  }\n}\n\nif (refreshPick) {\n  return [{json:{\n    pick: refreshPick,\n    refresh_mode: true,\n    refresh_handoff_id: refreshHandoffId,\n    total_candidates: 1,\n    refresh_queue_count: handoffRows.length || refreshResults.length,\n    note: refreshHandoffId\n      ? \"Picked refresh from /api/agent-handoffs row \" + refreshHandoffId\n      : \"Picked refresh from legacy HubSpot HANDOFF marker (transition fallback).\",\n  }}];\n}\n\n// --- Fallback: existing anchor-stuck cluster picker (unchanged behavior) ---\n// --- Fallback: existing anchor-stuck cluster picker (unchanged behavior) ---\nconst wpResp=$(\"Fetch Published Pages\").first().json;const gscResp=$(\"GSC Anchor Performance\").first().json;const list=Array.isArray(wpResp)?wpResp:(wpResp.results||[]);const publishedAnchors=list.filter(p=>(p.link||\"\").includes(\"/resources/\")).map(p=>({slug:p.slug,link:p.link,title:(p.title&&p.title.rendered)||p.slug,date:p.date}));const gscRows=gscResp.rows||[];const positionByUrl={};for(const r of gscRows){const url=r.keys?.[0];if(!url)continue;positionByUrl[url]=positionByUrl[url]||{positionSum:0,impressions:0};positionByUrl[url].positionSum+=(r.position||0)*(r.impressions||1);positionByUrl[url].impressions+=(r.impressions||1);}const anchorStatus=publishedAnchors.map(a=>{const p=positionByUrl[a.link]||{};const avgPos=p.impressions?p.positionSum/p.impressions:null;return{...a,avg_position:avgPos,impressions:p.impressions||0,is_stuck:avgPos!==null&&avgPos>=11&&avgPos<=20};});const anchor6Live=publishedAnchors.some(a=>/anchor-6|anchor6/.test(a.slug.toLowerCase())||/^\\/resources\\/[a-z0-9-]+\\/$/.test(a.link)&&publishedAnchors.length>=6);const CLUSTER_BACKLOG={1:[{title:\"Two-Post vs Four-Post HD Lifts: Decision Framework for Fleet Bays\",target_keyword:\"two post vs four post heavy duty lift\"},{title:\"Heavy-Duty Truck Lift Capacity Guide: Sizing for Specific Vehicle Classes\",target_keyword:\"heavy duty truck lift capacity\"},{title:\"Buy America Act and Heavy-Duty Truck Lift Procurement\",target_keyword:\"buy america vehicle lift\"}],2:[{title:\"Mobile Column Lift Capacity Calculator: Sizing for Transit Fleet Vehicles\",target_keyword:\"mobile column lift capacity transit\"},{title:\"Wireless vs Cabled Mobile Column Lifts: When Each Makes Sense\",target_keyword:\"wireless mobile column lifts\"},{title:\"School District Bus Maintenance: Multi-Depot Mobile Column Strategies\",target_keyword:\"school district mobile column lift\"},{title:\"Challenger CLHM vs Stertil-Koni Mobile Columns Spec Comparison\",target_keyword:\"clhm mobile column comparison\"}],3:[{title:\"Parallelogram vs Cassette In-Ground Lifts: Heavy-Duty Comparison\",target_keyword:\"parallelogram vs cassette in-ground lift\"},{title:\"Pit Lift Retrofit: When It Works, When It Does Not\",target_keyword:\"pit lift retrofit\"},{title:\"In-Ground Lift Inspection Requirements for Government Fleets\",target_keyword:\"in-ground lift inspection\"}],4:[{title:\"NASPO ValuePoint vs Sourcewell: Which Cooperative Contract Fits Your Fleet?\",target_keyword:\"naspo vs sourcewell vehicle lift\"},{title:\"Florida Sheriffs Association FSA23-EQU21.0: How Florida Agencies Buy Garage Equipment\",target_keyword:\"fsa garage equipment contract\"},{title:\"Buy America Compliance for Vehicle Lift Procurement\",target_keyword:\"buy america vehicle lift compliance\"}],5:[{title:\"Articulated Bus Service: Equipment Considerations for 60-Foot Vehicles\",target_keyword:\"articulated bus lift\"},{title:\"School Bus Service Bay Design: Equipment for Type C and Type D Buses\",target_keyword:\"school bus service bay design\"},{title:\"Transit Bus Maintenance Equipment: Beyond the Lift\",target_keyword:\"transit bus maintenance equipment\"}]};let pick;let pickType;if(!anchor6Live){pickType=\"anchor\";pick={piece_type:\"anchor\",title:\"Anchor #6 \u2014 TBD per Paul drafting\",target_keyword:\"(to be confirmed)\",pillar:\"TBD\",parent_anchor_url:null,note:\"Anchor #6 not detected in WP. Default: Paul drafts but agent shadow-drafts a cluster page below instead. Set 'agent_drafts_anchor_6=true' in staticData to override.\"};const sd=$getWorkflowStaticData(\"global\");if(sd.agent_drafts_anchor_6!==true){pickType=\"cluster_page_shadow\";}}const stuckAnchors=anchorStatus.filter(a=>a.is_stuck).sort((a,b)=>(a.avg_position||0)-(b.avg_position||0));const candidates=[];const URL_TO_ID={\"/resources/heavy-duty-truck-lifts-fleet-service-bays/\":1,\"/resources/mobile-column-lifts-transit-bus-heavy-duty-fleet/\":2,\"/resources/in-ground-and-pit-lifts/\":3,\"/resources/sourcewell-vehicle-lifts-buyers-guide/\":4,\"/resources/bus-lifts-vs-truck-lifts/\":5};const order=stuckAnchors.length?stuckAnchors.map(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]).filter(Boolean):[1,2,3,4,5];for(const anchorId of order){const clusters=CLUSTER_BACKLOG[anchorId]||[];const anchor=anchorStatus.find(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]===anchorId);if(!anchor)continue;for(const c of clusters){const slug=c.title.toLowerCase().replace(/[^a-z0-9]+/g,\"-\").slice(0,60);const alreadyLive=publishedAnchors.some(p=>p.slug.includes(slug.slice(0,30)));if(alreadyLive)continue;candidates.push({...c,piece_type:\"cluster_page\",parent_anchor_id:anchorId,parent_anchor_url:anchor.link,parent_anchor_title:anchor.title,parent_anchor_avg_position:anchor.avg_position,parent_anchor_is_stuck:anchor.is_stuck});}}if(pickType===\"cluster_page_shadow\"||pickType!==\"anchor\"){pick=candidates[0]||{piece_type:\"cluster_page\",title:\"(no candidate)\",note:\"All cluster pages from master plan \u00a74 backlog appear to be published.\"};}return [{json:{pick,refresh_mode:false,total_candidates:candidates.length,stuck_anchors:stuckAnchors.map(a=>({slug:a.slug,avg_position:a.avg_position})),anchor_6_live:anchor6Live}}];\n"
         },
         "id": "pick",
         "name": "Pick Next Piece (anchor-stuck priority)",
@@ -1248,15 +1305,63 @@
           100
         ],
         "parameters": {
+          "method": "GET",
+          "url": "https://bid-iq-neon.vercel.app/api/agent-handoffs?to_agent=Content%20Producer&pending=true&limit=5",
+          "authentication": "none",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-agent-secret",
+                "value": "LiftnowAgentTeam_kS9-bGq2_xVtN4mP"
+              },
+              {
+                "name": "Accept",
+                "value": "application/json"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 15000,
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "consume-handoff-node",
+        "name": "Consume Handoff",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1800,
+          504
+        ],
+        "parameters": {
           "method": "POST",
-          "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
-          "authentication": "predefinedCredentialType",
-          "nodeCredentialType": "httpHeaderAuth",
+          "url": "={{ $('Pick Next Piece (anchor-stuck priority)').first().json.refresh_handoff_id ? ('https://bid-iq-neon.vercel.app/api/agent-handoffs/' + $('Pick Next Piece (anchor-stuck priority)').first().json.refresh_handoff_id + '/consume') : 'https://bid-iq-neon.vercel.app/api/agent-handoffs/0/consume' }}",
+          "authentication": "none",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-agent-secret",
+                "value": "LiftnowAgentTeam_kS9-bGq2_xVtN4mP"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ JSON.stringify({filterGroups:[{filters:[{propertyName:\"hs_pipeline\",operator:\"EQ\",value:\"0\"},{propertyName:\"hs_pipeline_stage\",operator:\"EQ\",value:\"3\"},{propertyName:\"agent_name\",operator:\"EQ\",value:\"Content Decay Detector\"},{propertyName:\"hs_lastmodifieddate\",operator:\"GTE\",value:String($now.minus({days:14}).toMillis())}]}],properties:[\"id\",\"subject\",\"outcome_notes\",\"recommendation_detail\"],limit:5}) }}",
+          "jsonBody": "={{ JSON.stringify({execution_id: $execution.id, result: (  $('Create Content Ticket').isExecuted     ? ('drafted ticket ' + ($('Create Content Ticket').first().json.id || '?'))   : $('Self-Reject Skip Log').isExecuted     ? 'self-rejected: kill-list or quality gate'   : $('Log Memory Skip').isExecuted     ? 'memory-skipped: previously seen'   : 'unknown-terminal')}) }}",
           "options": {
-            "timeout": 30000,
+            "timeout": 8000,
             "response": {
               "response": {
                 "neverError": true
@@ -1264,12 +1369,7 @@
             }
           }
         },
-        "credentials": {
-          "httpHeaderAuth": {
-            "id": "S7YZNtmkHgtF72gN",
-            "name": "HubSpot Private App"
-          }
-        }
+        "onError": "continueRegularOutput"
       }
     ],
     "connections": {
@@ -1465,29 +1565,44 @@
             }
           ]
         ]
+      },
+      "Create Content Ticket": {
+        "main": [
+          [
+            {
+              "node": "Consume Handoff",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Self-Reject Skip Log": {
+        "main": [
+          [
+            {
+              "node": "Consume Handoff",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Log Memory Skip": {
+        "main": [
+          [
+            {
+              "node": "Consume Handoff",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Paul Stern",
     "name": null,
     "description": null,
-    "autosaved": false,
-    "workflowPublishHistory": [
-      {
-        "createdAt": "2026-05-27T22:32:44.151Z",
-        "id": 1009,
-        "workflowId": "d7YwC4ezub4g1LrI",
-        "versionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
-        "event": "deactivated",
-        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
-      },
-      {
-        "createdAt": "2026-05-27T22:32:44.172Z",
-        "id": 1010,
-        "workflowId": "d7YwC4ezub4g1LrI",
-        "versionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
-        "event": "activated",
-        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
-      }
-    ]
+    "autosaved": false
   }
 }

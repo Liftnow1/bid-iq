@@ -25,3 +25,8 @@ data/extraction-errors.log
 # Daily watcher state (local-only; per-machine state)
 data/.ingest-manifest.json
 data/.ingest-log/
+
+# Throwaway n8n maintenance scripts. They reference live n8n JWT + agent-secret
+# values inline — never commit them. The audit JSONs they produce are tracked
+# under audit/data/workflows/ which IS committed.
+.tmp_n8n/
