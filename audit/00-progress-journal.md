@@ -314,3 +314,42 @@ A spawned session fixed NEW-BUG-1 (Owl 4× Claude call) by re-chaining the four 
 - exec 8593 + 8626: all nodes 1× , status success
 - self_reject_log exec 8626 = 1 row; dedup probe attempt 6 = `{ok:true,deduped:true}`
 - commit 23dec8b pushed; Vercel deployed (dedup live)
+
+
+---
+
+## CHECKPOINT 14:35 ET — Paul flagged Bee duplicates; SAME fan-out bug, fixed (with an honest stumble)
+
+### Trigger
+Paul sent a dashboard screenshot: 4× identical "Commercial Vehicle Lifts" SEO tickets + 3× "Vehicle Lifts" — "still confusing, sending off multiple hits."
+
+### Diagnosis (receipts)
+Same multi-input fan-out bug as Owl, now in **Bee**. "Filter Content Pages" had 5 incoming main connections (Get All Pages/Posts/Product Categories ×2/Known Models) → n8n ran the WHOLE Bee chain 5× → 5 identical tickets + 5× Claude in Draft Fix per run. Confirmed exec 8640: every node ran 5×; all 5 Build Ticket items were wpId 123 (same page). Filter Content Pages reads all sources via `$('Node').all()` in flatten(), so it only needs to fire once.
+
+### 🔴 Honest stumble (Law 5)
+First fix (v1): chained the 6 fetches sequentially like the Owl fix. **This OOM-crashed Bee** (exec 8670, "WorkflowCrashedError: possible out-of-memory"). Root cause: HTTP nodes run once PER INPUT ITEM, so chaining made Get All Posts receive 42 items and multiply → explosion (Owl didn't hit this because its data volumes are tiny; Bee pulls 270+ items). **I rolled Bee back to the known-good parallel topology immediately** (restored from .tmp_n8n/bee_backup_pre_chain.json, verified active). No tickets were created by the crashed run.
+
+### Fix v2 (verified)
+Chained the fetches BUT set `executeOnce:true` + `onError:continueRegularOutput` + `alwaysOutputData:true` on all 6 fetch nodes. executeOnce stops the per-item multiplication (each input-independent GET runs once). Receipt: exec 8679 status=**success**, every node ran **1×** (Filter Content Pages 1, Draft Fix 1 = 1× Claude, Create SEO Ticket 1 = ONE ticket). The single ticket is a high-quality draft (real models HD-14LSX/CL20, Sourcewell contract, dealer voice).
+
+### Queue cleanup (receipts)
+- Closed 10 SEO duplicates (kept newest per page: Commercial Vehicle Lifts, Types of Vehicle Lifts, Vehicle Lifts).
+- Closed 6 stale Coordinator alerts (silent-failure tickets triggered by my Owl/Bee test-fire failures today; both agents now healthy).
+- Closed 8 more accumulated dupes (7 Eagle "scan complete" across multiple runs + 1 Turtle hunter-tc33m).
+- Pending queue: **36 → 12**, all distinct now (Content Decay Detector 7, SEO Optimizer 3, UI/UX Performance 2).
+
+### Fan-out sweep across ALL active workflows
+Only Owl + Bee had the HARMFUL version (per-run duplicate side effects). Checked every active workflow:
+- Eagle "Filter Content Pages" <- 2 inputs → runs 2× BUT "Create Summary Ticket" runs 1× (a Merge Results node absorbs the branches; PATCH WordPress also 1×). So Eagle wastes a little scan compute but creates NO duplicate tickets / no double-PATCH. Benign — not fixing (the OOM risk isn't worth it for a cosmetic 2× scan).
+- All other multi-input nodes are benign: schedule-trigger + manual-fire-webhook pairs (2 inputs, mutually exclusive) or genuine Merge nodes (Master Kill Switch 8, AE Merge All Branches 5, etc.).
+
+### Still open (flagged, NOT auto-resolved)
+- **Content Decay Detector / Hunter pages**: Turtle keeps proposing refreshes for liftnow.com pages targeting Hunter keywords (hunter-tc33m, hunter-wa673…). Owl self-rejects them (kill-list brand), so they churn. This is a STRATEGY question for Paul: keep the competitor-keyword arbitrage pages (needs a non-Owl content path) or retire/redirect them. Left in queue for his call.
+
+### Receipts attached
+- exec 8640 (pre-fix): all nodes 5×, 5 identical wpId-123 tickets
+- exec 8670 (v1): crashed, OOM — rolled back
+- exec 8679 (v2): success, all nodes 1×, 1 ticket
+- process-decision: 16 + 8 = 24 dupes/stale closed, 0 errors; queue 36→12
+- fan-out sweep output (Owl+Bee harmful, Eagle benign, rest benign)
+- backup: .tmp_n8n/bee_backup_pre_chain.json

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-28T02:24:41.462Z",
+  "updatedAt": "2026-05-28T14:33:21.515Z",
   "createdAt": "2026-05-22T22:51:33.781Z",
   "id": "N03TEmB50zG0XiiP",
   "name": "Agent 2 \u2014 Bee v3 (SEO Crawl + Execute)",
@@ -59,7 +59,11 @@
         "options": {
           "timeout": 60000
         }
-      }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "retryOnFail": true
     },
     {
       "id": "fetch_posts",
@@ -76,7 +80,11 @@
         "options": {
           "timeout": 60000
         }
-      }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "retryOnFail": true
     },
     {
       "id": "filter_pages",
@@ -117,7 +125,11 @@
           "id": "R24TuEIQaF3bmQSZ",
           "name": "Google Search Console OAuth2"
         }
-      }
+      },
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "retryOnFail": true
     },
     {
       "id": "classifier",
@@ -319,7 +331,11 @@
         400,
         600
       ],
-      "continueOnFail": true
+      "continueOnFail": true,
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "retryOnFail": true
     },
     {
       "parameters": {
@@ -342,7 +358,11 @@
         400,
         800
       ],
-      "continueOnFail": true
+      "continueOnFail": true,
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "retryOnFail": true
     },
     {
       "parameters": {
@@ -365,104 +385,14 @@
         400,
         800
       ],
-      "continueOnFail": true
+      "continueOnFail": true,
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "retryOnFail": true
     }
   ],
   "connections": {
-    "Daily 6AM ET": {
-      "main": [
-        [
-          {
-            "node": "Get All Pages",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get All Posts",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "GSC 90d Search Analytics",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get All Product Categories",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get All Product Categories Page 2",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch Known Models",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Manual Fire (Webhook)": {
-      "main": [
-        [
-          {
-            "node": "Get All Pages",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get All Posts",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "GSC 90d Search Analytics",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get All Product Categories",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get All Product Categories Page 2",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch Known Models",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get All Pages": {
-      "main": [
-        [
-          {
-            "node": "Filter Content Pages",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get All Posts": {
-      "main": [
-        [
-          {
-            "node": "Filter Content Pages",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Filter Content Pages": {
       "main": [
         [
@@ -547,11 +477,66 @@
         ]
       ]
     },
+    "Daily 6AM ET": {
+      "main": [
+        [
+          {
+            "node": "Get All Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Fire (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Get All Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Pages": {
+      "main": [
+        [
+          {
+            "node": "Get All Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Posts": {
+      "main": [
+        [
+          {
+            "node": "GSC 90d Search Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSC 90d Search Analytics": {
+      "main": [
+        [
+          {
+            "node": "Get All Product Categories",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Get All Product Categories": {
       "main": [
         [
           {
-            "node": "Filter Content Pages",
+            "node": "Get All Product Categories Page 2",
             "type": "main",
             "index": 0
           }
@@ -562,7 +547,7 @@
       "main": [
         [
           {
-            "node": "Filter Content Pages",
+            "node": "Fetch Known Models",
             "type": "main",
             "index": 0
           }
@@ -593,21 +578,21 @@
     },
     "global": {
       "lastBaselineTicketDate": "2026-05-27",
-      "lastScan": "2026-05-28T01:06:17.926Z",
-      "lastOppCount": 34
+      "lastScan": "2026-05-28T14:00:07.294Z",
+      "lastOppCount": 35
     }
   },
   "meta": null,
   "pinData": null,
-  "versionId": "0f8e9b9d-bc63-4df5-99bf-609223936054",
-  "activeVersionId": "0f8e9b9d-bc63-4df5-99bf-609223936054",
-  "versionCounter": 265,
+  "versionId": "eab22f2f-5ad5-47da-9de1-85dbb2ef7d7c",
+  "activeVersionId": "eab22f2f-5ad5-47da-9de1-85dbb2ef7d7c",
+  "versionCounter": 283,
   "triggerCount": 2,
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-28T02:24:41.464Z",
-    "createdAt": "2026-05-28T02:24:41.464Z",
-    "versionId": "0f8e9b9d-bc63-4df5-99bf-609223936054",
+    "updatedAt": "2026-05-28T14:33:21.518Z",
+    "createdAt": "2026-05-28T14:33:21.518Z",
+    "versionId": "eab22f2f-5ad5-47da-9de1-85dbb2ef7d7c",
     "workflowId": "N03TEmB50zG0XiiP",
     "nodes": [
       {
@@ -662,7 +647,11 @@
           "options": {
             "timeout": 60000
           }
-        }
+        },
+        "executeOnce": true,
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true,
+        "retryOnFail": true
       },
       {
         "id": "fetch_posts",
@@ -679,7 +668,11 @@
           "options": {
             "timeout": 60000
           }
-        }
+        },
+        "executeOnce": true,
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true,
+        "retryOnFail": true
       },
       {
         "id": "filter_pages",
@@ -720,7 +713,11 @@
             "id": "R24TuEIQaF3bmQSZ",
             "name": "Google Search Console OAuth2"
           }
-        }
+        },
+        "executeOnce": true,
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true,
+        "retryOnFail": true
       },
       {
         "id": "classifier",
@@ -922,7 +919,11 @@
           400,
           600
         ],
-        "continueOnFail": true
+        "continueOnFail": true,
+        "executeOnce": true,
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true,
+        "retryOnFail": true
       },
       {
         "parameters": {
@@ -945,7 +946,11 @@
           400,
           800
         ],
-        "continueOnFail": true
+        "continueOnFail": true,
+        "executeOnce": true,
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true,
+        "retryOnFail": true
       },
       {
         "parameters": {
@@ -968,104 +973,14 @@
           400,
           800
         ],
-        "continueOnFail": true
+        "continueOnFail": true,
+        "executeOnce": true,
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true,
+        "retryOnFail": true
       }
     ],
     "connections": {
-      "Daily 6AM ET": {
-        "main": [
-          [
-            {
-              "node": "Get All Pages",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Get All Posts",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "GSC 90d Search Analytics",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Get All Product Categories",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Get All Product Categories Page 2",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Fetch Known Models",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Manual Fire (Webhook)": {
-        "main": [
-          [
-            {
-              "node": "Get All Pages",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Get All Posts",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "GSC 90d Search Analytics",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Get All Product Categories",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Get All Product Categories Page 2",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Fetch Known Models",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Get All Pages": {
-        "main": [
-          [
-            {
-              "node": "Filter Content Pages",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Get All Posts": {
-        "main": [
-          [
-            {
-              "node": "Filter Content Pages",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Filter Content Pages": {
         "main": [
           [
@@ -1150,11 +1065,66 @@
           ]
         ]
       },
+      "Daily 6AM ET": {
+        "main": [
+          [
+            {
+              "node": "Get All Pages",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual Fire (Webhook)": {
+        "main": [
+          [
+            {
+              "node": "Get All Pages",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get All Pages": {
+        "main": [
+          [
+            {
+              "node": "Get All Posts",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get All Posts": {
+        "main": [
+          [
+            {
+              "node": "GSC 90d Search Analytics",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GSC 90d Search Analytics": {
+        "main": [
+          [
+            {
+              "node": "Get All Product Categories",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
       "Get All Product Categories": {
         "main": [
           [
             {
-              "node": "Filter Content Pages",
+              "node": "Get All Product Categories Page 2",
               "type": "main",
               "index": 0
             }
@@ -1165,7 +1135,7 @@
         "main": [
           [
             {
-              "node": "Filter Content Pages",
+              "node": "Fetch Known Models",
               "type": "main",
               "index": 0
             }
