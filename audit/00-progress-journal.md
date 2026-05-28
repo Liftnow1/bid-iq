@@ -379,3 +379,35 @@ Paul: Hunter sold locally (not via co-op contracts); update Hunter product pages
 - exec 8862: FRQ items=1 ok=true, Owl picked Hunter handoff, drafted, self-rejected (article gate), consumed handoff
 - Owl fetches executeOnce=true ×4 confirmed
 - backup: .tmp_n8n/owl_backup_pre_hunter.json
+
+
+---
+
+## CHECKPOINT 19:25 ET — Product-page refresh routing (Turtle → Bee) built + verified E2E
+
+Paul greenlit (and confirmed URL-based classification): decaying PRODUCT pages should be refreshed by Bee (on-page SEO), not Owl (articles). Design in audit/10-product-refresh-routing-design.md.
+
+### Built (Bee-first so no handoffs strand)
+**Change 2 — Bee targeted mode**
+- New `Fetch SEO Refresh Queue` node (executeOnce GET `/api/agent-handoffs?to_agent=SEO Optimizer&pending=true`), chained Fetch Known Models → Fetch SEO Refresh Queue → Filter Content Pages.
+- Diagnostic Classifier: targeted branch — if a refresh handoff exists, optimize THAT page as the sole candidate (severity 999, carries refresh_handoff_id).
+- New `Consume SEO Handoff` node wired from Create SEO Ticket + Log No Opportunity.
+- Receipt: exec 8903 — seeded `/products/vehicle-lifts/` handoff → Diagnostic Classifier targeted it → 1 ticket → handoff id=6 consumed.
+
+**Change 3 — Bee Hunter rule**
+- Parse+QA `banned` regex Hunter-aware (allow Hunter on Hunter pages); VOICE HARD RULE.
+- DETERMINISTIC co-op strip in Parse+QA (the LLM kept emitting Sourcewell despite the prompt rule — exec 8908 patch said "Hunter TC33M | Sourcewell Contract 121223-LFT"). Strip removes Sourcewell/NASPO/FSA/121223-LFT/CW7258/cooperative from Hunter-page patches + tidies.
+- Honest correction (Law 5): first strip was added via a heredoc that mangled `\b`→backspace (13 `\x08` chars corrupting the regex). Caught it by scanning for control chars, rewrote cleanly via a Write-tool file (no `\b`; distinctive terms don't need it).
+- Receipt: exec 8917 — Hunter page → TITLE "Hunter TC33M Tire Changer", META names Hunter + gov@liftnow.com, **ZERO Sourcewell/NASPO/FSA**; QA passed; handoff id=8 consumed.
+
+**Change 1 — AE routing**
+- Process & Route Turtle branch: `/\/products?\//i` → handoffTo='Bee', else 'Owl'.
+- Receipt (E2E): approved real Turtle ticket 45568259406 (hunter-tc33m) → fired AE → handoff id=9 created with **to_agent='SEO Optimizer'** (Bee), not Content Producer (Owl). The full Turtle→AE→Bee chain is live.
+
+### Net
+Product pages (incl. Hunter, local-sales, no co-op claims) now get on-page SEO from Bee; articles still go to Owl. Each agent fires once/run (executeOnce guard applied to the new fetch node — lesson from the Bee OOM + Owl deadlock).
+
+### Receipts attached
+- exec 8903 (non-Hunter targeted), 8908 (Hunter pre-strip leak), 8917 (Hunter post-strip clean)
+- E2E handoff id=9 → to_agent='SEO Optimizer'
+- commits fc5ffd8 (design), 9489b71 (impl); backups in .tmp_n8n/bee_backup_pre_*.json
