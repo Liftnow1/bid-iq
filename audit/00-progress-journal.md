@@ -286,3 +286,31 @@ Phase 1 reconnaissance only. No behavioral changes until audit/00-08 exist.
 - Owl exec 8130: Log Self-Reject Detail id=3, Consume Handoff id=4 consumed
 - NEW-BUG-1 evidence: node-run multiplicity across execs 8059/8091/8130 (Generate Draft ran 4× each)
 - Pick Next Piece connection dump: 4 main inputs confirmed
+
+
+---
+
+## CHECKPOINT 13:50 ET — NEW-BUG-1 fix verified + hardened + closed
+
+### What happened
+A spawned session fixed NEW-BUG-1 (Owl 4× Claude call) by re-chaining the four fetch nodes sequentially so Pick Next Piece fires once. They reported back; I verified per Law 1 (trust-but-verify) rather than taking the summary at face value.
+
+### Verified (with receipts)
+- **PNP single-fire confirmed**: live workflow now shows 1 incoming main connection into Pick Next Piece (was 4). Execs 8593 + 8626: Pick Next Piece, Generate Draft + LinkedIn each ran **1×** (was 4×). ~75% Owl token-cost cut, proven.
+- **Chain order correct**: Tue 9AM / Manual Fire → Fetch Published Pages → GSC Anchor Performance → Fetch Published Posts → Fetch Refresh Queue → Pick Next Piece.
+- **self_reject_log duplication gone at source**: exec 8626 wrote exactly 1 row (was 4).
+- **`/api/agent-handoffs` healthy**: 200 in 1.3s. The 3 errored execs (8576/8578/8585) ALL predate the fix (13:15:32); the only post-fix runs (8593/8626) are green.
+- **No rogue auto-fire**: only 1 `mode=trigger` exec (the weekly schedule); the rest are `mode=webhook` test fires. No `integrated`-mode caller.
+
+### Hardening I added (the fix put a flaky node in the critical path)
+- Could NOT reproduce the exact mid-flight "connection aborted" of exec 8585 — n8n's `neverError` masked every failure I injected (404 via Vercel wildcard DNS, `.invalid` TLD both came back "ok"). Rather than ship an unproven resilience claim, I made Fetch Refresh Queue maximally fault-tolerant: `neverError` + `onError:continueRegularOutput` + `retryOnFail` + `alwaysOutputData`. Confirmed green on exec 8626. A handoff-queue outage now degrades to the anchor-stuck picker instead of killing content drafting.
+- **DB defense-in-depth (deployed, commit 23dec8b)**: `self_reject_log` NULL-tolerant unique index `(COALESCE(exec_id,''), COALESCE(url,''))` + idempotent pre-dedupe + endpoint treats 23505 as `{ok:true,deduped:true}`. Verified live: 2nd identical POST returned `deduped:true` once Vercel finished deploying.
+
+### Cleanup (Law 5 — clean up after yourself)
+- Deleted 4 synthetic verification rows from self_reject_log (agent='test'/'DedupTest', smoke/dedup/hunter-tc33m-rig URLs). Left the 6 genuine Owl cluster-page self-rejects (real check names feed the aggregate). Cleanup script in .tmp_n8n (gitignored).
+
+### Receipts attached
+- Owl live config: PNP 1 incoming conn; FRQ onError=continueRegularOutput, retryOnFail=True, alwaysOutputData=True, neverError=True
+- exec 8593 + 8626: all nodes 1× , status success
+- self_reject_log exec 8626 = 1 row; dedup probe attempt 6 = `{ok:true,deduped:true}`
+- commit 23dec8b pushed; Vercel deployed (dedup live)

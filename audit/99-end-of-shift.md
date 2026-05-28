@@ -70,7 +70,7 @@ Everything I touched is now LIVE and verified with execution IDs. The big wins:
 
 Two **pre-existing** bugs surfaced during testing (NOT regressions I caused):
 
-- **🔴 NEW-BUG-1 (high value): Owl calls Claude 4× per run.** "Pick Next Piece (anchor-stuck priority)" has 4 incoming main connections (Fetch Published Pages, GSC Anchor Performance, Fetch Published Posts, Fetch Refresh Queue). n8n runs a node once per delivering connection, so Pick Next Piece — and the downstream Generate Draft Claude call + Self-Reject Gate — fire 4× every run. Confirmed across execs 8059/8091/8130. This burns ~4× Anthropic budget per Owl run, explains the 4-5 min Owl cycles, and (since I wired self-reject logging) writes 4 duplicate self_reject_log rows per self-reject. **I did NOT fix it** — the clean fix needs a Merge node + full Owl re-test (4-5 min/run), too risky to verify late in shift. Spawned a background task with full repro + fix guidance. **This is the #1 item for next operator.** The fix also eliminates the self_reject_log duplication as a side effect.
+- **✅ NEW-BUG-1 (high value): Owl calls Claude 4× per run — NOW FIXED & VERIFIED.** "Pick Next Piece (anchor-stuck priority)" had 4 incoming main connections (Fetch Published Pages, GSC Anchor Performance, Fetch Published Posts, Fetch Refresh Queue). n8n runs a node once per delivering connection, so Pick Next Piece — and the downstream Generate Draft Claude call + Self-Reject Gate — fired 4× every run (~4× Anthropic budget, 4-5 min cycles, 4 duplicate self_reject_log rows). A spawned session re-chained the four fetches sequentially (Pages → GSC → Posts → Fetch Refresh Queue → Pick Next Piece) so PNP fires once. **I verified the fix end-to-end:** execs 8593/8626 show Pick Next Piece + Generate Draft each ran 1× (was 4×); exec 8626 wrote exactly ONE self_reject_log row (was 4). That's the ~75% Owl token-cost cut, proven. **Caveat I hardened:** the chaining moved the flaky Fetch Refresh Queue node into the critical path. I couldn't reproduce the exact mid-flight "connection aborted" that killed exec 8585 (n8n's `neverError` masked every failure mode I could inject), so rather than rely on an unproven resilience claim I belt-and-suspendered the node: `neverError` + `onError:continueRegularOutput` + `retryOnFail` + `alwaysOutputData`. A handoff-queue outage now degrades to the anchor-stuck picker instead of stopping content drafting. Defense-in-depth on the data side too: `self_reject_log` got a NULL-tolerant unique index `(COALESCE(exec_id,''), COALESCE(url,''))` and the endpoint treats a 23505 as an idempotent no-op (verified live: 2nd identical POST returns `{ok:true, deduped:true}`). Commits 23dec8b (+ the spawned session's db.ts/route edits).
 
 - **Owl was reading the WRONG HubSpot stage all along.** Owl's old `Fetch Refresh Queue` filtered `hs_pipeline_stage="3"` (Deferred), but AE moves processed handoffs to stage `1363043699` (Auto-Applied). The 4 unconsumed HANDOFFs in audit/03 weren't a "credential bug" — they were a stage filter bug. Switching to the typed REST endpoint sidesteps this entirely, but if anyone reverts to the legacy path, they'll hit it again. **Don't roll back P0-B step 4 without also fixing Owl's HubSpot stage filter.**
 
@@ -97,12 +97,14 @@ The synthetic test rows I created during verification are still in Neon (all cle
 
 | Order | Item | Why |
 |---|---|---|
-| 1 | **🔴 NEW-BUG-1: fix Owl 4× Claude call** (Merge node before Pick Next Piece) | ~4× Anthropic cost on every Owl run, every day. Highest-ROI fix in the backlog. Spawned task has full repro. |
-| 2 | **P1-A: minimal Team Manager** (daily cron, summarizes per-agent ticket counts + handoff queue + self-reject top checks) | Highest operator-value: gives Paul a "did agents work yesterday" report without opening the dashboard |
-| 3 | **Sample Eagle's Mon 7AM cron** the morning after, confirm `_runStats` surface in the Summary Ticket | Trust-but-verify Block 3 P1-B fix at scale |
+| 1 | **P1-A: minimal Team Manager** (daily cron, summarizes per-agent ticket counts + handoff queue + self-reject top checks) | Highest operator-value: gives Paul a "did agents work yesterday" report without opening the dashboard. The self_reject_log aggregate (`/api/self-reject-log?aggregate=top-failed-checks`) is ready to feed it. |
+| 2 | **Sample Eagle's Mon 7AM cron** the morning after, confirm `_runStats` surface in the Summary Ticket | Trust-but-verify Block 3 P1-B fix at scale |
+| 3 | **Confirm Owl token-cost drop** in the Anthropic dashboard over the next few daily cycles | Validates the NEW-BUG-1 fix's ~75% saving in production billing, not just exec counts |
 | 4 | **Cron tag for 30-day dual-write removal** (calendar event ~2026-06-27 to deprecate the HANDOFF: marker in AE) | Prevents the legacy code from rotting |
 | 5 | **Paul-blocking: Yoast v3 verification (P2-E)** | Closes the last yesterday-carry-over thread |
 | 6 | **P2-B Zod schema for recommendation_detail** | Now that hubspot-stages.ts exists, this is the obvious next typing layer |
+
+**NEW-BUG-1 (Owl 4× Claude call) — RESOLVED this shift.** Was the prior #1; fix verified + hardened (see Known regressions section). Removed from the queue.
 
 ---
 
