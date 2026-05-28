@@ -267,5 +267,26 @@ export async function ensureSchema() {
   await sql`CREATE INDEX IF NOT EXISTS idx_self_reject_created ON self_reject_log (created_at DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_self_reject_agent ON self_reject_log (agent, created_at DESC)`;
 
+  // Defense-in-depth dedupe: one n8n execution should log at most one self-reject.
+  // A prior multi-fire bug (Owl's Pick Next Piece ran once per input connection)
+  // wrote identical rows per execution. COALESCE collapses NULLs so the common
+  // NULL-url case ('(no candidate)' picks) still dedupes. Wrapped in try/catch so a
+  // migration hiccup can never break ensureSchema — and thus every route awaiting it.
+  try {
+    await sql`
+      DELETE FROM self_reject_log a
+      USING self_reject_log b
+      WHERE a.id > b.id
+        AND COALESCE(a.n8n_execution_id, '') = COALESCE(b.n8n_execution_id, '')
+        AND COALESCE(a.url, '') = COALESCE(b.url, '')
+    `;
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_self_reject_exec_url
+      ON self_reject_log (COALESCE(n8n_execution_id, ''), COALESCE(url, ''))
+    `;
+  } catch (e: any) {
+    console.warn("self_reject_log dedupe/unique-index migration skipped:", e?.message || e);
+  }
+
   schemaReady = true;
 }

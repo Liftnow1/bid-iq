@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-28T02:39:11.996Z",
+  "updatedAt": "2026-05-28T13:44:36.583Z",
   "createdAt": "2026-05-22T22:53:28.370Z",
   "id": "d7YwC4ezub4g1LrI",
   "name": "Agent 1 \u2014 Content Producer v2",
@@ -69,8 +69,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        432,
-        208
+        428,
+        304
       ],
       "credentials": {
         "httpBasicAuth": {
@@ -105,8 +105,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        432,
-        400
+        648,
+        304
       ],
       "credentials": {
         "oAuth2Api": {
@@ -127,7 +127,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        640,
+        1308,
         304
       ]
     },
@@ -427,8 +427,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        432,
-        400
+        868,
+        304
       ],
       "credentials": {
         "httpBasicAuth": {
@@ -493,12 +493,12 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        420,
-        100
+        1088,
+        304
       ],
       "parameters": {
         "method": "GET",
-        "url": "https://bid-iq-neon.vercel.app/api/agent-handoffs?to_agent=Content%20Producer&pending=true&limit=5",
+        "url": "https://bid-iq-neon.vercel.app/api/agent-handoffs?to_agent=Content%20Producer&pending=true",
         "authentication": "none",
         "sendHeaders": true,
         "headerParameters": {
@@ -521,7 +521,12 @@
             }
           }
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
     },
     {
       "id": "consume-handoff-node",
@@ -612,16 +617,6 @@
             "node": "Fetch Published Pages",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "GSC Anchor Performance",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch Refresh Queue",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -630,7 +625,7 @@
       "main": [
         [
           {
-            "node": "Pick Next Piece (anchor-stuck priority)",
+            "node": "GSC Anchor Performance",
             "type": "main",
             "index": 0
           }
@@ -641,7 +636,7 @@
       "main": [
         [
           {
-            "node": "Pick Next Piece (anchor-stuck priority)",
+            "node": "Fetch Published Posts",
             "type": "main",
             "index": 0
           }
@@ -728,21 +723,6 @@
             "node": "Fetch Published Pages",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "GSC Anchor Performance",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch Published Posts",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Fetch Refresh Queue",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -762,7 +742,7 @@
       "main": [
         [
           {
-            "node": "Pick Next Piece (anchor-stuck priority)",
+            "node": "Fetch Refresh Queue",
             "type": "main",
             "index": 0
           }
@@ -849,15 +829,15 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "c4485541-339b-4e30-b0db-9a412365103a",
-  "activeVersionId": "c4485541-339b-4e30-b0db-9a412365103a",
-  "versionCounter": 296,
+  "versionId": "9bf27141-11c1-495d-b096-6364dc277af7",
+  "activeVersionId": "9bf27141-11c1-495d-b096-6364dc277af7",
+  "versionCounter": 329,
   "triggerCount": 2,
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-28T02:39:11.999Z",
-    "createdAt": "2026-05-28T02:39:11.999Z",
-    "versionId": "c4485541-339b-4e30-b0db-9a412365103a",
+    "updatedAt": "2026-05-28T13:44:36.585Z",
+    "createdAt": "2026-05-28T13:44:36.585Z",
+    "versionId": "9bf27141-11c1-495d-b096-6364dc277af7",
     "workflowId": "d7YwC4ezub4g1LrI",
     "nodes": [
       {
@@ -922,8 +902,8 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          432,
-          208
+          428,
+          304
         ],
         "credentials": {
           "httpBasicAuth": {
@@ -958,8 +938,8 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          432,
-          400
+          648,
+          304
         ],
         "credentials": {
           "oAuth2Api": {
@@ -980,7 +960,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          640,
+          1308,
           304
         ]
       },
@@ -1280,8 +1260,8 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          432,
-          400
+          868,
+          304
         ],
         "credentials": {
           "httpBasicAuth": {
@@ -1346,12 +1326,12 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          420,
-          100
+          1088,
+          304
         ],
         "parameters": {
           "method": "GET",
-          "url": "https://bid-iq-neon.vercel.app/api/agent-handoffs?to_agent=Content%20Producer&pending=true&limit=5",
+          "url": "https://bid-iq-neon.vercel.app/api/agent-handoffs?to_agent=Content%20Producer&pending=true",
           "authentication": "none",
           "sendHeaders": true,
           "headerParameters": {
@@ -1374,7 +1354,12 @@
               }
             }
           }
-        }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
+        "onError": "continueRegularOutput",
+        "alwaysOutputData": true
       },
       {
         "id": "consume-handoff-node",
@@ -1465,16 +1450,6 @@
               "node": "Fetch Published Pages",
               "type": "main",
               "index": 0
-            },
-            {
-              "node": "GSC Anchor Performance",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Fetch Refresh Queue",
-              "type": "main",
-              "index": 0
             }
           ]
         ]
@@ -1483,7 +1458,7 @@
         "main": [
           [
             {
-              "node": "Pick Next Piece (anchor-stuck priority)",
+              "node": "GSC Anchor Performance",
               "type": "main",
               "index": 0
             }
@@ -1494,7 +1469,7 @@
         "main": [
           [
             {
-              "node": "Pick Next Piece (anchor-stuck priority)",
+              "node": "Fetch Published Posts",
               "type": "main",
               "index": 0
             }
@@ -1581,21 +1556,6 @@
               "node": "Fetch Published Pages",
               "type": "main",
               "index": 0
-            },
-            {
-              "node": "GSC Anchor Performance",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Fetch Published Posts",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Fetch Refresh Queue",
-              "type": "main",
-              "index": 0
             }
           ]
         ]
@@ -1615,7 +1575,7 @@
         "main": [
           [
             {
-              "node": "Pick Next Piece (anchor-stuck priority)",
+              "node": "Fetch Refresh Queue",
               "type": "main",
               "index": 0
             }

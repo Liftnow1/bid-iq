@@ -76,6 +76,12 @@ export async function POST(req: NextRequest) {
       created_at: inserted[0].created_at,
     });
   } catch (e: any) {
+    // The (n8n_execution_id, url) unique index rejected a duplicate write — a
+    // second self-reject from the same execution. Treat as success (idempotent),
+    // not a 500, so a retried/duplicate fire is a no-op rather than an error.
+    if (e?.code === "23505" || /duplicate key|unique constraint/i.test(String(e?.message || ""))) {
+      return NextResponse.json({ ok: true, deduped: true });
+    }
     return NextResponse.json(
       { ok: false, error: String(e?.message || e).slice(0, 500) },
       { status: 500 }
