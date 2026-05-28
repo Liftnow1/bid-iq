@@ -254,3 +254,35 @@ Phase 1 reconnaissance only. No behavioral changes until audit/00-08 exist.
 - Eagle exec 8125: _runStats showed cap_per_run=1 engagement
 - audit/data/workflows/bee.json, eagle.json updated
 - public/approvals/index.html — 1 text change + 1 watchdog block addition
+
+
+---
+
+## CHECKPOINT 02:45 ET — Block 4 (P1-D) + NEW-BUG-1 discovered
+
+### Completed since last checkpoint (verified, with receipts)
+
+**P1-D — Owl Self-Reject feedback loop**
+- `self_reject_log` Neon table + 2 indexes added to lib/db.ts. Committed 4d6a0d4, deployed to Vercel.
+- `/api/self-reject-log` endpoint: POST (write), GET (?agent / ?aggregate=top-failed-checks). Smoke-tested: POST id=2 created; aggregate returns ranked checks; list filters by agent.
+- Owl "Log Self-Reject Detail" HTTP node added (18 → 19 nodes), wired from Self-Reject Skip Log, reads failed_checks + draft + word_count from Self-Reject Gate via named-node expressions.
+- **Receipt**: Owl exec 8130 — Log Self-Reject Detail returned `{ok:true, id:3}`; Consume Handoff returned `{ok:true, id:4, consumed_at:..., result:"self-rejected: kill-list or quality gate"}`; self_reject_log now has rows with full failed_checks arrays (byline, toc, fleet_manager_callout, procurement_callout, faq, closing_tagline, cta, banned_competitors, hedge_density, word_count_ok); agent_handoffs id=4 consumed by exec 8130.
+
+### 🔴 NEW-BUG-1 discovered (NOT introduced by me — pre-existing)
+
+**Owl calls Claude 4× per run.** "Pick Next Piece (anchor-stuck priority)" has FOUR incoming main connections (Fetch Published Pages, GSC Anchor Performance, Fetch Published Posts, Fetch Refresh Queue) all into input 0. n8n runs a node once per delivering connection → Pick Next Piece fires 4×, which fans out to Generate Draft + LinkedIn (Claude call) 4× and Self-Reject Gate 4×.
+
+- **Evidence**: execs 8059, 8091, 8130 ALL show Generate Draft + LinkedIn ran 4× and Pick Next Piece ran 4×. Fetch Refresh Queue ran 1× (correctly), so the fan-out is purely the 4 input connections.
+- **Impact**: ~4× Anthropic API cost on every Owl run, ~4× runtime (explains the 4-5 min Owl cycles), and 4 near-identical drafts/self-rejects per run. Now also causes 4 duplicate self_reject_log rows per self-reject (the aggregate ranking stays correct since all checks inflate proportionally, but absolute counts are 4×).
+- **Root cause**: Pick Next Piece's code reads the other 3 sources via `$("NodeName").first()` expressions, so they should NOT be main-input connections — they only need to have run earlier. Only ONE node should trigger Pick Next Piece (after all 4 have data).
+- **Why I did NOT fix it now**: the clean fix needs a Merge node (or sequential re-chaining) + a full Owl test cycle to confirm the `$('Fetch Published Pages').first()` refs still resolve. Owl runs take 4-5 min each, so verifying would eat the rest of the shift, and a broken Owl breaks the whole content pipeline. Per Section 9 (no risky changes without time to verify) + Honesty Law, I'm flagging it rather than half-fixing it.
+- **Handed off**: spawned a background task ("Fix Owl 4× Claude call (Pick Next Piece fan-in)") with full repro + fix guidance. This is the #1 recommended item for the next operator.
+
+### In progress
+- (None — wrapping shift)
+
+### Receipts attached
+- self_reject_log endpoint smoke chain (POST/GET aggregate/GET list)
+- Owl exec 8130: Log Self-Reject Detail id=3, Consume Handoff id=4 consumed
+- NEW-BUG-1 evidence: node-run multiplicity across execs 8059/8091/8130 (Generate Draft ran 4× each)
+- Pick Next Piece connection dump: 4 main inputs confirmed

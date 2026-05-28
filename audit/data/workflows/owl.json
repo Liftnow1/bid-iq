@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-28T02:08:23.846Z",
+  "updatedAt": "2026-05-28T02:39:11.996Z",
   "createdAt": "2026-05-22T22:53:28.370Z",
   "id": "d7YwC4ezub4g1LrI",
   "name": "Agent 1 \u2014 Content Producer v2",
@@ -562,6 +562,46 @@
         }
       },
       "onError": "continueRegularOutput"
+    },
+    {
+      "id": "log-self-reject-detail",
+      "name": "Log Self-Reject Detail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2040,
+        624
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://bid-iq-neon.vercel.app/api/self-reject-log",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-agent-secret",
+              "value": "LiftnowAgentTeam_kS9-bGq2_xVtN4mP"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({agent: 'Content Producer',piece_type: ($('Pick Next Piece (anchor-stuck priority)').first().json.pick && $('Pick Next Piece (anchor-stuck priority)').first().json.pick.piece_type) || null,url: ($('Pick Next Piece (anchor-stuck priority)').first().json.pick && $('Pick Next Piece (anchor-stuck priority)').first().json.pick.url) || null,title: ($('Pick Next Piece (anchor-stuck priority)').first().json.pick && $('Pick Next Piece (anchor-stuck priority)').first().json.pick.title) || null,draft_preview: (($('Self-Reject Gate (12 checks)').first().json.draft || '') + '').slice(0, 4000),word_count: $('Self-Reject Gate (12 checks)').first().json.word_count || null,failed_checks: $('Self-Reject Gate (12 checks)').first().json.failed || [],checks_full: $('Self-Reject Gate (12 checks)').first().json.checks || null,n8n_execution_id: $execution.id,source_handoff_id: $('Pick Next Piece (anchor-stuck priority)').first().json.refresh_handoff_id || null}) }}",
+        "options": {
+          "timeout": 8000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
@@ -776,6 +816,11 @@
             "node": "Consume Handoff",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Log Self-Reject Detail",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -804,15 +849,15 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "cc2e7fb9-7ac9-4d72-b367-6f2d87cb36c0",
-  "activeVersionId": "cc2e7fb9-7ac9-4d72-b367-6f2d87cb36c0",
-  "versionCounter": 293,
+  "versionId": "c4485541-339b-4e30-b0db-9a412365103a",
+  "activeVersionId": "c4485541-339b-4e30-b0db-9a412365103a",
+  "versionCounter": 296,
   "triggerCount": 2,
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-28T02:08:23.849Z",
-    "createdAt": "2026-05-28T02:08:23.849Z",
-    "versionId": "cc2e7fb9-7ac9-4d72-b367-6f2d87cb36c0",
+    "updatedAt": "2026-05-28T02:39:11.999Z",
+    "createdAt": "2026-05-28T02:39:11.999Z",
+    "versionId": "c4485541-339b-4e30-b0db-9a412365103a",
     "workflowId": "d7YwC4ezub4g1LrI",
     "nodes": [
       {
@@ -1370,6 +1415,46 @@
           }
         },
         "onError": "continueRegularOutput"
+      },
+      {
+        "id": "log-self-reject-detail",
+        "name": "Log Self-Reject Detail",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2040,
+          624
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://bid-iq-neon.vercel.app/api/self-reject-log",
+          "authentication": "none",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-agent-secret",
+                "value": "LiftnowAgentTeam_kS9-bGq2_xVtN4mP"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({agent: 'Content Producer',piece_type: ($('Pick Next Piece (anchor-stuck priority)').first().json.pick && $('Pick Next Piece (anchor-stuck priority)').first().json.pick.piece_type) || null,url: ($('Pick Next Piece (anchor-stuck priority)').first().json.pick && $('Pick Next Piece (anchor-stuck priority)').first().json.pick.url) || null,title: ($('Pick Next Piece (anchor-stuck priority)').first().json.pick && $('Pick Next Piece (anchor-stuck priority)').first().json.pick.title) || null,draft_preview: (($('Self-Reject Gate (12 checks)').first().json.draft || '') + '').slice(0, 4000),word_count: $('Self-Reject Gate (12 checks)').first().json.word_count || null,failed_checks: $('Self-Reject Gate (12 checks)').first().json.failed || [],checks_full: $('Self-Reject Gate (12 checks)').first().json.checks || null,n8n_execution_id: $execution.id,source_handoff_id: $('Pick Next Piece (anchor-stuck priority)').first().json.refresh_handoff_id || null}) }}",
+          "options": {
+            "timeout": 8000,
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "onError": "continueRegularOutput"
       }
     ],
     "connections": {
@@ -1582,6 +1667,11 @@
           [
             {
               "node": "Consume Handoff",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Log Self-Reject Detail",
               "type": "main",
               "index": 0
             }
