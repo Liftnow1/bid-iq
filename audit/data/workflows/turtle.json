@@ -1,0 +1,562 @@
+{
+  "updatedAt": "2026-05-27T21:05:16.329Z",
+  "createdAt": "2026-05-22T20:38:15.244Z",
+  "id": "yYyj4TnP9Ho9O85l",
+  "name": "Agent 9 \u2014 Content Decay Detector",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trig",
+      "name": "Weekly Mon 7AM ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": [
+                8
+              ],
+              "triggerAtDay": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gsc-cur",
+      "name": "GSC Current 28d",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        200
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aliftnow.com/searchAnalytics/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ startDate: $now.minus({days: 28}).toFormat(\"yyyy-MM-dd\"), endDate: $now.minus({days: 1}).toFormat(\"yyyy-MM-dd\"), dimensions: [\"page\"], rowLimit: 500, dataState: \"final\" }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "credentials": {
+        "oAuth2Api": {
+          "id": "R24TuEIQaF3bmQSZ",
+          "name": "Google Search Console OAuth2"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "gsc-prev",
+      "name": "GSC Previous 28d",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        400
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aliftnow.com/searchAnalytics/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ startDate: $now.minus({days: 56}).toFormat(\"yyyy-MM-dd\"), endDate: $now.minus({days: 29}).toFormat(\"yyyy-MM-dd\"), dimensions: [\"page\"], rowLimit: 500, dataState: \"final\" }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "credentials": {
+        "oAuth2Api": {
+          "id": "R24TuEIQaF3bmQSZ",
+          "name": "Google Search Console OAuth2"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "merge",
+      "name": "Merge Periods",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll"
+      }
+    },
+    {
+      "id": "find",
+      "name": "Find Decaying Pages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const KILL_PATTERNS=[/\\/product\\//i,/\\/wheel-align/i,/\\/tire-balanc/i,/\\/aligner/i,/\\/2-post/i,/\\/four-post/i,/\\/scissor/i,/\\/hunter/i,/\\/mohawk/i,/\\/rotary/i,/\\/snap-on/i,/car-lifter/i,/wheel-balancing/i];const isKillUrl=(u)=>KILL_PATTERNS.some(re=>re.test(u||\"\"));const cur=$(\"GSC Current 28d\").first().json.rows||[];const prev=$(\"GSC Previous 28d\").first().json.rows||[];const byUrl={};for(const r of cur){const url=r.keys?.[0];if(!url)continue;byUrl[url]=byUrl[url]||{};byUrl[url].cur={clicks:r.clicks||0,impressions:r.impressions||0,position:r.position||0,ctr:r.ctr||0};}for(const r of prev){const url=r.keys?.[0];if(!url)continue;byUrl[url]=byUrl[url]||{};byUrl[url].prev={clicks:r.clicks||0,impressions:r.impressions||0,position:r.position||0,ctr:r.ctr||0};}const decaying=[];for(const [url,m] of Object.entries(byUrl)){if(!m.cur||!m.prev)continue;if(m.prev.clicks<5)continue;const clickDelta=m.cur.clicks-m.prev.clicks;const clickPct=m.prev.clicks?clickDelta/m.prev.clicks:0;const posDelta=m.cur.position-m.prev.position;const isDecay=(clickPct<=-0.30&&m.prev.clicks>=10)||(posDelta>=5&&m.prev.position<=20);if(!isDecay)continue;decaying.push({url,prevClicks:m.prev.clicks,curClicks:m.cur.clicks,clickDeltaPct:Math.round(clickPct*100),prevPosition:Number(m.prev.position.toFixed(1)),curPosition:Number(m.cur.position.toFixed(1)),positionDelta:Number(posDelta.toFixed(1)),severity:(clickPct<=-0.50||posDelta>=10)?\"HIGH\":\"MEDIUM\"});}decaying.sort((a,b)=>(b.prevClicks*-a.clickDeltaPct)-(a.prevClicks*-b.clickDeltaPct));return decaying.slice(0,20).map(d=>({json:d}));"
+      }
+    },
+    {
+      "id": "ticket",
+      "name": "Create Decay Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/tickets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ properties: {\n  subject: \"Refresh \\\"\" + ($json.title || ($json.url || \"\").replace(/^https?:\\/\\/[^/]+/, \"\").replace(/\\/$/, \"\").split(\"/\").filter(Boolean).pop() || \"page\") + \"\\\" \u2014 losing traffic\",\n  content: \"ASK\\nThis published page is bleeding traffic over the last 28 days. Approve to have Owl draft a refresh (new data, new examples, fresh links) for your review.\\n\\nWHY\\nClicks: \" + $json.prevClicks + \" \u2192 \" + $json.curClicks + \" (\" + $json.clickDeltaPct + \"% vs prior 28 days)\\nAverage rank: \" + $json.prevPosition + \" \u2192 \" + $json.curPosition + \" (slipped \" + Math.abs($json.positionDelta || 0).toFixed(1) + \" spots)\\nPage: \" + $json.url + \"\\n\\nLikely cause: competitor pages updated with newer data, intent shifted (Google now showing different result types for these queries), or your own content references stale specs/dates.\\n\\nIF YOU APPROVE\\nI'll add this URL to Owl's refresh queue. Owl reads the current page, pulls competitor pages now ranking above, drafts a refresh with new data + reciprocal internal links, files it as a content draft ticket for your approval.\\n\\nIF YOU REJECT\\nI'll skip this URL for 30 days. The decay alert won't re-fire for the same page in that window.\",\n  hs_pipeline: \"0\",\n  hs_pipeline_stage: \"1\",\n  hs_ticket_priority: $json.severity || \"MEDIUM\",\n  agent_name: \"Content Decay Detector\",\n  recommendation_type: \"Content Refresh\",\n  recommendation_detail: JSON.stringify({\n    url: $json.url,\n    title: $json.title || \"\",\n    click_drop_pct: $json.clickDeltaPct,\n    position_drop: $json.positionDelta,\n    prev_clicks: $json.prevClicks,\n    cur_clicks: $json.curClicks,\n    prev_position: $json.prevPosition,\n    cur_position: $json.curPosition\n  })\n} }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fire-content-decay",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "fire-content-decay-webhook",
+      "name": "Manual Fire (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        100
+      ],
+      "webhookId": "fire-content-decay-uid"
+    }
+  ],
+  "connections": {
+    "Weekly Mon 7AM ET": {
+      "main": [
+        [
+          {
+            "node": "GSC Current 28d",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GSC Previous 28d",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSC Current 28d": {
+      "main": [
+        [
+          {
+            "node": "Merge Periods",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSC Previous 28d": {
+      "main": [
+        [
+          {
+            "node": "Merge Periods",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Periods": {
+      "main": [
+        [
+          {
+            "node": "Find Decaying Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Decaying Pages": {
+      "main": [
+        [
+          {
+            "node": "Create Decay Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Fire (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "GSC Current 28d",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GSC Previous 28d",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "qMeBXIjguVuaKLLF",
+    "executionOrder": "v0"
+  },
+  "staticData": {
+    "node:Weekly Mon 7AM ET": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "12b2d74c-9065-4ba5-b0c2-39236ab41469",
+  "activeVersionId": "12b2d74c-9065-4ba5-b0c2-39236ab41469",
+  "versionCounter": 156,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-05-22T20:38:15.244Z",
+      "createdAt": "2026-05-22T20:38:15.244Z",
+      "role": "workflow:owner",
+      "workflowId": "yYyj4TnP9Ho9O85l",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-27T21:05:16.330Z",
+    "createdAt": "2026-05-27T21:05:16.330Z",
+    "versionId": "12b2d74c-9065-4ba5-b0c2-39236ab41469",
+    "workflowId": "yYyj4TnP9Ho9O85l",
+    "nodes": [
+      {
+        "id": "trig",
+        "name": "Weekly Mon 7AM ET",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": [
+                  8
+                ],
+                "triggerAtDay": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "gsc-cur",
+        "name": "GSC Current 28d",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          460,
+          200
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aliftnow.com/searchAnalytics/query",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "oAuth2Api",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ startDate: $now.minus({days: 28}).toFormat(\"yyyy-MM-dd\"), endDate: $now.minus({days: 1}).toFormat(\"yyyy-MM-dd\"), dimensions: [\"page\"], rowLimit: 500, dataState: \"final\" }) }}",
+          "options": {
+            "timeout": 120000
+          }
+        },
+        "credentials": {
+          "oAuth2Api": {
+            "id": "R24TuEIQaF3bmQSZ",
+            "name": "Google Search Console OAuth2"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "id": "gsc-prev",
+        "name": "GSC Previous 28d",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          460,
+          400
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aliftnow.com/searchAnalytics/query",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "oAuth2Api",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ startDate: $now.minus({days: 56}).toFormat(\"yyyy-MM-dd\"), endDate: $now.minus({days: 29}).toFormat(\"yyyy-MM-dd\"), dimensions: [\"page\"], rowLimit: 500, dataState: \"final\" }) }}",
+          "options": {
+            "timeout": 120000
+          }
+        },
+        "credentials": {
+          "oAuth2Api": {
+            "id": "R24TuEIQaF3bmQSZ",
+            "name": "Google Search Console OAuth2"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "id": "merge",
+        "name": "Merge Periods",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          700,
+          300
+        ],
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineAll"
+        }
+      },
+      {
+        "id": "find",
+        "name": "Find Decaying Pages",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          920,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const KILL_PATTERNS=[/\\/product\\//i,/\\/wheel-align/i,/\\/tire-balanc/i,/\\/aligner/i,/\\/2-post/i,/\\/four-post/i,/\\/scissor/i,/\\/hunter/i,/\\/mohawk/i,/\\/rotary/i,/\\/snap-on/i,/car-lifter/i,/wheel-balancing/i];const isKillUrl=(u)=>KILL_PATTERNS.some(re=>re.test(u||\"\"));const cur=$(\"GSC Current 28d\").first().json.rows||[];const prev=$(\"GSC Previous 28d\").first().json.rows||[];const byUrl={};for(const r of cur){const url=r.keys?.[0];if(!url)continue;byUrl[url]=byUrl[url]||{};byUrl[url].cur={clicks:r.clicks||0,impressions:r.impressions||0,position:r.position||0,ctr:r.ctr||0};}for(const r of prev){const url=r.keys?.[0];if(!url)continue;byUrl[url]=byUrl[url]||{};byUrl[url].prev={clicks:r.clicks||0,impressions:r.impressions||0,position:r.position||0,ctr:r.ctr||0};}const decaying=[];for(const [url,m] of Object.entries(byUrl)){if(!m.cur||!m.prev)continue;if(m.prev.clicks<5)continue;const clickDelta=m.cur.clicks-m.prev.clicks;const clickPct=m.prev.clicks?clickDelta/m.prev.clicks:0;const posDelta=m.cur.position-m.prev.position;const isDecay=(clickPct<=-0.30&&m.prev.clicks>=10)||(posDelta>=5&&m.prev.position<=20);if(!isDecay)continue;decaying.push({url,prevClicks:m.prev.clicks,curClicks:m.cur.clicks,clickDeltaPct:Math.round(clickPct*100),prevPosition:Number(m.prev.position.toFixed(1)),curPosition:Number(m.cur.position.toFixed(1)),positionDelta:Number(posDelta.toFixed(1)),severity:(clickPct<=-0.50||posDelta>=10)?\"HIGH\":\"MEDIUM\"});}decaying.sort((a,b)=>(b.prevClicks*-a.clickDeltaPct)-(a.prevClicks*-b.clickDeltaPct));return decaying.slice(0,20).map(d=>({json:d}));"
+        }
+      },
+      {
+        "id": "ticket",
+        "name": "Create Decay Ticket",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1140,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.hubapi.com/crm/v3/objects/tickets",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ properties: {\n  subject: \"Refresh \\\"\" + ($json.title || ($json.url || \"\").replace(/^https?:\\/\\/[^/]+/, \"\").replace(/\\/$/, \"\").split(\"/\").filter(Boolean).pop() || \"page\") + \"\\\" \u2014 losing traffic\",\n  content: \"ASK\\nThis published page is bleeding traffic over the last 28 days. Approve to have Owl draft a refresh (new data, new examples, fresh links) for your review.\\n\\nWHY\\nClicks: \" + $json.prevClicks + \" \u2192 \" + $json.curClicks + \" (\" + $json.clickDeltaPct + \"% vs prior 28 days)\\nAverage rank: \" + $json.prevPosition + \" \u2192 \" + $json.curPosition + \" (slipped \" + Math.abs($json.positionDelta || 0).toFixed(1) + \" spots)\\nPage: \" + $json.url + \"\\n\\nLikely cause: competitor pages updated with newer data, intent shifted (Google now showing different result types for these queries), or your own content references stale specs/dates.\\n\\nIF YOU APPROVE\\nI'll add this URL to Owl's refresh queue. Owl reads the current page, pulls competitor pages now ranking above, drafts a refresh with new data + reciprocal internal links, files it as a content draft ticket for your approval.\\n\\nIF YOU REJECT\\nI'll skip this URL for 30 days. The decay alert won't re-fire for the same page in that window.\",\n  hs_pipeline: \"0\",\n  hs_pipeline_stage: \"1\",\n  hs_ticket_priority: $json.severity || \"MEDIUM\",\n  agent_name: \"Content Decay Detector\",\n  recommendation_type: \"Content Refresh\",\n  recommendation_detail: JSON.stringify({\n    url: $json.url,\n    title: $json.title || \"\",\n    click_drop_pct: $json.clickDeltaPct,\n    position_drop: $json.positionDelta,\n    prev_clicks: $json.prevClicks,\n    cur_clicks: $json.curClicks,\n    prev_position: $json.prevPosition,\n    cur_position: $json.curPosition\n  })\n} }) }}",
+          "options": {
+            "timeout": 120000
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "fire-content-decay",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "fire-content-decay-webhook",
+        "name": "Manual Fire (Webhook)",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1.1,
+        "position": [
+          240,
+          100
+        ],
+        "webhookId": "fire-content-decay-uid"
+      }
+    ],
+    "connections": {
+      "Weekly Mon 7AM ET": {
+        "main": [
+          [
+            {
+              "node": "GSC Current 28d",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "GSC Previous 28d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GSC Current 28d": {
+        "main": [
+          [
+            {
+              "node": "Merge Periods",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GSC Previous 28d": {
+        "main": [
+          [
+            {
+              "node": "Merge Periods",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge Periods": {
+        "main": [
+          [
+            {
+              "node": "Find Decaying Pages",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Decaying Pages": {
+        "main": [
+          [
+            {
+              "node": "Create Decay Ticket",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual Fire (Webhook)": {
+        "main": [
+          [
+            {
+              "node": "GSC Current 28d",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "GSC Previous 28d",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-27T21:05:16.362Z",
+        "id": 972,
+        "workflowId": "yYyj4TnP9Ho9O85l",
+        "versionId": "12b2d74c-9065-4ba5-b0c2-39236ab41469",
+        "event": "deactivated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      },
+      {
+        "createdAt": "2026-05-27T21:05:16.383Z",
+        "id": 973,
+        "workflowId": "yYyj4TnP9Ho9O85l",
+        "versionId": "12b2d74c-9065-4ba5-b0c2-39236ab41469",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

@@ -1,0 +1,4210 @@
+{
+  "updatedAt": "2026-05-26T20:50:03.644Z",
+  "createdAt": "2026-05-26T20:50:03.644Z",
+  "id": "P3fKgDjcHFIBwHgI",
+  "name": "Agent Heartbeat Store",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "wh_post",
+      "name": "POST",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        280
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent-heartbeat",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "a39d4bf0-7007-43b7-a4c1-14ffea7363fd"
+    },
+    {
+      "id": "wh_get",
+      "name": "GET",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        440
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "agent-heartbeat",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "47c4bbd1-c66d-47ca-99c8-54320661e9bf"
+    },
+    {
+      "id": "router",
+      "name": "Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        360
+      ],
+      "parameters": {
+        "jsCode": "// Agent Heartbeat Store\n// POST  /webhook/agent-heartbeat  body: {agentId, agentName, action, summary?, outcome?}\n// GET   /webhook/agent-heartbeat?action=read[&limit=50]\nconst MAX_HEARTBEATS = 500;  // keep last 500\nconst sd = $getWorkflowStaticData('global');\nsd.heartbeats = sd.heartbeats || [];\n\nconst input = $input.first().json || {};\nconst q = input.query || {};\nconst body = input.body || {};\n\n// READ\nif (q.action === 'read' || (!body.agentId && !body.action)) {\n  const limit = Math.min(parseInt(q.limit || '50'), 200);\n  // Reverse-chronological (most recent first)\n  const recent = (sd.heartbeats || []).slice(-limit).reverse();\n  // 24h stats\n  const cutoff24 = Date.now() - 24*3600*1000;\n  const recent24 = (sd.heartbeats || []).filter(h => new Date(h.at).getTime() >= cutoff24);\n  const byAgent = {};\n  for (const h of recent24) {\n    byAgent[h.agentId] = byAgent[h.agentId] || { total: 0, action_taken: 0, no_op: 0, errored: 0 };\n    byAgent[h.agentId].total += 1;\n    if (h.outcome === 'action_taken') byAgent[h.agentId].action_taken += 1;\n    else if (h.outcome === 'no_op') byAgent[h.agentId].no_op += 1;\n    else if (h.outcome === 'error') byAgent[h.agentId].errored += 1;\n  }\n  return [{ json: { ok: true, heartbeats: recent, stats_24h: byAgent, total_24h: recent24.length } }];\n}\n\n// WRITE\nconst heartbeat = {\n  at: new Date().toISOString(),\n  agentId: body.agentId || '',\n  agentName: body.agentName || '',\n  action: body.action || 'fired',\n  summary: (body.summary || '').toString().slice(0, 200),\n  outcome: body.outcome || 'unknown'   // action_taken | no_op | error\n};\nsd.heartbeats.push(heartbeat);\nif (sd.heartbeats.length > MAX_HEARTBEATS) {\n  sd.heartbeats = sd.heartbeats.slice(-MAX_HEARTBEATS);\n}\nreturn [{ json: { ok: true, total: sd.heartbeats.length } }];\n"
+      }
+    }
+  ],
+  "connections": {
+    "POST": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v0"
+  },
+  "staticData": {
+    "global": {
+      "heartbeats": [
+        {
+          "at": "2026-05-26T21:00:23.275Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 20:57:06 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:05:23.173Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:05:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:05:23.293Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 21:00:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:05:23.395Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 21:00:35 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:10:23.138Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:10:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:10:23.249Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 21:05:52 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:15:23.101Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:15:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:15:23.205Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 21:13:09 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:15:23.321Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 21:10:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:20:23.110Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:20:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:25:23.117Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:25:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:25:23.225Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 21:20:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:30:23.144Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:30:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:35:23.113Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:35:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:35:23.231Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 21:30:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:40:23.164Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:40:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:45:23.145Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:45:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:45:23.261Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 21:40:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:50:23.175Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:50:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:55:23.171Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 21:55:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T21:55:23.272Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 21:50:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:00:23.150Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:00:23.264Z",
+          "agentId": "reed",
+          "agentName": "Whisper",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:04 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:05:23.232Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:05:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:05:23.303Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:56 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:05:23.430Z",
+          "agentId": "max",
+          "agentName": "Tally",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:52 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:05:23.508Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:05:23.580Z",
+          "agentId": "sam",
+          "agentName": "Tweak",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:40 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:05:23.702Z",
+          "agentId": "pip",
+          "agentName": "Sift",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:32 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:05:23.784Z",
+          "agentId": "riley",
+          "agentName": "Maverick",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:31 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:05:23.885Z",
+          "agentId": "vex",
+          "agentName": "Periscope",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:29 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:05:24.002Z",
+          "agentId": "eve",
+          "agentName": "Maestro",
+          "action": "fired",
+          "summary": "trigger fire @ 22:00:24 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:10:23.166Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:10:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:15:23.105Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:15:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:15:23.205Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 22:10:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:20:23.122Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:20:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:25:23.108Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:25:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:25:23.237Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 22:20:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:30:23.145Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:30:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:35:23.143Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:35:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:35:23.232Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 22:30:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:40:23.154Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:40:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:45:23.115Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:45:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:45:23.215Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 22:40:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:50:23.164Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 22:50:14 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:50:23.280Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:50:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:55:23.155Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 22:55:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:55:23.252Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 22:50:55 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T22:55:23.363Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 22:50:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:00:23.153Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 23:00:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:05:23.233Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 23:05:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:05:23.320Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "trigger fire @ 23:00:56 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:05:23.389Z",
+          "agentId": "max",
+          "agentName": "Tally",
+          "action": "fired",
+          "summary": "trigger fire @ 23:00:52 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:05:23.521Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 23:00:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:05:23.613Z",
+          "agentId": "sam",
+          "agentName": "Tweak",
+          "action": "fired",
+          "summary": "trigger fire @ 23:00:40 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:05:23.710Z",
+          "agentId": "pip",
+          "agentName": "Sift",
+          "action": "fired",
+          "summary": "trigger fire @ 23:00:32 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:10:23.169Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 23:10:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:15:23.151Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 23:15:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:15:23.304Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 23:11:38 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:15:23.378Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 23:10:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:20:23.133Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 23:20:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:20:23.243Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 23:15:52 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:25:23.174Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 23:25:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:25:23.291Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 23:24:21 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:25:23.410Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 23:20:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:30:23.139Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 23:30:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:35:23.223Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 23:35:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:35:23.313Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 23:32:43 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:35:23.398Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "trigger fire @ 23:30:45 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:40:23.137Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "trigger fire @ 23:40:07 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:40:23.247Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "webhook fire @ 23:38:46 UTC",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:45:23.099Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "Swept your approvals + executed any approved tickets",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:45:23.196Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "Refreshed the daily ROI numbers (chart on Today)",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:45:23.321Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "Scanned Reddit for Liftnow mentions",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:50:23.181Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "Swept your approvals + executed any approved tickets",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:55:23.179Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "Swept your approvals + executed any approved tickets",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-26T23:55:23.283Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "Scanned Reddit for Liftnow mentions",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:00:23.167Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "Swept your approvals + executed any approved tickets",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:00:23.295Z",
+          "agentId": "reed",
+          "agentName": "Whisper",
+          "action": "fired",
+          "summary": "Worked on a Reddit reply",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:05:23.148Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "Swept your approvals + executed any approved tickets",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:05:23.240Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "Refreshed the daily ROI numbers (chart on Today)",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:05:23.366Z",
+          "agentId": "max",
+          "agentName": "Tally",
+          "action": "fired",
+          "summary": "Looked at Google Ads performance",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:05:23.461Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "Scanned Reddit for Liftnow mentions",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:05:23.551Z",
+          "agentId": "sam",
+          "agentName": "Tweak",
+          "action": "fired",
+          "summary": "Audited published pages for SEO opportunities",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:05:23.682Z",
+          "agentId": "pip",
+          "agentName": "Sift",
+          "action": "fired",
+          "summary": "Bundled recent tickets into a triage digest",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:05:23.752Z",
+          "agentId": "riley",
+          "agentName": "Maverick",
+          "action": "fired",
+          "summary": "Looked at Google Ads performance",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:05:23.863Z",
+          "agentId": "vex",
+          "agentName": "Periscope",
+          "action": "fired",
+          "summary": "Refreshed competitor SERP intel",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:10:23.148Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "Swept your approvals + executed any approved tickets",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:10:23.280Z",
+          "agentId": "iris",
+          "agentName": "Ledger",
+          "action": "fired",
+          "summary": "Refreshed the daily ROI numbers (chart on Today)",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:15:23.176Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "Swept your approvals + executed any approved tickets",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:15:23.283Z",
+          "agentId": "nox",
+          "agentName": "Sonar",
+          "action": "fired",
+          "summary": "Scanned Reddit for Liftnow mentions",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:20:23.171Z",
+          "agentId": "forge",
+          "agentName": "Forge",
+          "action": "fired",
+          "summary": "Swept your approvals + executed any approved tickets",
+          "outcome": "action_taken"
+        },
+        {
+          "at": "2026-05-27T00:25:24.152Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T00:25:24.302Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Scanned Reddit. No new Liftnow mentions found.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T00:30:25.571Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T00:35:27.130Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T00:35:27.232Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Scanned Reddit. No new Liftnow mentions found.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T00:40:32.566Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T00:45:30.055Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T01:00:30.784Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T01:00:30.825Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T01:00:30.933Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T01:20:25.250Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T01:20:25.309Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T01:20:25.429Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T01:20:25.529Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T01:20:25.614Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Checked Google Ads. No anomalies worth flagging.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T01:20:25.716Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T01:20:25.832Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T01:20:25.930Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T01:25:26.491Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T01:25:26.588Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T01:25:26.706Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T01:30:35.668Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T01:35:44.415Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T01:35:44.509Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T01:35:44.636Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T01:55:53.507Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T01:55:53.542Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T02:05:54.529Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T02:05:54.559Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T02:05:54.652Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T02:05:54.776Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T02:20:55.861Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T02:50:56.448Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T02:50:56.532Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T03:15:57.653Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T03:15:57.753Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T03:45:23.947Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T03:45:24.007Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T03:50:23.823Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T03:55:24.425Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T03:55:24.556Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T03:55:24.618Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T04:00:25.867Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T04:00:25.971Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T04:00:26.078Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T04:05:49.299Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T04:05:49.406Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T04:05:49.516Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Sent an email.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T04:05:49.598Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T04:05:49.716Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T04:05:49.819Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T04:05:49.921Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T04:05:50.020Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Checked Google Ads. No campaign needed adjustment right now.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T04:05:50.116Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T04:15:51.800Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T04:15:51.858Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T04:30:54.093Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T04:30:54.117Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T04:45:54.291Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T04:45:54.383Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T05:00:54.154Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T05:25:24.899Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T05:25:24.964Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T05:25:25.072Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T05:25:25.177Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Sent an email.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T05:25:25.279Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T05:25:25.376Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T05:30:25.683Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T05:35:29.205Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T05:35:29.282Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T05:35:29.381Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T05:40:41.067Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T05:45:53.321Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T05:45:53.416Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T05:45:53.521Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T06:10:24.067Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T06:10:24.115Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T06:10:24.241Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Checked Google Ads. No campaign needed adjustment right now.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T06:10:24.319Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T06:10:24.421Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T06:15:23.872Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T06:15:23.974Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T06:15:24.069Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T06:20:24.420Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T06:25:26.114Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T06:25:26.189Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T06:25:26.298Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T06:30:28.322Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T06:55:29.417Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T06:55:29.463Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T06:55:29.588Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T07:00:29.226Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T07:25:25.057Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T07:25:25.101Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T07:25:25.221Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Sent an email.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T07:25:25.323Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T07:25:25.429Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T07:25:25.515Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T07:30:25.648Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T07:35:29.237Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T07:35:29.307Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T07:35:29.434Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T07:40:41.352Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T07:45:53.362Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T07:45:53.411Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T07:45:53.532Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T08:10:24.125Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T08:10:24.200Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T08:10:24.282Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Checked Google Ads. No campaign needed adjustment right now.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T08:10:24.403Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T08:10:24.503Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T08:15:23.893Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T08:15:23.999Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T08:15:24.090Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T08:20:24.639Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T08:25:26.061Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T08:25:26.186Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T08:25:26.298Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T08:30:28.960Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T08:55:30.085Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T08:55:30.122Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T08:55:30.240Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T09:00:29.583Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T09:25:24.886Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T09:25:24.949Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T09:25:25.055Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T09:25:25.159Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Sent an email.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T09:25:25.265Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T09:25:25.369Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T09:25:25.463Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T09:30:25.440Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T09:35:29.156Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T09:35:29.239Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T09:35:29.340Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T09:40:41.119Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T09:45:53.938Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T09:45:53.990Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T09:45:54.100Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T10:10:23.981Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T10:10:24.044Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T10:10:24.167Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Checked Google Ads. No campaign needed adjustment right now.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T10:10:24.271Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T10:10:24.357Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T10:15:23.850Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T10:15:23.957Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T10:15:24.046Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T10:20:24.721Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T10:25:26.241Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T10:25:26.340Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T10:25:26.435Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T10:30:29.447Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T10:55:31.015Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T10:55:31.062Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T10:55:31.176Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T11:00:32.016Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T11:30:23.945Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T11:30:24.021Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T11:35:23.634Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T11:35:23.732Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T11:35:23.834Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T11:40:24.532Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T11:45:26.066Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T11:45:26.166Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T11:45:26.283Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T11:50:28.893Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T11:55:34.551Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T12:00:23.936Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T12:05:24.725Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T12:05:24.813Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T12:05:24.930Z",
+          "agentId": "dax",
+          "agentName": "Turtle",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T12:05:25.012Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Sent an email.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T12:05:25.116Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T12:05:25.244Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T12:05:25.341Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T12:05:25.430Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T12:05:25.536Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Checked Google Ads. No campaign needed adjustment right now.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T12:05:25.621Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T12:10:27.585Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T12:15:39.063Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T12:15:39.152Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T12:15:39.275Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T12:20:47.330Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T12:45:50.654Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T12:45:50.720Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T12:45:50.824Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T12:50:50.702Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T13:10:53.268Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T13:10:53.322Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T13:10:53.427Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T13:10:53.546Z",
+          "agentId": "eve",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Wrote briefing.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T13:10:53.618Z",
+          "agentId": "bran",
+          "agentName": "Spider",
+          "action": "fired",
+          "summary": "Sent an email.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T13:10:53.730Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T13:15:55.122Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T13:15:55.207Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T13:15:55.327Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T13:50:23.448Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T13:50:23.512Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T13:50:23.655Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T13:55:23.931Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:00:29.841Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:00:29.951Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:05:42.745Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:05:42.844Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T14:05:42.952Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:05:43.062Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Sent an email.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T14:05:43.154Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:05:43.235Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T14:05:43.365Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Checked Google Ads. No campaign needed adjustment right now.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:05:43.470Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T14:05:43.572Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:05:43.642Z",
+          "agentId": "lin",
+          "agentName": "Parrot",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T14:10:50.721Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:30:51.663Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:30:51.754Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T14:40:53.472Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T14:40:53.530Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T14:40:53.616Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T15:00:50.834Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T15:15:23.154Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T15:20:24.768Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T15:35:25.747Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T15:35:25.867Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T15:35:25.971Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Scanned threads. No good reply opportunity found.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T15:35:26.066Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "No errors to handle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T15:40:23.303Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T15:45:23.733Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T15:50:24.780Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T15:55:26.570Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:00:30.793Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:00:30.935Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Scanned threads. No good reply opportunity found.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:10:51.971Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:10:52.032Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:10:52.138Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "No errors to handle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:10:52.243Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Hit an error \u2014 Wolf filed an alert. Check Inbox.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T16:10:52.361Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:10:52.442Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T16:10:52.539Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Checked Google Ads. No campaign needed adjustment right now.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:10:52.646Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T16:10:52.765Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:10:52.863Z",
+          "agentId": "eve",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Wrote briefing.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:15:52.538Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:35:55.911Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "No errors to handle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:56:09.396Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T16:56:09.443Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "No errors to handle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:00:23.153Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:05:23.138Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:10:23.226Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:15:23.644Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:20:24.069Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:20:24.183Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Refreshed ROI data.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:25:24.546Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:30:25.869Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:35:28.723Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:35:28.818Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T17:55:32.208Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T17:55:32.244Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "No errors to handle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:05:32.263Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:05:32.333Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T18:05:32.446Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Checked Google Ads. No campaign needed adjustment right now.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:05:32.566Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T18:05:32.661Z",
+          "agentId": "lin",
+          "agentName": "Parrot",
+          "action": "fired",
+          "summary": "Looked at draft pool. Nothing ready to post yet.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:05:32.754Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Watched competitor SERPs. Nothing new since last check.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:25:23.926Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:25:23.995Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "No errors to handle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:25:24.108Z",
+          "agentId": "uma",
+          "agentName": "Eagle",
+          "action": "fired",
+          "summary": "Audited pages. No usability defects to flag.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:25:24.231Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:30:23.670Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:35:24.456Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:35:24.572Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T18:40:41.294Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Checked for approvals to execute. Queue empty.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:40:41.411Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T18:40:41.512Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Audited pages. No SEO issues worth fixing this cycle.",
+          "outcome": "ran_no_output"
+        },
+        {
+          "at": "2026-05-27T18:40:41.591Z",
+          "agentId": "uma",
+          "agentName": "Eagle",
+          "action": "fired",
+          "summary": "Created a ticket. Click to see what.",
+          "outcome": "produced_artifact"
+        },
+        {
+          "at": "2026-05-27T19:55:23.202Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Wolf ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T19:55:23.316Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver hit an error \u2014 Wolf may be alerting.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T19:55:23.421Z",
+          "agentId": "crow",
+          "agentName": "Crow",
+          "action": "fired",
+          "summary": "Crow ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:00:23.172Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Wolf ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:00:23.265Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver hit an error \u2014 Wolf may be alerting.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T20:00:23.376Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:05:23.246Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:05:23.314Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Wolf ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:05:23.418Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Squirrel ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:05:23.527Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox hit an error \u2014 Wolf may be alerting.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T20:05:23.650Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Elephant ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:05:23.735Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:05:23.850Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:05:23.927Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Cat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:10:23.112Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:10:23.237Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:15:23.132Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:20:23.099Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:20:23.231Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Squirrel ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:25:23.152Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:30:23.172Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:35:23.150Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:35:23.245Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:35:23.349Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Cat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:35:23.471Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:35:23.571Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:35:23.656Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:40:23.088Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:40:23.212Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Wolf ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:40:23.311Z",
+          "agentId": "carla",
+          "agentName": "Owl",
+          "action": "fired",
+          "summary": "Owl hit an error \u2014 Wolf may be alerting.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T20:45:23.120Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:45:23.218Z",
+          "agentId": "carla",
+          "agentName": "Owl",
+          "action": "fired",
+          "summary": "Owl ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:50:23.089Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:50:23.215Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Wolf ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:50:23.295Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox hit an error \u2014 Wolf may be alerting.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T20:50:23.414Z",
+          "agentId": "carla",
+          "agentName": "Owl",
+          "action": "fired",
+          "summary": "Owl ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:23.182Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:23.317Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Wolf ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:23.349Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Cat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:23.448Z",
+          "agentId": "crow",
+          "agentName": "Crow",
+          "action": "fired",
+          "summary": "Crow ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:23.564Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:23.660Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:23.764Z",
+          "agentId": "uma",
+          "agentName": "Eagle",
+          "action": "fired",
+          "summary": "Eagle ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:23.842Z",
+          "agentId": "lin",
+          "agentName": "Parrot",
+          "action": "fired",
+          "summary": "Parrot ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:23.956Z",
+          "agentId": "bran",
+          "agentName": "Spider",
+          "action": "fired",
+          "summary": "Spider hit an error \u2014 Wolf may be alerting.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T20:55:24.047Z",
+          "agentId": "kai",
+          "agentName": "Hound",
+          "action": "fired",
+          "summary": "Hound ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:24.166Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:24.271Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T20:55:24.374Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:00:23.081Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:00:23.186Z",
+          "agentId": "bran",
+          "agentName": "Spider",
+          "action": "fired",
+          "summary": "Spider ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:00:23.346Z",
+          "agentId": "sentinel",
+          "agentName": "Wolf",
+          "action": "fired",
+          "summary": "Wolf ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:05:23.123Z",
+          "agentId": "dax",
+          "agentName": "Turtle",
+          "action": "fired",
+          "summary": "Turtle ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:05:23.249Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:05:23.359Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Squirrel ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:05:23.452Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:05:23.544Z",
+          "agentId": "carla",
+          "agentName": "Owl",
+          "action": "fired",
+          "summary": "Owl ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:05:23.635Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Elephant ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:05:23.757Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:10:23.227Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:15:23.115Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:20:23.152Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:25:23.154Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:25:23.277Z",
+          "agentId": "carla",
+          "agentName": "Owl",
+          "action": "fired",
+          "summary": "Owl ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:30:23.082Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:35:23.126Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:35:23.244Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:35:23.404Z",
+          "agentId": "carla",
+          "agentName": "Owl",
+          "action": "fired",
+          "summary": "Owl ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:40:23.090Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:45:23.136Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:50:23.153Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T21:55:23.088Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:00:23.134Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:00:23.244Z",
+          "agentId": "reed",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:05:23.183Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:05:23.296Z",
+          "agentId": "iris",
+          "agentName": "Squirrel",
+          "action": "fired",
+          "summary": "Squirrel ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:05:23.373Z",
+          "agentId": "max",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:05:23.481Z",
+          "agentId": "pip",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Elephant ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:05:23.600Z",
+          "agentId": "riley",
+          "agentName": "Fox",
+          "action": "fired",
+          "summary": "Fox ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:05:23.678Z",
+          "agentId": "nox",
+          "agentName": "Bat",
+          "action": "fired",
+          "summary": "Bat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:05:23.774Z",
+          "agentId": "vex",
+          "agentName": "Cat",
+          "action": "fired",
+          "summary": "Cat ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:05:23.879Z",
+          "agentId": "eve",
+          "agentName": "Elephant",
+          "action": "fired",
+          "summary": "Elephant ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:10:23.116Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:15:23.170Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:20:23.118Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:25:23.150Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:25:23.252Z",
+          "agentId": "dax",
+          "agentName": "Turtle",
+          "action": "fired",
+          "summary": "Turtle ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:25:23.329Z",
+          "agentId": "uma",
+          "agentName": "Eagle",
+          "action": "fired",
+          "summary": "Eagle ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:25:23.428Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:30:23.117Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:35:23.135Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:35:23.236Z",
+          "agentId": "carla",
+          "agentName": "Owl",
+          "action": "fired",
+          "summary": "Owl ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:40:23.103Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:45:23.236Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:50:23.113Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:50:23.243Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:55:23.126Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T22:55:23.227Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:00:23.159Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:05:23.165Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:05:23.256Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:10:23.138Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:10:23.250Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:15:23.160Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:15:23.259Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee hit an error \u2014 Wolf may be alerting.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T23:20:23.120Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:20:23.225Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee hit an error \u2014 Wolf may be alerting.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T23:25:23.143Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:25:23.245Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee hit an error \u2014 Wolf may be alerting.",
+          "outcome": "error"
+        },
+        {
+          "at": "2026-05-27T23:30:23.156Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:30:23.267Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:35:23.096Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:40:23.149Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:45:23.153Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:50:23.107Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-27T23:55:23.109Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:00:23.132Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:05:23.224Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:10:23.093Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:15:23.092Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:20:23.089Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:25:23.147Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:30:23.113Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:35:23.135Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:40:23.170Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:45:23.134Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:45:23.232Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:50:23.172Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T00:55:23.163Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T01:00:23.100Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T01:05:23.151Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T01:10:23.174Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T01:10:23.285Z",
+          "agentId": "sam",
+          "agentName": "Bee",
+          "action": "fired",
+          "summary": "Bee ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T01:15:23.186Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        },
+        {
+          "at": "2026-05-28T01:20:23.097Z",
+          "agentId": "forge",
+          "agentName": "Beaver",
+          "action": "fired",
+          "summary": "Beaver ran a check.",
+          "outcome": "ran_clean"
+        }
+      ]
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "9a3885f9-0068-4df5-88ab-3bd5f36c2b0c",
+  "activeVersionId": "9a3885f9-0068-4df5-88ab-3bd5f36c2b0c",
+  "versionCounter": 699,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-05-26T20:50:03.644Z",
+      "createdAt": "2026-05-26T20:50:03.644Z",
+      "role": "workflow:owner",
+      "workflowId": "P3fKgDjcHFIBwHgI",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-26T20:50:03.644Z",
+    "createdAt": "2026-05-26T20:50:03.644Z",
+    "versionId": "9a3885f9-0068-4df5-88ab-3bd5f36c2b0c",
+    "workflowId": "P3fKgDjcHFIBwHgI",
+    "nodes": [
+      {
+        "id": "wh_post",
+        "name": "POST",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          280
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "agent-heartbeat",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "webhookId": "a39d4bf0-7007-43b7-a4c1-14ffea7363fd"
+      },
+      {
+        "id": "wh_get",
+        "name": "GET",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          440
+        ],
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "agent-heartbeat",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "webhookId": "47c4bbd1-c66d-47ca-99c8-54320661e9bf"
+      },
+      {
+        "id": "router",
+        "name": "Route",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          500,
+          360
+        ],
+        "parameters": {
+          "jsCode": "// Agent Heartbeat Store\n// POST  /webhook/agent-heartbeat  body: {agentId, agentName, action, summary?, outcome?}\n// GET   /webhook/agent-heartbeat?action=read[&limit=50]\nconst MAX_HEARTBEATS = 500;  // keep last 500\nconst sd = $getWorkflowStaticData('global');\nsd.heartbeats = sd.heartbeats || [];\n\nconst input = $input.first().json || {};\nconst q = input.query || {};\nconst body = input.body || {};\n\n// READ\nif (q.action === 'read' || (!body.agentId && !body.action)) {\n  const limit = Math.min(parseInt(q.limit || '50'), 200);\n  // Reverse-chronological (most recent first)\n  const recent = (sd.heartbeats || []).slice(-limit).reverse();\n  // 24h stats\n  const cutoff24 = Date.now() - 24*3600*1000;\n  const recent24 = (sd.heartbeats || []).filter(h => new Date(h.at).getTime() >= cutoff24);\n  const byAgent = {};\n  for (const h of recent24) {\n    byAgent[h.agentId] = byAgent[h.agentId] || { total: 0, action_taken: 0, no_op: 0, errored: 0 };\n    byAgent[h.agentId].total += 1;\n    if (h.outcome === 'action_taken') byAgent[h.agentId].action_taken += 1;\n    else if (h.outcome === 'no_op') byAgent[h.agentId].no_op += 1;\n    else if (h.outcome === 'error') byAgent[h.agentId].errored += 1;\n  }\n  return [{ json: { ok: true, heartbeats: recent, stats_24h: byAgent, total_24h: recent24.length } }];\n}\n\n// WRITE\nconst heartbeat = {\n  at: new Date().toISOString(),\n  agentId: body.agentId || '',\n  agentName: body.agentName || '',\n  action: body.action || 'fired',\n  summary: (body.summary || '').toString().slice(0, 200),\n  outcome: body.outcome || 'unknown'   // action_taken | no_op | error\n};\nsd.heartbeats.push(heartbeat);\nif (sd.heartbeats.length > MAX_HEARTBEATS) {\n  sd.heartbeats = sd.heartbeats.slice(-MAX_HEARTBEATS);\n}\nreturn [{ json: { ok: true, total: sd.heartbeats.length } }];\n"
+        }
+      }
+    ],
+    "connections": {
+      "POST": {
+        "main": [
+          [
+            {
+              "node": "Route",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GET": {
+        "main": [
+          [
+            {
+              "node": "Route",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-26T20:50:03.998Z",
+        "id": 724,
+        "workflowId": "P3fKgDjcHFIBwHgI",
+        "versionId": "9a3885f9-0068-4df5-88ab-3bd5f36c2b0c",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

@@ -1,0 +1,1366 @@
+{
+  "updatedAt": "2026-05-28T00:45:50.914Z",
+  "createdAt": "2026-05-20T16:29:29.701Z",
+  "id": "hpgbBAmRmqtsfr6g",
+  "name": "Approval Executor - Coordinator Brain",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "schedule",
+      "name": "Check Every 15 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"filterGroups\":[{\"filters\":[{\"propertyName\":\"hs_pipeline\",\"operator\":\"EQ\",\"value\":\"0\"},{\"propertyName\":\"hs_pipeline_stage\",\"operator\":\"EQ\",\"value\":\"2\"},{\"propertyName\":\"outcome_notes\",\"operator\":\"NOT_CONTAINS_TOKEN\",\"value\":\"CONDITIONAL_APPROVE\"}]}],\"properties\":[\"subject\",\"content\",\"hs_ticket_priority\",\"agent_name\",\"recommendation_type\",\"outcome_notes\",\"recommendation_detail\"],\"limit\":20}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "fetch-approved",
+      "name": "Fetch Approved Tickets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        280,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "proc-route-v3",
+      "name": "Process & Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Approval Executor v4 \u2014 Process & Route (clean rewrite)\n//\n// Reads approved tickets from HubSpot, emits per-action items with all data\n// downstream nodes need to execute. Every approval is also logged to Decision\n// Memory so Owl / Tally / etc can react on their next cycle (cross-agent\n// handoff mechanism).\n\nconst now = new Date().toISOString();\nconst input = $input.first().json;\nconst results = input.results || [];\nif (results.length === 0) return [];\n\nconst items = [];\n\nfor (const ticket of results) {\n  const props = ticket.properties || {};\n  const ticketId = ticket.id;\n  const agentName = props.agent_name || 'Unknown';\n  const recType = props.recommendation_type || '';\n  const subject = props.subject || '';\n  const content = props.content || '';\n  const priority = props.hs_ticket_priority || 'LOW';\n  const recDetailStr = props.recommendation_detail || '{}';\n  const outcomeNotes = props.outcome_notes || '';\n\n  let recDetail = {};\n  try { recDetail = JSON.parse(recDetailStr); } catch (e) { recDetail = {}; }\n\n  // Conditional approval detection\n  const isConditional = outcomeNotes.includes('CONDITIONAL_APPROVE');\n  const userInstructions = isConditional\n    ? outcomeNotes.split('CONDITIONAL_APPROVE').pop().replace(/^[ \u2014-]+/, '').trim()\n    : '';\n\n  // Base item shape \u2014 every downstream node reads these\n  const item = {\n    ticketId,\n    agentName,\n    recommendationType: recType,\n    subject,\n    content,\n    priority,\n    recDetail,\n    isConditionalApproval: isConditional,\n    userInstructions,\n    action_type: 'auto_ack',\n    executionNotes: 'Acknowledged.',\n    executedAt: now,\n    wpTitle: '', wpContent: '', wpSlug: '', wpStatus: 'draft',\n    wpPatchPageId: 0, wpPatchType: 'pages', wpPatchTitle: '',\n    wpPatchContent: '', wpPatchExcerpt: '', wpPatchAppendOnly: false,\n    wpPatchSlug: '', wpPatchUrl: '',\n    emailTo: '', emailCc: '', emailBcc: '', emailSubject: '', emailBodyHtml: '',\n    // Cross-agent handoff payload (logged to Decision Memory below)\n    handoffTo: '',   // 'Owl' | 'Tally' | 'Bee' | ''\n    handoffPayload: {}\n  };\n\n  // ===== ROUTING TABLE =====\n\n  // 1. Owl (Content Producer) -> wp_create draft\n  if (agentName === 'Content Producer' || recType === 'Content Draft') {\n    item.action_type = 'wp_create';\n    item.wpTitle = (recDetail.pick && recDetail.pick.title) || subject.replace(/^\\[Content[^\\]]*\\]\\s*/i,'').trim();\n    item.wpSlug = item.wpTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');\n    const draft = recDetail.draft_preview || content;\n    item.wpContent = isConditional ? `<!-- CONDITIONAL: ${userInstructions} -->\\n${draft}` : draft;\n    item.wpStatus = 'draft';\n    item.executionNotes = `WP draft created: \"${item.wpTitle}\". Review on WordPress before publishing public.`;\n\n  // 2. Bee (SEO Optimizer) -> wp_patch (title/excerpt/content)\n  } else if (agentName === 'SEO Optimizer' || recType === 'Content Optimization') {\n    const pageId = recDetail.wpId || recDetail.wp_page_id || recDetail.page_id || 0;\n    const patch = recDetail.patch || {};\n    const newTitle = patch.title || recDetail.proposed_title || '';\n    const newExcerpt = patch.excerpt || recDetail.proposed_meta_description || '';\n    let newContentChunk = '';\n    if (patch.new_h2 || patch.new_section_body) {\n      const h2 = patch.new_h2 ? `<h2>${patch.new_h2}</h2>\\n` : '';\n      const body = patch.new_section_body ? `<div>${patch.new_section_body.replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br/>')}</div>` : '';\n      newContentChunk = `\\n\\n<!-- Bee v3 SEO addition: ${recDetail.opportunity || ''} -->\\n${h2}${body}`;\n    }\n    if (pageId) {\n      item.action_type = 'wp_patch';\n      item.wpPatchPageId = pageId;\n      item.wpPatchType = recDetail.wp_type || 'pages';\n      // PRODUCT_CAT_HANDLING_INJECTED \u2014 for WC categories, the editable field is `description`, not `content`\n      if (item.wpPatchType === 'product_cat') {\n        item.wpPatchDescription = recDetail.proposed_content || recDetail.patch?.new_section_body || recDetail.patch?.excerpt || '';\n        item.wpPatchName = (recDetail.patch && recDetail.patch.title) || recDetail.proposed_title || '';\n        // Yoast term meta \u2014 these render in <title>, <meta description>, OG tags.\n        // Use the same title/excerpt from the patch (already length-validated by QA).\n        item.wpPatchYoastTitle = (recDetail.patch && recDetail.patch.title) || recDetail.proposed_title || item.wpPatchName || '';\n        item.wpPatchYoastMetaDesc = (recDetail.patch && recDetail.patch.excerpt) || recDetail.proposed_meta_description || '';\n      }\n      item.wpPatchTitle = newTitle;\n      item.wpPatchExcerpt = newExcerpt;\n      item.wpPatchContent = recDetail.proposed_content || newContentChunk;\n      item.wpPatchAppendOnly = !!(newContentChunk && !recDetail.proposed_content);\n      item.wpPatchSlug = recDetail.slug || '';\n      item.wpPatchUrl = recDetail.url || '';\n      item.executionNotes = `WP page ${pageId} updated by Bee (${recDetail.opportunity || 'SEO'}). Changed: ${[newTitle && 'title', newExcerpt && 'meta', newContentChunk && 'new section'].filter(Boolean).join(', ') || 'no fields'}.`;\n    } else {\n      item.action_type = 'auto_ack';\n      item.executionNotes = 'Bee ticket approved but no wpId in recommendation_detail \u2014 no patch attempted.';\n    }\n\n  // 3. Eagle (UI/UX Performance) -> auto_ack (Eagle pre-patches itself) OR wp_patch (legacy)\n  } else if (agentName === 'UI/UX Performance' || recType === 'Design Audit' || agentName === 'Agent 8 - UI/UX Performance' || agentName === 'UI/UX') {\n    const at = recDetail.action_type || '';\n    const pageId = recDetail.wp_page_id || recDetail.page_id || recDetail.wpId || 0;\n    if (at === 'eagle_run_log') {\n      item.action_type = 'auto_ack';\n      item.executionNotes = `Eagle v3 run logged. Auto-fixes already applied: ${recDetail.auto_fixed_count || 0} across ${recDetail.pages_auto_fixed || 0} pages.`;\n    } else if (pageId && recDetail.proposed_content) {\n      item.action_type = 'wp_patch';\n      item.wpPatchPageId = pageId;\n      item.wpPatchType = recDetail.wp_type || 'pages';\n      // PRODUCT_CAT_HANDLING_INJECTED \u2014 for WC categories, the editable field is `description`, not `content`\n      if (item.wpPatchType === 'product_cat') {\n        item.wpPatchDescription = recDetail.proposed_content || recDetail.patch?.new_section_body || recDetail.patch?.excerpt || '';\n        item.wpPatchName = (recDetail.patch && recDetail.patch.title) || recDetail.proposed_title || '';\n        // Yoast term meta \u2014 these render in <title>, <meta description>, OG tags.\n        // Use the same title/excerpt from the patch (already length-validated by QA).\n        item.wpPatchYoastTitle = (recDetail.patch && recDetail.patch.title) || recDetail.proposed_title || item.wpPatchName || '';\n        item.wpPatchYoastMetaDesc = (recDetail.patch && recDetail.patch.excerpt) || recDetail.proposed_meta_description || '';\n      }\n      item.wpPatchContent = recDetail.proposed_content;\n      item.executionNotes = `WP page ${pageId} updated with design fix.`;\n    } else {\n      item.action_type = 'auto_ack';\n      item.executionNotes = 'Eagle ticket approved \u2014 logged as reviewed.';\n    }\n\n  // 4. Turtle (Content Decay Detector) -> HAND OFF to Owl for refresh draft\n  } else if (agentName === 'Content Decay Detector' || recType === 'Content Refresh') {\n    item.action_type = 'auto_ack';\n    item.handoffTo = 'Owl';\n    item.handoffPayload = {\n      kind: 'refresh_url',\n      url: recDetail.url || '',\n      title: recDetail.title || '',\n      click_drop_pct: recDetail.click_drop_pct,\n      position_drop: recDetail.position_drop,\n    };\n    item.executionNotes = `Refresh queued for ${recDetail.url || 'URL'}. Owl will draft a refresh ticket on next cycle (handoff logged to Decision Memory).`;\n\n  // 5. Hound (Keyword Discovery) -> HAND OFF to Tally for ad-group ingestion\n  } else if (agentName === 'Keyword Discovery') {\n    item.action_type = 'auto_ack';\n    item.handoffTo = 'Tally';\n    item.handoffPayload = {\n      kind: 'new_keyword',\n      keyword: recDetail.keyword || recDetail.term || '',\n      pillar: recDetail.pillar || '',\n      rationale: recDetail.rationale || '',\n    };\n    item.executionNotes = `Keyword \"${recDetail.keyword || recDetail.term || '?'}\" added to Tally's candidate queue (handoff logged to Decision Memory).`;\n\n  // 6. Tally (SEM Manager) -> auto_ack (Maverick handles budgets, Paul handles non-budget manually)\n  } else if (agentName === 'SEM Manager' || recType === 'Bid Adjustment') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `SEM approval logged (${recDetail.action || 'change'} on \"${recDetail.keyword || '(keyword)'}\"). Maverick will pick this up if it's a budget change. For non-budget changes, make manually in Google Ads.`;\n\n  // 7. Spider (Backlink Builder) -> email_send to peer vendor\n  } else if (agentName === 'Backlink Builder' || recType === 'Backlink Outreach') {\n    const domain = recDetail.target_domain || '';\n    const guessedTo = domain ? `info@${domain}` : '';\n    const draftSubject = recDetail.subject_line || `Liftnow guest content - ${domain}`;\n    const draftBody = recDetail.draft_email || '';\n    item.action_type = guessedTo ? 'email_send' : 'auto_ack';\n    item.emailTo = guessedTo;\n    item.emailBcc = 'paulj@liftnow.com';\n    item.emailSubject = draftSubject;\n    const bodyHtml = draftBody.split(/\\n\\s*\\n/).map(p => '<p>' + p.replace(/\\n/g, '<br/>') + '</p>').join('');\n    item.emailBodyHtml = bodyHtml + (isConditional ? `<hr/><p style=\"color:#666\"><em>Conditional: ${userInstructions}</em></p>` : '');\n    item.executionNotes = guessedTo\n      ? `Outreach email sent to ${guessedTo} (BCC Paul). Domain: ${domain}.`\n      : `Backlink ticket approved but no target_domain \u2014 no email sent.`;\n\n  // 8. Beacon (LinkedIn Cadence) -> auto_ack (auto-post disabled, ticket IS the draft for manual paste)\n  } else if (agentName === 'LinkedIn Cadence' || recType === 'LinkedIn Post') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `LinkedIn draft approved. Auto-post is currently disabled \u2014 copy the draft text from the ticket body and paste into LinkedIn manually. Re-enable auto-post once LinkedIn API is wired.`;\n\n  // 9. Reed (Community Engagement / Reddit Reply) -> auto_ack (manual paste)\n  } else if (agentName === 'Community Engagement' || recType === 'Reddit Reply') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `Reddit reply approved. Paste from u/liftnowpartnerships manually \u2014 Reddit closed self-service API access in 2026.`;\n\n  // 10. Crow (Reddit Submissions) -> auto_ack (manual paste)\n  } else if (agentName === 'Reddit Submissions' || recType === 'Reddit Submission') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `Reddit submission approved. Paste from u/liftnowpartnerships manually.`;\n\n  // 11. Nox (Brand Listening) -> auto_ack\n  } else if (agentName === 'Brand Listening' || recType === 'Brand Mention') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `Brand mention acknowledged. Logged for trend awareness.`;\n\n  // 12. Cat (Competitor SERP Monitor) -> auto_ack\n  } else if (agentName === 'Competitor SERP Monitor' || recType === 'Competitor Movement') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `Competitor movement acknowledged. Logged to Decision Memory for Cat's next-cycle context.`;\n\n  // 13. Catch-all\n  } else {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `${agentName} report acknowledged.`;\n  }\n\n  items.push({ json: item });\n}\n\n// FINAL GUARD: downgrade email_send with empty recipient to auto_ack (defense in depth)\nfor (const it of items) {\n  const j = it.json || it;\n  if (j.action_type === 'email_send' && !(j.emailTo && String(j.emailTo).trim())) {\n    j.action_type = 'auto_ack';\n    j.executionNotes = (j.executionNotes || '') + ' [skipped: no recipient determined]';\n  }\n}\n\nreturn items;\n"
+      }
+    },
+    {
+      "id": "switch-action",
+      "name": "Route by Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        940,
+        300
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "outputKey": "wp_create",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.action_type }}",
+                    "rightValue": "wp_create"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "wp_patch",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "b",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.action_type }}",
+                    "rightValue": "wp_patch"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "email_send",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "c",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.action_type }}",
+                    "rightValue": "email_send"
+                  }
+                ]
+              }
+            },
+            {
+              "outputKey": "linkedin_post",
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "d",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.action_type }}",
+                    "rightValue": "linkedin_post"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "auto_ack"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "={{ $json.wpAction ? 'POST' : 'GET' }}",
+        "url": "={{ $json.wpAction ? 'https://liftnow.com/wp-json/wp/v2/posts' : 'https://liftnow.com/wp-json/' }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.wpAction ? JSON.stringify({ title: $json.wpTitle, content: $json.wpContent, status: $json.wpStatus, slug: $json.wpSlug }) : '{}' }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "publish-wordpress",
+      "name": "Publish to WordPress",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1160,
+        400
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AZ9RGlvZiPcT3wDJ",
+          "name": "WordPress REST API (liftnow-agent)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "continueOnFail": true
+    },
+    {
+      "id": "wp-patch",
+      "name": "WP PATCH Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1160,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://www.liftnow.com/wp-json/wp/v2/' + ($json.wpPatchType || 'pages') + '/' + $json.wpPatchPageId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify((function() {\n  const j = $json;\n  if (j.wpPatchType === 'product_cat') {\n    const out = {};\n    if (j.wpPatchDescription) out.description = j.wpPatchDescription;\n    if (j.wpPatchName) out.name = j.wpPatchName;\n    return out;  // Yoast meta is written separately via custom endpoint\n  }\n  const out = {};\n  if (j.wpPatchTitle) out.title = j.wpPatchTitle;\n  if (j.wpPatchExcerpt) out.excerpt = j.wpPatchExcerpt;\n  if (j.wpPatchContent && !j.wpPatchAppendOnly) out.content = j.wpPatchContent;\n  return out;\n})()) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AZ9RGlvZiPcT3wDJ",
+          "name": "WordPress REST API (liftnow-agent)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "continueOnFail": true
+    },
+    {
+      "id": "send-email",
+      "name": "Send Email (SMTP)",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1160,
+        200
+      ],
+      "parameters": {
+        "fromEmail": "partnerships@liftnow.com",
+        "toEmail": "={{ $json.emailTo }}",
+        "ccEmail": "={{ $json.emailCc }}",
+        "bccEmail": "={{ $json.emailBcc }}",
+        "subject": "={{ $json.emailSubject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.emailBodyHtml }}",
+        "options": {
+          "replyTo": "partnerships@liftnow.com"
+        }
+      },
+      "credentials": {
+        "smtp": {
+          "id": "QVGvplnURujjtF5E",
+          "name": "Partnerships Email (SMTP)"
+        }
+      },
+      "webhookId": "8a9dd30e-912a-4152-ac36-7c106fc56d75",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.linkedin.com/v2/userinfo",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "linkedInOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": []
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1160,
+        500
+      ],
+      "id": "linkedin-profile-node",
+      "name": "Get LinkedIn Profile",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "SuvQC6gV3rUPPf9B",
+          "name": "LinkedIn account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Post to LinkedIn \u2014 LinkedIn auto-post is DISABLED (per system policy).\n// linkedin_post items pass through with executionNotes updated.\n\nconst items = $input.all();\nreturn items.map(item => {\n  const d = item.json || {};\n  if (d.action === 'linkedin_post' || d.action_type === 'linkedin_post') {\n    d.executionNotes = (d.executionNotes || '') + ' [LinkedIn auto-post is off \u2014 copy from ticket body and paste manually]';\n    d.linkedInResult = 'manual_paste_required';\n  }\n  return { json: d };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1380,
+        500
+      ],
+      "id": "linkedin-post-node",
+      "name": "Post to LinkedIn",
+      "onError": "continueRegularOutput",
+      "continueOnFail": true
+    },
+    {
+      "id": "merge-actions",
+      "name": "Merge All Branches",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1600,
+        300
+      ],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 5
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mark Tickets Executed v4 \u2014 integrity check: don't claim Auto-Applied if downstream PATCH/POST returned an error.\n// Read from Write Handoffs for the ticket list + executionNotes.\n// Also peek at WP PATCH Page / Publish to WordPress / Send Email outputs to detect failed branches.\n\nconst processed = $('Write Handoffs').all().map(i => i.json);\n\n// Collect error fingerprints from each executor branch\nfunction branchHadError(nodeName, ticketId) {\n  try {\n    const items = $(nodeName).all().map(i => i.json);\n    for (const it of items) {\n      // WP REST error shape: {code: 'rest_cannot_*', message, data:{status: 4xx}}\n      // SMTP failure: typically wouldn't return a body, would error out\n      if (it && it.code && typeof it.code === 'string' && /^rest_/.test(it.code)) {\n        return { failed: true, reason: it.code + ': ' + (it.message || '').slice(0, 200) };\n      }\n      // Generic error envelope\n      if (it && it.data && it.data.status && it.data.status >= 400) {\n        return { failed: true, reason: 'http ' + it.data.status + ': ' + (it.message || '').slice(0, 200) };\n      }\n    }\n  } catch (e) {}\n  return { failed: false };\n}\n\nreturn processed\n  .filter(item => item.ticketId && item.ticketId !== '0')\n  .map(item => {\n    // Check executor branch outputs for this item's action_type\n    let integrityFail = null;\n    if (item.action_type === 'wp_patch') {\n      integrityFail = branchHadError('WP PATCH Page', item.ticketId);\n      // For product_cat, also check the Yoast endpoint\n      if (!integrityFail.failed && item.wpPatchType === 'product_cat') {\n        const yoastFail = branchHadError('PATCH Yoast Term Meta', item.ticketId);\n        if (yoastFail.failed) integrityFail = yoastFail;\n      }\n    } else if (item.action_type === 'wp_create') {\n      integrityFail = branchHadError('Publish to WordPress', item.ticketId);\n    }\n    const failed = integrityFail && integrityFail.failed;\n    return {\n      json: {\n        ticketId: item.ticketId,\n        url: 'https://api.hubapi.com/crm/v3/objects/tickets/' + item.ticketId,\n        body: {\n          properties: {\n            // If failed, send back to stage 1 (Pending Review) instead of Auto-Applied\n            hs_pipeline_stage: failed ? '1' : '1363043699',\n            outcome_notes: failed\n              ? ('EXECUTION FAILED: ' + (integrityFail.reason || 'unknown') + ' | Original intent: ' + (item.executionNotes || '').slice(0, 1000)).slice(0, 4000)\n              : (item.executionNotes || '').slice(0, 4000),\n          }\n        },\n        action: item.action_type,\n        handoffTo: item.handoffTo || '',\n        integrityFail: failed,\n        integrityReason: integrityFail && integrityFail.reason,\n      }\n    };\n  });\n"
+      },
+      "id": "mark-executed",
+      "name": "Mark Tickets Executed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "continueOnFail": true
+    },
+    {
+      "id": "manual-fire-exec",
+      "name": "Manual Fire (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fire-executor",
+        "responseMode": "onReceived",
+        "responseData": "noData",
+        "options": {}
+      },
+      "webhookId": "webhook-exec"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pass-through: embed handoff info inside executionNotes so Mark Tickets\n// Executed writes it into outcome_notes. Receiving agents (Owl, Tally) query\n// HubSpot directly for these notes at start of cycle. No external webhook\n// required.\n\nconst items = $input.all();\nfor (const it of items) {\n  const j = it.json || {};\n  if (j.handoffTo) {\n    const payload = JSON.stringify({to: j.handoffTo, payload: j.handoffPayload || {}});\n    j.executionNotes = (j.executionNotes || '') + ` HANDOFF:${payload}`;\n  }\n}\nreturn items;\n"
+      },
+      "id": "write-handoffs-node",
+      "name": "Write Handoffs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      },
+      "id": "patch-ticket-stage",
+      "name": "PATCH Ticket Stage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2040,
+        300
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Process & Route').itemMatching($itemIndex).json.wpPatchType === 'product_cat' ? 'https://www.liftnow.com/wp-json/liftnow/v1/yoast-term-meta' : 'https://www.liftnow.com/wp-json/wp/v2/types' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (function() {\n  const pr = $('Process & Route').itemMatching($itemIndex).json;\n  if (pr.wpPatchType !== 'product_cat') return '{}';\n  return JSON.stringify({\n    term_id: pr.wpPatchPageId,\n    taxonomy: 'product_cat',\n    fields: {\n      title: pr.wpPatchYoastTitle || '',\n      metadesc: pr.wpPatchYoastMetaDesc || ''\n    }\n  });\n})() }}",
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AZ9RGlvZiPcT3wDJ",
+          "name": "WordPress REST API (liftnow-agent)"
+        }
+      },
+      "id": "patch-yoast-term-meta",
+      "name": "PATCH Yoast Term Meta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        300
+      ],
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Check Every 15 Min": {
+      "main": [
+        [
+          {
+            "node": "Fetch Approved Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Approved Tickets": {
+      "main": [
+        [
+          {
+            "node": "Process & Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process & Route": {
+      "main": [
+        [
+          {
+            "node": "Write Handoffs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Action": {
+      "main": [
+        [
+          {
+            "node": "Publish to WordPress",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WP PATCH Page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Email (SMTP)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get LinkedIn Profile",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge All Branches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish to WordPress": {
+      "main": [
+        [
+          {
+            "node": "Merge All Branches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WP PATCH Page": {
+      "main": [
+        [
+          {
+            "node": "PATCH Yoast Term Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email (SMTP)": {
+      "main": [
+        [
+          {
+            "node": "Merge All Branches",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge All Branches": {
+      "main": [
+        [
+          {
+            "node": "Mark Tickets Executed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get LinkedIn Profile": {
+      "main": [
+        [
+          {
+            "node": "Post to LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Merge All Branches",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Manual Fire (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Approved Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Handoffs": {
+      "main": [
+        [
+          {
+            "node": "Route by Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Tickets Executed": {
+      "main": [
+        [
+          {
+            "node": "PATCH Ticket Stage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PATCH Yoast Term Meta": {
+      "main": [
+        [
+          {
+            "node": "Merge All Branches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v0",
+    "timezone": "America/New_York",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataSuccessExecution": "all",
+    "errorWorkflow": "qMeBXIjguVuaKLLF"
+  },
+  "staticData": {
+    "node:Check Every 15 Min": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
+  "activeVersionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
+  "versionCounter": 218,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-05-20T16:29:29.701Z",
+      "createdAt": "2026-05-20T16:29:29.701Z",
+      "role": "workflow:owner",
+      "workflowId": "hpgbBAmRmqtsfr6g",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-28T00:45:50.919Z",
+    "createdAt": "2026-05-28T00:45:50.919Z",
+    "versionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
+    "workflowId": "hpgbBAmRmqtsfr6g",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 5
+              }
+            ]
+          }
+        },
+        "id": "schedule",
+        "name": "Check Every 15 Min",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"filterGroups\":[{\"filters\":[{\"propertyName\":\"hs_pipeline\",\"operator\":\"EQ\",\"value\":\"0\"},{\"propertyName\":\"hs_pipeline_stage\",\"operator\":\"EQ\",\"value\":\"2\"},{\"propertyName\":\"outcome_notes\",\"operator\":\"NOT_CONTAINS_TOKEN\",\"value\":\"CONDITIONAL_APPROVE\"}]}],\"properties\":[\"subject\",\"content\",\"hs_ticket_priority\",\"agent_name\",\"recommendation_type\",\"outcome_notes\",\"recommendation_detail\"],\"limit\":20}",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "id": "fetch-approved",
+        "name": "Fetch Approved Tickets",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          280,
+          300
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "id": "proc-route-v3",
+        "name": "Process & Route",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          600,
+          300
+        ],
+        "parameters": {
+          "jsCode": "// Approval Executor v4 \u2014 Process & Route (clean rewrite)\n//\n// Reads approved tickets from HubSpot, emits per-action items with all data\n// downstream nodes need to execute. Every approval is also logged to Decision\n// Memory so Owl / Tally / etc can react on their next cycle (cross-agent\n// handoff mechanism).\n\nconst now = new Date().toISOString();\nconst input = $input.first().json;\nconst results = input.results || [];\nif (results.length === 0) return [];\n\nconst items = [];\n\nfor (const ticket of results) {\n  const props = ticket.properties || {};\n  const ticketId = ticket.id;\n  const agentName = props.agent_name || 'Unknown';\n  const recType = props.recommendation_type || '';\n  const subject = props.subject || '';\n  const content = props.content || '';\n  const priority = props.hs_ticket_priority || 'LOW';\n  const recDetailStr = props.recommendation_detail || '{}';\n  const outcomeNotes = props.outcome_notes || '';\n\n  let recDetail = {};\n  try { recDetail = JSON.parse(recDetailStr); } catch (e) { recDetail = {}; }\n\n  // Conditional approval detection\n  const isConditional = outcomeNotes.includes('CONDITIONAL_APPROVE');\n  const userInstructions = isConditional\n    ? outcomeNotes.split('CONDITIONAL_APPROVE').pop().replace(/^[ \u2014-]+/, '').trim()\n    : '';\n\n  // Base item shape \u2014 every downstream node reads these\n  const item = {\n    ticketId,\n    agentName,\n    recommendationType: recType,\n    subject,\n    content,\n    priority,\n    recDetail,\n    isConditionalApproval: isConditional,\n    userInstructions,\n    action_type: 'auto_ack',\n    executionNotes: 'Acknowledged.',\n    executedAt: now,\n    wpTitle: '', wpContent: '', wpSlug: '', wpStatus: 'draft',\n    wpPatchPageId: 0, wpPatchType: 'pages', wpPatchTitle: '',\n    wpPatchContent: '', wpPatchExcerpt: '', wpPatchAppendOnly: false,\n    wpPatchSlug: '', wpPatchUrl: '',\n    emailTo: '', emailCc: '', emailBcc: '', emailSubject: '', emailBodyHtml: '',\n    // Cross-agent handoff payload (logged to Decision Memory below)\n    handoffTo: '',   // 'Owl' | 'Tally' | 'Bee' | ''\n    handoffPayload: {}\n  };\n\n  // ===== ROUTING TABLE =====\n\n  // 1. Owl (Content Producer) -> wp_create draft\n  if (agentName === 'Content Producer' || recType === 'Content Draft') {\n    item.action_type = 'wp_create';\n    item.wpTitle = (recDetail.pick && recDetail.pick.title) || subject.replace(/^\\[Content[^\\]]*\\]\\s*/i,'').trim();\n    item.wpSlug = item.wpTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');\n    const draft = recDetail.draft_preview || content;\n    item.wpContent = isConditional ? `<!-- CONDITIONAL: ${userInstructions} -->\\n${draft}` : draft;\n    item.wpStatus = 'draft';\n    item.executionNotes = `WP draft created: \"${item.wpTitle}\". Review on WordPress before publishing public.`;\n\n  // 2. Bee (SEO Optimizer) -> wp_patch (title/excerpt/content)\n  } else if (agentName === 'SEO Optimizer' || recType === 'Content Optimization') {\n    const pageId = recDetail.wpId || recDetail.wp_page_id || recDetail.page_id || 0;\n    const patch = recDetail.patch || {};\n    const newTitle = patch.title || recDetail.proposed_title || '';\n    const newExcerpt = patch.excerpt || recDetail.proposed_meta_description || '';\n    let newContentChunk = '';\n    if (patch.new_h2 || patch.new_section_body) {\n      const h2 = patch.new_h2 ? `<h2>${patch.new_h2}</h2>\\n` : '';\n      const body = patch.new_section_body ? `<div>${patch.new_section_body.replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br/>')}</div>` : '';\n      newContentChunk = `\\n\\n<!-- Bee v3 SEO addition: ${recDetail.opportunity || ''} -->\\n${h2}${body}`;\n    }\n    if (pageId) {\n      item.action_type = 'wp_patch';\n      item.wpPatchPageId = pageId;\n      item.wpPatchType = recDetail.wp_type || 'pages';\n      // PRODUCT_CAT_HANDLING_INJECTED \u2014 for WC categories, the editable field is `description`, not `content`\n      if (item.wpPatchType === 'product_cat') {\n        item.wpPatchDescription = recDetail.proposed_content || recDetail.patch?.new_section_body || recDetail.patch?.excerpt || '';\n        item.wpPatchName = (recDetail.patch && recDetail.patch.title) || recDetail.proposed_title || '';\n        // Yoast term meta \u2014 these render in <title>, <meta description>, OG tags.\n        // Use the same title/excerpt from the patch (already length-validated by QA).\n        item.wpPatchYoastTitle = (recDetail.patch && recDetail.patch.title) || recDetail.proposed_title || item.wpPatchName || '';\n        item.wpPatchYoastMetaDesc = (recDetail.patch && recDetail.patch.excerpt) || recDetail.proposed_meta_description || '';\n      }\n      item.wpPatchTitle = newTitle;\n      item.wpPatchExcerpt = newExcerpt;\n      item.wpPatchContent = recDetail.proposed_content || newContentChunk;\n      item.wpPatchAppendOnly = !!(newContentChunk && !recDetail.proposed_content);\n      item.wpPatchSlug = recDetail.slug || '';\n      item.wpPatchUrl = recDetail.url || '';\n      item.executionNotes = `WP page ${pageId} updated by Bee (${recDetail.opportunity || 'SEO'}). Changed: ${[newTitle && 'title', newExcerpt && 'meta', newContentChunk && 'new section'].filter(Boolean).join(', ') || 'no fields'}.`;\n    } else {\n      item.action_type = 'auto_ack';\n      item.executionNotes = 'Bee ticket approved but no wpId in recommendation_detail \u2014 no patch attempted.';\n    }\n\n  // 3. Eagle (UI/UX Performance) -> auto_ack (Eagle pre-patches itself) OR wp_patch (legacy)\n  } else if (agentName === 'UI/UX Performance' || recType === 'Design Audit' || agentName === 'Agent 8 - UI/UX Performance' || agentName === 'UI/UX') {\n    const at = recDetail.action_type || '';\n    const pageId = recDetail.wp_page_id || recDetail.page_id || recDetail.wpId || 0;\n    if (at === 'eagle_run_log') {\n      item.action_type = 'auto_ack';\n      item.executionNotes = `Eagle v3 run logged. Auto-fixes already applied: ${recDetail.auto_fixed_count || 0} across ${recDetail.pages_auto_fixed || 0} pages.`;\n    } else if (pageId && recDetail.proposed_content) {\n      item.action_type = 'wp_patch';\n      item.wpPatchPageId = pageId;\n      item.wpPatchType = recDetail.wp_type || 'pages';\n      // PRODUCT_CAT_HANDLING_INJECTED \u2014 for WC categories, the editable field is `description`, not `content`\n      if (item.wpPatchType === 'product_cat') {\n        item.wpPatchDescription = recDetail.proposed_content || recDetail.patch?.new_section_body || recDetail.patch?.excerpt || '';\n        item.wpPatchName = (recDetail.patch && recDetail.patch.title) || recDetail.proposed_title || '';\n        // Yoast term meta \u2014 these render in <title>, <meta description>, OG tags.\n        // Use the same title/excerpt from the patch (already length-validated by QA).\n        item.wpPatchYoastTitle = (recDetail.patch && recDetail.patch.title) || recDetail.proposed_title || item.wpPatchName || '';\n        item.wpPatchYoastMetaDesc = (recDetail.patch && recDetail.patch.excerpt) || recDetail.proposed_meta_description || '';\n      }\n      item.wpPatchContent = recDetail.proposed_content;\n      item.executionNotes = `WP page ${pageId} updated with design fix.`;\n    } else {\n      item.action_type = 'auto_ack';\n      item.executionNotes = 'Eagle ticket approved \u2014 logged as reviewed.';\n    }\n\n  // 4. Turtle (Content Decay Detector) -> HAND OFF to Owl for refresh draft\n  } else if (agentName === 'Content Decay Detector' || recType === 'Content Refresh') {\n    item.action_type = 'auto_ack';\n    item.handoffTo = 'Owl';\n    item.handoffPayload = {\n      kind: 'refresh_url',\n      url: recDetail.url || '',\n      title: recDetail.title || '',\n      click_drop_pct: recDetail.click_drop_pct,\n      position_drop: recDetail.position_drop,\n    };\n    item.executionNotes = `Refresh queued for ${recDetail.url || 'URL'}. Owl will draft a refresh ticket on next cycle (handoff logged to Decision Memory).`;\n\n  // 5. Hound (Keyword Discovery) -> HAND OFF to Tally for ad-group ingestion\n  } else if (agentName === 'Keyword Discovery') {\n    item.action_type = 'auto_ack';\n    item.handoffTo = 'Tally';\n    item.handoffPayload = {\n      kind: 'new_keyword',\n      keyword: recDetail.keyword || recDetail.term || '',\n      pillar: recDetail.pillar || '',\n      rationale: recDetail.rationale || '',\n    };\n    item.executionNotes = `Keyword \"${recDetail.keyword || recDetail.term || '?'}\" added to Tally's candidate queue (handoff logged to Decision Memory).`;\n\n  // 6. Tally (SEM Manager) -> auto_ack (Maverick handles budgets, Paul handles non-budget manually)\n  } else if (agentName === 'SEM Manager' || recType === 'Bid Adjustment') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `SEM approval logged (${recDetail.action || 'change'} on \"${recDetail.keyword || '(keyword)'}\"). Maverick will pick this up if it's a budget change. For non-budget changes, make manually in Google Ads.`;\n\n  // 7. Spider (Backlink Builder) -> email_send to peer vendor\n  } else if (agentName === 'Backlink Builder' || recType === 'Backlink Outreach') {\n    const domain = recDetail.target_domain || '';\n    const guessedTo = domain ? `info@${domain}` : '';\n    const draftSubject = recDetail.subject_line || `Liftnow guest content - ${domain}`;\n    const draftBody = recDetail.draft_email || '';\n    item.action_type = guessedTo ? 'email_send' : 'auto_ack';\n    item.emailTo = guessedTo;\n    item.emailBcc = 'paulj@liftnow.com';\n    item.emailSubject = draftSubject;\n    const bodyHtml = draftBody.split(/\\n\\s*\\n/).map(p => '<p>' + p.replace(/\\n/g, '<br/>') + '</p>').join('');\n    item.emailBodyHtml = bodyHtml + (isConditional ? `<hr/><p style=\"color:#666\"><em>Conditional: ${userInstructions}</em></p>` : '');\n    item.executionNotes = guessedTo\n      ? `Outreach email sent to ${guessedTo} (BCC Paul). Domain: ${domain}.`\n      : `Backlink ticket approved but no target_domain \u2014 no email sent.`;\n\n  // 8. Beacon (LinkedIn Cadence) -> auto_ack (auto-post disabled, ticket IS the draft for manual paste)\n  } else if (agentName === 'LinkedIn Cadence' || recType === 'LinkedIn Post') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `LinkedIn draft approved. Auto-post is currently disabled \u2014 copy the draft text from the ticket body and paste into LinkedIn manually. Re-enable auto-post once LinkedIn API is wired.`;\n\n  // 9. Reed (Community Engagement / Reddit Reply) -> auto_ack (manual paste)\n  } else if (agentName === 'Community Engagement' || recType === 'Reddit Reply') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `Reddit reply approved. Paste from u/liftnowpartnerships manually \u2014 Reddit closed self-service API access in 2026.`;\n\n  // 10. Crow (Reddit Submissions) -> auto_ack (manual paste)\n  } else if (agentName === 'Reddit Submissions' || recType === 'Reddit Submission') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `Reddit submission approved. Paste from u/liftnowpartnerships manually.`;\n\n  // 11. Nox (Brand Listening) -> auto_ack\n  } else if (agentName === 'Brand Listening' || recType === 'Brand Mention') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `Brand mention acknowledged. Logged for trend awareness.`;\n\n  // 12. Cat (Competitor SERP Monitor) -> auto_ack\n  } else if (agentName === 'Competitor SERP Monitor' || recType === 'Competitor Movement') {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `Competitor movement acknowledged. Logged to Decision Memory for Cat's next-cycle context.`;\n\n  // 13. Catch-all\n  } else {\n    item.action_type = 'auto_ack';\n    item.executionNotes = `${agentName} report acknowledged.`;\n  }\n\n  items.push({ json: item });\n}\n\n// FINAL GUARD: downgrade email_send with empty recipient to auto_ack (defense in depth)\nfor (const it of items) {\n  const j = it.json || it;\n  if (j.action_type === 'email_send' && !(j.emailTo && String(j.emailTo).trim())) {\n    j.action_type = 'auto_ack';\n    j.executionNotes = (j.executionNotes || '') + ' [skipped: no recipient determined]';\n  }\n}\n\nreturn items;\n"
+        }
+      },
+      {
+        "id": "switch-action",
+        "name": "Route by Action",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          940,
+          300
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "wp_create",
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "a",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.action_type }}",
+                      "rightValue": "wp_create"
+                    }
+                  ]
+                }
+              },
+              {
+                "outputKey": "wp_patch",
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "b",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.action_type }}",
+                      "rightValue": "wp_patch"
+                    }
+                  ]
+                }
+              },
+              {
+                "outputKey": "email_send",
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "c",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.action_type }}",
+                      "rightValue": "email_send"
+                    }
+                  ]
+                }
+              },
+              {
+                "outputKey": "linkedin_post",
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict"
+                  },
+                  "combinator": "and",
+                  "conditions": [
+                    {
+                      "id": "d",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "leftValue": "={{ $json.action_type }}",
+                      "rightValue": "linkedin_post"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra",
+            "renameFallbackOutput": "auto_ack"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "={{ $json.wpAction ? 'POST' : 'GET' }}",
+          "url": "={{ $json.wpAction ? 'https://liftnow.com/wp-json/wp/v2/posts' : 'https://liftnow.com/wp-json/' }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "httpBasicAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.wpAction ? JSON.stringify({ title: $json.wpTitle, content: $json.wpContent, status: $json.wpStatus, slug: $json.wpSlug }) : '{}' }}",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "id": "publish-wordpress",
+        "name": "Publish to WordPress",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1160,
+          400
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "AZ9RGlvZiPcT3wDJ",
+            "name": "WordPress REST API (liftnow-agent)"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
+        "continueOnFail": true
+      },
+      {
+        "id": "wp-patch",
+        "name": "WP PATCH Page",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1160,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ 'https://www.liftnow.com/wp-json/wp/v2/' + ($json.wpPatchType || 'pages') + '/' + $json.wpPatchPageId }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify((function() {\n  const j = $json;\n  if (j.wpPatchType === 'product_cat') {\n    const out = {};\n    if (j.wpPatchDescription) out.description = j.wpPatchDescription;\n    if (j.wpPatchName) out.name = j.wpPatchName;\n    return out;  // Yoast meta is written separately via custom endpoint\n  }\n  const out = {};\n  if (j.wpPatchTitle) out.title = j.wpPatchTitle;\n  if (j.wpPatchExcerpt) out.excerpt = j.wpPatchExcerpt;\n  if (j.wpPatchContent && !j.wpPatchAppendOnly) out.content = j.wpPatchContent;\n  return out;\n})()) }}",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            },
+            "timeout": 30000
+          }
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "AZ9RGlvZiPcT3wDJ",
+            "name": "WordPress REST API (liftnow-agent)"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
+        "continueOnFail": true
+      },
+      {
+        "id": "send-email",
+        "name": "Send Email (SMTP)",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1160,
+          200
+        ],
+        "parameters": {
+          "fromEmail": "partnerships@liftnow.com",
+          "toEmail": "={{ $json.emailTo }}",
+          "ccEmail": "={{ $json.emailCc }}",
+          "bccEmail": "={{ $json.emailBcc }}",
+          "subject": "={{ $json.emailSubject }}",
+          "emailFormat": "html",
+          "html": "={{ $json.emailBodyHtml }}",
+          "options": {
+            "replyTo": "partnerships@liftnow.com"
+          }
+        },
+        "credentials": {
+          "smtp": {
+            "id": "QVGvplnURujjtF5E",
+            "name": "Partnerships Email (SMTP)"
+          }
+        },
+        "webhookId": "8a9dd30e-912a-4152-ac36-7c106fc56d75",
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.linkedin.com/v2/userinfo",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "linkedInOAuth2Api",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": []
+          },
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          }
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1160,
+          500
+        ],
+        "id": "linkedin-profile-node",
+        "name": "Get LinkedIn Profile",
+        "credentials": {
+          "linkedInOAuth2Api": {
+            "id": "SuvQC6gV3rUPPf9B",
+            "name": "LinkedIn account"
+          }
+        },
+        "onError": "continueRegularOutput",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "jsCode": "// Post to LinkedIn \u2014 LinkedIn auto-post is DISABLED (per system policy).\n// linkedin_post items pass through with executionNotes updated.\n\nconst items = $input.all();\nreturn items.map(item => {\n  const d = item.json || {};\n  if (d.action === 'linkedin_post' || d.action_type === 'linkedin_post') {\n    d.executionNotes = (d.executionNotes || '') + ' [LinkedIn auto-post is off \u2014 copy from ticket body and paste manually]';\n    d.linkedInResult = 'manual_paste_required';\n  }\n  return { json: d };\n});\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1380,
+          500
+        ],
+        "id": "linkedin-post-node",
+        "name": "Post to LinkedIn",
+        "onError": "continueRegularOutput",
+        "continueOnFail": true
+      },
+      {
+        "id": "merge-actions",
+        "name": "Merge All Branches",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3,
+        "position": [
+          1600,
+          300
+        ],
+        "parameters": {
+          "mode": "append",
+          "numberInputs": 5
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Mark Tickets Executed v4 \u2014 integrity check: don't claim Auto-Applied if downstream PATCH/POST returned an error.\n// Read from Write Handoffs for the ticket list + executionNotes.\n// Also peek at WP PATCH Page / Publish to WordPress / Send Email outputs to detect failed branches.\n\nconst processed = $('Write Handoffs').all().map(i => i.json);\n\n// Collect error fingerprints from each executor branch\nfunction branchHadError(nodeName, ticketId) {\n  try {\n    const items = $(nodeName).all().map(i => i.json);\n    for (const it of items) {\n      // WP REST error shape: {code: 'rest_cannot_*', message, data:{status: 4xx}}\n      // SMTP failure: typically wouldn't return a body, would error out\n      if (it && it.code && typeof it.code === 'string' && /^rest_/.test(it.code)) {\n        return { failed: true, reason: it.code + ': ' + (it.message || '').slice(0, 200) };\n      }\n      // Generic error envelope\n      if (it && it.data && it.data.status && it.data.status >= 400) {\n        return { failed: true, reason: 'http ' + it.data.status + ': ' + (it.message || '').slice(0, 200) };\n      }\n    }\n  } catch (e) {}\n  return { failed: false };\n}\n\nreturn processed\n  .filter(item => item.ticketId && item.ticketId !== '0')\n  .map(item => {\n    // Check executor branch outputs for this item's action_type\n    let integrityFail = null;\n    if (item.action_type === 'wp_patch') {\n      integrityFail = branchHadError('WP PATCH Page', item.ticketId);\n      // For product_cat, also check the Yoast endpoint\n      if (!integrityFail.failed && item.wpPatchType === 'product_cat') {\n        const yoastFail = branchHadError('PATCH Yoast Term Meta', item.ticketId);\n        if (yoastFail.failed) integrityFail = yoastFail;\n      }\n    } else if (item.action_type === 'wp_create') {\n      integrityFail = branchHadError('Publish to WordPress', item.ticketId);\n    }\n    const failed = integrityFail && integrityFail.failed;\n    return {\n      json: {\n        ticketId: item.ticketId,\n        url: 'https://api.hubapi.com/crm/v3/objects/tickets/' + item.ticketId,\n        body: {\n          properties: {\n            // If failed, send back to stage 1 (Pending Review) instead of Auto-Applied\n            hs_pipeline_stage: failed ? '1' : '1363043699',\n            outcome_notes: failed\n              ? ('EXECUTION FAILED: ' + (integrityFail.reason || 'unknown') + ' | Original intent: ' + (item.executionNotes || '').slice(0, 1000)).slice(0, 4000)\n              : (item.executionNotes || '').slice(0, 4000),\n          }\n        },\n        action: item.action_type,\n        handoffTo: item.handoffTo || '',\n        integrityFail: failed,\n        integrityReason: integrityFail && integrityFail.reason,\n      }\n    };\n  });\n"
+        },
+        "id": "mark-executed",
+        "name": "Mark Tickets Executed",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1820,
+          300
+        ],
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
+        "continueOnFail": true
+      },
+      {
+        "id": "manual-fire-exec",
+        "name": "Manual Fire (Webhook)",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          100
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "fire-executor",
+          "responseMode": "onReceived",
+          "responseData": "noData",
+          "options": {}
+        },
+        "webhookId": "webhook-exec"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Pass-through: embed handoff info inside executionNotes so Mark Tickets\n// Executed writes it into outcome_notes. Receiving agents (Owl, Tally) query\n// HubSpot directly for these notes at start of cycle. No external webhook\n// required.\n\nconst items = $input.all();\nfor (const it of items) {\n  const j = it.json || {};\n  if (j.handoffTo) {\n    const payload = JSON.stringify({to: j.handoffTo, payload: j.handoffPayload || {}});\n    j.executionNotes = (j.executionNotes || '') + ` HANDOFF:${payload}`;\n  }\n}\nreturn items;\n"
+        },
+        "id": "write-handoffs-node",
+        "name": "Write Handoffs",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          720,
+          300
+        ],
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "method": "PATCH",
+          "url": "={{ $json.url }}",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.body) }}",
+          "options": {
+            "timeout": 15000
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        },
+        "id": "patch-ticket-stage",
+        "name": "PATCH Ticket Stage",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2040,
+          300
+        ],
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $('Process & Route').itemMatching($itemIndex).json.wpPatchType === 'product_cat' ? 'https://www.liftnow.com/wp-json/liftnow/v1/yoast-term-meta' : 'https://www.liftnow.com/wp-json/wp/v2/types' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ (function() {\n  const pr = $('Process & Route').itemMatching($itemIndex).json;\n  if (pr.wpPatchType !== 'product_cat') return '{}';\n  return JSON.stringify({\n    term_id: pr.wpPatchPageId,\n    taxonomy: 'product_cat',\n    fields: {\n      title: pr.wpPatchYoastTitle || '',\n      metadesc: pr.wpPatchYoastMetaDesc || ''\n    }\n  });\n})() }}",
+          "options": {
+            "timeout": 15000,
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "neverError": true
+              }
+            }
+          }
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "AZ9RGlvZiPcT3wDJ",
+            "name": "WordPress REST API (liftnow-agent)"
+          }
+        },
+        "id": "patch-yoast-term-meta",
+        "name": "PATCH Yoast Term Meta",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1360,
+          300
+        ],
+        "continueOnFail": true
+      }
+    ],
+    "connections": {
+      "Check Every 15 Min": {
+        "main": [
+          [
+            {
+              "node": "Fetch Approved Tickets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Approved Tickets": {
+        "main": [
+          [
+            {
+              "node": "Process & Route",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Process & Route": {
+        "main": [
+          [
+            {
+              "node": "Write Handoffs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Route by Action": {
+        "main": [
+          [
+            {
+              "node": "Publish to WordPress",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "WP PATCH Page",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send Email (SMTP)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Get LinkedIn Profile",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Merge All Branches",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Publish to WordPress": {
+        "main": [
+          [
+            {
+              "node": "Merge All Branches",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "WP PATCH Page": {
+        "main": [
+          [
+            {
+              "node": "PATCH Yoast Term Meta",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Email (SMTP)": {
+        "main": [
+          [
+            {
+              "node": "Merge All Branches",
+              "type": "main",
+              "index": 2
+            }
+          ]
+        ]
+      },
+      "Merge All Branches": {
+        "main": [
+          [
+            {
+              "node": "Mark Tickets Executed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get LinkedIn Profile": {
+        "main": [
+          [
+            {
+              "node": "Post to LinkedIn",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Post to LinkedIn": {
+        "main": [
+          [
+            {
+              "node": "Merge All Branches",
+              "type": "main",
+              "index": 3
+            }
+          ]
+        ]
+      },
+      "Manual Fire (Webhook)": {
+        "main": [
+          [
+            {
+              "node": "Fetch Approved Tickets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Write Handoffs": {
+        "main": [
+          [
+            {
+              "node": "Route by Action",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mark Tickets Executed": {
+        "main": [
+          [
+            {
+              "node": "PATCH Ticket Stage",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "PATCH Yoast Term Meta": {
+        "main": [
+          [
+            {
+              "node": "Merge All Branches",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-28T00:45:51.014Z",
+        "id": 1042,
+        "workflowId": "hpgbBAmRmqtsfr6g",
+        "versionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
+        "event": "deactivated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      },
+      {
+        "createdAt": "2026-05-28T00:45:51.079Z",
+        "id": 1043,
+        "workflowId": "hpgbBAmRmqtsfr6g",
+        "versionId": "a2b58435-9f90-4a53-a0c2-f1d2517a5dc2",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

@@ -1,0 +1,357 @@
+{
+  "updatedAt": "2026-05-26T01:30:30.806Z",
+  "createdAt": "2026-05-22T20:01:28.029Z",
+  "id": "NAjdXCnFDyV5Z4Ep",
+  "name": "Webhook: Process Decision (write)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "wh",
+      "name": "POST process-decision",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "process-decision",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "862131bb-cf66-4583-8a0d-80d9e7ea7d01"
+    },
+    {
+      "id": "route",
+      "name": "Build PATCH Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const b=$input.first().json.body||{};const ticketId=b.ticketId;const decision=(b.decision||\"\").toLowerCase();const comment=b.comment||\"\";const deferDays=parseInt(b.deferDays)||3;if(!ticketId)throw new Error(\"ticketId required\");if(![\"approve\",\"defer\",\"reject\",\"acknowledge\",\"conditional_approve\"].includes(decision))throw new Error(\"decision must be approve|defer|reject|acknowledge|conditional_approve\");const ts=new Date().toISOString();let properties={};if(decision===\"approve\"){properties={hs_pipeline_stage:\"2\",outcome_notes:`APPROVED ${ts}${comment?\" \u2014 \"+comment:\"\"}`};}else if(decision===\"conditional_approve\"){properties={hs_pipeline_stage:\"2\",outcome_notes:`CONDITIONAL_APPROVE ${ts} \u2014 ${comment||\"(no conditions specified)\"}`};}else if(decision===\"reject\"){properties={hs_pipeline_stage:\"4\",outcome_notes:`REJECTED ${ts}${comment?\" \u2014 \"+comment:\"\"}`};}else if(decision===\"acknowledge\"){properties={hs_pipeline_stage:\"4\",outcome_notes:`ACKNOWLEDGED ${ts}${comment?\" \u2014 \"+comment:\"\"}`};}else{const until=new Date(Date.now()+deferDays*86400000).toISOString();properties={outcome_notes:`DEFERRED ${ts} until ${until}${comment?\" \u2014 \"+comment:\"\"}`};}return [{json:{ticketId,decision,properties,comment}}];"
+      }
+    },
+    {
+      "id": "patch",
+      "name": "PATCH HubSpot Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://api.hubapi.com/crm/v3/objects/tickets/{{ $json.ticketId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({properties: $json.properties}) }}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      }
+    },
+    {
+      "id": "resp",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ok:true,ticketId:$json.id,decision:$(\"Build PATCH Body\").item.json.decision,newStage:$json.properties?.hs_pipeline_stage}) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "auth-guard",
+      "name": "Validate Auth",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const provided = ($input.first().json.headers && $input.first().json.headers[\"x-agent-secret\"]) || ($input.first().json.body && $input.first().json.body[\"secret\"]) || $input.first().json[\"secret\"] || \"\";\nconst expected = \"LiftnowAgentTeam_kS9-bGq2_xVtN4mP\";\nif (provided !== expected) {\n  throw new Error(\"Unauthorized: missing or wrong x-agent-secret header (or secret in body)\");\n}\nreturn $input.all();"
+      }
+    }
+  ],
+  "connections": {
+    "POST process-decision": {
+      "main": [
+        [
+          {
+            "node": "Validate Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build PATCH Body": {
+      "main": [
+        [
+          {
+            "node": "PATCH HubSpot Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PATCH HubSpot Ticket": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Auth": {
+      "main": [
+        [
+          {
+            "node": "Build PATCH Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "f6d3bb21-a5de-4afb-a278-d8b7bd622859",
+  "activeVersionId": "f6d3bb21-a5de-4afb-a278-d8b7bd622859",
+  "versionCounter": 135,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-22T20:01:28.029Z",
+      "createdAt": "2026-05-22T20:01:28.029Z",
+      "role": "workflow:owner",
+      "workflowId": "NAjdXCnFDyV5Z4Ep",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-26T01:30:30.807Z",
+    "createdAt": "2026-05-26T01:30:30.807Z",
+    "versionId": "f6d3bb21-a5de-4afb-a278-d8b7bd622859",
+    "workflowId": "NAjdXCnFDyV5Z4Ep",
+    "nodes": [
+      {
+        "id": "wh",
+        "name": "POST process-decision",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "process-decision",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "webhookId": "862131bb-cf66-4583-8a0d-80d9e7ea7d01"
+      },
+      {
+        "id": "route",
+        "name": "Build PATCH Body",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const b=$input.first().json.body||{};const ticketId=b.ticketId;const decision=(b.decision||\"\").toLowerCase();const comment=b.comment||\"\";const deferDays=parseInt(b.deferDays)||3;if(!ticketId)throw new Error(\"ticketId required\");if(![\"approve\",\"defer\",\"reject\",\"acknowledge\",\"conditional_approve\"].includes(decision))throw new Error(\"decision must be approve|defer|reject|acknowledge|conditional_approve\");const ts=new Date().toISOString();let properties={};if(decision===\"approve\"){properties={hs_pipeline_stage:\"2\",outcome_notes:`APPROVED ${ts}${comment?\" \u2014 \"+comment:\"\"}`};}else if(decision===\"conditional_approve\"){properties={hs_pipeline_stage:\"2\",outcome_notes:`CONDITIONAL_APPROVE ${ts} \u2014 ${comment||\"(no conditions specified)\"}`};}else if(decision===\"reject\"){properties={hs_pipeline_stage:\"4\",outcome_notes:`REJECTED ${ts}${comment?\" \u2014 \"+comment:\"\"}`};}else if(decision===\"acknowledge\"){properties={hs_pipeline_stage:\"4\",outcome_notes:`ACKNOWLEDGED ${ts}${comment?\" \u2014 \"+comment:\"\"}`};}else{const until=new Date(Date.now()+deferDays*86400000).toISOString();properties={outcome_notes:`DEFERRED ${ts} until ${until}${comment?\" \u2014 \"+comment:\"\"}`};}return [{json:{ticketId,decision,properties,comment}}];"
+        }
+      },
+      {
+        "id": "patch",
+        "name": "PATCH HubSpot Ticket",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          720,
+          300
+        ],
+        "parameters": {
+          "method": "PATCH",
+          "url": "=https://api.hubapi.com/crm/v3/objects/tickets/{{ $json.ticketId }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({properties: $json.properties}) }}"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        }
+      },
+      {
+        "id": "resp",
+        "name": "Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          960,
+          300
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify({ok:true,ticketId:$json.id,decision:$(\"Build PATCH Body\").item.json.decision,newStage:$json.properties?.hs_pipeline_stage}) }}",
+          "options": {
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "auth-guard",
+        "name": "Validate Auth",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          420,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const provided = ($input.first().json.headers && $input.first().json.headers[\"x-agent-secret\"]) || ($input.first().json.body && $input.first().json.body[\"secret\"]) || $input.first().json[\"secret\"] || \"\";\nconst expected = \"LiftnowAgentTeam_kS9-bGq2_xVtN4mP\";\nif (provided !== expected) {\n  throw new Error(\"Unauthorized: missing or wrong x-agent-secret header (or secret in body)\");\n}\nreturn $input.all();"
+        }
+      }
+    ],
+    "connections": {
+      "POST process-decision": {
+        "main": [
+          [
+            {
+              "node": "Validate Auth",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build PATCH Body": {
+        "main": [
+          [
+            {
+              "node": "PATCH HubSpot Ticket",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "PATCH HubSpot Ticket": {
+        "main": [
+          [
+            {
+              "node": "Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validate Auth": {
+        "main": [
+          [
+            {
+              "node": "Build PATCH Body",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-26T01:30:30.836Z",
+        "id": 531,
+        "workflowId": "NAjdXCnFDyV5Z4Ep",
+        "versionId": "f6d3bb21-a5de-4afb-a278-d8b7bd622859",
+        "event": "deactivated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      },
+      {
+        "createdAt": "2026-05-26T01:30:30.849Z",
+        "id": 532,
+        "workflowId": "NAjdXCnFDyV5Z4Ep",
+        "versionId": "f6d3bb21-a5de-4afb-a278-d8b7bd622859",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

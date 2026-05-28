@@ -1,0 +1,54 @@
+[
+  {
+    "id": "P4qZX27Up0Hs9rcE",
+    "name": "Agent Feedback Store"
+  },
+  {
+    "id": "liOYeGcSZD8UQEOX",
+    "name": "Heartbeat Aggregator"
+  },
+  {
+    "id": "Oq07XLN678zlAIaF",
+    "name": "Webhook: Decision Memory"
+  },
+  {
+    "id": "ljEP1fIxSr2UmJHA",
+    "name": "Master Kill Switch"
+  },
+  {
+    "id": "P3fKgDjcHFIBwHgI",
+    "name": "Agent Heartbeat Store"
+  },
+  {
+    "id": "yYyj4TnP9Ho9O85l",
+    "name": "Agent 9 \u2014 Content Decay Detector"
+  },
+  {
+    "id": "d7YwC4ezub4g1LrI",
+    "name": "Agent 1 \u2014 Content Producer v2"
+  },
+  {
+    "id": "hpgbBAmRmqtsfr6g",
+    "name": "Approval Executor - Coordinator Brain"
+  },
+  {
+    "id": "VY38KRldIFDdvKJj",
+    "name": "Webhook: Agent Proposals (read)"
+  },
+  {
+    "id": "alik1C8sXr857rY7",
+    "name": "Agent 8 \u2014 Eagle v3 (Auto-PATCH UI/UX)"
+  },
+  {
+    "id": "P7c1fwvrmRV5CTrd",
+    "name": "CF7 Form \u2192 HubSpot Contact Creator"
+  },
+  {
+    "id": "N03TEmB50zG0XiiP",
+    "name": "Agent 2 \u2014 Bee v3 (SEO Crawl + Execute)"
+  },
+  {
+    "id": "NAjdXCnFDyV5Z4Ep",
+    "name": "Webhook: Process Decision (write)"
+  }
+]

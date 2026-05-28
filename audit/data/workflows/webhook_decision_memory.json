@@ -1,0 +1,351 @@
+{
+  "updatedAt": "2026-05-24T18:32:10.073Z",
+  "createdAt": "2026-05-22T22:58:43.533Z",
+  "id": "Oq07XLN678zlAIaF",
+  "name": "Webhook: Decision Memory",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "wh",
+      "name": "GET decision-memory",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "decision-memory",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "9b5033c3-bf39-43ba-a69b-2343c7572814"
+    },
+    {
+      "id": "build",
+      "name": "Build HubSpot Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const q=$input.first().json.query||{};const agent=q.agent||\"\";const signature=q.signature||\"\";const days=Math.min(parseInt(q.days)||30,90);const cutoff=Date.now()-(days*86400000);const filterGroups=[{filters:[{propertyName:\"hs_pipeline\",operator:\"EQ\",value:\"0\"},{propertyName:\"hs_pipeline_stage\",operator:\"IN\",values:[\"2\",\"3\",\"4\"]},{propertyName:\"hs_lastmodifieddate\",operator:\"GTE\",value:String(cutoff)}]}];if(agent)filterGroups[0].filters.push({propertyName:\"agent_name\",operator:\"EQ\",value:agent});return [{json:{filterGroups,properties:[\"subject\",\"content\",\"agent_name\",\"recommendation_type\",\"outcome_notes\",\"hs_pipeline_stage\",\"hs_lastmodifieddate\"],sorts:[{propertyName:\"hs_lastmodifieddate\",direction:\"DESCENDING\"}],limit:50,_meta:{agent,signature,days}}}];"
+      }
+    },
+    {
+      "id": "search",
+      "name": "Search Recent Decisions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({filterGroups:$json.filterGroups,properties:$json.properties,sorts:$json.sorts,limit:$json.limit}) }}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      }
+    },
+    {
+      "id": "compute",
+      "name": "Compute Similarity + Verdict",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        860,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const search=$input.first().json;const tickets=search.results||[];const meta=$(\"Build HubSpot Query\").first().json._meta;const signature=(meta.signature||\"\").toLowerCase();const STOP=new Set([\"the\",\"a\",\"an\",\"and\",\"or\",\"for\",\"with\",\"from\",\"to\",\"of\",\"in\",\"on\",\"by\",\"this\",\"that\",\"is\",\"are\",\"was\",\"were\",\"be\",\"been\",\"being\",\"have\",\"has\",\"had\",\"do\",\"does\",\"did\",\"will\",\"would\",\"should\",\"could\",\"may\",\"might\",\"must\",\"shall\",\"not\",\"no\",\"yes\",\"if\",\"then\",\"else\",\"at\",\"as\",\"it\",\"its\",\"our\",\"we\",\"you\",\"your\",\"my\",\"me\",\"i\",\"but\",\"so\"]);const tok=s=>(s||\"\").toLowerCase().replace(/[^a-z0-9\\s]/g,\" \").split(/\\s+/).filter(w=>w.length>=3&&!STOP.has(w));const sigTok=new Set(tok(signature));const jaccard=(a,b)=>{const ia=Array.from(a).filter(x=>b.has(x)).length;const u=new Set([...a,...b]).size;return u?ia/u:0;};const matches=[];for(const t of tickets){const p=t.properties||{};const cmpStr=(p.subject||\"\")+\" \"+(p.content||\"\");const cmpTok=new Set(tok(cmpStr));const sim=jaccard(sigTok,cmpTok);if(sim<0.2)continue;const notes=p.outcome_notes||\"\";let decision=\"UNKNOWN\";if(notes.startsWith(\"APPROVED\"))decision=\"APPROVED\";else if(notes.startsWith(\"REJECTED\"))decision=\"REJECTED\";else if(notes.startsWith(\"ACKNOWLEDGED\"))decision=\"ACKNOWLEDGED\";else if(notes.startsWith(\"DEFERRED\"))decision=\"DEFERRED\";const paulComment=(notes.match(/\u2014\\s*(.+)$/)||[])[1]||\"\";matches.push({ticketId:t.id,subject:p.subject,decision,paulComment:paulComment.slice(0,400),agent:p.agent_name,similarity:Math.round(sim*100)/100,age_days:Math.round((Date.now()-new Date(p.hs_lastmodifieddate).getTime())/86400000)});}matches.sort((a,b)=>b.similarity-a.similarity);const strongReject=matches.find(m=>m.decision===\"REJECTED\"&&m.similarity>=0.5);const strongApprove=matches.find(m=>m.decision===\"APPROVED\"&&m.similarity>=0.7);const should_skip=!!(strongReject||strongApprove);let skip_reason=null;if(strongReject)skip_reason=`Recently REJECTED similar proposal (sim ${strongReject.similarity}) - \"${strongReject.subject}\". Paul comment: ${strongReject.paulComment||\"none\"}`;else if(strongApprove)skip_reason=`Recently APPROVED (sim ${strongApprove.similarity}) - \"${strongApprove.subject}\" - do not re-propose.`;const mid_matches=matches.filter(m=>m.similarity>=0.3&&m.similarity<0.5&&m.decision===\"REJECTED\").slice(0,3);const learnings_for_prompt=mid_matches.length?(\"PRIOR PAUL FEEDBACK (incorporate into proposal):\\n\"+mid_matches.map(m=>`- Previously rejected \"${m.subject}\": ${m.paulComment||\"(no comment)\"}`).join(\"\\n\")):null;return [{json:{should_skip,skip_reason,learnings_for_prompt,signature_received:signature,window_days:meta.days,agent:meta.agent,total_matches:matches.length,top_matches:matches.slice(0,5)}}];"
+      }
+    },
+    {
+      "id": "resp",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1080,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GET decision-memory": {
+      "main": [
+        [
+          {
+            "node": "Build HubSpot Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build HubSpot Query": {
+      "main": [
+        [
+          {
+            "node": "Search Recent Decisions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Recent Decisions": {
+      "main": [
+        [
+          {
+            "node": "Compute Similarity + Verdict",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Similarity + Verdict": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "qMeBXIjguVuaKLLF"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "b2441634-e9b8-463b-8518-0c9b95543e73",
+  "activeVersionId": "b2441634-e9b8-463b-8518-0c9b95543e73",
+  "versionCounter": 131,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-22T22:58:43.533Z",
+      "createdAt": "2026-05-22T22:58:43.533Z",
+      "role": "workflow:owner",
+      "workflowId": "Oq07XLN678zlAIaF",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-24T18:32:10.075Z",
+    "createdAt": "2026-05-24T18:32:10.075Z",
+    "versionId": "b2441634-e9b8-463b-8518-0c9b95543e73",
+    "workflowId": "Oq07XLN678zlAIaF",
+    "nodes": [
+      {
+        "id": "wh",
+        "name": "GET decision-memory",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          200,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "decision-memory",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "webhookId": "9b5033c3-bf39-43ba-a69b-2343c7572814"
+      },
+      {
+        "id": "build",
+        "name": "Build HubSpot Query",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          420,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const q=$input.first().json.query||{};const agent=q.agent||\"\";const signature=q.signature||\"\";const days=Math.min(parseInt(q.days)||30,90);const cutoff=Date.now()-(days*86400000);const filterGroups=[{filters:[{propertyName:\"hs_pipeline\",operator:\"EQ\",value:\"0\"},{propertyName:\"hs_pipeline_stage\",operator:\"IN\",values:[\"2\",\"3\",\"4\"]},{propertyName:\"hs_lastmodifieddate\",operator:\"GTE\",value:String(cutoff)}]}];if(agent)filterGroups[0].filters.push({propertyName:\"agent_name\",operator:\"EQ\",value:agent});return [{json:{filterGroups,properties:[\"subject\",\"content\",\"agent_name\",\"recommendation_type\",\"outcome_notes\",\"hs_pipeline_stage\",\"hs_lastmodifieddate\"],sorts:[{propertyName:\"hs_lastmodifieddate\",direction:\"DESCENDING\"}],limit:50,_meta:{agent,signature,days}}}];"
+        }
+      },
+      {
+        "id": "search",
+        "name": "Search Recent Decisions",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          640,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({filterGroups:$json.filterGroups,properties:$json.properties,sorts:$json.sorts,limit:$json.limit}) }}"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        }
+      },
+      {
+        "id": "compute",
+        "name": "Compute Similarity + Verdict",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          860,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const search=$input.first().json;const tickets=search.results||[];const meta=$(\"Build HubSpot Query\").first().json._meta;const signature=(meta.signature||\"\").toLowerCase();const STOP=new Set([\"the\",\"a\",\"an\",\"and\",\"or\",\"for\",\"with\",\"from\",\"to\",\"of\",\"in\",\"on\",\"by\",\"this\",\"that\",\"is\",\"are\",\"was\",\"were\",\"be\",\"been\",\"being\",\"have\",\"has\",\"had\",\"do\",\"does\",\"did\",\"will\",\"would\",\"should\",\"could\",\"may\",\"might\",\"must\",\"shall\",\"not\",\"no\",\"yes\",\"if\",\"then\",\"else\",\"at\",\"as\",\"it\",\"its\",\"our\",\"we\",\"you\",\"your\",\"my\",\"me\",\"i\",\"but\",\"so\"]);const tok=s=>(s||\"\").toLowerCase().replace(/[^a-z0-9\\s]/g,\" \").split(/\\s+/).filter(w=>w.length>=3&&!STOP.has(w));const sigTok=new Set(tok(signature));const jaccard=(a,b)=>{const ia=Array.from(a).filter(x=>b.has(x)).length;const u=new Set([...a,...b]).size;return u?ia/u:0;};const matches=[];for(const t of tickets){const p=t.properties||{};const cmpStr=(p.subject||\"\")+\" \"+(p.content||\"\");const cmpTok=new Set(tok(cmpStr));const sim=jaccard(sigTok,cmpTok);if(sim<0.2)continue;const notes=p.outcome_notes||\"\";let decision=\"UNKNOWN\";if(notes.startsWith(\"APPROVED\"))decision=\"APPROVED\";else if(notes.startsWith(\"REJECTED\"))decision=\"REJECTED\";else if(notes.startsWith(\"ACKNOWLEDGED\"))decision=\"ACKNOWLEDGED\";else if(notes.startsWith(\"DEFERRED\"))decision=\"DEFERRED\";const paulComment=(notes.match(/\u2014\\s*(.+)$/)||[])[1]||\"\";matches.push({ticketId:t.id,subject:p.subject,decision,paulComment:paulComment.slice(0,400),agent:p.agent_name,similarity:Math.round(sim*100)/100,age_days:Math.round((Date.now()-new Date(p.hs_lastmodifieddate).getTime())/86400000)});}matches.sort((a,b)=>b.similarity-a.similarity);const strongReject=matches.find(m=>m.decision===\"REJECTED\"&&m.similarity>=0.5);const strongApprove=matches.find(m=>m.decision===\"APPROVED\"&&m.similarity>=0.7);const should_skip=!!(strongReject||strongApprove);let skip_reason=null;if(strongReject)skip_reason=`Recently REJECTED similar proposal (sim ${strongReject.similarity}) - \"${strongReject.subject}\". Paul comment: ${strongReject.paulComment||\"none\"}`;else if(strongApprove)skip_reason=`Recently APPROVED (sim ${strongApprove.similarity}) - \"${strongApprove.subject}\" - do not re-propose.`;const mid_matches=matches.filter(m=>m.similarity>=0.3&&m.similarity<0.5&&m.decision===\"REJECTED\").slice(0,3);const learnings_for_prompt=mid_matches.length?(\"PRIOR PAUL FEEDBACK (incorporate into proposal):\\n\"+mid_matches.map(m=>`- Previously rejected \"${m.subject}\": ${m.paulComment||\"(no comment)\"}`).join(\"\\n\")):null;return [{json:{should_skip,skip_reason,learnings_for_prompt,signature_received:signature,window_days:meta.days,agent:meta.agent,total_matches:matches.length,top_matches:matches.slice(0,5)}}];"
+        }
+      },
+      {
+        "id": "resp",
+        "name": "Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1080,
+          300
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "connections": {
+      "GET decision-memory": {
+        "main": [
+          [
+            {
+              "node": "Build HubSpot Query",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build HubSpot Query": {
+        "main": [
+          [
+            {
+              "node": "Search Recent Decisions",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Search Recent Decisions": {
+        "main": [
+          [
+            {
+              "node": "Compute Similarity + Verdict",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Compute Similarity + Verdict": {
+        "main": [
+          [
+            {
+              "node": "Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-24T18:32:10.798Z",
+        "id": 301,
+        "workflowId": "Oq07XLN678zlAIaF",
+        "versionId": "b2441634-e9b8-463b-8518-0c9b95543e73",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

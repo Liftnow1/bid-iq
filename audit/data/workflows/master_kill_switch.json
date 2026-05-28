@@ -1,0 +1,1089 @@
+{
+  "updatedAt": "2026-05-26T01:35:00.914Z",
+  "createdAt": "2026-05-26T00:50:43.654Z",
+  "id": "ljEP1fIxSr2UmJHA",
+  "name": "Master Kill Switch",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trig",
+      "name": "Kill Switch Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kill-switch",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "kill-switch-1"
+    },
+    {
+      "id": "parse-action",
+      "name": "Parse Action",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json || {};\nconst action = (body.action || 'deactivate').toLowerCase();\nif (!['activate','deactivate'].includes(action)) {\n  return [{json:{error:'action must be \"activate\" or \"deactivate\"', received:action}}];\n}\nreturn [{json:{action}}];"
+      }
+    },
+    {
+      "id": "toggle-0",
+      "name": "Toggle: Agent 4 - SEM Manager v2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/tW1hYtfGWddfg7TF/\" + $json.action }}",
+        "authentication": "none",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": false
+            }
+          },
+          "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "toggle-1",
+      "name": "Toggle: Agent 6 - Backlink Builder v2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        190
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/YP07sPEQgTyrQ5BK/\" + $json.action }}",
+        "authentication": "none",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": false
+            }
+          },
+          "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "toggle-2",
+      "name": "Toggle: Backlink Poster - Agent 6b",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        280
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/riG3espgO00QYCEl/\" + $json.action }}",
+        "authentication": "none",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": false
+            }
+          },
+          "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "toggle-3",
+      "name": "Toggle: Agent 3 - LinkedIn Cadence v2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        370
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/f7d4k95CQPJMiuqv/\" + $json.action }}",
+        "authentication": "none",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": false
+            }
+          },
+          "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "toggle-4",
+      "name": "Toggle: Agent 1 - Content Producer v2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        460
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/d7YwC4ezub4g1LrI/\" + $json.action }}",
+        "authentication": "none",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": false
+            }
+          },
+          "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "toggle-5",
+      "name": "Toggle: Agent 2 - SEO Optimizer v2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        550
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/N03TEmB50zG0XiiP/\" + $json.action }}",
+        "authentication": "none",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": false
+            }
+          },
+          "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "toggle-6",
+      "name": "Toggle: Agent 8 - UI/UX Performance v2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        640
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/alik1C8sXr857rY7/\" + $json.action }}",
+        "authentication": "none",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": false
+            }
+          },
+          "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "toggle-7",
+      "name": "Toggle: Agent 9 - Content Decay Detect",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        730
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/yYyj4TnP9Ho9O85l/\" + $json.action }}",
+        "authentication": "none",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": false
+            }
+          },
+          "timeout": 15000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "aggregate",
+      "name": "Aggregate Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        830,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = items.map((it, idx) => {\n  const j = it.json || {};\n  return {workflow_id: j.id || '?', name: j.name || '?', active: j.active, action_applied: true};\n});\nreturn [{json:{ok:true, results:results, count:results.length, timestamp:new Date().toISOString()}}];"
+      }
+    },
+    {
+      "id": "auth-guard",
+      "name": "Validate Auth",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const provided = ($input.first().json.headers && $input.first().json.headers[\"x-agent-secret\"]) || ($input.first().json.body && $input.first().json.body[\"secret\"]) || $input.first().json[\"secret\"] || \"\";\nconst expected = \"LiftnowAgentTeam_kS9-bGq2_xVtN4mP\";\nif (provided !== expected) {\n  throw new Error(\"Unauthorized: missing or wrong x-agent-secret header (or secret in body)\");\n}\nreturn $input.all();"
+      }
+    }
+  ],
+  "connections": {
+    "Kill Switch Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Action": {
+      "main": [
+        [
+          {
+            "node": "Toggle: Agent 4 - SEM Manager v2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Toggle: Agent 6 - Backlink Builder v2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Toggle: Backlink Poster - Agent 6b",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Toggle: Agent 3 - LinkedIn Cadence v2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Toggle: Agent 1 - Content Producer v2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Toggle: Agent 2 - SEO Optimizer v2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Toggle: Agent 8 - UI/UX Performance v2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Toggle: Agent 9 - Content Decay Detect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Toggle: Agent 4 - SEM Manager v2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Toggle: Agent 6 - Backlink Builder v2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Toggle: Backlink Poster - Agent 6b": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Toggle: Agent 3 - LinkedIn Cadence v2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Toggle: Agent 1 - Content Producer v2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Toggle: Agent 2 - SEO Optimizer v2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Toggle: Agent 8 - UI/UX Performance v2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Toggle: Agent 9 - Content Decay Detect": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Auth": {
+      "main": [
+        [
+          {
+            "node": "Parse Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "f7d323c6-6630-4aa2-99b2-2eb9fa9f0ea1",
+  "activeVersionId": "f7d323c6-6630-4aa2-99b2-2eb9fa9f0ea1",
+  "versionCounter": 133,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-26T00:50:43.654Z",
+      "createdAt": "2026-05-26T00:50:43.654Z",
+      "role": "workflow:owner",
+      "workflowId": "ljEP1fIxSr2UmJHA",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-26T01:35:00.916Z",
+    "createdAt": "2026-05-26T01:35:00.916Z",
+    "versionId": "f7d323c6-6630-4aa2-99b2-2eb9fa9f0ea1",
+    "workflowId": "ljEP1fIxSr2UmJHA",
+    "nodes": [
+      {
+        "id": "trig",
+        "name": "Kill Switch Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          200,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "kill-switch",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "webhookId": "kill-switch-1"
+      },
+      {
+        "id": "parse-action",
+        "name": "Parse Action",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          380,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const body = $input.first().json.body || $input.first().json || {};\nconst action = (body.action || 'deactivate').toLowerCase();\nif (!['activate','deactivate'].includes(action)) {\n  return [{json:{error:'action must be \"activate\" or \"deactivate\"', received:action}}];\n}\nreturn [{json:{action}}];"
+        }
+      },
+      {
+        "id": "toggle-0",
+        "name": "Toggle: Agent 4 - SEM Manager v2",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          580,
+          100
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/tW1hYtfGWddfg7TF/\" + $json.action }}",
+          "authentication": "none",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": false
+              }
+            },
+            "timeout": 15000
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "toggle-1",
+        "name": "Toggle: Agent 6 - Backlink Builder v2",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          580,
+          190
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/YP07sPEQgTyrQ5BK/\" + $json.action }}",
+          "authentication": "none",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": false
+              }
+            },
+            "timeout": 15000
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "toggle-2",
+        "name": "Toggle: Backlink Poster - Agent 6b",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          580,
+          280
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/riG3espgO00QYCEl/\" + $json.action }}",
+          "authentication": "none",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": false
+              }
+            },
+            "timeout": 15000
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "toggle-3",
+        "name": "Toggle: Agent 3 - LinkedIn Cadence v2",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          580,
+          370
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/f7d4k95CQPJMiuqv/\" + $json.action }}",
+          "authentication": "none",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": false
+              }
+            },
+            "timeout": 15000
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "toggle-4",
+        "name": "Toggle: Agent 1 - Content Producer v2",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          580,
+          460
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/d7YwC4ezub4g1LrI/\" + $json.action }}",
+          "authentication": "none",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": false
+              }
+            },
+            "timeout": 15000
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "toggle-5",
+        "name": "Toggle: Agent 2 - SEO Optimizer v2",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          580,
+          550
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/N03TEmB50zG0XiiP/\" + $json.action }}",
+          "authentication": "none",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": false
+              }
+            },
+            "timeout": 15000
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "toggle-6",
+        "name": "Toggle: Agent 8 - UI/UX Performance v2",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          580,
+          640
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/alik1C8sXr857rY7/\" + $json.action }}",
+          "authentication": "none",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": false
+              }
+            },
+            "timeout": 15000
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "toggle-7",
+        "name": "Toggle: Agent 9 - Content Decay Detect",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          580,
+          730
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://agents.liftnowdirect.com/api/v1/workflows/yYyj4TnP9Ho9O85l/\" + $json.action }}",
+          "authentication": "none",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "fullResponse": false
+              }
+            },
+            "timeout": 15000
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiMjg1NDE3NDctOTM1ZS00YzdjLWI4ZjYtZDVlMjdjOGZkNzY1IiwiaWF0IjoxNzc5NDk0NjA1fQ.j-JQPpsTF01aQheoqKneoMAyP5G7Z-MHS_aSD6CzEhA"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "aggregate",
+        "name": "Aggregate Results",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          830,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst results = items.map((it, idx) => {\n  const j = it.json || {};\n  return {workflow_id: j.id || '?', name: j.name || '?', active: j.active, action_applied: true};\n});\nreturn [{json:{ok:true, results:results, count:results.length, timestamp:new Date().toISOString()}}];"
+        }
+      },
+      {
+        "id": "auth-guard",
+        "name": "Validate Auth",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          380,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const provided = ($input.first().json.headers && $input.first().json.headers[\"x-agent-secret\"]) || ($input.first().json.body && $input.first().json.body[\"secret\"]) || $input.first().json[\"secret\"] || \"\";\nconst expected = \"LiftnowAgentTeam_kS9-bGq2_xVtN4mP\";\nif (provided !== expected) {\n  throw new Error(\"Unauthorized: missing or wrong x-agent-secret header (or secret in body)\");\n}\nreturn $input.all();"
+        }
+      }
+    ],
+    "connections": {
+      "Kill Switch Webhook": {
+        "main": [
+          [
+            {
+              "node": "Validate Auth",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Action": {
+        "main": [
+          [
+            {
+              "node": "Toggle: Agent 4 - SEM Manager v2",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Toggle: Agent 6 - Backlink Builder v2",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Toggle: Backlink Poster - Agent 6b",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Toggle: Agent 3 - LinkedIn Cadence v2",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Toggle: Agent 1 - Content Producer v2",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Toggle: Agent 2 - SEO Optimizer v2",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Toggle: Agent 8 - UI/UX Performance v2",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Toggle: Agent 9 - Content Decay Detect",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Toggle: Agent 4 - SEM Manager v2": {
+        "main": [
+          [
+            {
+              "node": "Aggregate Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Toggle: Agent 6 - Backlink Builder v2": {
+        "main": [
+          [
+            {
+              "node": "Aggregate Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Toggle: Backlink Poster - Agent 6b": {
+        "main": [
+          [
+            {
+              "node": "Aggregate Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Toggle: Agent 3 - LinkedIn Cadence v2": {
+        "main": [
+          [
+            {
+              "node": "Aggregate Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Toggle: Agent 1 - Content Producer v2": {
+        "main": [
+          [
+            {
+              "node": "Aggregate Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Toggle: Agent 2 - SEO Optimizer v2": {
+        "main": [
+          [
+            {
+              "node": "Aggregate Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Toggle: Agent 8 - UI/UX Performance v2": {
+        "main": [
+          [
+            {
+              "node": "Aggregate Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Toggle: Agent 9 - Content Decay Detect": {
+        "main": [
+          [
+            {
+              "node": "Aggregate Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validate Auth": {
+        "main": [
+          [
+            {
+              "node": "Parse Action",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-26T01:35:00.952Z",
+        "id": 534,
+        "workflowId": "ljEP1fIxSr2UmJHA",
+        "versionId": "f7d323c6-6630-4aa2-99b2-2eb9fa9f0ea1",
+        "event": "deactivated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      },
+      {
+        "createdAt": "2026-05-26T01:35:00.965Z",
+        "id": 535,
+        "workflowId": "ljEP1fIxSr2UmJHA",
+        "versionId": "f7d323c6-6630-4aa2-99b2-2eb9fa9f0ea1",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

@@ -1,0 +1,1218 @@
+{
+  "updatedAt": "2026-05-27T18:40:35.754Z",
+  "createdAt": "2026-05-22T22:45:59.219Z",
+  "id": "alik1C8sXr857rY7",
+  "name": "Agent 8 \u2014 Eagle v3 (Auto-PATCH UI/UX)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trig",
+      "name": "Mon 7AM ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": [
+                8
+              ],
+              "triggerAtDay": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "inv",
+      "name": "Get Page Inventory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.liftnow.com/wp-json/wp/v2/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            },
+            {
+              "name": "_fields",
+              "value": "id,slug,link,title"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AZ9RGlvZiPcT3wDJ",
+          "name": "WordPress REST API (liftnow-agent)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "filter",
+      "name": "Filter Content Pages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Eagle only audits /resources/ anchor + cluster pages (article structure\n// expected: byline, TOC, FAQ schema, contracts tagline, CTA). Excludes\n// /lp/ landing pages (different content model, no byline/FAQ on purpose).\n// Map the WordPress REST shape into the {fetchedUrl, slug, wpId} shape\n// the downstream HTTP + Preserve Metadata + Scanner nodes expect.\nconst items = $input.all().map(i => i.json);\nconst RESOURCES = /\\/resources\\//;\nconst out = [];\nfor (const p of items) {\n  const link = p.link || '';\n  if (!RESOURCES.test(link)) continue;\n  out.push({\n    fetchedUrl: link,\n    url: link,\n    slug: p.slug || '',\n    wpId: p.id || null,\n    title: (p.title && p.title.rendered) || ''\n  });\n}\nreturn out.map(o => ({json: o}));\n"
+      }
+    },
+    {
+      "id": "fetch-html",
+      "name": "Fetch Rendered HTML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        860,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.fetchedUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "LiftnowAgent8/1.0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 120000
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "preserve",
+      "name": "Preserve Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const items=$input.all();const meta=$(\"Filter Content Pages\").all();return items.map((it,i)=>{const m=meta[i]?meta[i].json:{};return {json:{...m,data:typeof it.json===\"string\"?it.json:(it.json.data||it.json.body||\"\")}};});"
+      }
+    },
+    {
+      "id": "manual-fire-alik1C",
+      "name": "Manual Fire (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fire-uiux",
+        "responseMode": "onReceived",
+        "responseData": "noData",
+        "options": {}
+      },
+      "webhookId": "webhook-alik1C8sXr857rY7"
+    },
+    {
+      "id": "get-post-inv",
+      "name": "Get Post Inventory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        500
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://www.liftnow.com/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            },
+            {
+              "name": "_fields",
+              "value": "id,slug,link,title"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AZ9RGlvZiPcT3wDJ",
+          "name": "WordPress REST API (liftnow-agent)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "scanner",
+      "name": "Structural Defect Scanner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst allReports = [];\nconst skippedSsrEmpty = [];\nconst bannedRegex = /LiftNow|LIFTNOW|45\\+ states|We don't subcontract|dealing directly|ALI-certified inspection|single contract line item|revolutionary|industry-leading|best-in-class|cutting-edge|In this post|in today's fast-paced|\\bMohawk\\b|\\bStertil-Koni\\b|\\bRotary\\b|\\bSnap-on\\b|\\bHunter\\b|\\bWhip\\b|\\bChallenger\\b|\\bGray\\b|\\bARI\\b/g;\n\nfor (const item of items) {\n  const html = item.json.data || item.json.body || (typeof item.json === 'string' ? item.json : '') || '';\n  const url = item.json.fetchedUrl || item.json.url || '';\n  const slug = item.json.slug || '';\n  const wpId = item.json.wpId || null;\n  const title = item.json.title || '';\n\n  const safeHtml = html.replace(/Challenger\\s+(CLHM-?190|40\\d{2}[a-z]*|44\\d{2}[a-z]*)/gi, 'PRODUCT_CHALLENGER');\n  const wordCount = safeHtml.replace(/<[^>]+>/g, ' ').split(/\\s+/).filter(Boolean).length;\n\n  if (wordCount < 200) {\n    skippedSsrEmpty.push({url, slug, wordCount});\n    continue;\n  }\n\n  const defects = [];\n\n  // Auto-fixable structural omissions\n  if (!/By Paul Stern, VP of Public Sector Sales/i.test(html))\n    defects.push({type: 'MISSING_BYLINE', severity: 'high', autoFixable: true});\n  if (wordCount > 1500) {\n    if (!/For the Fleet Manager/i.test(html))\n      defects.push({type: 'MISSING_FLEET_MANAGER_CALLOUT', severity: 'medium', autoFixable: false});\n    if (!/For the Procurement Officer/i.test(html))\n      defects.push({type: 'MISSING_PROCUREMENT_CALLOUT', severity: 'medium', autoFixable: false});\n  }\n  if (!/FAQPage/.test(html))\n    defects.push({type: 'MISSING_FAQ_SCHEMA', severity: 'high', autoFixable: false});\n  if (!/121223-LFT|CW7258|FSA23-EQU21\\.0/.test(html))\n    defects.push({type: 'MISSING_CONTRACTS_TAGLINE', severity: 'high', autoFixable: true});\n  if (!/gov@liftnow\\.com/i.test(html) || !/1-800-LIFT-NOW/i.test(html))\n    defects.push({type: 'MISSING_CTA', severity: 'high', autoFixable: true});\n  if (!/data-trust-block|wpcode-12173|Trust Block/i.test(html))\n    defects.push({type: 'TRUST_BLOCK_MISSING', severity: 'high', autoFixable: false, infoOnly: true,\n                  hint: 'depends on WPCode snippet #12173 \u2014 separate system, not auto-fixable via REST'});\n\n  bannedRegex.lastIndex = 0;\n  const bannedHits = [];\n  let m;\n  while ((m = bannedRegex.exec(safeHtml)) !== null) {\n    bannedHits.push({phrase: m[0], offset: m.index});\n    if (bannedHits.length >= 5) break;\n  }\n  if (bannedHits.length) defects.push({\n    type: 'BANNED_PHRASE_DETECTED', severity: 'high', autoFixable: false,\n    detail: Array.from(new Set(bannedHits.map(h => h.phrase))),\n    offsets: bannedHits.map(h => h.offset)\n  });\n\n  if (defects.length) {\n    const high = defects.filter(d => d.severity === 'high').length;\n    allReports.push({\n      url, slug, wpId, title, wordCount,\n      defectCount: defects.length,\n      priority: high ? 'HIGH' : 'MEDIUM',\n      defects,\n      currentHtml: html,\n      wp_edit_url: wpId ? `https://www.liftnow.com/wp-admin/post.php?post=${wpId}&action=edit` : null\n    });\n  }\n}\n\nconst pagesScanned = items.length;\nconst pagesAuditable = pagesScanned - skippedSsrEmpty.length;\nconst totalDefects = allReports.reduce((s,r) => s + r.defectCount, 0);\n\nif (!allReports.length) {\n  return [{json: {\n    statusGreen: true,\n    note: `All ${pagesAuditable} /resources/ pages passed structural checks. ${skippedSsrEmpty.length} pages skipped (SSR sparse).`,\n    pages_scanned: pagesScanned\n  }}];\n}\n\n// EMIT ONE ITEM PER PAGE so downstream nodes can process per-page in parallel\nreturn allReports.map(r => ({json: r}));\n"
+      }
+    },
+    {
+      "id": "if_defects",
+      "name": "Any Defects?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a",
+              "leftValue": "={{ $json.statusGreen ? 0 : 1 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "build_autofix",
+      "name": "Build Auto-PATCH",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1900,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Process ALL pages \u2014 emit one item per page with patchPayload (or noAutoFix flag)\nconst BYLINE_HTML = \"<p><em>By Paul Stern, VP of Public Sector Sales \\u2014 Liftnow</em></p>\\n\\n\";\nconst CTA_HTML = \"\\n<hr/>\\n<div class=\\\"liftnow-cta\\\">\\n  <h3>Ready to spec your fleet's lifts?</h3>\\n  <p>Send your vehicle list and bay dimensions to <a href=\\\"mailto:gov@liftnow.com\\\">gov@liftnow.com</a>. Or call <a href=\\\"tel:18005438669\\\">1-800-LIFT-NOW</a>.</p>\\n</div>\\n\";\nconst CONTRACTS_TAGLINE_HTML = \"\\n<p style=\\\"font-size:0.85em;color:#666;margin-top:2em\\\">\\n<strong>Liftnow contracts:</strong> Sourcewell 121223-LFT \\u00b7 NASPO CW7258 \\u00b7 Florida Sheriffs FSA23-EQU21.0\\n</p>\\n\";\n\nconst out = [];\nfor (const item of $input.all()) {\n  const r = item.json;\n  let patchedHtml = r.currentHtml || '';\n  const autoFixesApplied = [];\n\n  for (const d of (r.defects || [])) {\n    if (!d.autoFixable) continue;\n    if (d.type === 'MISSING_BYLINE') {\n      const headingMatch = patchedHtml.match(/<h1[^>]*>[\\s\\S]*?<\\/h1>/i);\n      if (headingMatch) {\n        const idx = headingMatch.index + headingMatch[0].length;\n        patchedHtml = patchedHtml.slice(0, idx) + '\\n\\n' + BYLINE_HTML + patchedHtml.slice(idx);\n      } else {\n        patchedHtml = BYLINE_HTML + patchedHtml;\n      }\n      autoFixesApplied.push('MISSING_BYLINE');\n    } else if (d.type === 'MISSING_CTA') {\n      patchedHtml = patchedHtml + '\\n\\n' + CTA_HTML;\n      autoFixesApplied.push('MISSING_CTA');\n    } else if (d.type === 'MISSING_CONTRACTS_TAGLINE') {\n      patchedHtml = patchedHtml + '\\n\\n' + CONTRACTS_TAGLINE_HTML;\n      autoFixesApplied.push('MISSING_CONTRACTS_TAGLINE');\n    }\n  }\n\n  if (!autoFixesApplied.length) {\n    out.push({json: {noAutoFix: true, ...r}});\n  } else {\n    out.push({json: {\n      ...r,\n      autoFixesApplied,\n      patchedHtml,\n      patchPayload: { content: patchedHtml }\n    }});\n  }\n}\nreturn out;\n"
+      }
+    },
+    {
+      "id": "if_autofix",
+      "name": "Has Auto-Fixes?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a",
+              "leftValue": "={{ $json.noAutoFix ? 0 : 1 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wp_patch",
+      "name": "PATCH WordPress Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2500,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://www.liftnow.com/wp-json/wp/v2/\" + ($json.type || \"pages\") + \"/\" + $json.wpId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.patchPayload) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AZ9RGlvZiPcT3wDJ",
+          "name": "WordPress REST API (liftnow-agent)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "continueOnFail": true
+    },
+    {
+      "id": "merge",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2800,
+        300
+      ],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2
+      }
+    },
+    {
+      "id": "build_summary",
+      "name": "Build Summary Ticket",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3100,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Collect results across all pages processed this run\nconst items = $input.all().map(i => i.json);\nlet autoFixedCount = 0;\nlet pagesAutoFixed = 0;\nconst remainingDefects = [];\n\nfor (const it of items) {\n  if (it.autoFixesApplied && it.autoFixesApplied.length) {\n    autoFixedCount += it.autoFixesApplied.length;\n    pagesAutoFixed++;\n  }\n  // Non-auto-fixable defects are remaining\n  for (const d of (it.defects || [])) {\n    if (!d.autoFixable && !d.infoOnly) {\n      remainingDefects.push({\n        slug: it.slug || '',\n        url: it.url || '',\n        type: d.type,\n        detail: d.detail || null,\n        wp_edit_url: it.wp_edit_url || null\n      });\n    }\n  }\n}\n\nconst subject = autoFixedCount > 0\n  ? \"Eagle auto-fixed \" + autoFixedCount + \" structural defects across \" + pagesAutoFixed + \" pages\"\n  : \"Eagle scan complete \u2014 \" + remainingDefects.length + \" content fixes need your review\";\n\nconst content = \"ASK\\n\" +\n  (autoFixedCount > 0 ? \"I auto-PATCHed \" + autoFixedCount + \" structural fixes (byline, CTA, contracts tagline) across \" + pagesAutoFixed + \" /resources/ pages. \" : \"\") +\n  (remainingDefects.length > 0 ? \"I also found \" + remainingDefects.length + \" defects that need content judgment \u2014 listed below. Approve to have me draft fixes, reject to skip.\\n\\n\" : \"All structural defects are now fixed. Click Approve to log this run.\\n\\n\") +\n  (autoFixedCount > 0 ? \"\u2705 AUTO-FIXED (already PATCHed in WP):\\n\" +\n    items.filter(i => i.autoFixesApplied && i.autoFixesApplied.length)\n      .map(i => \"  \u2022 /\" + (i.slug || '?') + \" \u2014 \" + i.autoFixesApplied.join(', '))\n      .join(\"\\n\") + \"\\n\\n\" : \"\") +\n  (remainingDefects.length > 0 ? \"\u26a0\ufe0f NEEDS YOUR REVIEW (Eagle can't auto-fix without judgment):\\n\" +\n    remainingDefects.map(d => \"  \u2022 /\" + d.slug + \" \u2014 \" + d.type + (d.detail ? ' (' + JSON.stringify(d.detail).slice(0,80) + ')' : ''))\n      .join(\"\\n\") + \"\\n\\n\" : \"\") +\n  \"WHY\\n\" +\n  \"Eagle weekly scan of /resources/ anchor + cluster pages for structural elements: byline, FAQ schema, contracts tagline, CTA, banned phrases, Trust Block.\\n\\n\" +\n  \"IF YOU APPROVE\\n\" +\n  \"I log this run in Decision Memory. If there are remaining content fixes, I'll spin up an Owl-style draft for each on the next cycle.\\n\\n\" +\n  \"IF YOU REJECT\\n\" +\n  \"I'll undo the auto-PATCHes (WP keeps revisions) and revert. Tell me what to change in the comment.\";\n\nconst payload = {\n  properties: {\n    subject: subject.slice(0, 200),\n    content,\n    hs_pipeline: '0',\n    hs_pipeline_stage: '1',\n    hs_ticket_priority: remainingDefects.length > 0 ? 'MEDIUM' : 'LOW',\n    agent_name: 'UI/UX Performance',\n    recommendation_type: 'Design Audit',\n    recommendation_detail: JSON.stringify({\n      auto_fixed_count: autoFixedCount,\n      pages_auto_fixed: pagesAutoFixed,\n      remaining_defects: remainingDefects,\n      action_type: 'eagle_run_log'\n    })\n  }\n};\nreturn [{json: {body_str: JSON.stringify(payload)}}];\n"
+      }
+    },
+    {
+      "id": "create_ticket",
+      "name": "Create Summary Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3400,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/tickets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body_str }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "continueOnFail": true
+    },
+    {
+      "id": "green_log",
+      "name": "Status Green Log",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1900,
+        500
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a",
+              "name": "status",
+              "value": "={{ 'Eagle: ' + ($json.note || 'all pages clean') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Mon 7AM ET": {
+      "main": [
+        [
+          {
+            "node": "Get Page Inventory",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Post Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Fire (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Get Page Inventory",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Post Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Page Inventory": {
+      "main": [
+        [
+          {
+            "node": "Filter Content Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Post Inventory": {
+      "main": [
+        [
+          {
+            "node": "Filter Content Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Content Pages": {
+      "main": [
+        [
+          {
+            "node": "Fetch Rendered HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Rendered HTML": {
+      "main": [
+        [
+          {
+            "node": "Preserve Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preserve Metadata": {
+      "main": [
+        [
+          {
+            "node": "Structural Defect Scanner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structural Defect Scanner": {
+      "main": [
+        [
+          {
+            "node": "Any Defects?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Defects?": {
+      "main": [
+        [
+          {
+            "node": "Build Auto-PATCH",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Status Green Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Auto-PATCH": {
+      "main": [
+        [
+          {
+            "node": "Has Auto-Fixes?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Auto-Fixes?": {
+      "main": [
+        [
+          {
+            "node": "PATCH WordPress Page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "PATCH WordPress Page": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Build Summary Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Summary Ticket": {
+      "main": [
+        [
+          {
+            "node": "Create Summary Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "qMeBXIjguVuaKLLF",
+    "executionOrder": "v0"
+  },
+  "staticData": {
+    "node:Mon 7AM ET": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
+  "activeVersionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
+  "versionCounter": 192,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-05-22T22:45:59.219Z",
+      "createdAt": "2026-05-22T22:45:59.219Z",
+      "role": "workflow:owner",
+      "workflowId": "alik1C8sXr857rY7",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-27T18:40:35.757Z",
+    "createdAt": "2026-05-27T18:40:35.757Z",
+    "versionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
+    "workflowId": "alik1C8sXr857rY7",
+    "nodes": [
+      {
+        "id": "trig",
+        "name": "Mon 7AM ET",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          200,
+          300
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": [
+                  8
+                ],
+                "triggerAtDay": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "inv",
+        "name": "Get Page Inventory",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          420,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://www.liftnow.com/wp-json/wp/v2/pages",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "per_page",
+                "value": "100"
+              },
+              {
+                "name": "_fields",
+                "value": "id,slug,link,title"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 120000
+          }
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "AZ9RGlvZiPcT3wDJ",
+            "name": "WordPress REST API (liftnow-agent)"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "id": "filter",
+        "name": "Filter Content Pages",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          640,
+          300
+        ],
+        "parameters": {
+          "jsCode": "// Eagle only audits /resources/ anchor + cluster pages (article structure\n// expected: byline, TOC, FAQ schema, contracts tagline, CTA). Excludes\n// /lp/ landing pages (different content model, no byline/FAQ on purpose).\n// Map the WordPress REST shape into the {fetchedUrl, slug, wpId} shape\n// the downstream HTTP + Preserve Metadata + Scanner nodes expect.\nconst items = $input.all().map(i => i.json);\nconst RESOURCES = /\\/resources\\//;\nconst out = [];\nfor (const p of items) {\n  const link = p.link || '';\n  if (!RESOURCES.test(link)) continue;\n  out.push({\n    fetchedUrl: link,\n    url: link,\n    slug: p.slug || '',\n    wpId: p.id || null,\n    title: (p.title && p.title.rendered) || ''\n  });\n}\nreturn out.map(o => ({json: o}));\n"
+        }
+      },
+      {
+        "id": "fetch-html",
+        "name": "Fetch Rendered HTML",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          860,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $json.fetchedUrl }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "LiftnowAgent8/1.0"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "responseFormat": "text"
+              }
+            },
+            "timeout": 120000
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "id": "preserve",
+        "name": "Preserve Metadata",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1080,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const items=$input.all();const meta=$(\"Filter Content Pages\").all();return items.map((it,i)=>{const m=meta[i]?meta[i].json:{};return {json:{...m,data:typeof it.json===\"string\"?it.json:(it.json.data||it.json.body||\"\")}};});"
+        }
+      },
+      {
+        "id": "manual-fire-alik1C",
+        "name": "Manual Fire (Webhook)",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          200,
+          100
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "fire-uiux",
+          "responseMode": "onReceived",
+          "responseData": "noData",
+          "options": {}
+        },
+        "webhookId": "webhook-alik1C8sXr857rY7"
+      },
+      {
+        "id": "get-post-inv",
+        "name": "Get Post Inventory",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          420,
+          500
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://www.liftnow.com/wp-json/wp/v2/posts",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "per_page",
+                "value": "100"
+              },
+              {
+                "name": "_fields",
+                "value": "id,slug,link,title"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 120000
+          }
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "AZ9RGlvZiPcT3wDJ",
+            "name": "WordPress REST API (liftnow-agent)"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "id": "scanner",
+        "name": "Structural Defect Scanner",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1300,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst allReports = [];\nconst skippedSsrEmpty = [];\nconst bannedRegex = /LiftNow|LIFTNOW|45\\+ states|We don't subcontract|dealing directly|ALI-certified inspection|single contract line item|revolutionary|industry-leading|best-in-class|cutting-edge|In this post|in today's fast-paced|\\bMohawk\\b|\\bStertil-Koni\\b|\\bRotary\\b|\\bSnap-on\\b|\\bHunter\\b|\\bWhip\\b|\\bChallenger\\b|\\bGray\\b|\\bARI\\b/g;\n\nfor (const item of items) {\n  const html = item.json.data || item.json.body || (typeof item.json === 'string' ? item.json : '') || '';\n  const url = item.json.fetchedUrl || item.json.url || '';\n  const slug = item.json.slug || '';\n  const wpId = item.json.wpId || null;\n  const title = item.json.title || '';\n\n  const safeHtml = html.replace(/Challenger\\s+(CLHM-?190|40\\d{2}[a-z]*|44\\d{2}[a-z]*)/gi, 'PRODUCT_CHALLENGER');\n  const wordCount = safeHtml.replace(/<[^>]+>/g, ' ').split(/\\s+/).filter(Boolean).length;\n\n  if (wordCount < 200) {\n    skippedSsrEmpty.push({url, slug, wordCount});\n    continue;\n  }\n\n  const defects = [];\n\n  // Auto-fixable structural omissions\n  if (!/By Paul Stern, VP of Public Sector Sales/i.test(html))\n    defects.push({type: 'MISSING_BYLINE', severity: 'high', autoFixable: true});\n  if (wordCount > 1500) {\n    if (!/For the Fleet Manager/i.test(html))\n      defects.push({type: 'MISSING_FLEET_MANAGER_CALLOUT', severity: 'medium', autoFixable: false});\n    if (!/For the Procurement Officer/i.test(html))\n      defects.push({type: 'MISSING_PROCUREMENT_CALLOUT', severity: 'medium', autoFixable: false});\n  }\n  if (!/FAQPage/.test(html))\n    defects.push({type: 'MISSING_FAQ_SCHEMA', severity: 'high', autoFixable: false});\n  if (!/121223-LFT|CW7258|FSA23-EQU21\\.0/.test(html))\n    defects.push({type: 'MISSING_CONTRACTS_TAGLINE', severity: 'high', autoFixable: true});\n  if (!/gov@liftnow\\.com/i.test(html) || !/1-800-LIFT-NOW/i.test(html))\n    defects.push({type: 'MISSING_CTA', severity: 'high', autoFixable: true});\n  if (!/data-trust-block|wpcode-12173|Trust Block/i.test(html))\n    defects.push({type: 'TRUST_BLOCK_MISSING', severity: 'high', autoFixable: false, infoOnly: true,\n                  hint: 'depends on WPCode snippet #12173 \u2014 separate system, not auto-fixable via REST'});\n\n  bannedRegex.lastIndex = 0;\n  const bannedHits = [];\n  let m;\n  while ((m = bannedRegex.exec(safeHtml)) !== null) {\n    bannedHits.push({phrase: m[0], offset: m.index});\n    if (bannedHits.length >= 5) break;\n  }\n  if (bannedHits.length) defects.push({\n    type: 'BANNED_PHRASE_DETECTED', severity: 'high', autoFixable: false,\n    detail: Array.from(new Set(bannedHits.map(h => h.phrase))),\n    offsets: bannedHits.map(h => h.offset)\n  });\n\n  if (defects.length) {\n    const high = defects.filter(d => d.severity === 'high').length;\n    allReports.push({\n      url, slug, wpId, title, wordCount,\n      defectCount: defects.length,\n      priority: high ? 'HIGH' : 'MEDIUM',\n      defects,\n      currentHtml: html,\n      wp_edit_url: wpId ? `https://www.liftnow.com/wp-admin/post.php?post=${wpId}&action=edit` : null\n    });\n  }\n}\n\nconst pagesScanned = items.length;\nconst pagesAuditable = pagesScanned - skippedSsrEmpty.length;\nconst totalDefects = allReports.reduce((s,r) => s + r.defectCount, 0);\n\nif (!allReports.length) {\n  return [{json: {\n    statusGreen: true,\n    note: `All ${pagesAuditable} /resources/ pages passed structural checks. ${skippedSsrEmpty.length} pages skipped (SSR sparse).`,\n    pages_scanned: pagesScanned\n  }}];\n}\n\n// EMIT ONE ITEM PER PAGE so downstream nodes can process per-page in parallel\nreturn allReports.map(r => ({json: r}));\n"
+        }
+      },
+      {
+        "id": "if_defects",
+        "name": "Any Defects?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1600,
+          300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "a",
+                "leftValue": "={{ $json.statusGreen ? 0 : 1 }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "build_autofix",
+        "name": "Build Auto-PATCH",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1900,
+          200
+        ],
+        "parameters": {
+          "jsCode": "// Process ALL pages \u2014 emit one item per page with patchPayload (or noAutoFix flag)\nconst BYLINE_HTML = \"<p><em>By Paul Stern, VP of Public Sector Sales \\u2014 Liftnow</em></p>\\n\\n\";\nconst CTA_HTML = \"\\n<hr/>\\n<div class=\\\"liftnow-cta\\\">\\n  <h3>Ready to spec your fleet's lifts?</h3>\\n  <p>Send your vehicle list and bay dimensions to <a href=\\\"mailto:gov@liftnow.com\\\">gov@liftnow.com</a>. Or call <a href=\\\"tel:18005438669\\\">1-800-LIFT-NOW</a>.</p>\\n</div>\\n\";\nconst CONTRACTS_TAGLINE_HTML = \"\\n<p style=\\\"font-size:0.85em;color:#666;margin-top:2em\\\">\\n<strong>Liftnow contracts:</strong> Sourcewell 121223-LFT \\u00b7 NASPO CW7258 \\u00b7 Florida Sheriffs FSA23-EQU21.0\\n</p>\\n\";\n\nconst out = [];\nfor (const item of $input.all()) {\n  const r = item.json;\n  let patchedHtml = r.currentHtml || '';\n  const autoFixesApplied = [];\n\n  for (const d of (r.defects || [])) {\n    if (!d.autoFixable) continue;\n    if (d.type === 'MISSING_BYLINE') {\n      const headingMatch = patchedHtml.match(/<h1[^>]*>[\\s\\S]*?<\\/h1>/i);\n      if (headingMatch) {\n        const idx = headingMatch.index + headingMatch[0].length;\n        patchedHtml = patchedHtml.slice(0, idx) + '\\n\\n' + BYLINE_HTML + patchedHtml.slice(idx);\n      } else {\n        patchedHtml = BYLINE_HTML + patchedHtml;\n      }\n      autoFixesApplied.push('MISSING_BYLINE');\n    } else if (d.type === 'MISSING_CTA') {\n      patchedHtml = patchedHtml + '\\n\\n' + CTA_HTML;\n      autoFixesApplied.push('MISSING_CTA');\n    } else if (d.type === 'MISSING_CONTRACTS_TAGLINE') {\n      patchedHtml = patchedHtml + '\\n\\n' + CONTRACTS_TAGLINE_HTML;\n      autoFixesApplied.push('MISSING_CONTRACTS_TAGLINE');\n    }\n  }\n\n  if (!autoFixesApplied.length) {\n    out.push({json: {noAutoFix: true, ...r}});\n  } else {\n    out.push({json: {\n      ...r,\n      autoFixesApplied,\n      patchedHtml,\n      patchPayload: { content: patchedHtml }\n    }});\n  }\n}\nreturn out;\n"
+        }
+      },
+      {
+        "id": "if_autofix",
+        "name": "Has Auto-Fixes?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          2200,
+          200
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "a",
+                "leftValue": "={{ $json.noAutoFix ? 0 : 1 }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "wp_patch",
+        "name": "PATCH WordPress Page",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          2500,
+          150
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "={{ \"https://www.liftnow.com/wp-json/wp/v2/\" + ($json.type || \"pages\") + \"/\" + $json.wpId }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json.patchPayload) }}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "AZ9RGlvZiPcT3wDJ",
+            "name": "WordPress REST API (liftnow-agent)"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 3000,
+        "continueOnFail": true
+      },
+      {
+        "id": "merge",
+        "name": "Merge Results",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3,
+        "position": [
+          2800,
+          300
+        ],
+        "parameters": {
+          "mode": "append",
+          "numberInputs": 2
+        }
+      },
+      {
+        "id": "build_summary",
+        "name": "Build Summary Ticket",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3100,
+          300
+        ],
+        "parameters": {
+          "jsCode": "// Collect results across all pages processed this run\nconst items = $input.all().map(i => i.json);\nlet autoFixedCount = 0;\nlet pagesAutoFixed = 0;\nconst remainingDefects = [];\n\nfor (const it of items) {\n  if (it.autoFixesApplied && it.autoFixesApplied.length) {\n    autoFixedCount += it.autoFixesApplied.length;\n    pagesAutoFixed++;\n  }\n  // Non-auto-fixable defects are remaining\n  for (const d of (it.defects || [])) {\n    if (!d.autoFixable && !d.infoOnly) {\n      remainingDefects.push({\n        slug: it.slug || '',\n        url: it.url || '',\n        type: d.type,\n        detail: d.detail || null,\n        wp_edit_url: it.wp_edit_url || null\n      });\n    }\n  }\n}\n\nconst subject = autoFixedCount > 0\n  ? \"Eagle auto-fixed \" + autoFixedCount + \" structural defects across \" + pagesAutoFixed + \" pages\"\n  : \"Eagle scan complete \u2014 \" + remainingDefects.length + \" content fixes need your review\";\n\nconst content = \"ASK\\n\" +\n  (autoFixedCount > 0 ? \"I auto-PATCHed \" + autoFixedCount + \" structural fixes (byline, CTA, contracts tagline) across \" + pagesAutoFixed + \" /resources/ pages. \" : \"\") +\n  (remainingDefects.length > 0 ? \"I also found \" + remainingDefects.length + \" defects that need content judgment \u2014 listed below. Approve to have me draft fixes, reject to skip.\\n\\n\" : \"All structural defects are now fixed. Click Approve to log this run.\\n\\n\") +\n  (autoFixedCount > 0 ? \"\u2705 AUTO-FIXED (already PATCHed in WP):\\n\" +\n    items.filter(i => i.autoFixesApplied && i.autoFixesApplied.length)\n      .map(i => \"  \u2022 /\" + (i.slug || '?') + \" \u2014 \" + i.autoFixesApplied.join(', '))\n      .join(\"\\n\") + \"\\n\\n\" : \"\") +\n  (remainingDefects.length > 0 ? \"\u26a0\ufe0f NEEDS YOUR REVIEW (Eagle can't auto-fix without judgment):\\n\" +\n    remainingDefects.map(d => \"  \u2022 /\" + d.slug + \" \u2014 \" + d.type + (d.detail ? ' (' + JSON.stringify(d.detail).slice(0,80) + ')' : ''))\n      .join(\"\\n\") + \"\\n\\n\" : \"\") +\n  \"WHY\\n\" +\n  \"Eagle weekly scan of /resources/ anchor + cluster pages for structural elements: byline, FAQ schema, contracts tagline, CTA, banned phrases, Trust Block.\\n\\n\" +\n  \"IF YOU APPROVE\\n\" +\n  \"I log this run in Decision Memory. If there are remaining content fixes, I'll spin up an Owl-style draft for each on the next cycle.\\n\\n\" +\n  \"IF YOU REJECT\\n\" +\n  \"I'll undo the auto-PATCHes (WP keeps revisions) and revert. Tell me what to change in the comment.\";\n\nconst payload = {\n  properties: {\n    subject: subject.slice(0, 200),\n    content,\n    hs_pipeline: '0',\n    hs_pipeline_stage: '1',\n    hs_ticket_priority: remainingDefects.length > 0 ? 'MEDIUM' : 'LOW',\n    agent_name: 'UI/UX Performance',\n    recommendation_type: 'Design Audit',\n    recommendation_detail: JSON.stringify({\n      auto_fixed_count: autoFixedCount,\n      pages_auto_fixed: pagesAutoFixed,\n      remaining_defects: remainingDefects,\n      action_type: 'eagle_run_log'\n    })\n  }\n};\nreturn [{json: {body_str: JSON.stringify(payload)}}];\n"
+        }
+      },
+      {
+        "id": "create_ticket",
+        "name": "Create Summary Ticket",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          3400,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.hubapi.com/crm/v3/objects/tickets",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ $json.body_str }}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 3000,
+        "continueOnFail": true
+      },
+      {
+        "id": "green_log",
+        "name": "Status Green Log",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1900,
+          500
+        ],
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a",
+                "name": "status",
+                "value": "={{ 'Eagle: ' + ($json.note || 'all pages clean') }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "Mon 7AM ET": {
+        "main": [
+          [
+            {
+              "node": "Get Page Inventory",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Get Post Inventory",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual Fire (Webhook)": {
+        "main": [
+          [
+            {
+              "node": "Get Page Inventory",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Get Post Inventory",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Page Inventory": {
+        "main": [
+          [
+            {
+              "node": "Filter Content Pages",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Post Inventory": {
+        "main": [
+          [
+            {
+              "node": "Filter Content Pages",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter Content Pages": {
+        "main": [
+          [
+            {
+              "node": "Fetch Rendered HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Rendered HTML": {
+        "main": [
+          [
+            {
+              "node": "Preserve Metadata",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preserve Metadata": {
+        "main": [
+          [
+            {
+              "node": "Structural Defect Scanner",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Structural Defect Scanner": {
+        "main": [
+          [
+            {
+              "node": "Any Defects?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Any Defects?": {
+        "main": [
+          [
+            {
+              "node": "Build Auto-PATCH",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Status Green Log",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Auto-PATCH": {
+        "main": [
+          [
+            {
+              "node": "Has Auto-Fixes?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Has Auto-Fixes?": {
+        "main": [
+          [
+            {
+              "node": "PATCH WordPress Page",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Merge Results",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "PATCH WordPress Page": {
+        "main": [
+          [
+            {
+              "node": "Merge Results",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Results": {
+        "main": [
+          [
+            {
+              "node": "Build Summary Ticket",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Summary Ticket": {
+        "main": [
+          [
+            {
+              "node": "Create Summary Ticket",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-27T18:40:35.804Z",
+        "id": 890,
+        "workflowId": "alik1C8sXr857rY7",
+        "versionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
+        "event": "deactivated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      },
+      {
+        "createdAt": "2026-05-27T18:40:35.821Z",
+        "id": 891,
+        "workflowId": "alik1C8sXr857rY7",
+        "versionId": "d6e7f7d0-d264-4e31-b82b-8e0cb1fbe610",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

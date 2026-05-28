@@ -1,0 +1,239 @@
+{
+  "updatedAt": "2026-05-26T19:59:08.371Z",
+  "createdAt": "2026-05-26T19:58:20.506Z",
+  "id": "P4qZX27Up0Hs9rcE",
+  "name": "Agent Feedback Store",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "wh",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent-feedback",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "agent-feedback-post"
+    },
+    {
+      "id": "whget",
+      "name": "Webhook GET",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        480
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "agent-feedback",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "agent-feedback-get"
+    },
+    {
+      "id": "router",
+      "name": "Route",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        380
+      ],
+      "parameters": {
+        "jsCode": "// Agent Feedback Store\nconst sd = $getWorkflowStaticData('global');\nsd.feedback = sd.feedback || {};\n\nconst input = $input.first().json || {};\nconst q = input.query || {};\nconst body = input.body || {};\n\n// READ \u2014 query has action=read OR no body fields\nif (q.action === 'read' || (!body.agentId && !body.comment)) {\n  if (q.agentId) {\n    return [{ json: { agentId: q.agentId, feedback: sd.feedback[q.agentId] || [] } }];\n  }\n  const summary = {};\n  for (const aid of Object.keys(sd.feedback)) {\n    summary[aid] = (sd.feedback[aid] || []).length;\n  }\n  return [{ json: { feedbackCounts: summary, all: sd.feedback } }];\n}\n\n// WRITE\nconst agentId = body.agentId;\nconst comment = (body.comment || '').toString().trim();\nif (!agentId || !comment) {\n  return [{ json: { ok: false, error: 'agentId and comment required' } }];\n}\nsd.feedback[agentId] = sd.feedback[agentId] || [];\nsd.feedback[agentId].push({\n  at: new Date().toISOString(),\n  comment: comment.slice(0, 5000),\n  source: body.source || 'ui'\n});\nif (sd.feedback[agentId].length > 100) {\n  sd.feedback[agentId] = sd.feedback[agentId].slice(-100);\n}\nreturn [{ json: { ok: true, agentId, totalFeedback: sd.feedback[agentId].length } }];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook GET": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v0"
+  },
+  "staticData": {
+    "global": {
+      "feedback": {
+        "carla-content-producer": [
+          {
+            "at": "2026-05-26T19:58:35.350Z",
+            "comment": "Test - keep drafts under 3000 words for cluster pages.",
+            "source": "ui"
+          }
+        ],
+        "riley-sem-auto": [
+          {
+            "at": "2026-05-26T19:59:11.084Z",
+            "comment": "Be more aggressive on AG3 - it has room to grow",
+            "source": "ui"
+          }
+        ],
+        "uma": [
+          {
+            "at": "2026-05-27T19:31:35.820Z",
+            "comment": "onsite \"Hunter\" mentions on liftnow.com are OK since we carry Hunter locally, they just shouldn't show up on Public Sector, NASPO or Sourcewell pages.",
+            "source": "ui"
+          }
+        ]
+      }
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "49841982-0323-4277-b576-c7625cd59c1f",
+  "activeVersionId": "49841982-0323-4277-b576-c7625cd59c1f",
+  "versionCounter": 184,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-05-26T19:58:20.506Z",
+      "createdAt": "2026-05-26T19:58:20.506Z",
+      "role": "workflow:owner",
+      "workflowId": "P4qZX27Up0Hs9rcE",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-26T19:59:08.372Z",
+    "createdAt": "2026-05-26T19:59:08.372Z",
+    "versionId": "49841982-0323-4277-b576-c7625cd59c1f",
+    "workflowId": "P4qZX27Up0Hs9rcE",
+    "nodes": [
+      {
+        "id": "wh",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "agent-feedback",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "webhookId": "agent-feedback-post"
+      },
+      {
+        "id": "whget",
+        "name": "Webhook GET",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          480
+        ],
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "agent-feedback",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "webhookId": "agent-feedback-get"
+      },
+      {
+        "id": "router",
+        "name": "Route",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          520,
+          380
+        ],
+        "parameters": {
+          "jsCode": "// Agent Feedback Store\nconst sd = $getWorkflowStaticData('global');\nsd.feedback = sd.feedback || {};\n\nconst input = $input.first().json || {};\nconst q = input.query || {};\nconst body = input.body || {};\n\n// READ \u2014 query has action=read OR no body fields\nif (q.action === 'read' || (!body.agentId && !body.comment)) {\n  if (q.agentId) {\n    return [{ json: { agentId: q.agentId, feedback: sd.feedback[q.agentId] || [] } }];\n  }\n  const summary = {};\n  for (const aid of Object.keys(sd.feedback)) {\n    summary[aid] = (sd.feedback[aid] || []).length;\n  }\n  return [{ json: { feedbackCounts: summary, all: sd.feedback } }];\n}\n\n// WRITE\nconst agentId = body.agentId;\nconst comment = (body.comment || '').toString().trim();\nif (!agentId || !comment) {\n  return [{ json: { ok: false, error: 'agentId and comment required' } }];\n}\nsd.feedback[agentId] = sd.feedback[agentId] || [];\nsd.feedback[agentId].push({\n  at: new Date().toISOString(),\n  comment: comment.slice(0, 5000),\n  source: body.source || 'ui'\n});\nif (sd.feedback[agentId].length > 100) {\n  sd.feedback[agentId] = sd.feedback[agentId].slice(-100);\n}\nreturn [{ json: { ok: true, agentId, totalFeedback: sd.feedback[agentId].length } }];\n"
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Route",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook GET": {
+        "main": [
+          [
+            {
+              "node": "Route",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-26T19:59:08.407Z",
+        "id": 692,
+        "workflowId": "P4qZX27Up0Hs9rcE",
+        "versionId": "49841982-0323-4277-b576-c7625cd59c1f",
+        "event": "deactivated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      },
+      {
+        "createdAt": "2026-05-26T19:59:08.421Z",
+        "id": 693,
+        "workflowId": "P4qZX27Up0Hs9rcE",
+        "versionId": "49841982-0323-4277-b576-c7625cd59c1f",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

@@ -1,0 +1,349 @@
+{
+  "updatedAt": "2026-05-27T20:26:21.664Z",
+  "createdAt": "2026-05-26T20:51:23.233Z",
+  "id": "liOYeGcSZD8UQEOX",
+  "name": "Heartbeat Aggregator",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "trig",
+      "name": "Every 5 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fetch",
+      "name": "Fetch Recent Executions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://agents.liftnowdirect.com/api/v1/executions?limit=20",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiYzljMzdkYzQtMGY3OS00NzRkLWE0MjAtNWY3YmVhNzk4ZTRlIiwiaWF0IjoxNzc5ODEyNDEzfQ.THhRZqCYGD1Z4ULIaYps8uHHUdgdOrjMrnQGSLjUPq8"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "shape",
+      "name": "Shape Heartbeats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const AGENT_MAP = {\"d7YwC4ezub4g1LrI\": {\"id\": \"carla\", \"name\": \"Owl\"}, \"N03TEmB50zG0XiiP\": {\"id\": \"sam\", \"name\": \"Bee\"}, \"tW1hYtfGWddfg7TF\": {\"id\": \"max\", \"name\": \"Fox\"}, \"rZW6J0ccvzWjDxYr\": {\"id\": \"riley\", \"name\": \"Fox\"}, \"4FoOz5TX184zH0Zn\": {\"id\": \"kai\", \"name\": \"Hound\"}, \"YP07sPEQgTyrQ5BK\": {\"id\": \"bran\", \"name\": \"Spider\"}, \"QrKVBx6jtkseu8xH\": {\"id\": \"reed\", \"name\": \"Bat\"}, \"f7d4k95CQPJMiuqv\": {\"id\": \"lin\", \"name\": \"Parrot\"}, \"VtBvtrYqS4vChTi2\": {\"id\": \"eve\", \"name\": \"Elephant\"}, \"alik1C8sXr857rY7\": {\"id\": \"uma\", \"name\": \"Eagle\"}, \"yYyj4TnP9Ho9O85l\": {\"id\": \"dax\", \"name\": \"Turtle\"}, \"dEKZkETwoVsSQO0A\": {\"id\": \"vex\", \"name\": \"Cat\"}, \"uRIzR7Uh8d9fUx9T\": {\"id\": \"nox\", \"name\": \"Bat\"}, \"wTkLhqNY7pfIU5ro\": {\"id\": \"theo\", \"name\": \"Dragon\"}, \"JjIHLI2AdZ3DfnbY\": {\"id\": \"iris\", \"name\": \"Squirrel\"}, \"i8AjYKBt0V15VGA7\": {\"id\": \"pip\", \"name\": \"Elephant\"}, \"qMeBXIjguVuaKLLF\": {\"id\": \"sentinel\", \"name\": \"Wolf\"}, \"hpgbBAmRmqtsfr6g\": {\"id\": \"forge\", \"name\": \"Beaver\"}, \"VdYI5nLqDTt5jWYR\": {\"id\": \"crow\", \"name\": \"Crow\"}};\n\nconst items = $input.all();\nconst sd = $getWorkflowStaticData('global');\nsd.lastSeenExec = sd.lastSeenExec || {};\n\nconst heartbeats = [];\n\nfor (const item of items) {\n  const data = (item.json && item.json.data) || [];\n  if (!Array.isArray(data)) continue;\n  for (const e of data) {\n    const wfId = e.workflowId;\n    const persona = AGENT_MAP[wfId];\n    if (!persona) continue;\n    const execId = String(e.id);\n    const lastSeen = String(sd.lastSeenExec[wfId] || '0');\n    if (Number(execId) <= Number(lastSeen)) continue;\n\n    // Lightweight classification \u2014 status only, no runData required\n    let outcome, summary;\n    if (e.status === 'error' || e.status === 'crashed') {\n      outcome = 'error';\n      summary = persona.name + ' hit an error \u2014 Wolf may be alerting.';\n    } else if (e.status === 'success') {\n      outcome = 'ran_clean';\n      // Generic \"agent ran\" \u2014 we don't know if it produced artifact without runData\n      // The dashboard's ticket count tells the artifact story; heartbeats just confirm \"alive\"\n      summary = persona.name + ' ran a check.';\n    } else {\n      outcome = 'unknown';\n      summary = persona.name + ' (' + e.status + ')';\n    }\n\n    heartbeats.push({\n      agentId: persona.id,\n      agentName: persona.name,\n      action: 'fired',\n      summary,\n      outcome,\n      workflow_id: wfId,\n      exec_id: execId,\n      at_iso: e.startedAt\n    });\n\n    if (Number(execId) > Number(sd.lastSeenExec[wfId] || 0)) {\n      sd.lastSeenExec[wfId] = execId;\n    }\n  }\n}\n\nreturn heartbeats.map(hb => ({json: hb}));\n"
+      }
+    },
+    {
+      "id": "post",
+      "name": "POST Heartbeats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://agents.liftnowdirect.com/webhook/agent-heartbeat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 15000,
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 100
+            }
+          }
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000
+    }
+  ],
+  "connections": {
+    "Every 5 min": {
+      "main": [
+        [
+          {
+            "node": "Fetch Recent Executions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Recent Executions": {
+      "main": [
+        [
+          {
+            "node": "Shape Heartbeats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape Heartbeats": {
+      "main": [
+        [
+          {
+            "node": "POST Heartbeats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v0"
+  },
+  "staticData": {
+    "node:Every 5 min": {
+      "recurrenceRules": []
+    },
+    "global": {
+      "lastSeenExec": {
+        "hpgbBAmRmqtsfr6g": "8002",
+        "JjIHLI2AdZ3DfnbY": "7829",
+        "f7d4k95CQPJMiuqv": "7670",
+        "uRIzR7Uh8d9fUx9T": "7823",
+        "qMeBXIjguVuaKLLF": "7698",
+        "QrKVBx6jtkseu8xH": "7813",
+        "tW1hYtfGWddfg7TF": "7827",
+        "N03TEmB50zG0XiiP": "7992",
+        "i8AjYKBt0V15VGA7": "7825",
+        "rZW6J0ccvzWjDxYr": "7824",
+        "dEKZkETwoVsSQO0A": "7822",
+        "VtBvtrYqS4vChTi2": "7820",
+        "yYyj4TnP9Ho9O85l": "7852",
+        "YP07sPEQgTyrQ5BK": "7703",
+        "alik1C8sXr857rY7": "7851",
+        "VdYI5nLqDTt5jWYR": "7674",
+        "d7YwC4ezub4g1LrI": "7862",
+        "4FoOz5TX184zH0Zn": "7668"
+      }
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "d4e8b0b9-bbb3-4b5e-ae7a-629ac0be3cbf",
+  "activeVersionId": "d4e8b0b9-bbb3-4b5e-ae7a-629ac0be3cbf",
+  "versionCounter": 358,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-26T20:51:23.233Z",
+      "createdAt": "2026-05-26T20:51:23.233Z",
+      "role": "workflow:owner",
+      "workflowId": "liOYeGcSZD8UQEOX",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-27T20:26:21.665Z",
+    "createdAt": "2026-05-27T20:26:21.665Z",
+    "versionId": "d4e8b0b9-bbb3-4b5e-ae7a-629ac0be3cbf",
+    "workflowId": "liOYeGcSZD8UQEOX",
+    "nodes": [
+      {
+        "id": "trig",
+        "name": "Every 5 min",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          200,
+          300
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 5
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "fetch",
+        "name": "Fetch Recent Executions",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          500,
+          300
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://agents.liftnowdirect.com/api/v1/executions?limit=20",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YjdlNGI3Ny05MzM4LTRhM2QtODEyMC04NjcxZWIyZGU2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwianRpIjoiYzljMzdkYzQtMGY3OS00NzRkLWE0MjAtNWY3YmVhNzk4ZTRlIiwiaWF0IjoxNzc5ODEyNDEzfQ.THhRZqCYGD1Z4ULIaYps8uHHUdgdOrjMrnQGSLjUPq8"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 15000
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "id": "shape",
+        "name": "Shape Heartbeats",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          800,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const AGENT_MAP = {\"d7YwC4ezub4g1LrI\": {\"id\": \"carla\", \"name\": \"Owl\"}, \"N03TEmB50zG0XiiP\": {\"id\": \"sam\", \"name\": \"Bee\"}, \"tW1hYtfGWddfg7TF\": {\"id\": \"max\", \"name\": \"Fox\"}, \"rZW6J0ccvzWjDxYr\": {\"id\": \"riley\", \"name\": \"Fox\"}, \"4FoOz5TX184zH0Zn\": {\"id\": \"kai\", \"name\": \"Hound\"}, \"YP07sPEQgTyrQ5BK\": {\"id\": \"bran\", \"name\": \"Spider\"}, \"QrKVBx6jtkseu8xH\": {\"id\": \"reed\", \"name\": \"Bat\"}, \"f7d4k95CQPJMiuqv\": {\"id\": \"lin\", \"name\": \"Parrot\"}, \"VtBvtrYqS4vChTi2\": {\"id\": \"eve\", \"name\": \"Elephant\"}, \"alik1C8sXr857rY7\": {\"id\": \"uma\", \"name\": \"Eagle\"}, \"yYyj4TnP9Ho9O85l\": {\"id\": \"dax\", \"name\": \"Turtle\"}, \"dEKZkETwoVsSQO0A\": {\"id\": \"vex\", \"name\": \"Cat\"}, \"uRIzR7Uh8d9fUx9T\": {\"id\": \"nox\", \"name\": \"Bat\"}, \"wTkLhqNY7pfIU5ro\": {\"id\": \"theo\", \"name\": \"Dragon\"}, \"JjIHLI2AdZ3DfnbY\": {\"id\": \"iris\", \"name\": \"Squirrel\"}, \"i8AjYKBt0V15VGA7\": {\"id\": \"pip\", \"name\": \"Elephant\"}, \"qMeBXIjguVuaKLLF\": {\"id\": \"sentinel\", \"name\": \"Wolf\"}, \"hpgbBAmRmqtsfr6g\": {\"id\": \"forge\", \"name\": \"Beaver\"}, \"VdYI5nLqDTt5jWYR\": {\"id\": \"crow\", \"name\": \"Crow\"}};\n\nconst items = $input.all();\nconst sd = $getWorkflowStaticData('global');\nsd.lastSeenExec = sd.lastSeenExec || {};\n\nconst heartbeats = [];\n\nfor (const item of items) {\n  const data = (item.json && item.json.data) || [];\n  if (!Array.isArray(data)) continue;\n  for (const e of data) {\n    const wfId = e.workflowId;\n    const persona = AGENT_MAP[wfId];\n    if (!persona) continue;\n    const execId = String(e.id);\n    const lastSeen = String(sd.lastSeenExec[wfId] || '0');\n    if (Number(execId) <= Number(lastSeen)) continue;\n\n    // Lightweight classification \u2014 status only, no runData required\n    let outcome, summary;\n    if (e.status === 'error' || e.status === 'crashed') {\n      outcome = 'error';\n      summary = persona.name + ' hit an error \u2014 Wolf may be alerting.';\n    } else if (e.status === 'success') {\n      outcome = 'ran_clean';\n      // Generic \"agent ran\" \u2014 we don't know if it produced artifact without runData\n      // The dashboard's ticket count tells the artifact story; heartbeats just confirm \"alive\"\n      summary = persona.name + ' ran a check.';\n    } else {\n      outcome = 'unknown';\n      summary = persona.name + ' (' + e.status + ')';\n    }\n\n    heartbeats.push({\n      agentId: persona.id,\n      agentName: persona.name,\n      action: 'fired',\n      summary,\n      outcome,\n      workflow_id: wfId,\n      exec_id: execId,\n      at_iso: e.startedAt\n    });\n\n    if (Number(execId) > Number(sd.lastSeenExec[wfId] || 0)) {\n      sd.lastSeenExec[wfId] = execId;\n    }\n  }\n}\n\nreturn heartbeats.map(hb => ({json: hb}));\n"
+        }
+      },
+      {
+        "id": "post",
+        "name": "POST Heartbeats",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1100,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://agents.liftnowdirect.com/webhook/agent-heartbeat",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "timeout": 15000,
+            "batching": {
+              "batch": {
+                "batchSize": 1,
+                "batchInterval": 100
+              }
+            }
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 2000
+      }
+    ],
+    "connections": {
+      "Every 5 min": {
+        "main": [
+          [
+            {
+              "node": "Fetch Recent Executions",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Recent Executions": {
+        "main": [
+          [
+            {
+              "node": "Shape Heartbeats",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Shape Heartbeats": {
+        "main": [
+          [
+            {
+              "node": "POST Heartbeats",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-27T20:26:21.695Z",
+        "id": 938,
+        "workflowId": "liOYeGcSZD8UQEOX",
+        "versionId": "d4e8b0b9-bbb3-4b5e-ae7a-629ac0be3cbf",
+        "event": "deactivated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      },
+      {
+        "createdAt": "2026-05-27T20:26:21.711Z",
+        "id": 939,
+        "workflowId": "liOYeGcSZD8UQEOX",
+        "versionId": "d4e8b0b9-bbb3-4b5e-ae7a-629ac0be3cbf",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

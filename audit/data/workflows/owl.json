@@ -1,0 +1,1493 @@
+{
+  "updatedAt": "2026-05-27T22:32:44.080Z",
+  "createdAt": "2026-05-22T22:53:28.370Z",
+  "id": "d7YwC4ezub4g1LrI",
+  "name": "Agent 1 \u2014 Content Producer v2",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": [
+                9,
+                13,
+                17
+              ],
+              "triggerAtDay": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ]
+            }
+          ]
+        }
+      },
+      "id": "trig",
+      "name": "Tue 9AM ET",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.liftnow.com/wp-json/wp/v2/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            },
+            {
+              "name": "_fields",
+              "value": "id,slug,link,title,date"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "wp",
+      "name": "Fetch Published Pages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        208
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AZ9RGlvZiPcT3wDJ",
+          "name": "WordPress REST API (liftnow-agent)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aliftnow.com/searchAnalytics/query",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({startDate:$now.minus({days:90}).toFormat(\"yyyy-MM-dd\"),endDate:$now.minus({days:1}).toFormat(\"yyyy-MM-dd\"),dimensions:[\"page\"],rowLimit:100,dataState:\"final\"}) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "gsc",
+      "name": "GSC Anchor Performance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        400
+      ],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "R24TuEIQaF3bmQSZ",
+          "name": "Google Search Console OAuth2"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "// Refresh-queue priority branch (added 2026-05): check approved Turtle handoffs first.\nconst refreshResp = (() => { try { return $(\"Fetch Refresh Queue\").first().json; } catch(e) { return null; }})();\nconst refreshResults = (refreshResp && refreshResp.results) || [];\nlet refreshPick = null;\nfor (const t of refreshResults) {\n  const props = t.properties || {};\n  const notes = props.outcome_notes || \"\";\n  const idx = notes.indexOf(\"HANDOFF:\");\n  if (idx < 0) continue;\n  const tail = notes.slice(idx + \"HANDOFF:\".length).trim();\n  // Try to parse a JSON object starting at the first '{'.\n  const start = tail.indexOf(\"{\");\n  if (start < 0) continue;\n  // Balance braces to find the end of the JSON object.\n  let depth = 0, end = -1;\n  for (let i = start; i < tail.length; i++) {\n    const ch = tail[i];\n    if (ch === \"{\") depth++;\n    else if (ch === \"}\") { depth--; if (depth === 0) { end = i; break; } }\n  }\n  if (end < 0) continue;\n  let handoff = null;\n  try { handoff = JSON.parse(tail.slice(start, end + 1)); } catch(e) { continue; }\n  if (!handoff || handoff.to !== \"Owl\") continue;\n  const payload = handoff.payload || {};\n  if (payload.kind !== \"refresh_url\" || !payload.url) continue;\n  refreshPick = {\n    piece_type: \"refresh\",\n    url: payload.url,\n    title: payload.title || props.subject || \"(refresh) \" + payload.url,\n    click_drop_pct: payload.click_drop_pct,\n    position_drop: payload.position_drop,\n    source_ticket_id: t.id || props.id,\n    source_agent: \"Content Decay Detector\",\n    target_keyword: payload.target_keyword || null,\n    parent_anchor_url: payload.parent_anchor_url || null,\n  };\n  break;\n}\nif (refreshPick) {\n  return [{json:{\n    pick: refreshPick,\n    refresh_mode: true,\n    total_candidates: 1,\n    refresh_queue_count: refreshResults.length,\n    note: \"Picked refresh request from approved Turtle handoff; bypassing cluster backlog.\",\n  }}];\n}\n\n// --- Fallback: existing anchor-stuck cluster picker (unchanged behavior) ---\nconst wpResp=$(\"Fetch Published Pages\").first().json;const gscResp=$(\"GSC Anchor Performance\").first().json;const list=Array.isArray(wpResp)?wpResp:(wpResp.results||[]);const publishedAnchors=list.filter(p=>(p.link||\"\").includes(\"/resources/\")).map(p=>({slug:p.slug,link:p.link,title:(p.title&&p.title.rendered)||p.slug,date:p.date}));const gscRows=gscResp.rows||[];const positionByUrl={};for(const r of gscRows){const url=r.keys?.[0];\n      // REFRESH_QUEUE_COMPETITOR_FILTER \u2014 skip URLs that contain competitor brand slugs\n      const COMPETITOR_SLUGS = /(hunter|mohawk|stertil|rotary|snap-on|ari-hetra|whip|bendpak|challenger)/i;\n      if (COMPETITOR_SLUGS.test(handoffUrl || '')) {\n        // Skip this ticket \u2014 Owl can't refresh a competitor-branded page (voice violation)\n        continue;\n      }if(!url)continue;positionByUrl[url]=positionByUrl[url]||{positionSum:0,impressions:0};positionByUrl[url].positionSum+=(r.position||0)*(r.impressions||1);positionByUrl[url].impressions+=(r.impressions||1);}const anchorStatus=publishedAnchors.map(a=>{const p=positionByUrl[a.link]||{};const avgPos=p.impressions?p.positionSum/p.impressions:null;return{...a,avg_position:avgPos,impressions:p.impressions||0,is_stuck:avgPos!==null&&avgPos>=11&&avgPos<=20};});const anchor6Live=publishedAnchors.some(a=>/anchor-6|anchor6/.test(a.slug.toLowerCase())||/^\\/resources\\/[a-z0-9-]+\\/$/.test(a.link)&&publishedAnchors.length>=6);const CLUSTER_BACKLOG={1:[{title:\"Two-Post vs Four-Post HD Lifts: Decision Framework for Fleet Bays\",target_keyword:\"two post vs four post heavy duty lift\"},{title:\"Heavy-Duty Truck Lift Capacity Guide: Sizing for Specific Vehicle Classes\",target_keyword:\"heavy duty truck lift capacity\"},{title:\"Buy America Act and Heavy-Duty Truck Lift Procurement\",target_keyword:\"buy america vehicle lift\"}],2:[{title:\"Mobile Column Lift Capacity Calculator: Sizing for Transit Fleet Vehicles\",target_keyword:\"mobile column lift capacity transit\"},{title:\"Wireless vs Cabled Mobile Column Lifts: When Each Makes Sense\",target_keyword:\"wireless mobile column lifts\"},{title:\"School District Bus Maintenance: Multi-Depot Mobile Column Strategies\",target_keyword:\"school district mobile column lift\"},{title:\"Challenger CLHM vs Stertil-Koni Mobile Columns Spec Comparison\",target_keyword:\"clhm mobile column comparison\"}],3:[{title:\"Parallelogram vs Cassette In-Ground Lifts: Heavy-Duty Comparison\",target_keyword:\"parallelogram vs cassette in-ground lift\"},{title:\"Pit Lift Retrofit: When It Works, When It Does Not\",target_keyword:\"pit lift retrofit\"},{title:\"In-Ground Lift Inspection Requirements for Government Fleets\",target_keyword:\"in-ground lift inspection\"}],4:[{title:\"NASPO ValuePoint vs Sourcewell: Which Cooperative Contract Fits Your Fleet?\",target_keyword:\"naspo vs sourcewell vehicle lift\"},{title:\"Florida Sheriffs Association FSA23-EQU21.0: How Florida Agencies Buy Garage Equipment\",target_keyword:\"fsa garage equipment contract\"},{title:\"Buy America Compliance for Vehicle Lift Procurement\",target_keyword:\"buy america vehicle lift compliance\"}],5:[{title:\"Articulated Bus Service: Equipment Considerations for 60-Foot Vehicles\",target_keyword:\"articulated bus lift\"},{title:\"School Bus Service Bay Design: Equipment for Type C and Type D Buses\",target_keyword:\"school bus service bay design\"},{title:\"Transit Bus Maintenance Equipment: Beyond the Lift\",target_keyword:\"transit bus maintenance equipment\"}]};let pick;let pickType;if(!anchor6Live){pickType=\"anchor\";pick={piece_type:\"anchor\",title:\"Anchor #6 \u2014 TBD per Paul drafting\",target_keyword:\"(to be confirmed)\",pillar:\"TBD\",parent_anchor_url:null,note:\"Anchor #6 not detected in WP. Default: Paul drafts but agent shadow-drafts a cluster page below instead. Set 'agent_drafts_anchor_6=true' in staticData to override.\"};const sd=$getWorkflowStaticData(\"global\");if(sd.agent_drafts_anchor_6!==true){pickType=\"cluster_page_shadow\";}}const stuckAnchors=anchorStatus.filter(a=>a.is_stuck).sort((a,b)=>(a.avg_position||0)-(b.avg_position||0));const candidates=[];const URL_TO_ID={\"/resources/heavy-duty-truck-lifts-fleet-service-bays/\":1,\"/resources/mobile-column-lifts-transit-bus-heavy-duty-fleet/\":2,\"/resources/in-ground-and-pit-lifts/\":3,\"/resources/sourcewell-vehicle-lifts-buyers-guide/\":4,\"/resources/bus-lifts-vs-truck-lifts/\":5};const order=stuckAnchors.length?stuckAnchors.map(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]).filter(Boolean):[1,2,3,4,5];for(const anchorId of order){const clusters=CLUSTER_BACKLOG[anchorId]||[];const anchor=anchorStatus.find(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]===anchorId);if(!anchor)continue;for(const c of clusters){const slug=c.title.toLowerCase().replace(/[^a-z0-9]+/g,\"-\").slice(0,60);const alreadyLive=publishedAnchors.some(p=>p.slug.includes(slug.slice(0,30)));if(alreadyLive)continue;candidates.push({...c,piece_type:\"cluster_page\",parent_anchor_id:anchorId,parent_anchor_url:anchor.link,parent_anchor_title:anchor.title,parent_anchor_avg_position:anchor.avg_position,parent_anchor_is_stuck:anchor.is_stuck});}}if(pickType===\"cluster_page_shadow\"||pickType!==\"anchor\"){pick=candidates[0]||{piece_type:\"cluster_page\",title:\"(no candidate)\",note:\"All cluster pages from master plan \u00a74 backlog appear to be published.\"};}return [{json:{pick,refresh_mode:false,total_candidates:candidates.length,stuck_anchors:stuckAnchors.map(a=>({slug:a.slug,avg_position:a.avg_position})),anchor_6_live:anchor6Live}}];\n"
+      },
+      "id": "pick",
+      "name": "Pick Next Piece (anchor-stuck priority)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bid-iq-neon.vercel.app/api/ask",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({consumer_role:\"marketing\",question:\"I am drafting a Liftnow \"+($json.pick.piece_type||\"cluster_page\")+\" titled \\\"\"+($json.pick.title||\"\")+\"\\\" targeting keyword \\\"\"+($json.pick.target_keyword||\"\")+\"\\\", parent anchor \"+($json.pick.parent_anchor_url||\"\")+\". Return: (1) 3-5 specific product / contract / compliance facts a fleet manager OR procurement officer would need (specific numbers, capacities, model names from carry brands only); (2) which Liftnow-carried brands belong here; (3) Sourcewell #121223-LFT / NASPO CW7258 / FSA23-EQU21.0 angles that apply; (4) dual-vertical hooks if topic applies to BOTH transit AND school districts. Do NOT return pricing. Do NOT name Challenger / Gray / Whip / Hunter / Mohawk / BendPak / Stertil-Koni / Rotary / ARI / Snap-on as competitors.\"}) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "kb",
+      "name": "KB Strategic Frame",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        864,
+        304
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({model:\"claude-sonnet-4-5\",max_tokens: 6000,system:\"\\n\\n# PRICING \u2014 HARD RULE (additional to identity rule above)\\nNEVER include pricing estimates, dollar figures, contract pricing, \\\"starts at $X\\\", or \\\"$X-$Y range\\\" in any public post. Pricing has too many config-specific variables; posting a number anchors readers on figures that won't match their actual quote. Acceptable hedges:\\n- \\\"confirmed on the quote\\\"\\n- \\\"depends on your bay dimensions and vehicle list\\\"\\n- \\\"pricing varies by Sourcewell discount tier and configuration\\\"\\n- \\\"send your vehicle list + bay dimensions to gov@liftnow.com for a quote\\\"\\n\\nIf your draft includes any specific dollar figure for lift purchase, install, or contract cost, REMOVE it before posting. Even comparative pricing (\\\"Liftnow's typically 15-20% less than X\\\") is banned in public copy.\\n\\n\\n---\\n\\n\\n\\n# IDENTITY \u2014 HARD RULE (overrides any conflicting voice instruction below)\\n\\nYou are writing AS LIFTNOW. Liftnow is a Sourcewell-contracted commercial vehicle lift DEALER + installer. Liftnow is NOT a fleet operator, NOT a customer, NOT an end user of the lifts. Liftnow SELLS and INSTALLS the lifts to government fleets, transit agencies, school districts, etc.\\n\\n## NEVER position Liftnow as a customer\\n- \u274c \\\"We just took delivery of a four-post mobile column set for our 47-truck fleet\\\"\\n- \u274c \\\"We installed a CL20 in our shop last week\\\"\\n- \u274c \\\"Our maintenance team uses...\\\"\\n- \u274c \\\"Our fleet runs...\\\"\\n- \u274c \\\"Since we switched to BendPak lifts...\\\"\\n- \u274c Any first-person \\\"we bought / we own / we operate / we maintain\\\" framing where \\\"we\\\" = a fleet that uses lifts.\\n\\n## ALWAYS position Liftnow as the dealer/installer\\n- \u2705 \\\"We spec'd a four-post mobile column set for a 47-truck municipal fleet last quarter \u2014 here's the breakdown.\\\"\\n- \u2705 \\\"From the Liftnow shop floor: across maybe 30 transit-bus installs in the past 18 months, the consistent friction point is column spacing on older depot bays.\\\"\\n- \u2705 \\\"When a customer asks us about CL20 vs CL12A, the real spec gap is...\\\"\\n- \u2705 \\\"Across the Liftnow installer network, the most common failure mode is...\\\"\\n- \u2705 \\\"Liftnow's been quoting under Sourcewell 121223-LFT since [date]; the contract field that catches buyers off-guard is...\\\"\\n\\n## Disclosure\\nThe reader should understand within the first 2 sentences that this is from a vendor sharing what they've learned, not from a fleet operator describing their own setup. If you can't write the piece without making Liftnow sound like a customer, RETURN skip:true.\\n\\n## Platform-specific\\n- LinkedIn: byline \\\"By Paul Stern, VP Public Sector Sales \u2014 Liftnow\\\" makes the dealer relationship clear; voice can still be first-person about Liftnow's experience.\\n- Reddit: even MORE careful \u2014 reddit users downvote covert advertising. Sign reply/post with \\\"\u2014 Paul, Liftnow\\\" or open with \\\"Liftnow rep here, but adding actual content vs sales pitch:\\\". Be honest about who you are; redditors respect honesty more than coverage.\\n- Blog/article: byline + clear \\\"Liftnow's experience across N installs\\\" framing in the opening.\\n\\n## Test before submitting\\nRe-read the draft. Ask: \\\"Would a reasonable reader think the author is a fleet operator who bought lifts?\\\" If yes, REWRITE entirely.\\n\\n\\n---\\n\\n# VOICE \u2014 PAUL STERN BLOG / ARTICLE / LINKEDIN VOICE (mandatory)\\n\\nThis is content for strangers reading among many similar articles. Voice is distinct from Paul's email registers but rooted in the same identity.\\n\\n## ALWAYS\\n- Brand name: \\\"Liftnow\\\" \u2014 never \\\"LiftNow\\\" or \\\"LIFTNOW\\\".\\n- \\\"All 50 states\\\" \u2014 never \\\"45+ states\\\" or \\\"nationwide\\\" alone.\\n- \\\"We\\\" for Liftnow actions. \\\"You\\\" for the reader.\\n- Hedged contract promises: \\\"typically\\\", \\\"most sets\\\", \\\"depending on the contract\\\", \\\"confirmed on the quote\\\", \\\"confirmed at specification\\\".\\n- Dual-audience callouts where natural: \\\"For the Fleet Manager:\\\" and \\\"For the Procurement Officer:\\\".\\n- Industry shorthand without explanation (treat reader as practitioner, not novice).\\n- Specific numbers everywhere for credibility.\\n- Active voice: \\\"Liftnow handles\\\" not \\\"is handled by Liftnow\\\".\\n- Anchor pieces include: byline (*By Paul Stern, VP of Public Sector Sales \u2014 Liftnow*), TOC, FAQ schema (5\u20139 questions), closing contract tagline (Sourcewell 121223-LFT, NASPO CW7258, FSA23-EQU21.0), CTA (gov@liftnow.com + 1-800-LIFT-NOW + \\\"Send your vehicle list and bay dimensions\\\").\\n- Honest about limitations. Refuses to over-claim.\\n\\n## NEVER\\n- Competitor brand names in permanent website copy (no Mohawk, Stertil-Koni, Rotary, Ari-Hetra, Hunter, Snap-on, Whip, Gray as Liftnow offerings).\\n- \\\"Revolutionary\\\", \\\"industry-leading\\\", \\\"best-in-class\\\", \\\"cutting-edge\\\". Banned.\\n- \\\"In today's fast-paced fleet management world...\\\" \u2014 banned filler.\\n- \\\"In this post, we'll explore...\\\" \u2014 banned blog trope.\\n- Absolute contract claims: \\\"always\\\", \\\"every\\\", \\\"included in every contract\\\" \u2192 use \\\"typically\\\", \\\"available on most\\\", \\\"confirmed on the quote\\\".\\n- \\\"Single contract line item\\\" \u2192 say \\\"single quote that bundles\\\".\\n- \\\"ALI-certified inspection\\\" when referring to Liftnow's service. (Liftnow subcontracts inspection \u2014 don't claim certification we don't directly hold.)\\n- \\\"We don't subcontract\\\" \u2014 false.\\n- Filler paragraphs to hit word counts.\\n- \\\"Dealing directly\\\".\\n\\n## LINKEDIN-SPECIFIC\\n- Every post links back to a liftnow.com URL.\\n- Real human sign-off \u2014 not corporate formality.\\n- One ALL-CAPS emphasis word allowed for punch (\\\"This is HOW we beat the spec write-up.\\\").\\n- Tag institutions (Sourcewell, FleetOwner), not individuals, in adversarial contexts.\\n\\n## TONE\\nConfident without preaching. Hedge words are calibrated honesty, not dodging. Direct address with \\\"you\\\", not \\\"the fleet manager\\\" abstractly. Concrete CTAs (\\\"Send your vehicle list and bay dimensions\\\"), not vague (\\\"Contact us today\\\").\\n\\n## ANTI-FLUFF TEST\\nBefore finalizing, scan for: \\\"best-in-class\\\", \\\"cutting-edge\\\", \\\"revolutionary\\\", \\\"industry-leading\\\", \\\"in today's\\\", \\\"in this post\\\", \\\"leverage\\\", \\\"synergize\\\", \\\"robust solution\\\". Replace each with concrete specifics or remove.\\n\\n---\\n\\nYou are Liftnow Content Producer v2. Generate a complete WordPress-ready markdown draft for the assigned piece.\\n\\nREFRESH MODE: If the piece object has piece_type=\\\\\\\"refresh\\\\\\\" or refresh_mode is true, this is REFRESHING an existing decaying page at URL \u2014 fetch the current title and write a refresh proposal that UPDATES the existing content with new data, new examples, fresh internal links. Do NOT write a brand-new piece from scratch. Preserve the existing URL, slug, and primary keyword. The output should be a delta the editor can paste over the live page.\\\\n\\\\nVOICE (HARD): Consultative Direct, first-person plural (we for Liftnow, you for the reader). Industry shorthand WITHOUT explanation (GVW, Class 7/8, ALCTV, ALI Gold Label, frame engagement, CAN-bus, Type C/D buses, articulated bus). Honest hedges only (typically, most, depending on the contract, confirmed on the quote). Specific numbers. NO buzzwords.\\n\\nBANNED IN BODY: LiftNow, LIFTNOW, 45+ states, nationwide alone, We do not subcontract, dealing directly, ALI-certified inspection (use nationwide lift inspection service), single contract line item (use single quote that bundles), revolutionary, industry-leading, best-in-class, cutting-edge, In this post we will explore, In today fast-paced. NEVER name as competitors: Challenger, Gray, Whip, Hunter, Mohawk, BendPak, Stertil-Koni, Rotary, ARI, Snap-on. Allowed: Challenger CLHM-190 in product context only.\\n\\nALWAYS: Liftnow capitalization; all 50 states when relevant; gov@liftnow.com; 1-800-LIFT-NOW; Sourcewell #121223-LFT; NASPO Master CW7258; FSA23-EQU21.0.\\n\\nREQUIRED STRUCTURAL ELEMENTS (every anchor \u2014 agent self-rejects if missing): italic byline *By Paul Stern, VP of Public Sector Sales \u2014 Liftnow* after hero above TOC; TOC at top of long-form; For the Fleet Manager callout (mandatory if >1500 words); For the Procurement Officer callout (mandatory if >1500 words); FAQ section at end (5-9 sentence-case questions); italic closing tagline naming Sourcewell #121223-LFT, NASPO CW7258, FSA23-EQU21.0; concrete CTA with gov@liftnow.com and 1-800-LIFT-NOW; reciprocal internal link to parent anchor URL (for cluster pages) or to related anchors (for anchor pieces).\\n\\nHEDGED CONTRACT-PROMISE RULE: never every / always / included with. Use typically issues a single quote that bundles, available on most sets, depending on the contract, confirmed at specification review. Word counts: anchor 2,800-4,000; cluster 1,500-2,500.\\n\\nDUAL-VERTICAL RULE: when topic applies to both transit AND school districts, address both in parallel language.\",messages:[{role:\"user\",content:\"Piece: \" + JSON.stringify($(\"Pick Next Piece (anchor-stuck priority)\").first().json.pick) + \"\\n\\nKB strategic context: \" + ($(\"KB Strategic Frame\").first().json.answer || \"\").slice(0,3000) + \"\\n\\n\" + ($(\"Check Decision Memory\").first().json.learnings_for_prompt || \"\") + \"\\n\\nGenerate the full markdown draft now.\\n\\nAfter the draft, on a new line write `=== ASSETS NEEDED ===` then a JSON array listing rich assets this piece would benefit from (hero image, infographic, PDF download, capacity chart, decision matrix table image, video, callout illustration, etc.). Each asset object: type (image|infographic|pdf|video|chart), purpose, where_in_draft (section_X), brief (enough detail for a designer or Cowork to create), on_brand_constraints (array of style notes, e.g. transit + school district imagery, avoid stock imagery, include ALI Gold Label badge).\\n\\nThen on a new line write `=== LINKEDIN DERIVATIVES ===` followed by 3 LinkedIn post variants each backlinking to the parent anchor URL. Each LinkedIn variant 80-200 words, Consultative Direct voice, max 3 hashtags.\"}]}) }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "draft",
+      "name": "Generate Draft + LinkedIn",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1088,
+        304
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "bU6QPziNPD0EYh5j",
+          "name": "Anthropic API Key"
+        }
+      },
+      "maxTries": 3,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp=$input.first().json;\nconst text=(resp.content&&resp.content[0]&&resp.content[0].text)||\"\";\nconst partsLI=text.split(/=+\\s*LINKEDIN DERIVATIVES\\s*=+/i);\nconst beforeLI=partsLI[0]||\"\";\nconst linkedinRaw=partsLI[1]||\"\";\nconst partsAssets=beforeLI.split(/=+\\s*ASSETS NEEDED\\s*=+/i);\nconst draft=(partsAssets[0]||\"\").trim();\nconst assetsBlock=(partsAssets[1]||\"\").trim();\nlet assets_needed=[];\ntry{const m=assetsBlock.match(/\\[[\\s\\S]*\\]/);if(m){assets_needed=JSON.parse(m[0]);}}catch(e){assets_needed=[];}\nconst pick=$(\"Pick Next Piece (anchor-stuck priority)\").first().json.pick;\n\nconst checks={\n  byline:/\\*By Paul Stern, VP of Public Sector Sales\\s*[\u2014-]\\s*Liftnow\\*/i.test(draft),\n  toc:/##\\s*Table of Contents|##\\s*Contents|<nav/i.test(draft),\n  fleet_manager_callout:/For the Fleet Manager/i.test(draft),\n  procurement_callout:/For the Procurement Officer/i.test(draft),\n  faq:(draft.match(/\\?/g)||[]).length>=5&&/(##\\s*FAQ|##\\s*Frequently Asked Questions)/i.test(draft),\n  closing_tagline:/121223-LFT/.test(draft)&&/CW7258/.test(draft)&&/FSA23-EQU21\\.0/.test(draft),\n  cta:/gov@liftnow\\.com/i.test(draft)&&/1-800-LIFT-NOW/i.test(draft),\n  reciprocal:!pick.parent_anchor_url||draft.includes(pick.parent_anchor_url),\n  banned_phrases:!/(LiftNow|LIFTNOW|45\\+ states|We don.t subcontract|dealing directly|ALI-certified inspection|industry-leading|best-in-class|cutting-edge|revolutionary|in this post|in today.s fast-paced)/.test(draft),\n  banned_competitors:!/(\\bMohawk\\b|\\bBendPak\\b|\\bStertil-Koni\\b|\\bRotary\\b|\\bARI\\b|\\bSnap-on\\b|\\bHunter\\b|\\bWhip\\b)/i.test(draft.replace(/Challenger\\s+(CLHM|40\\d{2}|44\\d{2})[\\w-]*/gi,\"\")),\n  hedge_density:((draft.match(/(typically|most\\s+(agencies|sets)|depending on (the )?contract|available on|confirmed on the quote|confirmed at specification)/gi)||[]).length)>=(pick.piece_type===\"anchor\"?4:2),\n  word_count_ok:(()=>{const wc=draft.split(/\\s+/).filter(Boolean).length;return pick.piece_type===\"anchor\"?(wc>=2800&&wc<=4500):(wc>=1500&&wc<=2800);})()\n};\nconst failed=Object.entries(checks).filter(([k,v])=>!v).map(([k])=>k);\nconst passed=failed.length===0;\nconst wc=draft.split(/\\s+/).filter(Boolean).length;\n\n// ASK / WHY / IF APPROVE / IF REJECT\nconst subject = (pick.piece_type === 'anchor' ? 'Publish anchor: ' : 'Publish cluster page: ') + (pick.title || '').slice(0,100);\n\nconst ask = \"Publish a new \" + (pick.piece_type || 'piece') + \" titled \\\"\" + (pick.title || '') + \"\\\" (\" + wc + \" words). \" + (assets_needed.length ? assets_needed.length + \" rich assets recommended (image/infographic/PDF).\" : \"No rich assets needed.\");\n\nconst why = pick.piece_type === 'anchor'\n  ? \"This is anchor content - long-form piece that ranks for high-volume keywords and provides reciprocal links to cluster pages. \" + (pick.note || '')\n  : \"This is a cluster page supporting parent anchor \\\"\" + (pick.parent_anchor_title || '') + \"\\\". It targets \" + (pick.target_keyword || 'a related keyword') + \".\";\n\nconst ifApprove = \"I'll publish this draft to WordPress as a private page (status: draft). You'll get a preview link from WordPress. If structural checks failed (\" + (failed.join(', ') || 'none') + \"), they'll show in the WP admin notes - fix before going public.\" + (assets_needed.length ? \" Rich assets get a separate Asset Review ticket for designer/Cowork to create.\" : \"\");\n\nconst ifReject = \"I'll skip this piece for 30 days. Your rejection comment trains the Pick Next Piece logic - if you said \\\"already exists\\\" or \\\"off-strategy\\\", I won't re-propose similar.\";\n\nconst content = \"ASK\\n\" + ask + \"\\n\\nWHY\\n\" + why + \"\\n\\nIF YOU APPROVE\\n\" + ifApprove + \"\\n\\nIF YOU REJECT\\n\" + ifReject + \"\\n\\n--- DRAFT PREVIEW (first 1500 chars) ---\\n\" + draft.slice(0, 1500);\n\nconst recommendation_detail={\n  pick,\n  checks,\n  failed,\n  word_count: wc,\n  draft_preview: (draft || '').slice(0, 8000),\n  draft_full: draft,\n  assets_needed,\n  linkedin_derivatives: (linkedinRaw || '').slice(0, 3000)\n};\n\nconst body_payload={\n  properties:{\n    subject: subject,\n    content: content,\n    hs_pipeline:\"0\",\n    hs_pipeline_stage:\"1\",\n    hs_ticket_priority: passed ? \"MEDIUM\" : \"LOW\",\n    agent_name:\"Content Producer\",\n    recommendation_type:\"Content Draft\",\n    recommendation_detail:JSON.stringify(recommendation_detail)\n  }\n};\nconst body_str=JSON.stringify(body_payload);\n\nreturn [{json:{passed,failed,checks,word_count:wc,draft,linkedin_raw:linkedinRaw,assets_needed,pick,subject,content,body_str}}];"
+      },
+      "id": "qa",
+      "name": "Self-Reject Gate (12 checks)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/tickets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ properties: {subject: \"[done] Drafted: \" + ($(\"Self-Reject Gate (12 checks)\").first().json.pick.title || \"\"),content: \"DONE: I published the draft as PRIVATE on WordPress (not visible to readers).\\n\\nTitle: \" + ($(\"Self-Reject Gate (12 checks)\").first().json.pick.title || \"\") + \"\\nType: \" + ($(\"Self-Reject Gate (12 checks)\").first().json.pick.piece_type || \"\") + \"\\nWord count: \" + ($(\"Self-Reject Gate (12 checks)\").first().json.word_count || 0) + \"\\nWP URL: \" + ($(\"Auto-Publish Private Draft\").first().json.link || \"(see WP admin)\") + \"\\nWP ID: \" + ($json.id || \"?\") + \"\\nFailed checks: \" + (($(\"Self-Reject Gate (12 checks)\").first().json.failed || []).join(\", \") || \"none\") + \"\\n\\nReview the draft in WordPress admin and publish public when ready.\\n\\nTo change agent behavior, comment below.\",hs_pipeline: \"0\",hs_pipeline_stage: \"3\",outcome_notes: \"AUTO_EXECUTED \" + new Date().toISOString() + \" - published WP private; id=\" + ($json.id || \"?\") + \"; link=\" + ($(\"Auto-Publish Private Draft\").first().json.link || \"?\"),agent_name: \"Content Producer\",recommendation_type: \"Content Draft\",recommendation_detail: JSON.stringify({pick: $(\"Self-Reject Gate (12 checks)\").first().json.pick, checks: $(\"Self-Reject Gate (12 checks)\").first().json.checks, failed: $(\"Self-Reject Gate (12 checks)\").first().json.failed, word_count: $(\"Self-Reject Gate (12 checks)\").first().json.word_count, draft_preview: ($(\"Self-Reject Gate (12 checks)\").first().json.draft || \"\").slice(0,8000), assets_needed: $(\"Self-Reject Gate (12 checks)\").first().json.assets_needed, wp_id: $json.id, wp_link: $(\"Auto-Publish Private Draft\").first().json.link})} }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "ticket",
+      "name": "Create Content Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1520,
+        304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "url": "https://agents.liftnowdirect.com/webhook/decision-memory",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "agent",
+              "value": "Content Producer"
+            },
+            {
+              "name": "signature",
+              "value": "={{ $(\"Pick Next Piece (anchor-stuck priority)\").first().json.pick.title || \"\" }}"
+            },
+            {
+              "name": "days",
+              "value": "30"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "mem-check",
+      "name": "Check Decision Memory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        768,
+        304
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a",
+              "leftValue": "={{ $json.should_skip }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "mem-gate",
+      "name": "Memory Says Skip?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        976,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a",
+              "name": "status",
+              "value": "={{ \"Skipped per Decision Memory: \" + ($json.skip_reason || \"similar recent decision\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "mem-skip",
+      "name": "Log Memory Skip",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1008,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fire-content-producer",
+        "options": {}
+      },
+      "id": "manual-fire-d7YwC4",
+      "name": "Manual Fire (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        208,
+        112
+      ],
+      "webhookId": "webhook-d7YwC4ezub4g1LrI"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.liftnow.com/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({title: ($json.pick.title || \"Untitled Liftnow draft\") + \" (\" + new Date().toISOString().slice(0,16) + \")\", slug: (($json.pick.title || \"untitled\").toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\").slice(0,40) + \"-\" + Date.now()), content: $json.draft || \"\", status: \"private\", excerpt: ($json.pick.title || \"\").slice(0,160)}) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          },
+          "timeout": 30000
+        }
+      },
+      "id": "auto-publish-draft",
+      "name": "Auto-Publish Private Draft",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1552,
+        304
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AZ9RGlvZiPcT3wDJ",
+          "name": "WordPress REST API (liftnow-agent)"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.liftnow.com/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            },
+            {
+              "name": "_fields",
+              "value": "id,slug,link,title,date"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "fetch-posts",
+      "name": "Fetch Published Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        400
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "AZ9RGlvZiPcT3wDJ",
+          "name": "WordPress REST API (liftnow-agent)"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a",
+              "leftValue": "={{ $json.passed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "self-reject-gate-if",
+      "name": "Self-Reject Passed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1488,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "self-reject-skip-log",
+      "name": "Self-Reject Skip Log",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        1488,
+        480
+      ]
+    },
+    {
+      "id": "fetch-refresh-queue",
+      "name": "Fetch Refresh Queue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({filterGroups:[{filters:[{propertyName:\"hs_pipeline\",operator:\"EQ\",value:\"0\"},{propertyName:\"hs_pipeline_stage\",operator:\"EQ\",value:\"3\"},{propertyName:\"agent_name\",operator:\"EQ\",value:\"Content Decay Detector\"},{propertyName:\"hs_lastmodifieddate\",operator:\"GTE\",value:String($now.minus({days:14}).toMillis())}]}],properties:[\"id\",\"subject\",\"outcome_notes\",\"recommendation_detail\"],limit:5}) }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Tue 9AM ET": {
+      "main": [
+        [
+          {
+            "node": "Fetch Published Pages",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GSC Anchor Performance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Refresh Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Published Pages": {
+      "main": [
+        [
+          {
+            "node": "Pick Next Piece (anchor-stuck priority)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GSC Anchor Performance": {
+      "main": [
+        [
+          {
+            "node": "Pick Next Piece (anchor-stuck priority)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Next Piece (anchor-stuck priority)": {
+      "main": [
+        [
+          {
+            "node": "KB Strategic Frame",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KB Strategic Frame": {
+      "main": [
+        [
+          {
+            "node": "Check Decision Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Draft + LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Self-Reject Gate (12 checks)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Self-Reject Gate (12 checks)": {
+      "main": [
+        [
+          {
+            "node": "Self-Reject Passed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Decision Memory": {
+      "main": [
+        [
+          {
+            "node": "Memory Says Skip?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory Says Skip?": {
+      "main": [
+        [
+          {
+            "node": "Log Memory Skip",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Draft + LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Fire (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Fetch Published Pages",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GSC Anchor Performance",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Published Posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Refresh Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Publish Private Draft": {
+      "main": [
+        [
+          {
+            "node": "Create Content Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Published Posts": {
+      "main": [
+        [
+          {
+            "node": "Pick Next Piece (anchor-stuck priority)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Self-Reject Passed?": {
+      "main": [
+        [
+          {
+            "node": "Create Content Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Self-Reject Skip Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Refresh Queue": {
+      "main": [
+        [
+          {
+            "node": "Pick Next Piece (anchor-stuck priority)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "qMeBXIjguVuaKLLF",
+    "executionOrder": "v0",
+    "binaryMode": "separate"
+  },
+  "staticData": {
+    "node:Tue 9AM ET": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
+  "activeVersionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
+  "versionCounter": 283,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-05-22T22:53:28.370Z",
+      "createdAt": "2026-05-22T22:53:28.370Z",
+      "role": "workflow:owner",
+      "workflowId": "d7YwC4ezub4g1LrI",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-27T22:32:44.083Z",
+    "createdAt": "2026-05-27T22:32:44.083Z",
+    "versionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
+    "workflowId": "d7YwC4ezub4g1LrI",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": [
+                  9,
+                  13,
+                  17
+                ],
+                "triggerAtDay": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5
+                ]
+              }
+            ]
+          }
+        },
+        "id": "trig",
+        "name": "Tue 9AM ET",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          208,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://www.liftnow.com/wp-json/wp/v2/pages",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "per_page",
+                "value": "100"
+              },
+              {
+                "name": "_fields",
+                "value": "id,slug,link,title,date"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            },
+            "timeout": 60000
+          }
+        },
+        "id": "wp",
+        "name": "Fetch Published Pages",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          432,
+          208
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "AZ9RGlvZiPcT3wDJ",
+            "name": "WordPress REST API (liftnow-agent)"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://www.googleapis.com/webmasters/v3/sites/sc-domain%3Aliftnow.com/searchAnalytics/query",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "oAuth2Api",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({startDate:$now.minus({days:90}).toFormat(\"yyyy-MM-dd\"),endDate:$now.minus({days:1}).toFormat(\"yyyy-MM-dd\"),dimensions:[\"page\"],rowLimit:100,dataState:\"final\"}) }}",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            },
+            "timeout": 60000
+          }
+        },
+        "id": "gsc",
+        "name": "GSC Anchor Performance",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          432,
+          400
+        ],
+        "credentials": {
+          "oAuth2Api": {
+            "id": "R24TuEIQaF3bmQSZ",
+            "name": "Google Search Console OAuth2"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "jsCode": "// Refresh-queue priority branch (added 2026-05): check approved Turtle handoffs first.\nconst refreshResp = (() => { try { return $(\"Fetch Refresh Queue\").first().json; } catch(e) { return null; }})();\nconst refreshResults = (refreshResp && refreshResp.results) || [];\nlet refreshPick = null;\nfor (const t of refreshResults) {\n  const props = t.properties || {};\n  const notes = props.outcome_notes || \"\";\n  const idx = notes.indexOf(\"HANDOFF:\");\n  if (idx < 0) continue;\n  const tail = notes.slice(idx + \"HANDOFF:\".length).trim();\n  // Try to parse a JSON object starting at the first '{'.\n  const start = tail.indexOf(\"{\");\n  if (start < 0) continue;\n  // Balance braces to find the end of the JSON object.\n  let depth = 0, end = -1;\n  for (let i = start; i < tail.length; i++) {\n    const ch = tail[i];\n    if (ch === \"{\") depth++;\n    else if (ch === \"}\") { depth--; if (depth === 0) { end = i; break; } }\n  }\n  if (end < 0) continue;\n  let handoff = null;\n  try { handoff = JSON.parse(tail.slice(start, end + 1)); } catch(e) { continue; }\n  if (!handoff || handoff.to !== \"Owl\") continue;\n  const payload = handoff.payload || {};\n  if (payload.kind !== \"refresh_url\" || !payload.url) continue;\n  refreshPick = {\n    piece_type: \"refresh\",\n    url: payload.url,\n    title: payload.title || props.subject || \"(refresh) \" + payload.url,\n    click_drop_pct: payload.click_drop_pct,\n    position_drop: payload.position_drop,\n    source_ticket_id: t.id || props.id,\n    source_agent: \"Content Decay Detector\",\n    target_keyword: payload.target_keyword || null,\n    parent_anchor_url: payload.parent_anchor_url || null,\n  };\n  break;\n}\nif (refreshPick) {\n  return [{json:{\n    pick: refreshPick,\n    refresh_mode: true,\n    total_candidates: 1,\n    refresh_queue_count: refreshResults.length,\n    note: \"Picked refresh request from approved Turtle handoff; bypassing cluster backlog.\",\n  }}];\n}\n\n// --- Fallback: existing anchor-stuck cluster picker (unchanged behavior) ---\nconst wpResp=$(\"Fetch Published Pages\").first().json;const gscResp=$(\"GSC Anchor Performance\").first().json;const list=Array.isArray(wpResp)?wpResp:(wpResp.results||[]);const publishedAnchors=list.filter(p=>(p.link||\"\").includes(\"/resources/\")).map(p=>({slug:p.slug,link:p.link,title:(p.title&&p.title.rendered)||p.slug,date:p.date}));const gscRows=gscResp.rows||[];const positionByUrl={};for(const r of gscRows){const url=r.keys?.[0];\n      // REFRESH_QUEUE_COMPETITOR_FILTER \u2014 skip URLs that contain competitor brand slugs\n      const COMPETITOR_SLUGS = /(hunter|mohawk|stertil|rotary|snap-on|ari-hetra|whip|bendpak|challenger)/i;\n      if (COMPETITOR_SLUGS.test(handoffUrl || '')) {\n        // Skip this ticket \u2014 Owl can't refresh a competitor-branded page (voice violation)\n        continue;\n      }if(!url)continue;positionByUrl[url]=positionByUrl[url]||{positionSum:0,impressions:0};positionByUrl[url].positionSum+=(r.position||0)*(r.impressions||1);positionByUrl[url].impressions+=(r.impressions||1);}const anchorStatus=publishedAnchors.map(a=>{const p=positionByUrl[a.link]||{};const avgPos=p.impressions?p.positionSum/p.impressions:null;return{...a,avg_position:avgPos,impressions:p.impressions||0,is_stuck:avgPos!==null&&avgPos>=11&&avgPos<=20};});const anchor6Live=publishedAnchors.some(a=>/anchor-6|anchor6/.test(a.slug.toLowerCase())||/^\\/resources\\/[a-z0-9-]+\\/$/.test(a.link)&&publishedAnchors.length>=6);const CLUSTER_BACKLOG={1:[{title:\"Two-Post vs Four-Post HD Lifts: Decision Framework for Fleet Bays\",target_keyword:\"two post vs four post heavy duty lift\"},{title:\"Heavy-Duty Truck Lift Capacity Guide: Sizing for Specific Vehicle Classes\",target_keyword:\"heavy duty truck lift capacity\"},{title:\"Buy America Act and Heavy-Duty Truck Lift Procurement\",target_keyword:\"buy america vehicle lift\"}],2:[{title:\"Mobile Column Lift Capacity Calculator: Sizing for Transit Fleet Vehicles\",target_keyword:\"mobile column lift capacity transit\"},{title:\"Wireless vs Cabled Mobile Column Lifts: When Each Makes Sense\",target_keyword:\"wireless mobile column lifts\"},{title:\"School District Bus Maintenance: Multi-Depot Mobile Column Strategies\",target_keyword:\"school district mobile column lift\"},{title:\"Challenger CLHM vs Stertil-Koni Mobile Columns Spec Comparison\",target_keyword:\"clhm mobile column comparison\"}],3:[{title:\"Parallelogram vs Cassette In-Ground Lifts: Heavy-Duty Comparison\",target_keyword:\"parallelogram vs cassette in-ground lift\"},{title:\"Pit Lift Retrofit: When It Works, When It Does Not\",target_keyword:\"pit lift retrofit\"},{title:\"In-Ground Lift Inspection Requirements for Government Fleets\",target_keyword:\"in-ground lift inspection\"}],4:[{title:\"NASPO ValuePoint vs Sourcewell: Which Cooperative Contract Fits Your Fleet?\",target_keyword:\"naspo vs sourcewell vehicle lift\"},{title:\"Florida Sheriffs Association FSA23-EQU21.0: How Florida Agencies Buy Garage Equipment\",target_keyword:\"fsa garage equipment contract\"},{title:\"Buy America Compliance for Vehicle Lift Procurement\",target_keyword:\"buy america vehicle lift compliance\"}],5:[{title:\"Articulated Bus Service: Equipment Considerations for 60-Foot Vehicles\",target_keyword:\"articulated bus lift\"},{title:\"School Bus Service Bay Design: Equipment for Type C and Type D Buses\",target_keyword:\"school bus service bay design\"},{title:\"Transit Bus Maintenance Equipment: Beyond the Lift\",target_keyword:\"transit bus maintenance equipment\"}]};let pick;let pickType;if(!anchor6Live){pickType=\"anchor\";pick={piece_type:\"anchor\",title:\"Anchor #6 \u2014 TBD per Paul drafting\",target_keyword:\"(to be confirmed)\",pillar:\"TBD\",parent_anchor_url:null,note:\"Anchor #6 not detected in WP. Default: Paul drafts but agent shadow-drafts a cluster page below instead. Set 'agent_drafts_anchor_6=true' in staticData to override.\"};const sd=$getWorkflowStaticData(\"global\");if(sd.agent_drafts_anchor_6!==true){pickType=\"cluster_page_shadow\";}}const stuckAnchors=anchorStatus.filter(a=>a.is_stuck).sort((a,b)=>(a.avg_position||0)-(b.avg_position||0));const candidates=[];const URL_TO_ID={\"/resources/heavy-duty-truck-lifts-fleet-service-bays/\":1,\"/resources/mobile-column-lifts-transit-bus-heavy-duty-fleet/\":2,\"/resources/in-ground-and-pit-lifts/\":3,\"/resources/sourcewell-vehicle-lifts-buyers-guide/\":4,\"/resources/bus-lifts-vs-truck-lifts/\":5};const order=stuckAnchors.length?stuckAnchors.map(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]).filter(Boolean):[1,2,3,4,5];for(const anchorId of order){const clusters=CLUSTER_BACKLOG[anchorId]||[];const anchor=anchorStatus.find(a=>URL_TO_ID[a.link.replace(/^https?:\\/\\/[^/]+/,\"\")]===anchorId);if(!anchor)continue;for(const c of clusters){const slug=c.title.toLowerCase().replace(/[^a-z0-9]+/g,\"-\").slice(0,60);const alreadyLive=publishedAnchors.some(p=>p.slug.includes(slug.slice(0,30)));if(alreadyLive)continue;candidates.push({...c,piece_type:\"cluster_page\",parent_anchor_id:anchorId,parent_anchor_url:anchor.link,parent_anchor_title:anchor.title,parent_anchor_avg_position:anchor.avg_position,parent_anchor_is_stuck:anchor.is_stuck});}}if(pickType===\"cluster_page_shadow\"||pickType!==\"anchor\"){pick=candidates[0]||{piece_type:\"cluster_page\",title:\"(no candidate)\",note:\"All cluster pages from master plan \u00a74 backlog appear to be published.\"};}return [{json:{pick,refresh_mode:false,total_candidates:candidates.length,stuck_anchors:stuckAnchors.map(a=>({slug:a.slug,avg_position:a.avg_position})),anchor_6_live:anchor6Live}}];\n"
+        },
+        "id": "pick",
+        "name": "Pick Next Piece (anchor-stuck priority)",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          640,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://bid-iq-neon.vercel.app/api/ask",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({consumer_role:\"marketing\",question:\"I am drafting a Liftnow \"+($json.pick.piece_type||\"cluster_page\")+\" titled \\\"\"+($json.pick.title||\"\")+\"\\\" targeting keyword \\\"\"+($json.pick.target_keyword||\"\")+\"\\\", parent anchor \"+($json.pick.parent_anchor_url||\"\")+\". Return: (1) 3-5 specific product / contract / compliance facts a fleet manager OR procurement officer would need (specific numbers, capacities, model names from carry brands only); (2) which Liftnow-carried brands belong here; (3) Sourcewell #121223-LFT / NASPO CW7258 / FSA23-EQU21.0 angles that apply; (4) dual-vertical hooks if topic applies to BOTH transit AND school districts. Do NOT return pricing. Do NOT name Challenger / Gray / Whip / Hunter / Mohawk / BendPak / Stertil-Koni / Rotary / ARI / Snap-on as competitors.\"}) }}",
+          "options": {
+            "timeout": 120000
+          }
+        },
+        "id": "kb",
+        "name": "KB Strategic Frame",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          864,
+          304
+        ],
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.anthropic.com/v1/messages",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "anthropic-version",
+                "value": "2023-06-01"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({model:\"claude-sonnet-4-5\",max_tokens: 6000,system:\"\\n\\n# PRICING \u2014 HARD RULE (additional to identity rule above)\\nNEVER include pricing estimates, dollar figures, contract pricing, \\\"starts at $X\\\", or \\\"$X-$Y range\\\" in any public post. Pricing has too many config-specific variables; posting a number anchors readers on figures that won't match their actual quote. Acceptable hedges:\\n- \\\"confirmed on the quote\\\"\\n- \\\"depends on your bay dimensions and vehicle list\\\"\\n- \\\"pricing varies by Sourcewell discount tier and configuration\\\"\\n- \\\"send your vehicle list + bay dimensions to gov@liftnow.com for a quote\\\"\\n\\nIf your draft includes any specific dollar figure for lift purchase, install, or contract cost, REMOVE it before posting. Even comparative pricing (\\\"Liftnow's typically 15-20% less than X\\\") is banned in public copy.\\n\\n\\n---\\n\\n\\n\\n# IDENTITY \u2014 HARD RULE (overrides any conflicting voice instruction below)\\n\\nYou are writing AS LIFTNOW. Liftnow is a Sourcewell-contracted commercial vehicle lift DEALER + installer. Liftnow is NOT a fleet operator, NOT a customer, NOT an end user of the lifts. Liftnow SELLS and INSTALLS the lifts to government fleets, transit agencies, school districts, etc.\\n\\n## NEVER position Liftnow as a customer\\n- \u274c \\\"We just took delivery of a four-post mobile column set for our 47-truck fleet\\\"\\n- \u274c \\\"We installed a CL20 in our shop last week\\\"\\n- \u274c \\\"Our maintenance team uses...\\\"\\n- \u274c \\\"Our fleet runs...\\\"\\n- \u274c \\\"Since we switched to BendPak lifts...\\\"\\n- \u274c Any first-person \\\"we bought / we own / we operate / we maintain\\\" framing where \\\"we\\\" = a fleet that uses lifts.\\n\\n## ALWAYS position Liftnow as the dealer/installer\\n- \u2705 \\\"We spec'd a four-post mobile column set for a 47-truck municipal fleet last quarter \u2014 here's the breakdown.\\\"\\n- \u2705 \\\"From the Liftnow shop floor: across maybe 30 transit-bus installs in the past 18 months, the consistent friction point is column spacing on older depot bays.\\\"\\n- \u2705 \\\"When a customer asks us about CL20 vs CL12A, the real spec gap is...\\\"\\n- \u2705 \\\"Across the Liftnow installer network, the most common failure mode is...\\\"\\n- \u2705 \\\"Liftnow's been quoting under Sourcewell 121223-LFT since [date]; the contract field that catches buyers off-guard is...\\\"\\n\\n## Disclosure\\nThe reader should understand within the first 2 sentences that this is from a vendor sharing what they've learned, not from a fleet operator describing their own setup. If you can't write the piece without making Liftnow sound like a customer, RETURN skip:true.\\n\\n## Platform-specific\\n- LinkedIn: byline \\\"By Paul Stern, VP Public Sector Sales \u2014 Liftnow\\\" makes the dealer relationship clear; voice can still be first-person about Liftnow's experience.\\n- Reddit: even MORE careful \u2014 reddit users downvote covert advertising. Sign reply/post with \\\"\u2014 Paul, Liftnow\\\" or open with \\\"Liftnow rep here, but adding actual content vs sales pitch:\\\". Be honest about who you are; redditors respect honesty more than coverage.\\n- Blog/article: byline + clear \\\"Liftnow's experience across N installs\\\" framing in the opening.\\n\\n## Test before submitting\\nRe-read the draft. Ask: \\\"Would a reasonable reader think the author is a fleet operator who bought lifts?\\\" If yes, REWRITE entirely.\\n\\n\\n---\\n\\n# VOICE \u2014 PAUL STERN BLOG / ARTICLE / LINKEDIN VOICE (mandatory)\\n\\nThis is content for strangers reading among many similar articles. Voice is distinct from Paul's email registers but rooted in the same identity.\\n\\n## ALWAYS\\n- Brand name: \\\"Liftnow\\\" \u2014 never \\\"LiftNow\\\" or \\\"LIFTNOW\\\".\\n- \\\"All 50 states\\\" \u2014 never \\\"45+ states\\\" or \\\"nationwide\\\" alone.\\n- \\\"We\\\" for Liftnow actions. \\\"You\\\" for the reader.\\n- Hedged contract promises: \\\"typically\\\", \\\"most sets\\\", \\\"depending on the contract\\\", \\\"confirmed on the quote\\\", \\\"confirmed at specification\\\".\\n- Dual-audience callouts where natural: \\\"For the Fleet Manager:\\\" and \\\"For the Procurement Officer:\\\".\\n- Industry shorthand without explanation (treat reader as practitioner, not novice).\\n- Specific numbers everywhere for credibility.\\n- Active voice: \\\"Liftnow handles\\\" not \\\"is handled by Liftnow\\\".\\n- Anchor pieces include: byline (*By Paul Stern, VP of Public Sector Sales \u2014 Liftnow*), TOC, FAQ schema (5\u20139 questions), closing contract tagline (Sourcewell 121223-LFT, NASPO CW7258, FSA23-EQU21.0), CTA (gov@liftnow.com + 1-800-LIFT-NOW + \\\"Send your vehicle list and bay dimensions\\\").\\n- Honest about limitations. Refuses to over-claim.\\n\\n## NEVER\\n- Competitor brand names in permanent website copy (no Mohawk, Stertil-Koni, Rotary, Ari-Hetra, Hunter, Snap-on, Whip, Gray as Liftnow offerings).\\n- \\\"Revolutionary\\\", \\\"industry-leading\\\", \\\"best-in-class\\\", \\\"cutting-edge\\\". Banned.\\n- \\\"In today's fast-paced fleet management world...\\\" \u2014 banned filler.\\n- \\\"In this post, we'll explore...\\\" \u2014 banned blog trope.\\n- Absolute contract claims: \\\"always\\\", \\\"every\\\", \\\"included in every contract\\\" \u2192 use \\\"typically\\\", \\\"available on most\\\", \\\"confirmed on the quote\\\".\\n- \\\"Single contract line item\\\" \u2192 say \\\"single quote that bundles\\\".\\n- \\\"ALI-certified inspection\\\" when referring to Liftnow's service. (Liftnow subcontracts inspection \u2014 don't claim certification we don't directly hold.)\\n- \\\"We don't subcontract\\\" \u2014 false.\\n- Filler paragraphs to hit word counts.\\n- \\\"Dealing directly\\\".\\n\\n## LINKEDIN-SPECIFIC\\n- Every post links back to a liftnow.com URL.\\n- Real human sign-off \u2014 not corporate formality.\\n- One ALL-CAPS emphasis word allowed for punch (\\\"This is HOW we beat the spec write-up.\\\").\\n- Tag institutions (Sourcewell, FleetOwner), not individuals, in adversarial contexts.\\n\\n## TONE\\nConfident without preaching. Hedge words are calibrated honesty, not dodging. Direct address with \\\"you\\\", not \\\"the fleet manager\\\" abstractly. Concrete CTAs (\\\"Send your vehicle list and bay dimensions\\\"), not vague (\\\"Contact us today\\\").\\n\\n## ANTI-FLUFF TEST\\nBefore finalizing, scan for: \\\"best-in-class\\\", \\\"cutting-edge\\\", \\\"revolutionary\\\", \\\"industry-leading\\\", \\\"in today's\\\", \\\"in this post\\\", \\\"leverage\\\", \\\"synergize\\\", \\\"robust solution\\\". Replace each with concrete specifics or remove.\\n\\n---\\n\\nYou are Liftnow Content Producer v2. Generate a complete WordPress-ready markdown draft for the assigned piece.\\n\\nREFRESH MODE: If the piece object has piece_type=\\\\\\\"refresh\\\\\\\" or refresh_mode is true, this is REFRESHING an existing decaying page at URL \u2014 fetch the current title and write a refresh proposal that UPDATES the existing content with new data, new examples, fresh internal links. Do NOT write a brand-new piece from scratch. Preserve the existing URL, slug, and primary keyword. The output should be a delta the editor can paste over the live page.\\\\n\\\\nVOICE (HARD): Consultative Direct, first-person plural (we for Liftnow, you for the reader). Industry shorthand WITHOUT explanation (GVW, Class 7/8, ALCTV, ALI Gold Label, frame engagement, CAN-bus, Type C/D buses, articulated bus). Honest hedges only (typically, most, depending on the contract, confirmed on the quote). Specific numbers. NO buzzwords.\\n\\nBANNED IN BODY: LiftNow, LIFTNOW, 45+ states, nationwide alone, We do not subcontract, dealing directly, ALI-certified inspection (use nationwide lift inspection service), single contract line item (use single quote that bundles), revolutionary, industry-leading, best-in-class, cutting-edge, In this post we will explore, In today fast-paced. NEVER name as competitors: Challenger, Gray, Whip, Hunter, Mohawk, BendPak, Stertil-Koni, Rotary, ARI, Snap-on. Allowed: Challenger CLHM-190 in product context only.\\n\\nALWAYS: Liftnow capitalization; all 50 states when relevant; gov@liftnow.com; 1-800-LIFT-NOW; Sourcewell #121223-LFT; NASPO Master CW7258; FSA23-EQU21.0.\\n\\nREQUIRED STRUCTURAL ELEMENTS (every anchor \u2014 agent self-rejects if missing): italic byline *By Paul Stern, VP of Public Sector Sales \u2014 Liftnow* after hero above TOC; TOC at top of long-form; For the Fleet Manager callout (mandatory if >1500 words); For the Procurement Officer callout (mandatory if >1500 words); FAQ section at end (5-9 sentence-case questions); italic closing tagline naming Sourcewell #121223-LFT, NASPO CW7258, FSA23-EQU21.0; concrete CTA with gov@liftnow.com and 1-800-LIFT-NOW; reciprocal internal link to parent anchor URL (for cluster pages) or to related anchors (for anchor pieces).\\n\\nHEDGED CONTRACT-PROMISE RULE: never every / always / included with. Use typically issues a single quote that bundles, available on most sets, depending on the contract, confirmed at specification review. Word counts: anchor 2,800-4,000; cluster 1,500-2,500.\\n\\nDUAL-VERTICAL RULE: when topic applies to both transit AND school districts, address both in parallel language.\",messages:[{role:\"user\",content:\"Piece: \" + JSON.stringify($(\"Pick Next Piece (anchor-stuck priority)\").first().json.pick) + \"\\n\\nKB strategic context: \" + ($(\"KB Strategic Frame\").first().json.answer || \"\").slice(0,3000) + \"\\n\\n\" + ($(\"Check Decision Memory\").first().json.learnings_for_prompt || \"\") + \"\\n\\nGenerate the full markdown draft now.\\n\\nAfter the draft, on a new line write `=== ASSETS NEEDED ===` then a JSON array listing rich assets this piece would benefit from (hero image, infographic, PDF download, capacity chart, decision matrix table image, video, callout illustration, etc.). Each asset object: type (image|infographic|pdf|video|chart), purpose, where_in_draft (section_X), brief (enough detail for a designer or Cowork to create), on_brand_constraints (array of style notes, e.g. transit + school district imagery, avoid stock imagery, include ALI Gold Label badge).\\n\\nThen on a new line write `=== LINKEDIN DERIVATIVES ===` followed by 3 LinkedIn post variants each backlinking to the parent anchor URL. Each LinkedIn variant 80-200 words, Consultative Direct voice, max 3 hashtags.\"}]}) }}",
+          "options": {
+            "timeout": 600000
+          }
+        },
+        "id": "draft",
+        "name": "Generate Draft + LinkedIn",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1088,
+          304
+        ],
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "bU6QPziNPD0EYh5j",
+            "name": "Anthropic API Key"
+          }
+        },
+        "maxTries": 3,
+        "continueOnFail": true
+      },
+      {
+        "parameters": {
+          "jsCode": "const resp=$input.first().json;\nconst text=(resp.content&&resp.content[0]&&resp.content[0].text)||\"\";\nconst partsLI=text.split(/=+\\s*LINKEDIN DERIVATIVES\\s*=+/i);\nconst beforeLI=partsLI[0]||\"\";\nconst linkedinRaw=partsLI[1]||\"\";\nconst partsAssets=beforeLI.split(/=+\\s*ASSETS NEEDED\\s*=+/i);\nconst draft=(partsAssets[0]||\"\").trim();\nconst assetsBlock=(partsAssets[1]||\"\").trim();\nlet assets_needed=[];\ntry{const m=assetsBlock.match(/\\[[\\s\\S]*\\]/);if(m){assets_needed=JSON.parse(m[0]);}}catch(e){assets_needed=[];}\nconst pick=$(\"Pick Next Piece (anchor-stuck priority)\").first().json.pick;\n\nconst checks={\n  byline:/\\*By Paul Stern, VP of Public Sector Sales\\s*[\u2014-]\\s*Liftnow\\*/i.test(draft),\n  toc:/##\\s*Table of Contents|##\\s*Contents|<nav/i.test(draft),\n  fleet_manager_callout:/For the Fleet Manager/i.test(draft),\n  procurement_callout:/For the Procurement Officer/i.test(draft),\n  faq:(draft.match(/\\?/g)||[]).length>=5&&/(##\\s*FAQ|##\\s*Frequently Asked Questions)/i.test(draft),\n  closing_tagline:/121223-LFT/.test(draft)&&/CW7258/.test(draft)&&/FSA23-EQU21\\.0/.test(draft),\n  cta:/gov@liftnow\\.com/i.test(draft)&&/1-800-LIFT-NOW/i.test(draft),\n  reciprocal:!pick.parent_anchor_url||draft.includes(pick.parent_anchor_url),\n  banned_phrases:!/(LiftNow|LIFTNOW|45\\+ states|We don.t subcontract|dealing directly|ALI-certified inspection|industry-leading|best-in-class|cutting-edge|revolutionary|in this post|in today.s fast-paced)/.test(draft),\n  banned_competitors:!/(\\bMohawk\\b|\\bBendPak\\b|\\bStertil-Koni\\b|\\bRotary\\b|\\bARI\\b|\\bSnap-on\\b|\\bHunter\\b|\\bWhip\\b)/i.test(draft.replace(/Challenger\\s+(CLHM|40\\d{2}|44\\d{2})[\\w-]*/gi,\"\")),\n  hedge_density:((draft.match(/(typically|most\\s+(agencies|sets)|depending on (the )?contract|available on|confirmed on the quote|confirmed at specification)/gi)||[]).length)>=(pick.piece_type===\"anchor\"?4:2),\n  word_count_ok:(()=>{const wc=draft.split(/\\s+/).filter(Boolean).length;return pick.piece_type===\"anchor\"?(wc>=2800&&wc<=4500):(wc>=1500&&wc<=2800);})()\n};\nconst failed=Object.entries(checks).filter(([k,v])=>!v).map(([k])=>k);\nconst passed=failed.length===0;\nconst wc=draft.split(/\\s+/).filter(Boolean).length;\n\n// ASK / WHY / IF APPROVE / IF REJECT\nconst subject = (pick.piece_type === 'anchor' ? 'Publish anchor: ' : 'Publish cluster page: ') + (pick.title || '').slice(0,100);\n\nconst ask = \"Publish a new \" + (pick.piece_type || 'piece') + \" titled \\\"\" + (pick.title || '') + \"\\\" (\" + wc + \" words). \" + (assets_needed.length ? assets_needed.length + \" rich assets recommended (image/infographic/PDF).\" : \"No rich assets needed.\");\n\nconst why = pick.piece_type === 'anchor'\n  ? \"This is anchor content - long-form piece that ranks for high-volume keywords and provides reciprocal links to cluster pages. \" + (pick.note || '')\n  : \"This is a cluster page supporting parent anchor \\\"\" + (pick.parent_anchor_title || '') + \"\\\". It targets \" + (pick.target_keyword || 'a related keyword') + \".\";\n\nconst ifApprove = \"I'll publish this draft to WordPress as a private page (status: draft). You'll get a preview link from WordPress. If structural checks failed (\" + (failed.join(', ') || 'none') + \"), they'll show in the WP admin notes - fix before going public.\" + (assets_needed.length ? \" Rich assets get a separate Asset Review ticket for designer/Cowork to create.\" : \"\");\n\nconst ifReject = \"I'll skip this piece for 30 days. Your rejection comment trains the Pick Next Piece logic - if you said \\\"already exists\\\" or \\\"off-strategy\\\", I won't re-propose similar.\";\n\nconst content = \"ASK\\n\" + ask + \"\\n\\nWHY\\n\" + why + \"\\n\\nIF YOU APPROVE\\n\" + ifApprove + \"\\n\\nIF YOU REJECT\\n\" + ifReject + \"\\n\\n--- DRAFT PREVIEW (first 1500 chars) ---\\n\" + draft.slice(0, 1500);\n\nconst recommendation_detail={\n  pick,\n  checks,\n  failed,\n  word_count: wc,\n  draft_preview: (draft || '').slice(0, 8000),\n  draft_full: draft,\n  assets_needed,\n  linkedin_derivatives: (linkedinRaw || '').slice(0, 3000)\n};\n\nconst body_payload={\n  properties:{\n    subject: subject,\n    content: content,\n    hs_pipeline:\"0\",\n    hs_pipeline_stage:\"1\",\n    hs_ticket_priority: passed ? \"MEDIUM\" : \"LOW\",\n    agent_name:\"Content Producer\",\n    recommendation_type:\"Content Draft\",\n    recommendation_detail:JSON.stringify(recommendation_detail)\n  }\n};\nconst body_str=JSON.stringify(body_payload);\n\nreturn [{json:{passed,failed,checks,word_count:wc,draft,linkedin_raw:linkedinRaw,assets_needed,pick,subject,content,body_str}}];"
+        },
+        "id": "qa",
+        "name": "Self-Reject Gate (12 checks)",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1312,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.hubapi.com/crm/v3/objects/tickets",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ properties: {subject: \"[done] Drafted: \" + ($(\"Self-Reject Gate (12 checks)\").first().json.pick.title || \"\"),content: \"DONE: I published the draft as PRIVATE on WordPress (not visible to readers).\\n\\nTitle: \" + ($(\"Self-Reject Gate (12 checks)\").first().json.pick.title || \"\") + \"\\nType: \" + ($(\"Self-Reject Gate (12 checks)\").first().json.pick.piece_type || \"\") + \"\\nWord count: \" + ($(\"Self-Reject Gate (12 checks)\").first().json.word_count || 0) + \"\\nWP URL: \" + ($(\"Auto-Publish Private Draft\").first().json.link || \"(see WP admin)\") + \"\\nWP ID: \" + ($json.id || \"?\") + \"\\nFailed checks: \" + (($(\"Self-Reject Gate (12 checks)\").first().json.failed || []).join(\", \") || \"none\") + \"\\n\\nReview the draft in WordPress admin and publish public when ready.\\n\\nTo change agent behavior, comment below.\",hs_pipeline: \"0\",hs_pipeline_stage: \"3\",outcome_notes: \"AUTO_EXECUTED \" + new Date().toISOString() + \" - published WP private; id=\" + ($json.id || \"?\") + \"; link=\" + ($(\"Auto-Publish Private Draft\").first().json.link || \"?\"),agent_name: \"Content Producer\",recommendation_type: \"Content Draft\",recommendation_detail: JSON.stringify({pick: $(\"Self-Reject Gate (12 checks)\").first().json.pick, checks: $(\"Self-Reject Gate (12 checks)\").first().json.checks, failed: $(\"Self-Reject Gate (12 checks)\").first().json.failed, word_count: $(\"Self-Reject Gate (12 checks)\").first().json.word_count, draft_preview: ($(\"Self-Reject Gate (12 checks)\").first().json.draft || \"\").slice(0,8000), assets_needed: $(\"Self-Reject Gate (12 checks)\").first().json.assets_needed, wp_id: $json.id, wp_link: $(\"Auto-Publish Private Draft\").first().json.link})} }) }}",
+          "options": {
+            "timeout": 60000
+          }
+        },
+        "id": "ticket",
+        "name": "Create Content Ticket",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1520,
+          304
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "url": "https://agents.liftnowdirect.com/webhook/decision-memory",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "agent",
+                "value": "Content Producer"
+              },
+              {
+                "name": "signature",
+                "value": "={{ $(\"Pick Next Piece (anchor-stuck priority)\").first().json.pick.title || \"\" }}"
+              },
+              {
+                "name": "days",
+                "value": "30"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            },
+            "timeout": 30000
+          }
+        },
+        "id": "mem-check",
+        "name": "Check Decision Memory",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          768,
+          304
+        ],
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 1
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "a",
+                "leftValue": "={{ $json.should_skip }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "mem-gate",
+        "name": "Memory Says Skip?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          976,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a",
+                "name": "status",
+                "value": "={{ \"Skipped per Decision Memory: \" + ($json.skip_reason || \"similar recent decision\") }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "mem-skip",
+        "name": "Log Memory Skip",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1008,
+          512
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "fire-content-producer",
+          "options": {}
+        },
+        "id": "manual-fire-d7YwC4",
+        "name": "Manual Fire (Webhook)",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          208,
+          112
+        ],
+        "webhookId": "webhook-d7YwC4ezub4g1LrI"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://www.liftnow.com/wp-json/wp/v2/posts",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({title: ($json.pick.title || \"Untitled Liftnow draft\") + \" (\" + new Date().toISOString().slice(0,16) + \")\", slug: (($json.pick.title || \"untitled\").toLowerCase().replace(/[^a-z0-9]+/g, \"-\").replace(/^-|-$/g, \"\").slice(0,40) + \"-\" + Date.now()), content: $json.draft || \"\", status: \"private\", excerpt: ($json.pick.title || \"\").slice(0,160)}) }}",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true
+              }
+            },
+            "timeout": 30000
+          }
+        },
+        "id": "auto-publish-draft",
+        "name": "Auto-Publish Private Draft",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1552,
+          304
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "AZ9RGlvZiPcT3wDJ",
+            "name": "WordPress REST API (liftnow-agent)"
+          }
+        },
+        "onError": "continueRegularOutput",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "url": "https://www.liftnow.com/wp-json/wp/v2/posts",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "per_page",
+                "value": "100"
+              },
+              {
+                "name": "_fields",
+                "value": "id,slug,link,title,date"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            },
+            "timeout": 60000
+          }
+        },
+        "id": "fetch-posts",
+        "name": "Fetch Published Posts",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          432,
+          400
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "AZ9RGlvZiPcT3wDJ",
+            "name": "WordPress REST API (liftnow-agent)"
+          }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 1
+            },
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "a",
+                "leftValue": "={{ $json.passed }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "self-reject-gate-if",
+        "name": "Self-Reject Passed?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          1488,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "self-reject-skip-log",
+        "name": "Self-Reject Skip Log",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3,
+        "position": [
+          1488,
+          480
+        ]
+      },
+      {
+        "id": "fetch-refresh-queue",
+        "name": "Fetch Refresh Queue",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          420,
+          100
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({filterGroups:[{filters:[{propertyName:\"hs_pipeline\",operator:\"EQ\",value:\"0\"},{propertyName:\"hs_pipeline_stage\",operator:\"EQ\",value:\"3\"},{propertyName:\"agent_name\",operator:\"EQ\",value:\"Content Decay Detector\"},{propertyName:\"hs_lastmodifieddate\",operator:\"GTE\",value:String($now.minus({days:14}).toMillis())}]}],properties:[\"id\",\"subject\",\"outcome_notes\",\"recommendation_detail\"],limit:5}) }}",
+          "options": {
+            "timeout": 30000,
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Tue 9AM ET": {
+        "main": [
+          [
+            {
+              "node": "Fetch Published Pages",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "GSC Anchor Performance",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Fetch Refresh Queue",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Published Pages": {
+        "main": [
+          [
+            {
+              "node": "Pick Next Piece (anchor-stuck priority)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GSC Anchor Performance": {
+        "main": [
+          [
+            {
+              "node": "Pick Next Piece (anchor-stuck priority)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pick Next Piece (anchor-stuck priority)": {
+        "main": [
+          [
+            {
+              "node": "KB Strategic Frame",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "KB Strategic Frame": {
+        "main": [
+          [
+            {
+              "node": "Check Decision Memory",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Draft + LinkedIn": {
+        "main": [
+          [
+            {
+              "node": "Self-Reject Gate (12 checks)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Self-Reject Gate (12 checks)": {
+        "main": [
+          [
+            {
+              "node": "Self-Reject Passed?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Decision Memory": {
+        "main": [
+          [
+            {
+              "node": "Memory Says Skip?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Memory Says Skip?": {
+        "main": [
+          [
+            {
+              "node": "Log Memory Skip",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Generate Draft + LinkedIn",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual Fire (Webhook)": {
+        "main": [
+          [
+            {
+              "node": "Fetch Published Pages",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "GSC Anchor Performance",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Fetch Published Posts",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Fetch Refresh Queue",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Auto-Publish Private Draft": {
+        "main": [
+          [
+            {
+              "node": "Create Content Ticket",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Published Posts": {
+        "main": [
+          [
+            {
+              "node": "Pick Next Piece (anchor-stuck priority)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Self-Reject Passed?": {
+        "main": [
+          [
+            {
+              "node": "Create Content Ticket",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Self-Reject Skip Log",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Refresh Queue": {
+        "main": [
+          [
+            {
+              "node": "Pick Next Piece (anchor-stuck priority)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-27T22:32:44.151Z",
+        "id": 1009,
+        "workflowId": "d7YwC4ezub4g1LrI",
+        "versionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
+        "event": "deactivated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      },
+      {
+        "createdAt": "2026-05-27T22:32:44.172Z",
+        "id": 1010,
+        "workflowId": "d7YwC4ezub4g1LrI",
+        "versionId": "2f62275f-d2f9-4146-a6b5-54f909de4e3c",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}

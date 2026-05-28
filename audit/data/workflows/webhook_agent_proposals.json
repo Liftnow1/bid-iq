@@ -1,0 +1,349 @@
+{
+  "updatedAt": "2026-05-22T20:01:18.261Z",
+  "createdAt": "2026-05-22T20:01:18.261Z",
+  "id": "VY38KRldIFDdvKJj",
+  "name": "Webhook: Agent Proposals (read)",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "wh",
+      "name": "GET agent-proposals",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "agent-proposals",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "webhookId": "a328ad50-8e52-4594-a238-72efd166f453"
+    },
+    {
+      "id": "route",
+      "name": "Build HubSpot Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const view=($input.first().json.query?.view||\"pending\").toLowerCase();let stages;let recencyDays=7;if(view===\"done\"){stages=[\"2\",\"3\",\"4\"];}else if(view===\"all\"){stages=[\"1\",\"2\",\"3\",\"4\"];}else{stages=[\"1\"];}const filters=[{propertyName:\"hs_pipeline\",operator:\"EQ\",value:\"0\"},{propertyName:\"hs_pipeline_stage\",operator:\"IN\",values:stages}];if(view===\"done\"){const cutoff=Date.now()-(recencyDays*86400000);filters.push({propertyName:\"hs_lastmodifieddate\",operator:\"GTE\",value:String(cutoff)});}return [{json:{filterGroups:[{filters}],properties:[\"subject\",\"content\",\"hs_pipeline_stage\",\"hs_ticket_priority\",\"agent_name\",\"recommendation_type\",\"recommendation_detail\",\"outcome_notes\",\"createdate\",\"hs_lastmodifieddate\"],sorts:[{propertyName:\"createdate\",direction:\"DESCENDING\"}],limit:50,view}}];"
+      }
+    },
+    {
+      "id": "hs",
+      "name": "Search HubSpot Tickets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({filterGroups: $json.filterGroups, properties: $json.properties, sorts: $json.sorts, limit: $json.limit}) }}"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "S7YZNtmkHgtF72gN",
+          "name": "HubSpot Private App"
+        }
+      }
+    },
+    {
+      "id": "shape",
+      "name": "Shape Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const items=$input.first().json.results||[];const out=items.map(t=>{const p=t.properties||{};const ageMs=Date.now()-new Date(p.createdate).getTime();const ageHours=Math.round(ageMs/3600000);return{ticketId:t.id,agent:p.agent_name||\"(unknown agent)\",subject:p.subject||\"(no subject)\",content:p.content||\"\",recommendationType:p.recommendation_type||null,recommendationDetail:p.recommendation_detail||null,outcomeNotes:p.outcome_notes||null,priority:p.hs_ticket_priority||\"MEDIUM\",stage:p.hs_pipeline_stage,createdAt:p.createdate,ageHours};});return [{json:{count:out.length,tickets:out}}];"
+      }
+    },
+    {
+      "id": "resp",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GET agent-proposals": {
+      "main": [
+        [
+          {
+            "node": "Build HubSpot Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build HubSpot Query": {
+      "main": [
+        [
+          {
+            "node": "Search HubSpot Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search HubSpot Tickets": {
+      "main": [
+        [
+          {
+            "node": "Shape Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape Response": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "d38a4e67-d6b2-438b-8730-a732f611ab8b",
+  "activeVersionId": "d38a4e67-d6b2-438b-8730-a732f611ab8b",
+  "versionCounter": 127,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-22T20:01:18.261Z",
+      "createdAt": "2026-05-22T20:01:18.261Z",
+      "role": "workflow:owner",
+      "workflowId": "VY38KRldIFDdvKJj",
+      "projectId": "9rLUju41pxF01khS",
+      "project": {
+        "updatedAt": "2026-05-18T14:07:07.992Z",
+        "createdAt": "2026-05-18T13:55:16.416Z",
+        "id": "9rLUju41pxF01khS",
+        "name": "Paul Stern <paulj@liftnow.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-22T20:01:18.261Z",
+    "createdAt": "2026-05-22T20:01:18.261Z",
+    "versionId": "d38a4e67-d6b2-438b-8730-a732f611ab8b",
+    "workflowId": "VY38KRldIFDdvKJj",
+    "nodes": [
+      {
+        "id": "wh",
+        "name": "GET agent-proposals",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "agent-proposals",
+          "responseMode": "responseNode",
+          "options": {
+            "allowedOrigins": "*"
+          }
+        },
+        "webhookId": "a328ad50-8e52-4594-a238-72efd166f453"
+      },
+      {
+        "id": "route",
+        "name": "Build HubSpot Query",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          480,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const view=($input.first().json.query?.view||\"pending\").toLowerCase();let stages;let recencyDays=7;if(view===\"done\"){stages=[\"2\",\"3\",\"4\"];}else if(view===\"all\"){stages=[\"1\",\"2\",\"3\",\"4\"];}else{stages=[\"1\"];}const filters=[{propertyName:\"hs_pipeline\",operator:\"EQ\",value:\"0\"},{propertyName:\"hs_pipeline_stage\",operator:\"IN\",values:stages}];if(view===\"done\"){const cutoff=Date.now()-(recencyDays*86400000);filters.push({propertyName:\"hs_lastmodifieddate\",operator:\"GTE\",value:String(cutoff)});}return [{json:{filterGroups:[{filters}],properties:[\"subject\",\"content\",\"hs_pipeline_stage\",\"hs_ticket_priority\",\"agent_name\",\"recommendation_type\",\"recommendation_detail\",\"outcome_notes\",\"createdate\",\"hs_lastmodifieddate\"],sorts:[{propertyName:\"createdate\",direction:\"DESCENDING\"}],limit:50,view}}];"
+        }
+      },
+      {
+        "id": "hs",
+        "name": "Search HubSpot Tickets",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          720,
+          300
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.hubapi.com/crm/v3/objects/tickets/search",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({filterGroups: $json.filterGroups, properties: $json.properties, sorts: $json.sorts, limit: $json.limit}) }}"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "S7YZNtmkHgtF72gN",
+            "name": "HubSpot Private App"
+          }
+        }
+      },
+      {
+        "id": "shape",
+        "name": "Shape Response",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          960,
+          300
+        ],
+        "parameters": {
+          "jsCode": "const items=$input.first().json.results||[];const out=items.map(t=>{const p=t.properties||{};const ageMs=Date.now()-new Date(p.createdate).getTime();const ageHours=Math.round(ageMs/3600000);return{ticketId:t.id,agent:p.agent_name||\"(unknown agent)\",subject:p.subject||\"(no subject)\",content:p.content||\"\",recommendationType:p.recommendation_type||null,recommendationDetail:p.recommendation_detail||null,outcomeNotes:p.outcome_notes||null,priority:p.hs_ticket_priority||\"MEDIUM\",stage:p.hs_pipeline_stage,createdAt:p.createdate,ageHours};});return [{json:{count:out.length,tickets:out}}];"
+        }
+      },
+      {
+        "id": "resp",
+        "name": "Respond",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1200,
+          300
+        ],
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={{ JSON.stringify($json) }}",
+          "options": {
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "connections": {
+      "GET agent-proposals": {
+        "main": [
+          [
+            {
+              "node": "Build HubSpot Query",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build HubSpot Query": {
+        "main": [
+          [
+            {
+              "node": "Search HubSpot Tickets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Search HubSpot Tickets": {
+        "main": [
+          [
+            {
+              "node": "Shape Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Shape Response": {
+        "main": [
+          [
+            {
+              "node": "Respond",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Paul Stern",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-22T20:01:33.806Z",
+        "id": 28,
+        "workflowId": "VY38KRldIFDdvKJj",
+        "versionId": "d38a4e67-d6b2-438b-8730-a732f611ab8b",
+        "event": "activated",
+        "userId": "6b7e4b77-9338-4a3d-8120-8671eb2de6f3"
+      }
+    ]
+  }
+}
