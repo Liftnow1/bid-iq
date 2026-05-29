@@ -628,3 +628,27 @@ Re-screenshotted the *current* file (didn't trust the prior state) and caught tw
 - Width-probe readout (screenshotted): `vw=482 main=482 card=454 preview=450` → no overflow. Methodology bug, not layout bug.
 - Faithful renders captured at canvas==viewport: **mobile 482px** = clean 2-line clamp, tip text no longer clipped, scannable; **desktop 1280px Now** (collapsed) unchanged-good; **desktop expanded** (via throwaway `_exp.html`, since `--screenshot` can't click — created, shot, then **deleted**; confirmed `public/approvals/` = only `index.html`) = WHY prose clean with **no raw `--- TITLE ---`/`BODY:` markers** (correctly tucked in the draft `<details>`), IF-APPROVE/REJECT boxes intact.
 - Only CSS touched this pass (`.card-preview`) + build marker already at `dash-rebuild-2026-05-28-v3-collapse`. No JS, no behavior change.
+
+---
+
+## CHECKPOINT (2026-05-28) — Bright / animated / "grandma-proof" redesign (build `dash-bright-2026-05-28-v4`)
+Paul's ask: *"make sure it's really good, bright color, easy to follow, great animations etc. I want it to be so easy that i could give it to my grandma who's never done tech before and SHE could run my SEO/SEM team."* The v3 was honest + scannable but tonally muted/dense (GitHub-grey). This pass is a **tonal redesign**, not a data change — every proven data contract was preserved verbatim.
+
+### What changed (presentation only)
+- **Palette rebuilt bright:** new `:root` (soft blue gradient body `#e7f0ff→#f3f7fc`, white cards, `--accent #2f6bff`, green/amber/red semantic sets with soft+ink variants), bigger radii (18px), layered shadows.
+- **Plain-language copy throughout.** Tabs relabel **📋 Needs you / 🤖 Team / 📈 Results** (data-view values `now/team/trends` UNCHANGED). Now-tab H2 "What your team needs from you" + instruction lead ("…choose Approve to let it happen or Reject to skip it"). Group labels "🔥 Look at these first / 👀 Worth a look / 🌱 Whenever you have a moment". Empty state = celebratory "You're all caught up!". Team agent rows get human one-liners ("Scans liftnow.com pages for ranking slippage…"); Owl's honest fallback "No tickets filed yet — but it fired 14× in the last 24h, so it's running." Results captions in plain English.
+- **Big obvious buttons.** Green gradient **✓ Approve** (flex-grow, max 240px, dominant), red **✕ Reject**, smaller secondary "Approve with a note" / "Remind me later". Friendlier note placeholder.
+- **Animations layer (10 keyframes):** `cardIn` staggered entrance (delay `min(i*55,330)ms`), `countUp` ease-out number roll on hero + stat tiles, `flyout`+`approveFlash` on decide, `successPop` ✓ + `sparkFly` 16-spark confetti **burst on approve**, pulsing running-dot `beat`, tab-switch `fadeUp`. **All gated by `prefers-reduced-motion`** (`reduceMotion()` no-ops countUp/celebrate).
+- Bright hero on Now ("14 things waiting for you" + importance pills); Results stat tiles get colored left accent bars.
+
+### Data layer UNTOUCHED (verified by reading the code, not assuming)
+`decide()` network call preserved **verbatim**: POST `${API_BASE}/process-decision`, headers `x-agent-secret: AGENT_SECRET`, body `{ticketId, decision, comment, deferDays:3, secret}`, 15s AbortController. Also unchanged: humanizeSubject/decodeEntities, splitDraft/askPreview, fetchTickets settle-wrapped Promise.all, charts, j/k/a/d/r/c keyboard nav, static-mode (`?static=1`), kill-switch. Card template still exactly 1 occurrence of `class="card collapsed`.
+
+### RECEIPTS (Test-Before-Done + Receipt Law)
+- **Screenshot pipeline** (headless Chrome `--screenshot` + `?static=1`, virtual-time-budget=18000 so entrance/count-up complete): captured `v4_now.png` (1000×1650), `v4_team.png` (1000×2000), `v4_trends.png` (1000×1750), `v4_mobile.png` (482px faithful).
+- **Viewed all four + 1:1 crops** (`v4_now_card`, `v4_team_top`, `v4_team_owl`): Now = bright headline + lead + "14 waiting" hero + 🔥 grouping + big green Approve; Team = color-coded stat tiles (runs/need-you/auto-shipped/errors) + proof links (HubSpot + live page) on every card; Results = 4 accent-bar tiles + 3 Chart.js charts w/ plain captions; mobile = clean stacked, collapsed cards hide actions. **Liftnow** wordmark renders lowercase-n highlighted. No defects.
+- **Celebration is interaction-only** (not in static `--screenshot` captures) → verified by **reading the code path**: `decide()` approve branch calls `celebrate(card)` (appends `.success-pop` ✓ + `burst()` 16 sparks with random `--dx/--dy/--dr`) → `.approving` flash → `.fading` flyout (720ms) → `finish()` removes card, filters STATE.pending, renderHeader, advanceFocus, empty→renderNow. Error path restores opacity + re-enables controls. All keyframes + helpers (`reduceMotion/countUp/celebrate/burst`) confirmed present + syntactically intact.
+- Page renders without JS crash (all 4 PNGs non-trivial 124–213KB; a syntax error would blank the cards/charts).
+- Build marker flipped `…v3-collapse` → **`dash-bright-2026-05-28-v4`**; title → "Liftnow Agents · Your Marketing Team". (Live-deploy verification recorded on push below.)
+
+### State unchanged: no agent re-activated, no cron touched, no n8n DELETE API called, no creds printed (AGENT_SECRET reused from already-committed file). Surgical commit = `public/approvals/index.html` + this journal only.
