@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Liftnow Agents · Your Marketing Team</title>
-<meta name="build" content="dash-bright-2026-05-28-v4">
+<meta name="build" content="dash-bright-2026-05-28-v5-crisp">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root{
@@ -35,8 +35,9 @@
   button{font-family:inherit; cursor:pointer}
 
   /* ---------- Animations ---------- */
-  @keyframes cardIn{from{opacity:0; transform:translateY(16px) scale(.985)} to{opacity:1; transform:none}}
-  @keyframes fadeUp{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+  @keyframes cardIn{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+  @keyframes fadeUp{from{opacity:0} to{opacity:1}}
+  @keyframes fadeIn{from{opacity:0} to{opacity:1}}
   @keyframes popIn{0%{opacity:0; transform:scale(.4)} 60%{opacity:1; transform:scale(1.12)} 100%{transform:scale(1)}}
   @keyframes floaty{0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)}}
   @keyframes ring{0%{box-shadow:0 0 0 0 rgba(34,197,94,.45)} 70%{box-shadow:0 0 0 9px rgba(34,197,94,0)} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
@@ -309,7 +310,7 @@
   .stat-tile{
     background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius);
     padding:18px; box-shadow:var(--shadow); position:relative; overflow:hidden;
-    transition:box-shadow .2s, transform .2s; animation:cardIn .4s cubic-bezier(.2,.7,.3,1) both;
+    transition:box-shadow .2s, transform .2s; animation:fadeIn .4s ease both;  /* opacity-only: transform-scale entrance blurs canvas/text on fractional-DPR (125/150%) displays */
   }
   .stat-tile::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--accent)}
   .stat-tile.t-ok::before{background:var(--ok-bright)} .stat-tile.t-warn::before{background:var(--warn)} .stat-tile.t-purple::before{background:#8b5cf6}
@@ -319,7 +320,7 @@
   .chart-card{
     background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius);
     padding:18px 20px 20px; box-shadow:var(--shadow); margin-bottom:18px;
-    animation:cardIn .4s cubic-bezier(.2,.7,.3,1) both;
+    animation:fadeIn .45s ease both;  /* opacity-only so the chart <canvas> never gets composited+scaled (blur fix) */
   }
   .chart-card h3{font-size:16px; margin:0 0 4px; font-weight:800; letter-spacing:-.01em}
   .chart-card .sub{font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.5}
@@ -1168,7 +1169,7 @@ function drawHoursChart(){
   charts.push(new Chart(ctx, {
     type:'bar',
     data:{ labels, datasets:[{ data:byHour, backgroundColor:'#0366d6', borderRadius:4, maxBarThickness:20 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{title:i=>`${i[0].label}:00 UTC`, label:i=>`${i.raw} heartbeats`}}},
+    options:{ responsive:true, maintainAspectRatio:false, devicePixelRatio:Math.max(window.devicePixelRatio||1,2), plugins:{legend:{display:false}, tooltip:{callbacks:{title:i=>`${i[0].label}:00 UTC`, label:i=>`${i.raw} heartbeats`}}},
       scales:{ x:{grid:{display:false}, ticks:{maxRotation:0, autoSkip:true, maxTicksLimit:12}}, y:{beginAtZero:true, ticks:{precision:0}, grid:{color:'#eef1f4'}} } }
   }));
 }
@@ -1181,7 +1182,7 @@ function drawStageChart(all){
   charts.push(new Chart(ctx, {
     type:'doughnut',
     data:{ labels: rows.map(r=>r[1]), datasets:[{ data: rows.map(r=>sc[r[0]]), backgroundColor: rows.map(r=>r[2]), borderWidth:2, borderColor:'#fff' }] },
-    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{position:'right', labels:{boxWidth:12, padding:12, font:{size:12}}}, tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw}`}} } }
+    options:{ responsive:true, maintainAspectRatio:false, devicePixelRatio:Math.max(window.devicePixelRatio||1,2), cutout:'62%', plugins:{ legend:{position:'right', labels:{boxWidth:12, padding:12, font:{size:12}}}, tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw}`}} } }
   }));
 }
 
@@ -1192,7 +1193,7 @@ function drawAgentsChart(all){
     type:'bar',
     data:{ labels: counts.map(c => `${c.a.emoji} ${c.a.name}`),
       datasets:[{ data: counts.map(c=>c.n), backgroundColor: counts.map(c=>c.a.color), borderRadius:5, maxBarThickness:26 }] },
-    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:i=>`${i.raw} tickets filed`}}},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, devicePixelRatio:Math.max(window.devicePixelRatio||1,2), plugins:{legend:{display:false}, tooltip:{callbacks:{label:i=>`${i.raw} tickets filed`}}},
       scales:{ x:{beginAtZero:true, ticks:{precision:0}, grid:{color:'#eef1f4'}}, y:{grid:{display:false}} } }
   }));
 }
