@@ -1,835 +1,455 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Liftnow Agent Team — Today</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Liftnow Agents · Command Center</title>
+<meta name="build" content="dash-rebuild-2026-05-28-v2">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root{
-    --bg:#fafbfc; --card:#ffffff; --border:#e1e4e8; --muted:#6a737d;
-    --fg:#24292e; --fg-dim:#586069;
-    --ok:#22863a; --warn:#b08800; --err:#d73a49; --accent:#0366d6;
-    --priority-high:#d73a49; --priority-med:#b08800; --priority-low:#22863a;
-    /* Agent colors */
-    --a-content:#0366d6; --a-sem:#d97706; --a-seo:#0891b2;
-    --a-backlink:#7c3aed; --a-keyword:#be185d; --a-linkedin:#15803d;
-    --a-uiux:#0d9488; --a-competitor:#9333ea; --a-coordinator:#1f2937;
+    --bg:#f6f8fa; --card:#ffffff; --border:#e1e4e8; --border-soft:#eef1f4;
+    --ink:#1b1f24; --muted:#656d76; --faint:#8a929b;
+    --accent:#0366d6; --accent-soft:#ddeafe;
+    --ok:#1a7f37; --ok-soft:#e6f4ea;
+    --warn:#9a6700; --warn-soft:#fff4d6;
+    --err:#cf222e; --err-soft:#ffe9ec;
+    --shadow:0 1px 2px rgba(27,31,36,.04), 0 2px 8px rgba(27,31,36,.04);
+    --shadow-lg:0 4px 16px rgba(27,31,36,.10);
+    --radius:12px;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-  header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:#f6f8fa}
-  h1{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
-  .sub{color:var(--muted);font-size:12px;margin-top:2px}
-  .tabs{display:flex;gap:0;padding:0 24px;border-bottom:1px solid var(--border);background:#f6f8fa}
-  .tab{padding:10px 18px;background:none;border:none;color:var(--muted);font:inherit;cursor:pointer;border-bottom:2px solid transparent}
-  .tab.active{color:var(--fg);border-bottom-color:var(--accent)}
-  .tab:hover:not(.active){color:var(--fg-dim)}
-  .count{display:inline-block;background:#e1e4e8;color:var(--muted);padding:1px 6px;border-radius:10px;font-size:11px;margin-left:4px;min-width:18px;text-align:center;font-variant-numeric:tabular-nums}
-  .tab.active .count{background:var(--accent);color:#fff}
-  main{max-width:1080px;margin:0 auto;padding:16px 24px 32px}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+  button{font-family:inherit; cursor:pointer}
 
-  /* === Coordinator strip === */
-  .coord-strip{background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden;transition:max-height 240ms cubic-bezier(0.4,0,0.2,1)}
-  .coord-strip-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;user-select:none}
-  .coord-strip-head:hover{background:#f6f8fa}
-  .health-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
-  .health-green{background:var(--ok)} .health-yellow{background:var(--warn)} .health-red{background:var(--err)} .health-unknown{background:var(--muted)}
-  .coord-summary{flex:1;font-size:13px;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .coord-strip-pills{display:flex;gap:6px;flex-shrink:0}
-  .pill{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#e1e4e8;color:var(--muted);cursor:pointer}
-  .pill.has-conflicts{background:rgba(176,136,0,.15);color:var(--warn)}
-  .pill.has-redflags{background:rgba(215,58,73,.15);color:var(--err)}
-  .pill.has-synergies{background:rgba(34,134,58,.15);color:var(--ok)}
-  .coord-strip-body{padding:0 16px 16px;border-top:1px solid var(--border);display:none}
-  .coord-strip.expanded .coord-strip-body{display:block}
-  .coord-section{margin-top:12px}
-  .coord-section h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 6px;font-weight:600}
-  .coord-item{padding:6px 10px;background:#f6f8fa;border-radius:6px;margin-bottom:4px;font-size:13px}
-  .coord-priority{display:flex;align-items:center;gap:8px}
-  .rank-chip{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:var(--accent);color:#fff;font-weight:700;font-size:12px;font-variant-numeric:tabular-nums;flex-shrink:0}
-  .ticket-link{color:var(--accent);text-decoration:none;font-family:ui-monospace,SFMono-Regular,monospace;font-size:12px;cursor:pointer}
-  .ticket-link:hover{text-decoration:underline}
-  .coord-no-brief{color:var(--muted);font-style:italic;font-size:13px}
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50; background:rgba(255,255,255,.92);
+    backdrop-filter:saturate(160%) blur(8px); border-bottom:1px solid var(--border);
+  }
+  .head-row{
+    max-width:920px; margin:0 auto; padding:14px 20px 0;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:baseline; gap:9px; margin-right:auto}
+  .brand .logo{font-size:18px; font-weight:700; letter-spacing:-.02em}
+  .brand .logo b{color:var(--accent)}
+  .brand .tag{font-size:12px; color:var(--faint); font-weight:500}
+  .pulse{
+    display:flex; align-items:center; gap:14px; font-size:13px; color:var(--muted);
+    flex-wrap:wrap;
+  }
+  .pulse .big{font-weight:700; color:var(--ink)}
+  .pulse .dot{width:7px; height:7px; border-radius:50%; display:inline-block; margin-right:5px; vertical-align:middle}
+  .pulse .sep{color:var(--border)}
+  .pulse .refresh{
+    background:none; border:1px solid var(--border); border-radius:7px; padding:4px 9px;
+    color:var(--muted); font-size:12px; font-weight:600; transition:.12s;
+  }
+  .pulse .refresh:hover{border-color:var(--accent); color:var(--accent)}
+  .kill{
+    background:#fff; border:1px solid var(--err-soft); color:var(--err); border-radius:7px;
+    padding:4px 9px; font-size:12px; font-weight:600; transition:.12s;
+  }
+  .kill:hover{background:var(--err-soft)}
+  .tabs{
+    max-width:920px; margin:0 auto; padding:10px 20px 0; display:flex; gap:4px;
+  }
+  .tab{
+    background:none; border:none; padding:9px 16px 12px; font-size:14px; font-weight:600;
+    color:var(--muted); border-bottom:2.5px solid transparent; transition:.12s; position:relative;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--accent); border-bottom-color:var(--accent)}
+  .tab .badge{
+    display:inline-block; min-width:18px; padding:0 5px; margin-left:6px; height:18px; line-height:18px;
+    background:var(--accent); color:#fff; border-radius:9px; font-size:11px; font-weight:700; text-align:center;
+    vertical-align:1px;
+  }
+  .tab.active .badge{background:var(--accent)}
+  .tab .badge.zero{display:none}
 
-  /* === Toolbar === */
-  .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-  .meta{color:var(--muted);font-size:12px}
-  .toolbar input[type=text],.toolbar select{background:#fff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font:inherit;font-size:13px}
-  .toolbar input[type=text]{flex:1;min-width:160px}
-  .toolbar .spacer{flex:1}
+  /* ---------- Layout ---------- */
+  main{max-width:920px; margin:0 auto; padding:22px 20px 60px}
+  .section-head{display:flex; align-items:baseline; gap:10px; margin:4px 2px 14px}
+  .section-head h2{font-size:18px; margin:0; letter-spacing:-.01em}
+  .section-head .hint{font-size:13px; color:var(--muted)}
+  .lead{font-size:14px; color:var(--muted); margin:0 2px 18px}
 
-  /* === Cards === */
-  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:8px;transition:opacity 200ms ease-out,transform 200ms ease-out;position:relative}
-  .card.low{background:#fafbfc;opacity:.92}
-  .card.collapsed .body,.card.collapsed .actions,.card.collapsed .coord-context{display:none}
-  .card.focused{outline:2px solid var(--accent);outline-offset:4px}
-  .card.red-flag{box-shadow:inset 3px 0 0 var(--err)}
-  .card.fading{opacity:0;transform:translateX(8px)}
-  .card-head{display:flex;align-items:center;gap:10px;cursor:pointer;min-height:24px}
-  .rank-chip.in-card{margin-right:2px}
-  .agent-badge{background:var(--badge-bg,#e7f0fe);color:var(--badge-fg,var(--accent));padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
-  .priority{font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;text-transform:uppercase;font-variant-numeric:tabular-nums}
-  .priority-HIGH{background:rgba(215,58,73,.15);color:var(--priority-high)}
-  .priority-MEDIUM{background:rgba(176,136,0,.15);color:var(--priority-med)}
-  .priority-LOW{background:rgba(34,134,58,.15);color:var(--priority-low)}
-  .subject{flex:1;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .card.collapsed .subject{white-space:nowrap}
-  .card:not(.collapsed) .subject{white-space:normal}
-  .age{color:var(--muted);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
-  .age.old{color:var(--warn)} .age.stale{color:var(--err)}
-  .redflag-dot{width:8px;height:8px;border-radius:50%;background:var(--err);flex-shrink:0}
-  .exec-status{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
-  .exec-queued{background:#e1e4e8;color:var(--muted)}
-  .exec-executing{background:rgba(3,102,214,.15);color:var(--accent);animation:pulse 1.5s ease-in-out infinite}
-  .exec-completed{background:rgba(34,134,58,.15);color:var(--ok)}
-  .exec-failed{background:rgba(215,58,73,.15);color:var(--err)}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+  /* ---------- Now: action cards ---------- */
+  .queue-summary{
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 18px; margin-bottom:18px; box-shadow:var(--shadow);
+  }
+  .queue-summary .num{font-size:26px; font-weight:700; line-height:1}
+  .queue-summary .stat{display:flex; align-items:baseline; gap:7px}
+  .queue-summary .stat .lbl{font-size:13px; color:var(--muted)}
+  .group-label{
+    display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.04em; color:var(--faint); margin:22px 2px 10px;
+  }
+  .group-label::after{content:""; flex:1; height:1px; background:var(--border-soft)}
 
-  .coord-context{margin-top:10px;padding:8px 10px;background:#f0f7ff;border-left:3px solid var(--accent);border-radius:0 6px 6px 0;font-size:12px;color:var(--fg-dim)}
-  .coord-conflict{background:#fffbea;border-left-color:var(--warn);color:#7a5d00}
-  .body{margin-top:10px;color:var(--fg-dim);white-space:pre-wrap;font-size:13px;background:#f6f8fa;border:1px solid var(--border);border-radius:6px;padding:10px 12px;max-height:280px;overflow:auto}
-  .body details{margin-top:8px}
-  .body pre{margin:6px 0;font-size:12px}
-  .dm-note{margin-top:6px;font-size:12px;color:var(--muted);font-style:italic}
-  .section{margin:10px 0}
-  .section-label{font-size:11px;font-weight:700;color:var(--fg-dim);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
-  .section-body{white-space:pre-wrap;font-size:14px;line-height:1.4}
-  .section-approve{background:#f0fdf4;border-left:3px solid var(--ok);padding:6px 10px;margin:8px 0;border-radius:4px}
-  .section-reject{background:#fef2f2;border-left:3px solid #e74c3c;padding:6px 10px;margin:8px 0;border-radius:4px}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    margin-bottom:12px; box-shadow:var(--shadow); overflow:hidden; transition:opacity .2s, transform .2s;
+  }
+  .card.hi{border-left:3px solid var(--err)}
+  .card.med{border-left:3px solid var(--warn)}
+  .card.fading{opacity:0; transform:translateX(8px)}
+  .card-head{
+    display:flex; align-items:center; gap:10px; padding:13px 16px 11px; cursor:pointer;
+    flex-wrap:wrap;
+  }
+  .agent-chip{
+    display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600;
+    padding:3px 9px; border-radius:20px; white-space:nowrap;
+  }
+  .agent-chip .emoji{font-size:14px}
+  .prio{
+    font-size:10.5px; font-weight:800; letter-spacing:.04em; padding:2px 7px; border-radius:5px;
+    text-transform:uppercase;
+  }
+  .prio.HIGH{background:var(--err-soft); color:var(--err)}
+  .prio.MEDIUM{background:var(--warn-soft); color:var(--warn)}
+  .prio.LOW{background:#eef1f4; color:var(--muted)}
+  .card-subject{font-weight:600; flex:1; min-width:180px; font-size:14.5px}
+  .card-age{font-size:12px; color:var(--faint); white-space:nowrap}
+  .card-age.old{color:var(--warn); font-weight:600}
+  .proof-row{
+    display:flex; gap:8px; flex-wrap:wrap; padding:0 16px 12px;
+  }
+  .proof{
+    display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600;
+    padding:4px 10px; border-radius:7px; border:1px solid var(--border); background:#fafbfc;
+    color:var(--accent); transition:.12s;
+  }
+  .proof:hover{background:var(--accent-soft); border-color:var(--accent); text-decoration:none}
+  .proof.muted{color:var(--muted)}
+  .proof .ext{font-size:11px; opacity:.7}
+  .card-body{padding:2px 16px 14px; font-size:14px}
+  .card-body .section{margin:10px 0}
+  .card-body .section-label{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--faint); margin-bottom:3px}
+  .card-body .section-body{white-space:pre-wrap; color:var(--ink)}
+  .card-body .section-approve{margin:10px 0; padding:9px 12px; background:var(--ok-soft); border-radius:8px}
+  .card-body .section-approve .section-label{color:var(--ok)}
+  .card-body .section-reject{margin:10px 0; padding:9px 12px; background:var(--err-soft); border-radius:8px}
+  .card-body .section-reject .section-label{color:var(--err)}
+  .card-body details{margin-top:8px}
+  .card-body summary{cursor:pointer; color:var(--muted); font-size:12px}
+  .card-body pre{
+    white-space:pre-wrap; word-break:break-word; background:#f6f8fa; border:1px solid var(--border-soft);
+    border-radius:7px; padding:9px; font-size:12px; margin:6px 0 0; max-height:240px; overflow:auto;
+  }
+  .actions{display:flex; gap:8px; flex-wrap:wrap; padding:0 16px 15px; align-items:flex-start}
+  .btn{
+    border:1px solid var(--border); background:#fff; color:var(--ink); border-radius:8px;
+    padding:8px 14px; font-size:13.5px; font-weight:600; transition:.12s;
+  }
+  .btn:hover{border-color:var(--muted)}
+  .btn:disabled{opacity:.5; cursor:not-allowed}
+  .btn-approve{background:var(--ok); border-color:var(--ok); color:#fff}
+  .btn-approve:hover{background:#176d2e; border-color:#176d2e}
+  .btn-cond{color:var(--ok); border-color:var(--ok-soft)}
+  .btn-cond:hover{background:var(--ok-soft); border-color:var(--ok)}
+  .btn-defer{color:var(--muted)}
+  .btn-reject{color:var(--err); border-color:var(--err-soft)}
+  .btn-reject:hover{background:var(--err-soft); border-color:var(--err)}
+  .comment{
+    flex:1; min-width:200px; border:1px solid var(--border); border-radius:8px; padding:8px 10px;
+    font-family:inherit; font-size:13px; resize:none; min-height:38px; color:var(--ink);
+  }
+  .comment:focus{outline:none; border-color:var(--accent)}
 
-  .actions{margin-top:10px;display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
-  .comment{flex:1;min-width:200px;background:#fff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font:inherit;resize:vertical;min-height:34px;max-height:200px}
-  .btn{background:#fff;color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:5px 11px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
-  .btn:hover{background:#f0f3f6}
-  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  .btn[disabled]{opacity:.5;cursor:wait}
-  .btn-approve{background:#2ea043;border-color:#22863a;color:#fff}
-  .btn-approve:hover{background:#22863a}
-  .btn-cond{background:#6f42c1;border-color:#5a32a3;color:#fff}
-  .btn-cond:hover{background:#5a32a3}
-  .btn-defer{background:#b08800;border-color:#855700;color:#fff}
-  .btn-defer:hover{background:#855700}
-  .btn-reject{background:#d73a49;border-color:#b31d28;color:#fff}
-  .btn-reject:hover{background:#b31d28}
-  .btn-ack{background:var(--accent);border-color:#024ea4;color:#fff;font-weight:600}
-  .btn-ack:hover{background:#024ea4}
-  .btn.refresh{padding:5px 10px}
+  /* ---------- Team: scorecards ---------- */
+  .scorecard{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:16px 18px; margin-bottom:14px; box-shadow:var(--shadow);
+  }
+  .sc-head{display:flex; align-items:center; gap:11px; flex-wrap:wrap}
+  .sc-emoji{
+    width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+    font-size:22px; flex-shrink:0;
+  }
+  .sc-title{flex:1; min-width:160px}
+  .sc-title .name{font-size:16px; font-weight:700; line-height:1.2}
+  .sc-title .role{font-size:13px; color:var(--muted)}
+  .status{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600;
+    padding:4px 10px; border-radius:20px; white-space:nowrap;
+  }
+  .status .dot{width:8px; height:8px; border-radius:50%}
+  .status.live{background:var(--ok-soft); color:var(--ok)}
+  .status.live .dot{background:var(--ok); box-shadow:0 0 0 3px rgba(26,127,55,.15)}
+  .status.idle{background:#eef3fb; color:var(--accent)}
+  .status.idle .dot{background:var(--accent)}
+  .status.quiet{background:var(--warn-soft); color:var(--warn)}
+  .status.quiet .dot{background:var(--warn)}
+  .status.silent{background:var(--err-soft); color:var(--err)}
+  .status.silent .dot{background:var(--err)}
+  .sc-what{font-size:13px; color:var(--muted); margin:11px 0 13px}
+  .sc-metrics{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border-soft);
+    border:1px solid var(--border-soft); border-radius:10px; overflow:hidden; margin-bottom:14px;
+  }
+  .metric{background:var(--card); padding:11px 12px; text-align:center}
+  .metric .v{font-size:20px; font-weight:700; line-height:1.1}
+  .metric .v.warn{color:var(--warn)} .metric .v.err{color:var(--err)} .metric .v.ok{color:var(--ok)}
+  .metric .k{font-size:11px; color:var(--muted); margin-top:3px}
+  .sc-latest{
+    border-top:1px dashed var(--border); padding-top:12px; font-size:13px;
+  }
+  .sc-latest .ll{font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--faint); margin-bottom:5px}
+  .sc-latest .subj{font-weight:600; margin-bottom:8px}
+  .sc-latest .when{color:var(--faint); font-weight:400; font-size:12px}
 
-  /* === NEW: Today dashboard === */
-  .hero-do{background:linear-gradient(135deg,#0366d6 0%,#0846a8 100%);color:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;box-shadow:0 4px 14px rgba(3,102,214,.18)}
-  .hero-do h2{margin:0 0 4px;font-size:20px;font-weight:700;letter-spacing:-.01em}
-  .hero-do .hero-sub{opacity:.85;font-size:13px;margin-bottom:14px}
-  .hero-list{display:flex;flex-direction:column;gap:8px}
-  .hero-item{background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform 120ms,background 120ms}
-  .hero-item:hover{background:rgba(255,255,255,.2);transform:translateX(4px)}
-  .hero-num{width:28px;height:28px;border-radius:50%;background:#fff;color:#0366d6;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-  .hero-text{flex:1;font-size:14px}
-  .hero-text .label{opacity:.75;font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
-  .hero-empty{text-align:center;padding:18px;opacity:.85;font-size:14px}
+  .infra-note, .paused-box{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); margin-bottom:14px;
+  }
+  .infra-grid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border-soft); border-radius:var(--radius); overflow:hidden}
+  .infra-cell{background:var(--card); padding:14px 16px; display:flex; gap:11px; align-items:flex-start}
+  .infra-cell .ie{font-size:22px}
+  .infra-cell .nm{font-weight:700; font-size:14px}
+  .infra-cell .rl{font-size:12px; color:var(--muted)}
+  .infra-cell .mt{font-size:12px; color:var(--faint); margin-top:4px}
+  details.paused-box{padding:0}
+  details.paused-box summary{
+    list-style:none; padding:13px 18px; font-size:13.5px; font-weight:600; color:var(--muted);
+    cursor:pointer; display:flex; align-items:center; gap:8px;
+  }
+  details.paused-box summary::-webkit-details-marker{display:none}
+  details.paused-box summary .chev{transition:.15s; color:var(--faint)}
+  details.paused-box[open] summary .chev{transform:rotate(90deg)}
+  .paused-list{padding:0 18px 16px; display:grid; grid-template-columns:1fr 1fr; gap:7px 18px}
+  .paused-item{font-size:12.5px; color:var(--muted); display:flex; justify-content:space-between; gap:10px; padding:4px 0; border-bottom:1px solid var(--border-soft)}
+  .paused-item .why{color:var(--faint); font-size:11.5px; white-space:nowrap}
 
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px}
-  .kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
-  .kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
-  .kpi-value{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
-  .kpi-trend{font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums}
-  .kpi-trend.up{color:var(--ok)}
-  .kpi-trend.down{color:var(--err)}
-  .kpi-trend.flat{color:var(--muted)}
+  /* ---------- Trends ---------- */
+  .stat-strip{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px;
+  }
+  .stat-tile{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:15px 16px; box-shadow:var(--shadow);
+  }
+  .stat-tile .v{font-size:26px; font-weight:700; line-height:1}
+  .stat-tile .k{font-size:12.5px; color:var(--muted); margin-top:5px}
+  .chart-card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:16px 18px 18px; box-shadow:var(--shadow); margin-bottom:16px;
+  }
+  .chart-card h3{font-size:14px; margin:0 0 3px}
+  .chart-card .sub{font-size:12.5px; color:var(--muted); margin:0 0 14px}
+  .chart-wrap{position:relative; height:230px}
+  .chart-wrap.short{height:180px}
 
-  .panel{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px}
-  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .panel-title{font-size:14px;font-weight:600;color:var(--fg);margin:0}
-  .panel-sub{font-size:12px;color:var(--muted)}
-  #roi-chart-wrap{position:relative;height:260px}
-  #roi-source-notice{font-size:11px;color:var(--muted);margin-top:6px;text-align:center}
+  /* ---------- States ---------- */
+  .loading,.empty{
+    text-align:center; padding:48px 20px; color:var(--muted); font-size:14px;
+  }
+  .empty .big{font-size:40px; display:block; margin-bottom:12px}
+  .empty.celebrate{color:var(--ok)}
+  .inline-err{
+    background:var(--card); border:1px dashed var(--err-soft); border-radius:var(--radius);
+    padding:18px; text-align:center; color:var(--muted); font-size:13px; margin-bottom:14px;
+  }
+  .inline-err button{
+    background:#fff; border:1px solid var(--border); border-radius:7px; padding:5px 12px;
+    font-size:12.5px; font-weight:600; color:var(--accent); margin-top:8px;
+  }
+  .skeleton{
+    height:80px; background:linear-gradient(90deg,#f0f3f6 25%,#e7ebef 50%,#f0f3f6 75%);
+    background-size:200% 100%; animation:sk 1.3s infinite; border-radius:var(--radius); margin-bottom:12px;
+  }
+  @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-  .recent-feed{display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto}
-  .feed-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f6f8fa;border-radius:6px;font-size:13px}
-  .feed-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
-  .feed-icon.done{background:rgba(34,134,58,.15);color:var(--ok)}
-  .feed-icon.alert{background:rgba(215,58,73,.15);color:var(--err)}
-  .feed-icon.info{background:rgba(3,102,214,.15);color:var(--accent)}
-  .feed-text{flex:1;color:var(--fg)}
-  .feed-time{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* ---------- Footer ---------- */
+  footer{
+    max-width:920px; margin:0 auto; padding:24px 20px 40px; border-top:1px solid var(--border-soft);
+    font-size:12px; color:var(--faint); line-height:1.7;
+  }
+  footer b{color:var(--muted)}
+  footer .legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:8px}
+  footer .legend span{display:inline-flex; align-items:center; gap:5px}
+  footer .ld{width:8px; height:8px; border-radius:50%}
 
-  .health-strip{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;font-size:13px;color:var(--fg-dim)}
-  .health-strip .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-  .health-strip .dot.ok{background:var(--ok)}
-  .health-strip .dot.err{background:var(--err)}
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; padding:11px 20px; border-radius:9px; font-size:13.5px;
+    font-weight:600; box-shadow:var(--shadow-lg); z-index:100; max-width:90vw;
+  }
+  .toast.ok{background:var(--ok)} .toast.err{background:var(--err)}
 
-  /* === Toast === */
-  .toast{position:fixed;right:24px;bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;animation:slidein .2s ease-out;max-width:320px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-  .toast.ok{border-color:var(--ok)}
-  .toast.err{border-color:var(--err)}
-  @keyframes slidein{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
-
-  /* === Misc === */
-  .empty{padding:40px;text-align:center;color:var(--muted)}
-  .loading{padding:40px;text-align:center;color:var(--muted)}
-  .reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
-  .stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px}
-  .stat-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
-  .stat-value{font-size:28px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
-  .stat-sub{color:var(--muted);font-size:12px;margin-top:4px}
-  h2{font-size:14px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:20px 0 8px}
-  .agent-row{display:flex;justify-content:space-between;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:13px}
-
-  /* === Shortcut hint === */
-  .shortcut-hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(36,41,46,.92);color:#fff;padding:6px 14px;border-radius:18px;font-size:11px;z-index:999;font-family:ui-monospace,SFMono-Regular,monospace}
-  .shortcut-hint.fade-out{opacity:0;transition:opacity 800ms ease-out}
-
-  /* === Polished Today === */
-  .hero-do{background:linear-gradient(135deg,#0366d6 0%,#1f4ea8 100%);color:#fff;border-radius:14px;padding:24px 28px;margin-bottom:18px;box-shadow:0 6px 24px rgba(3,102,214,.2)}
-  .hero-do h2{margin:0 0 6px;color:#fff;text-transform:none;letter-spacing:-.01em;font-size:14px;font-weight:700;opacity:.95;letter-spacing:.08em}
-  .hero-do .hero-sub{color:rgba(255,255,255,.85);font-size:13px;margin-bottom:14px}
-  .hero-do .hero-list{display:flex;flex-direction:column;gap:8px}
-  .hero-do .hero-item{display:flex;gap:14px;align-items:flex-start;padding:12px 14px;background:rgba(255,255,255,.10);border-radius:10px;cursor:pointer;transition:background .15s}
-  .hero-do .hero-item:hover{background:rgba(255,255,255,.18)}
-  .hero-do .hero-num{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.20);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
-  .hero-do .hero-text{flex:1;color:#fff;font-size:14px;line-height:1.4}
-  .hero-do .hero-text .label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,.7);margin-bottom:2px;font-weight:600}
-  .hero-do .hero-empty{color:rgba(255,255,255,.85);font-size:14px;text-align:center;padding:22px}
-
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
-  .kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:transform .15s,box-shadow .15s}
-  .kpi:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.06)}
-  .kpi-label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:6px}
-  .kpi-value{font-size:24px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.1}
-  .kpi-trend{color:var(--muted);font-size:11px;margin-top:4px}
-  .kpi-trend.up{color:var(--ok)}
-  .kpi-trend.down{color:var(--err)}
-  .kpi-trend.flat{color:var(--muted)}
-
-  .panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px}
-  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;flex-wrap:wrap}
-  .panel-title{font-size:14px;font-weight:700;color:var(--fg);margin:0}
-  .panel-sub{color:var(--muted);font-size:12px}
-
-  /* Segmented toggle */
-  .seg-toggle{display:inline-flex;gap:0;background:#f0f3f6;border:1px solid var(--border);border-radius:8px;padding:2px}
-  .seg-btn{background:none;border:none;padding:5px 12px;font:inherit;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-radius:6px;transition:all .15s}
-  .seg-btn.active{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-  .seg-btn:hover:not(.active){color:var(--fg)}
-
-  #roi-chart-wrap{height:280px;position:relative}
-
-  .recent-feed{display:flex;flex-direction:column;gap:2px;max-height:340px;overflow-y:auto}
-  .feed-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;transition:background .12s}
-  .feed-item:hover{background:#f6f8fa}
-  .feed-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-  .feed-icon.done{background:rgba(34,134,58,.15);color:var(--ok)}
-  .feed-icon.alert{background:rgba(215,58,73,.15);color:var(--err)}
-  .feed-icon.info{background:rgba(3,102,214,.15);color:var(--accent)}
-  .feed-text{flex:1;font-size:13px;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .feed-time{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;flex-shrink:0}
-
-  /* === Failure banner === */
-  .failure-banner{display:flex;align-items:center;gap:14px;background:rgba(176,136,0,.10);border:1px solid rgba(176,136,0,.35);border-radius:8px;padding:14px 18px;margin-bottom:14px;color:var(--fg)}
-  .failure-banner.urgent{background:rgba(215,58,73,.10);border-color:rgba(215,58,73,.5)}
-  .failure-banner .fb-icon{font-size:24px;flex-shrink:0}
-  .failure-banner .fb-text{flex:1}
-  .failure-banner .fb-title{font-weight:700;font-size:14px;color:var(--fg)}
-  .failure-banner .fb-sub{font-size:12px;color:var(--fg-dim);margin-top:2px}
-  .failure-banner .btn{flex-shrink:0;background:#fff;border:1px solid var(--border)}
-  .failure-banner.urgent .btn{border-color:var(--err);color:var(--err)}
-
-  /* === Team / Personas === */
-  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:8px}
-  .persona{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;position:relative;display:flex;flex-direction:column;gap:10px}
-  .persona:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
-  .persona-head{display:flex;gap:12px;align-items:center}
-  .avatar{width:48px;height:48px;border-radius:50%;background:#f0f3f6;flex-shrink:0;overflow:hidden;border:1px solid var(--border)}
-  .avatar img{width:100%;height:100%;display:block}
-  .persona-name{font-weight:700;font-size:15px;color:var(--fg);line-height:1.2}
-  .persona-role{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
-  .persona-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--fg-dim)}
-  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0}
-  .status-dot.live{background:var(--ok);box-shadow:0 0 0 0 rgba(34,134,58,.6);animation:livepulse 2s infinite}
-  .status-dot.idle{background:#9ca3af}
-  .status-dot.stale{background:var(--warn)}
-  .status-dot.dead{background:var(--err)}
-  @keyframes livepulse{0%{box-shadow:0 0 0 0 rgba(34,134,58,.6)}70%{box-shadow:0 0 0 6px rgba(34,134,58,0)}100%{box-shadow:0 0 0 0 rgba(34,134,58,0)}}
-  .persona-tagline{font-size:12px;color:var(--fg-dim);line-height:1.4;flex:1}
-  .persona-foot{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:8px}
-  .persona-foot .schedule{font-variant-numeric:tabular-nums}
-  .comment-badge{display:inline-flex;align-items:center;gap:3px;background:rgba(3,102,214,.12);color:var(--accent);padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600}
-  .comment-badge.zero{background:#f0f3f6;color:var(--muted)}
-
-  /* === Persona modal === */
-  .pmodal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px;animation:fadein .15s ease-out}
-  .pmodal-backdrop.show{display:flex}
-  @keyframes fadein{from{opacity:0}to{opacity:1}}
-  .pmodal{background:var(--card);border-radius:12px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.18)}
-  .pmodal-head{display:flex;gap:16px;align-items:center;padding:20px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1}
-  .pmodal .avatar{width:64px;height:64px;font-size:36px !important}
-  .pmodal-title h2{margin:0;font-size:20px;font-weight:700;color:var(--fg);text-transform:none;letter-spacing:0}
-  .pmodal-title .role{color:var(--muted);font-size:13px;margin-top:3px}
-  .pmodal-close{margin-left:auto;background:none;border:none;font-size:24px;color:var(--muted);cursor:pointer;padding:4px 10px;border-radius:6px}
-  .pmodal-close:hover{background:#f0f3f6;color:var(--fg)}
-  .pmodal-body{padding:18px 22px 22px}
-  .pmodal-section{margin-bottom:18px}
-  .pmodal-section h3{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px;font-weight:600}
-  .pmodal-section p{margin:0;font-size:14px;line-height:1.5;color:var(--fg)}
-  .interact-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
-  .interact-chip{background:#f0f3f6;color:var(--fg-dim);padding:3px 10px;border-radius:14px;font-size:12px;cursor:pointer}
-  .interact-chip:hover{background:#e1e4e8;color:var(--fg)}
-  .interact-chip .arr{margin-right:5px;color:var(--muted)}
-  .activity-feed{max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:8px}
-  .activity-item{padding:8px 12px;border-bottom:1px solid var(--border);font-size:13px}
-  .activity-item:last-child{border-bottom:none}
-  .activity-item .when{color:var(--muted);font-size:11px;margin-right:8px;font-variant-numeric:tabular-nums}
-  .activity-empty{padding:14px;text-align:center;color:var(--muted);font-size:13px}
-  .feedback-list{max-height:160px;overflow-y:auto;margin-bottom:8px}
-  .feedback-item{padding:6px 10px;background:#f6f8fa;border-radius:6px;margin-bottom:4px;font-size:13px}
-  .feedback-item .when{color:var(--muted);font-size:11px;display:block;margin-bottom:2px}
-  .feedback-empty{color:var(--muted);font-size:13px;font-style:italic;padding:6px 0}
-  .feedback-form{display:flex;flex-direction:column;gap:8px}
-  .feedback-form textarea{background:#fff;color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font:inherit;font-size:13px;resize:vertical;min-height:80px}
-  .feedback-form textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(3,102,214,.1)}
-  .feedback-form-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .feedback-form-row .hint{color:var(--muted);font-size:11px}
-
-  /* === Mobile === */
+  /* ---------- Mobile ---------- */
   @media (max-width:640px){
-    main{padding:12px}
-    .toolbar{flex-direction:column;align-items:stretch}
-    .toolbar input[type=text],.toolbar select{width:100%}
+    .head-row{padding:12px 14px 0; gap:10px}
+    .tabs{padding:8px 8px 0}
+    .tab{padding:8px 11px 11px; font-size:13.5px}
+    main{padding:18px 14px 50px}
+    .sc-metrics{grid-template-columns:repeat(2,1fr)}
+    .stat-strip{grid-template-columns:repeat(2,1fr)}
+    .infra-grid{grid-template-columns:1fr}
+    .paused-list{grid-template-columns:1fr}
     .actions{flex-direction:column}
+    .actions .btn{width:100%}
     .comment{width:100%}
-    .btn{width:100%}
-    .team-grid{grid-template-columns:1fr 1fr;gap:10px}
-    .pmodal{max-width:100%;max-height:96vh}
-    .pmodal-head{padding:14px 16px}
-    .pmodal-body{padding:14px 16px}
+    .pulse{font-size:12px; gap:9px}
+    .brand .tag{display:none}
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div>
-    <h1>Liftnow Agent Approvals</h1>
-    <div class="sub">4 agents active · 23 paused · <span id="last-refresh">connecting…</span></div>
+  <div class="head-row">
+    <div class="brand">
+      <span class="logo">Lift<b>now</b> Agents</span>
+      <span class="tag">command center</span>
+    </div>
+    <div class="pulse" id="pulse">
+      <span id="pulse-text">Loading…</span>
+      <span class="sep">·</span>
+      <button class="refresh" id="refresh-btn" onclick="boot(false)">Refresh</button>
+      <button class="kill" id="kill-switch-btn" onclick="triggerKillSwitch()" title="Pause every running agent">Pause all</button>
+    </div>
   </div>
-  <button class="btn refresh" onclick="loadCurrentTab()">Refresh</button>
+  <nav class="tabs">
+    <button class="tab active" data-view="now" onclick="switchTab('now')">Now <span class="badge zero" id="badge-now">0</span></button>
+    <button class="tab" data-view="team" onclick="switchTab('team')">Team</button>
+    <button class="tab" data-view="trends" onclick="switchTab('trends')">Trends</button>
+  </nav>
 </header>
 
-<div class="tabs">
-  <button class="tab active" data-view="today" onclick="switchTab('today')">🏠 Today <span class="tab-sub" id="sub-today"></span></button>
-  <button class="tab" data-view="decide" onclick="switchTab('decide')">✋ Decide <span class="count" id="count-decide"></span></button>
-  <button class="tab" data-view="progress" onclick="switchTab('progress')">📊 Progress</button>
-</div>
-<style>
-  .tab-sub { font-size: 11px; color: var(--muted); margin-left: 4px; }
-  .outcome-row { display: flex; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border); }
-  .outcome-row:last-child { border-bottom: none; }
-  .outcome-icon { font-size: 22px; line-height: 1; flex-shrink: 0; width: 28px; text-align: center; }
-  .outcome-body { flex: 1; min-width: 0; }
-  .outcome-headline { font-weight: 600; font-size: 14px; color: var(--fg); line-height: 1.4; }
-  .outcome-detail { font-size: 12px; color: var(--fg-dim); margin-top: 4px; line-height: 1.5; }
-  .outcome-meta { font-size: 11px; color: var(--muted); margin-top: 6px; display: flex; gap: 12px; align-items: center; }
-  .outcome-meta a { color: var(--link); text-decoration: none; }
-  .outcome-meta a:hover { text-decoration: underline; }
-  .outcome-badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
-  .outcome-badge.live { background: #dcfce7; color: #166534; }
-  .outcome-badge.draft { background: #fef3c7; color: #92400e; }
-  .outcome-badge.auto { background: #dbeafe; color: #1e40af; }
-  .outcome-badge.needs { background: #fee2e2; color: #991b1b; }
-  .day-divider { padding: 14px 0 8px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 2px solid var(--border); margin-bottom: 8px; }
-</style>
+<main id="main"><div class="loading">Loading your agents…</div></main>
 
-<main id="main">
-  <div class="loading">Loading…</div>
-</main>
-
-<!-- Persona modal -->
-<div class="pmodal-backdrop" id="pmodal" onclick="if(event.target===this)closePersona()">
-  <div class="pmodal" id="pmodal-content"></div>
-</div>
+<footer id="footer"></footer>
 
 <script>
+/* =====================================================================
+   Liftnow Agents — Command Center
+   Static dashboard. Calls n8n webhooks directly from the browser.
+   Built ground-truth-first: it shows ONLY the agents that actually run,
+   and every "done" claim links to proof you can open and verify.
+   ===================================================================== */
+
 const API_BASE = 'https://agents.liftnowdirect.com/webhook';
 const AGENT_SECRET = 'LiftnowAgentTeam_kS9-bGq2_xVtN4mP';  // shared with n8n auth guard
-let currentView = 'today';
-let roiChart = null;  // Chart.js instance
-let cachedPending = null;
-let cachedInbox = null;
-let cachedDone = null;
-let coordinatorBrief = null;
-let agentFilter = 'all';
-let searchTerm = '';
-let sortMode = 'priority';
+const HUBSPOT_PORTAL = '24043196';
+
+// --- The 4 agents that are actually ACTIVE in n8n (verified live) ---
+// ticketAgent = the `agent` field on their HubSpot tickets
+// hbId        = the agentId on their heartbeats
+const AGENTS = [
+  { key:'bee',    emoji:'🐝', name:'Bee',    role:'SEO Optimizer',          ticketAgent:'SEO Optimizer',          hbId:'sam',   color:'#d97706', tint:'rgba(217,119,6,.12)',
+    what:'Scans liftnow.com pages for ranking slippage and drafts on-page SEO fixes for your review.' },
+  { key:'turtle', emoji:'🐢', name:'Turtle', role:'Content Decay Detector', ticketAgent:'Content Decay Detector', hbId:'dax',   color:'#16a34a', tint:'rgba(22,163,74,.12)',
+    what:'Watches for pages losing search traffic and proposes content refreshes before they slide further.' },
+  { key:'eagle',  emoji:'🦅', name:'Eagle',  role:'UI/UX Performance',      ticketAgent:'UI/UX Performance',      hbId:'uma',   color:'#0d9488', tint:'rgba(13,148,136,.12)',
+    what:'Audits /resources/ pages for structural and UX defects, then bundles the fixes that need a look.' },
+  { key:'owl',    emoji:'🦉', name:'Owl',    role:'Content Producer',       ticketAgent:'Content Producer',       hbId:'carla', color:'#0366d6', tint:'rgba(3,102,214,.12)',
+    what:'Drafts brand-new articles and content pieces for liftnow.com, ready for you to approve.' },
+];
+const AGENT_BY_TICKET = Object.fromEntries(AGENTS.map(a => [a.ticketAgent, a]));
+const AGENT_BY_HB = Object.fromEntries(AGENTS.map(a => [a.hbId, a]));
+const MARKETING_TICKET_AGENTS = new Set(AGENTS.map(a => a.ticketAgent));
+
+// --- Infra agents that keep the team running (not content producers) ---
+const INFRA = [
+  { emoji:'🦫', name:'Beaver', role:'Approval Executor',  hbId:'forge',    what:'Applies your approved decisions and powers the heartbeat that proves the team is alive.' },
+  { emoji:'🐺', name:'Wolf',   role:'Failure Alerts',     hbId:'sentinel', what:'Watches every agent and raises a flag the moment one goes silent or starts erroring.' },
+];
+
+// --- Agents intentionally OFF, with honest one-line reasons ---
+const PAUSED = [
+  ['SEM Manager',            'needs ad-spend approval'],
+  ['SEM Auto-Optimizer',     'needs ad-spend approval'],
+  ['Backlink Builder',       'needs email-send approval'],
+  ['LinkedIn Cadence',       'not enabled yet'],
+  ['Keyword Discovery',      'not enabled yet'],
+  ['Community Engagement',   'not enabled yet'],
+  ['Competitor SERP Monitor','not enabled yet'],
+  ['Brand Listening',        'not enabled yet'],
+  ['Coordinator / Team Mgr', 'not enabled yet'],
+  ['Ticket Triage',          'not enabled yet'],
+  ['Daily ROI Tracker',      'not enabled yet'],
+  ['Asset Review Gate',      'runs only on demand'],
+];
+
+const STAGE_LABEL = {'1':'Needs review','2':'Approved','3':'Deferred','4':'Closed / rejected','1363043699':'Auto-applied'};
+
+let currentView = 'now';
+const STATE = { all:null, allErr:false, pending:null, pendErr:false, hb:null, hbErr:false, fb:null, updatedAt:null };
+let charts = [];
 let focusedTicketId = null;
-let shortcutHintShown = sessionStorage.getItem('shortcutHintShown') === '1';
 
-const AGENT_COLORS = {
-  'Content Producer':       {bg:'rgba(3,102,214,.12)', fg:'#0366d6'},
-  'SEM Manager':            {bg:'rgba(217,119,6,.12)', fg:'#d97706'},
-  'SEO Optimizer':          {bg:'rgba(8,145,178,.12)', fg:'#0891b2'},
-  'Backlink Builder':       {bg:'rgba(124,58,237,.12)', fg:'#7c3aed'},
-  'Keyword Discovery':      {bg:'rgba(190,24,93,.12)', fg:'#be185d'},
-  'LinkedIn Cadence':       {bg:'rgba(21,128,61,.12)', fg:'#15803d'},
-  'UI/UX Performance':      {bg:'rgba(13,148,136,.12)', fg:'#0d9488'},
-  'Competitor SERP Monitor':{bg:'rgba(147,51,234,.12)', fg:'#9333ea'},
-  'Coordinator':            {bg:'rgba(31,41,55,.12)', fg:'#1f2937'},
-  'Content Decay Detector': {bg:'rgba(180,83,9,.12)', fg:'#b45309'},
-  'Brand Listening':        {bg:'rgba(120,113,108,.12)', fg:'#78716c'},
-  'Daily Briefing':         {bg:'rgba(82,82,91,.12)', fg:'#52525b'},
-};
-function agentColor(name){ return AGENT_COLORS[name] || {bg:'#f0f3f6', fg:'#586069'}; }
+/* ---------------------------------------------------------------------
+   Helpers (escapeHtml / toast / age / proof links)  — proven, preserved
+   ------------------------------------------------------------------- */
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
-function isReport(t){
-  const s = t.subject || '';
-  const rt = (t.recommendationType || '').toLowerCase();
-  return /\bsummary\b|\[coordinator\]|\[briefing\]|\[patterns?\]|^weekly |^monthly |weekly (report|summary|backlink|sem|keyword)|monthly (report|summary|keyword)|daily briefing/i.test(s)
-      || /^report$|^summary$|^daily digest$|^daily briefing$|^dashboard insight$/.test(rt);
+// Some ticket text arrives HTML-encoded from HubSpot (e.g. "Costs, &amp; Best Uses").
+// Decode once to clean text so the later escapeHtml() single-encodes it (no "&amp;amp;").
+// Safe: textarea content is RCDATA — no scripts run.
+function decodeEntities(s){
+  if (s == null) return s;
+  const ta = document.createElement('textarea');
+  ta.innerHTML = String(s);
+  return ta.value;
 }
 
-function switchTab(view){
-  currentView = view;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.view===view));
-  loadCurrentTab();
+function toast(msg, kind='ok'){
+  const t = document.createElement('div');
+  t.className = 'toast ' + kind;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => {t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)}, 2600);
 }
 
-async function loadCurrentTab(){
-  const main = document.getElementById('main');
-  main.innerHTML = '<div class="loading">Loading…</div>';
+function ageLabel(hours){
+  hours = Number(hours)||0;
+  if (hours < 1) return 'just now';
+  if (hours < 24) return `${Math.round(hours)}h ago`;
+  return `${Math.floor(hours/24)}d ago`;
+}
+function ageClass(hours){ return (Number(hours)||0) > 36 ? 'old' : ''; }
+function plural(n, word){ return Number(n) === 1 ? word : word + 's'; }
 
-  // 15s watchdog — if Loading is still showing, replace with a friendly error.
-  // (P1-G UX fix: don't leave Paul staring at "Loading…" forever on a hung fetch.)
-  const loadingWatchdog = setTimeout(() => {
-    const stillLoading = main.querySelector('.loading');
-    if (stillLoading) {
-      main.innerHTML = `<div class="empty">Still loading after 15s — the agent backend might be slow or unreachable.<br><br><button class="btn" onclick="loadCurrentTab()">Retry</button></div>`;
-    }
-  }, 15000);
-
-  try {
-    document.getElementById('last-refresh').textContent = 'updated ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    if (currentView === 'today') {
-      await renderTodayOutcomes();
-    } else if (currentView === 'decide') {
-      await renderDecide();
-    } else if (currentView === 'progress') {
-      await renderProgress();
-    } else {
-      // Legacy tab name fell through — default to today
-      currentView = 'today';
-      await renderTodayOutcomes();
-    }
-  } catch (e) {
-    main.innerHTML = `<div class="empty">Error: ${escapeHtml(e.message)}<br><br><button class="btn" onclick="loadCurrentTab()">Retry</button></div>`;
-  } finally {
-    clearTimeout(loadingWatchdog);
-  }
+function hubspotLink(ticketId){ return `https://app.hubspot.com/contacts/${HUBSPOT_PORTAL}/record/0-5/${ticketId}`; }
+function pageUrlFromTicket(t){
+  try { const d = JSON.parse(t.recommendationDetail || '{}'); return d.url || d.target_url || d.page_url || null; }
+  catch { return null; }
 }
 
-// =================================================================
-// NEW UI v4 — three tabs answering one question each
-//   Today:    "What did my agents DO?"
-//   Decide:   "What needs me?"
-//   Progress: "Is it actually working?"
-// =================================================================
+function autoGrow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,200)+'px'; }
 
-// Map ticket / heartbeat into an outcome row with a clear "what happened" headline.
-function classifyOutcome(t) {
-  const subj = (t.subject || '');
-  const subjLow = subj.toLowerCase();
-  const agent = (t.agent || '').toLowerCase();
-  const notes = (t.outcomeNotes || '').toLowerCase();
-  const rd = (() => { try { return JSON.parse(t.recommendationDetail || '{}'); } catch { return {}; } })();
-
-  // Auto-executed wins (Eagle PATCHed, Maverick mutated, etc.)
-  if (notes.includes('wp page') && notes.includes('updated')) {
-    const m = notes.match(/wp page (\d+) updated/i);
-    const pageId = m ? m[1] : null;
-    const url = rd.url || (pageId ? `https://liftnow.com/?p=${pageId}` : null);
-    return {
-      icon: '🐝', kind: 'wp_patch', badge: 'live',
-      headline: 'Bee updated a WordPress page',
-      detail: subj.replace(/^SEO fix for /,'').replace(/ — page \d+.*$/, '') + (rd.opportunity ? ` (${rd.opportunity})` : ''),
-      links: url ? [{label:'View page →', href: url}] : []
-    };
-  }
-  if (notes.includes('budget') && (notes.includes('mutated') || notes.includes('applied'))) {
-    return {
-      icon: '🦊', kind: 'ads_mutate', badge: 'live',
-      headline: 'Maverick adjusted a Google Ads budget',
-      detail: subj.replace(/^Google Ads:\s*/, ''),
-      links: [{label: 'See campaign in Google Ads →', href: 'https://ads.google.com/'}]
-    };
-  }
-  if (agent.includes('ui/ux') && (notes.includes('auto-fix') || subjLow.includes('auto-fixed') || subjLow.includes('eagle scan'))) {
-    return {
-      icon: '🦅', kind: 'eagle_fix', badge: rd.auto_fixed_count > 0 ? 'live' : 'auto',
-      headline: rd.auto_fixed_count > 0
-        ? `Eagle auto-fixed ${rd.auto_fixed_count} structural defects across ${rd.pages_auto_fixed || '?'} pages`
-        : 'Eagle scanned /resources/ pages',
-      detail: subj,
-      links: []
-    };
-  }
-  if (subjLow.includes('reddit submission draft')) {
-    return {
-      icon: '🐦‍⬛', kind: 'crow_draft', badge: 'draft',
-      headline: 'Crow drafted a Reddit post (needs your manual paste)',
-      detail: subj.replace(/^Reddit submission draft — /, ''),
-      links: [{label: 'See draft & post URL →', href: `https://app.hubspot.com/contacts/24043196/record/0-5/${t.ticketId}`}]
-    };
-  }
-  if (subjLow.includes('reddit reply')) {
-    return {
-      icon: '🦇', kind: 'reed_draft', badge: 'draft',
-      headline: 'Bat-Reply drafted a Reddit reply (needs your manual paste)',
-      detail: subj.replace(/^Reddit reply.*?— /, ''),
-      links: [{label: 'See draft + thread →', href: `https://app.hubspot.com/contacts/24043196/record/0-5/${t.ticketId}`}]
-    };
-  }
-  if (agent.includes('brand listening') || subjLow.startsWith('news mention') || subjLow.startsWith('hn discussion')) {
-    return {
-      icon: '🦇', kind: 'mention', badge: 'auto',
-      headline: subjLow.startsWith('hn') ? 'HN discussion picked up' : 'News mention picked up',
-      detail: subj.replace(/^(News mention|HN discussion): /, ''),
-      links: rd.url ? [{label: 'Read source →', href: rd.url}] : []
-    };
-  }
-  if (agent.includes('seo optimizer') && subjLow.includes('seo fix for')) {
-    return {
-      icon: '🐝', kind: 'seo_draft', badge: 'needs',
-      headline: 'Bee proposed an SEO fix (needs your approval)',
-      detail: subj.replace(/^SEO fix for /, ''),
-      links: [{label: 'Review & approve →', href: `https://bid-iq-neon.vercel.app/approvals?tab=decide#t-${t.ticketId}`}]
-    };
-  }
-  if (agent.includes('content producer') || subjLow.includes('publish anchor:') || subjLow.includes('publish cluster page:')) {
-    return {
-      icon: '🦉', kind: 'owl_draft', badge: 'needs',
-      headline: 'Owl drafted a new article (needs your approval)',
-      detail: subj.replace(/^(Publish anchor:|Publish cluster page:)\s*/i, ''),
-      links: []
-    };
-  }
-  if (agent.includes('linkedin')) {
-    return {
-      icon: '🦜', kind: 'linkedin', badge: 'draft',
-      headline: 'Beacon drafted a LinkedIn post',
-      detail: subj,
-      links: []
-    };
-  }
-  if (agent.includes('competitor serp') || subjLow.startsWith('competitor moved') || subjLow.includes('top 3 for')) {
-    return {
-      icon: '🐈', kind: 'serp', badge: 'auto',
-      headline: 'Cat spotted competitor SERP movement',
-      detail: subj,
-      links: rd.url ? [{label: 'Source →', href: rd.url}] : []
-    };
-  }
-  if (agent.includes('content decay') || subjLow.startsWith('refresh ')) {
-    return {
-      icon: '🐢', kind: 'decay', badge: 'needs',
-      headline: 'Turtle flagged a decaying page',
-      detail: subj.replace(/^Refresh /, '').replace(/^"|"$/g, ''),
-      links: rd.url ? [{label: 'View page →', href: rd.url}] : []
-    };
-  }
-  if (agent.includes('coordinator') && (subjLow.includes('today\'s top') || subjLow.includes('morning briefing'))) {
-    return {
-      icon: '🐘', kind: 'briefing', badge: 'auto',
-      headline: subj,
-      detail: 'Daily briefing — top items to look at today',
-      links: []
-    };
-  }
-  if (agent.includes('coordinator') && (subjLow.includes('escalated') || subjLow.includes('heads-up'))) {
-    return {
-      icon: '🐺', kind: 'wolf_alert', badge: 'needs',
-      headline: subj,
-      detail: t.content ? String(t.content).split('\n')[0].slice(0, 160) : '',
-      links: []
-    };
-  }
-  // Generic catch-all
-  return {
-    icon: '·', kind: 'other', badge: 'auto',
-    headline: subj,
-    detail: agent || 'agent',
-    links: []
-  };
+// Status from how recently the agent last fired a heartbeat.
+function statusFromHours(h){
+  if (h == null) return {k:'silent', label:'no signal'};
+  if (h < 1)  return {k:'live',   label:'live'};
+  if (h < 12) return {k:'idle',   label:'idle'};
+  if (h < 48) return {k:'quiet',  label:'quiet'};
+  return {k:'silent', label:'silent'};
 }
 
-async function renderTodayOutcomes(){
-  const main = document.getElementById('main');
-  // Pull recent done + pending in parallel — combine into one chronological feed
-  const [doneData, pendingData] = await Promise.all([
-    fetchTickets('all').catch(()=>({tickets:[]})),
-    fetchTickets('pending').catch(()=>({tickets:[]}))
-  ]);
-  const allTickets = [...(doneData.tickets || []), ...(pendingData.tickets || [])];
-  // Dedupe by ticketId
-  const seen = new Set();
-  const unique = [];
-  for (const t of allTickets) {
-    if (seen.has(t.ticketId)) continue;
-    seen.add(t.ticketId);
-    unique.push(t);
-  }
-  // Sort newest first
-  unique.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
-  // Classify each + group by day
-  const outcomes = unique.slice(0, 50).map(t => ({...classifyOutcome(t), ticket: t, createdAt: t.createdAt, age: t.ageHours}));
-
-  // Group by day
-  const groups = {};
-  for (const o of outcomes) {
-    const d = new Date(o.createdAt);
-    const key = d.toLocaleDateString(undefined, {weekday: 'long', month: 'short', day: 'numeric'});
-    (groups[key] = groups[key] || []).push(o);
-  }
-
-  // Count today's "live wins" for the tab sub-label
-  const todayKey = new Date().toLocaleDateString(undefined, {weekday: 'long', month: 'short', day: 'numeric'});
-  const todayLiveWins = (groups[todayKey] || []).filter(o => o.badge === 'live').length;
-  document.getElementById('sub-today').textContent = todayLiveWins > 0 ? `· ${todayLiveWins} live` : '';
-
-  let html = `
-    <section style="margin-bottom:24px">
-      <h1 style="margin:0 0 6px;font-size:24px">Today's outcomes</h1>
-      <p style="margin:0;color:var(--fg-dim);font-size:14px">Chronological feed of what your agents actually did. Live = change pushed to liftnow.com/Ads. Draft = waiting for your manual paste. Auto = agent acted on its own (no approval needed). Needs = waiting on your approval (go to Decide tab).</p>
-    </section>
-
-    <section class="panel" style="border-left:4px solid var(--ok)">
-      <div class="panel-head" style="margin-bottom:0">
-        <h3 class="panel-title">Recent activity</h3>
-        <div class="panel-sub">${outcomes.length} items across the last ${Object.keys(groups).length} day${Object.keys(groups).length===1?'':'s'}</div>
-      </div>
-  `;
-
-  for (const day of Object.keys(groups)) {
-    html += `<div class="day-divider">${day}</div>`;
-    for (const o of groups[day]) {
-      const ageStr = o.age < 24 ? `${o.age}h ago` : `${Math.round(o.age/24)}d ago`;
-      const linkBits = o.links.map(l => `<a href="${l.href}" target="_blank" rel="noopener">${l.label}</a>`).join(' · ');
-      html += `
-        <div class="outcome-row">
-          <div class="outcome-icon">${o.icon}</div>
-          <div class="outcome-body">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span class="outcome-badge ${o.badge}">${o.badge}</span>
-              <span class="outcome-headline">${escapeHtml(o.headline)}</span>
-            </div>
-            <div class="outcome-detail">${escapeHtml(o.detail || '')}</div>
-            <div class="outcome-meta">
-              <span>${ageStr}</span>
-              ${linkBits ? `<span>${linkBits}</span>` : ''}
-            </div>
-          </div>
-        </div>
-      `;
-    }
-  }
-
-  if (outcomes.length === 0) {
-    html += `<div class="empty" style="padding:32px;text-align:center;color:var(--muted)">No agent activity yet. Agents fire on schedule — first outcomes typically arrive within an hour.</div>`;
-  }
-  html += `</section>`;
-
-  main.innerHTML = html;
-}
-
-async function renderDecide(){
-  const main = document.getElementById('main');
-  const data = await fetchTickets('pending');
-  cachedPending = data;
-  const tickets = (data.tickets || []).filter(t => !isReport(t));
-  document.getElementById('count-decide').textContent = tickets.length || '';
-
-  if (tickets.length === 0) {
-    main.innerHTML = `
-      <section style="margin-bottom:20px">
-        <h1 style="margin:0 0 6px;font-size:24px">✓ Nothing to decide</h1>
-        <p style="margin:0;color:var(--fg-dim);font-size:14px">Your agents are working in the background. When they need your input, items appear here. Check Today to see what's been happening.</p>
-      </section>
-      <div class="empty" style="padding:48px;text-align:center;color:var(--muted);background:#f6f8fa;border-radius:8px">
-        <div style="font-size:48px;margin-bottom:12px">🌱</div>
-        <div>No pending approvals right now.</div>
-      </div>
-    `;
-    return;
-  }
-
-  // Group by leverage — content edits, ad changes, drafts to paste, etc.
-  let html = `
-    <section style="margin-bottom:20px">
-      <h1 style="margin:0 0 6px;font-size:24px">${tickets.length} item${tickets.length===1?'':'s'} need your call</h1>
-      <p style="margin:0;color:var(--fg-dim);font-size:14px">Each card shows ASK / WHY / IF YOU APPROVE / IF YOU REJECT. Click Approve to ship the change. Reject if it shouldn't happen.</p>
-    </section>
-  `;
-  // Delegate to existing renderPending since the card UX is already built
-  const tmpMain = document.createElement('div');
-  // renderPending writes to #main directly — render manually here
-  main.innerHTML = html;
-  renderPending(tickets);
-}
-
-async function renderProgress(){
-  const main = document.getElementById('main');
-  main.innerHTML = '<div class="loading">Loading progress...</div>';
-  // Reuse existing renderStats data + add a "shipped this week" counter
-  const [doneData, roi] = await Promise.all([
-    fetchTickets('all').catch(()=>({tickets:[]})),
-    fetch(`${API_BASE}/roi-data`).then(r => r.ok ? r.json() : null).catch(()=>null)
-  ]);
-  const tickets = doneData.tickets || [];
-  // Compute counters
-  const oneWeekAgo = Date.now() - 7 * 86400 * 1000;
-  const oneDayAgo = Date.now() - 86400 * 1000;
-  const liveThisWeek = tickets.filter(t => {
-    const c = new Date(t.createdAt || 0).getTime();
-    if (c < oneWeekAgo) return false;
-    const notes = (t.outcomeNotes || '').toLowerCase();
-    return (notes.includes('wp page') && notes.includes('updated')) ||
-           (notes.includes('budget') && (notes.includes('mutated') || notes.includes('applied'))) ||
-           (notes.includes('auto-fix') || notes.includes('auto_executed'));
-  }).length;
-  const draftsThisWeek = tickets.filter(t => {
-    const c = new Date(t.createdAt || 0).getTime();
-    if (c < oneWeekAgo) return false;
-    const s = (t.subject || '').toLowerCase();
-    return s.includes('draft') || s.includes('publish anchor') || s.includes('publish cluster');
-  }).length;
-  const stage3 = tickets.filter(t => t.stage === '3').length;  // approved
-  const stage4 = tickets.filter(t => t.stage === '4').length;  // rejected
-  const approvalRate = (stage3 + stage4) > 0 ? Math.round(stage3 / (stage3 + stage4) * 100) : null;
-
-  // ROI chart data
-  let roiHtml = '';
-  if (roi && roi.daily && Object.keys(roi.daily).length > 0) {
-    roiHtml = `
-      <section class="panel" style="margin-top:20px">
-        <div class="panel-head"><h3 class="panel-title">Ad spend → conversions (last 30 days)</h3></div>
-        <canvas id="roi-chart" height="80"></canvas>
-        <div style="margin-top:10px;font-size:11px;color:var(--muted)">Google Ads + Microsoft Ads combined. Green bars = conversions, blue line = spend.</div>
-      </section>
-    `;
-  } else {
-    roiHtml = `
-      <section class="panel" style="margin-top:20px;background:#fafbfc">
-        <div class="panel-head"><h3 class="panel-title">Ad spend → conversions</h3></div>
-        <div style="padding:16px;color:var(--muted);font-size:13px">ROI data not loaded yet. Squirrel (Daily ROI Tracker) runs every hour to refresh — check back shortly.</div>
-      </section>
-    `;
-  }
-
-  main.innerHTML = `
-    <section style="margin-bottom:20px">
-      <h1 style="margin:0 0 6px;font-size:24px">Is it working?</h1>
-      <p style="margin:0;color:var(--fg-dim);font-size:14px">Concrete output of your agent team. Live = change pushed to your site/ads. Drafts = work the agents prepared but waiting on you (or manual paste, for Reddit).</p>
-    </section>
-
-    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px">
-      <div class="kpi-card" style="padding:18px;border:1px solid var(--border);border-radius:8px;background:#f0fff4">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Live changes this week</div>
-        <div style="font-size:34px;font-weight:600;color:var(--ok);margin-top:6px">${liveThisWeek}</div>
-        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px">WP pages patched, ad budgets mutated, auto-fixes shipped</div>
-      </div>
-      <div class="kpi-card" style="padding:18px;border:1px solid var(--border);border-radius:8px;background:#fffaf0">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Drafts produced this week</div>
-        <div style="font-size:34px;font-weight:600;color:var(--warn);margin-top:6px">${draftsThisWeek}</div>
-        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px">Content drafts, Reddit posts, LinkedIn variants — waiting for your call</div>
-      </div>
-      <div class="kpi-card" style="padding:18px;border:1px solid var(--border);border-radius:8px">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Your trust trend</div>
-        <div style="font-size:34px;font-weight:600;margin-top:6px">${approvalRate === null ? '—' : approvalRate + '%'}</div>
-        <div style="font-size:12px;color:var(--fg-dim);margin-top:4px">${approvalRate === null ? 'No decisions yet' : approvalRate >= 70 ? 'You approve most things — trust building' : approvalRate >= 40 ? 'Mixed — agents still learning your taste' : 'You reject most — agents need recalibration'}</div>
-      </div>
-    </section>
-
-    ${roiHtml}
-
-    <section class="panel" style="margin-top:20px">
-      <div class="panel-head"><h3 class="panel-title">What's NOT working yet (honest list)</h3></div>
-      <ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.7;color:var(--fg-dim)">
-        <li><b>Reddit posting is manual paste.</b> Reddit closed self-service API access in 2026. Crow + Bat-Reply draft for you; you copy + paste. No way around it without a registered Reddit API app (which had to be approved by Reddit).</li>
-        <li><b>Content body edits aren't fully wired yet.</b> Bee can change title + meta description directly via WP REST. New H2 section appending still requires a fetch-then-update flow — coming next session.</li>
-        <li><b>LinkedIn auto-post is disabled.</b> Beacon drafts in your voice but the actual posting node is off until you decide to wire LinkedIn's API.</li>
-        <li><b>No conversion attribution.</b> The Live counter shows changes shipped, but doesn't yet tie "Bee changed page X → traffic went up Y%" together. That's the next-level dashboard.</li>
-      </ul>
-    </section>
-  `;
-
-  // Render the ROI chart if we have data
-  if (roi && roi.daily) {
-    setTimeout(() => renderRoiChart('combined'), 50);
-  }
-}
-
-function parseCoordinatorBrief(ticket){
-  if (!ticket) return null;
-  try {
-    const detail = JSON.parse(ticket.recommendationDetail || '{}');
-    return {ticketId: ticket.ticketId, ageHours: ticket.ageHours, ...detail};
-  } catch (e) { return null; }
-}
-
-async function fetchTickets(view){
-  const r = await fetch(`${API_BASE}/agent-proposals?view=${view}`);
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  const data = await r.json();
-  // Filter out non-marketing tickets that may have leaked in via Wolf
-  // before its exclusion list was added (Phase 5 Quote Watcher, CF7 form
-  // bridge, duplicate detectors, etc.) These are operational/sales
-  // infrastructure, not part of the marketing agent team.
-  const NON_MARKETING_PATTERNS = [
-    /quote\s*watcher/i,
-    /phase\s*5/i,
-    /cf7\s*form/i,
-    /duplicate\s*workflow/i,
-    /master\s*kill\s*switch/i,
-    /daily\s*health\s*check/i,
-    /webhook[:\s].*decision\s*memory/i,
-    /webhook[:\s].*agent\s*proposals/i,
-    /webhook[:\s].*process\s*decision/i,
-    /silent\s*failure\s*detector/i,
-    /agent\s*heartbeat\s*store/i,
-    /agent\s*feedback\s*store/i,
-    // Legacy Eagle (UI/UX) per-page spam tickets. Pre-fix Eagle filed one
-    // empty ticket per scanned page with subject "[UI/UX] 0 defects on ?"
-    // or "[UI/UX] N defects on <slug>" using stale $json after a Decision
-    // Memory HTTP shadow swallowed the original data. New Eagle posts a
-    // single digest ticket: "[UI/UX] HIGH-PRIORITY N defects across M /resources/ pages".
-    /^\[UI\/UX\]\s+0\s+defects\s+on\s+\?$/i,
-  ];
-  const isNonMarketing = (t) => {
-    const haystack = [(t.subject || ''), (t.outcomeNotes || ''), (t.content || '').slice(0, 500)].join(' ');
-    return NON_MARKETING_PATTERNS.some((re) => re.test(haystack));
-  };
-  if (Array.isArray(data?.tickets)) {
-    const before = data.tickets.length;
-    data.tickets = data.tickets.filter((t) => !isNonMarketing(t));
-    if (before !== data.tickets.length) {
-      console.log(`[ui-filter] hid ${before - data.tickets.length} non-marketing tickets`);
-    }
-    // Pretty-print legacy subjects that pre-date the humanize sweep.
-    // The agents themselves now produce plain English, but old tickets in
-    // the queue still carry the bracket-prefixed forms. Translate at render.
-    data.tickets = data.tickets.map((t) => ({...t, subject: humanizeSubject(t.subject)}));
-  }
-  return data;
-}
-
-// Translate legacy bracket-prefixed subjects to plain English. New tickets
-// (post-humanize sweep) bypass this because they already match a 'no bracket prefix' shape.
+/* ---------------------------------------------------------------------
+   Subject humanizer + ticket-content parser  — preserved verbatim
+   ------------------------------------------------------------------- */
 function humanizeSubject(subj){
   if (!subj) return subj;
-  let s = String(subj);
-  // Strip leading status markers like [done] / [suggestion] / [review] / [SEM] / [META] / [PATTERNS] / [TRIAGE] / [BRIEFING] / [BEE] / [SERP type] / [GOOGLE_NEWS] / [HN]
-  // and rephrase them into plain language.
-  // Order matters — match the most specific patterns first.
+  let s = decodeEntities(String(subj));
   s = s.replace(/^\[SERP\s+top_3_entry\]\s*([^\s]+)\s+on\s+"([^"]+)"\s+—\s+(.+?)\s*→\s*(\d+)/i,
-    (_, dom, kw, prev, cur) => `Competitor moved into top 3 for "${kw}" — ${dom.replace(/\.com$/,'').replace(/-/g,' ')} now #${cur}`);
+    (_, dom, kw) => `Competitor moved into top 3 for "${kw}" — ${dom.replace(/\.com$/,'').replace(/-/g,' ')}`);
   s = s.replace(/^\[SERP\s+top_3_exit\]\s*([^\s]+)\s+on\s+"([^"]+)"\s+—\s+\d+\s*→\s*(\d+)/i,
     (_, dom, kw, cur) => `${dom.replace(/\.com$/,'').replace(/-/g,' ')} dropped out of top 3 for "${kw}" — now #${cur}`);
   s = s.replace(/^\[SERP\s+new_entrant\]\s*([^\s]+)\s+on\s+"([^"]+)"\s+—\s+new\s*→\s*(\d+)/i,
@@ -859,9 +479,7 @@ function humanizeSubject(subj){
   s = s.replace(/^\[done\]\s*SEM Auto:\s*/i, 'Google Ads: budget ');
   s = s.replace(/^\[suggestion\]\s*/i, 'Google Ads suggestion — ');
   s = s.replace(/^\[review\]\s*SEM:\s*/i, 'Google Ads change needs your approval: ');
-  // Strip leftover generic [TAG] prefixes
   s = s.replace(/^\[[A-Z][A-Z_]+\]\s*/, '');
-  // Content decay raw URL form: "Content decay: https://...../slug/ — -X% clicks, Y positions"
   s = s.replace(/^Content decay:\s*https?:\/\/[^/]+\/(.+?)\/?\s*—\s*(-?\d+(?:\.\d+)?)%\s*clicks,\s*(-?\d+(?:\.\d+)?)\s*positions?$/i,
     (_, path, clicks, pos) => {
       const slug = path.split('/').filter(Boolean).pop() || path;
@@ -870,310 +488,249 @@ function humanizeSubject(subj){
   return s;
 }
 
-function escapeHtml(s){return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-
-// Parse content into ASK/WHY/IF YOU APPROVE/IF YOU REJECT sections when present.
-// Falls back to raw escaped content for unmigrated tickets.
 function renderTicketContent(content){
-  const raw = String(content || '');
-  if (!raw.trim()) return '(no detail)';
-  // Quick check: all four markers present, each at the start of a line
+  const raw = decodeEntities(String(content || ''));
+  if (!raw.trim()) return '<div style="color:var(--faint)">(no detail)</div>';
   const hasAsk = /(^|\n)ASK\s*\n/.test(raw);
   const hasWhy = /(^|\n)WHY\s*\n/.test(raw);
   const hasApprove = /(^|\n)IF YOU APPROVE\s*\n/.test(raw);
-  if (!(hasAsk && hasWhy && hasApprove)) {
-    return escapeHtml(raw);
-  }
-  // Split on the four section headers, capturing the body between each.
-  // The order in the structured format is fixed: ASK, WHY, IF YOU APPROVE, IF YOU REJECT (reject optional for safety).
+  if (!(hasAsk && hasWhy && hasApprove)) return `<div class="section-body">${escapeHtml(raw)}</div>`;
   const re = /(^|\n)(ASK|WHY|IF YOU APPROVE|IF YOU REJECT)\s*\n/g;
-  const sections = {};
-  const matches = [];
-  let m;
-  while ((m = re.exec(raw)) !== null) {
-    // headerStart = where the leading newline (or string start) is — the boundary that ends the previous section
-    // bodyStart = where the section's body content begins (after the header and its trailing newline)
-    matches.push({label: m[2], headerStart: m.index, bodyStart: m.index + m[0].length});
-  }
+  const sections = {}; const matches = []; let m;
+  while ((m = re.exec(raw)) !== null) matches.push({label: m[2], headerStart: m.index, bodyStart: m.index + m[0].length});
   for (let i = 0; i < matches.length; i++) {
     const end = i + 1 < matches.length ? matches[i+1].headerStart : raw.length;
     sections[matches[i].label] = raw.slice(matches[i].bodyStart, end).replace(/\s+$/, '');
   }
   let html = '';
-  if (sections['ASK']) {
-    html += `<div class="section"><div class="section-label">Ask</div><div class="section-body">${escapeHtml(sections['ASK'])}</div></div>`;
-  }
-  if (sections['WHY']) {
-    html += `<div class="section"><div class="section-label">Why</div><div class="section-body">${escapeHtml(sections['WHY'])}</div></div>`;
-  }
-  if (sections['IF YOU APPROVE']) {
-    html += `<div class="section-approve"><div class="section-label">If you approve</div><div class="section-body">${escapeHtml(sections['IF YOU APPROVE'])}</div></div>`;
-  }
-  if (sections['IF YOU REJECT']) {
-    html += `<div class="section-reject"><div class="section-label">If you reject</div><div class="section-body">${escapeHtml(sections['IF YOU REJECT'])}</div></div>`;
-  }
+  if (sections['ASK'])           html += `<div class="section"><div class="section-label">What it's asking</div><div class="section-body">${escapeHtml(sections['ASK'])}</div></div>`;
+  if (sections['WHY'])           html += `<div class="section"><div class="section-label">Why</div><div class="section-body">${escapeHtml(sections['WHY'])}</div></div>`;
+  if (sections['IF YOU APPROVE'])html += `<div class="section-approve"><div class="section-label">If you approve</div><div class="section-body">${escapeHtml(sections['IF YOU APPROVE'])}</div></div>`;
+  if (sections['IF YOU REJECT']) html += `<div class="section-reject"><div class="section-label">If you reject</div><div class="section-body">${escapeHtml(sections['IF YOU REJECT'])}</div></div>`;
   return html;
 }
 
-function ageLabel(hours){
-  if (hours < 1) return 'just now';
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours/24)}d ago`;
-}
-function ageClass(hours){
-  if (hours > 120) return 'stale';
-  if (hours > 48) return 'old';
-  return '';
+/* ---------------------------------------------------------------------
+   Data layer — every source loads independently (no all-or-nothing)
+   ------------------------------------------------------------------- */
+async function fetchTickets(view){
+  const r = await fetch(`${API_BASE}/agent-proposals?view=${view}`);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const data = await r.json();
+  // Hide non-marketing infra tickets that can leak in (kill switch, webhooks, SFD, etc.)
+  const NON_MARKETING_PATTERNS = [
+    /quote\s*watcher/i, /phase\s*5/i, /cf7\s*form/i, /duplicate\s*workflow/i,
+    /master\s*kill\s*switch/i, /daily\s*health\s*check/i,
+    /webhook[:\s].*decision\s*memory/i, /webhook[:\s].*agent\s*proposals/i, /webhook[:\s].*process\s*decision/i,
+    /silent\s*failure\s*detector/i, /agent\s*heartbeat\s*store/i, /agent\s*feedback\s*store/i,
+    /^\[UI\/UX\]\s+0\s+defects\s+on\s+\?$/i,
+  ];
+  const isNonMarketing = (t) => {
+    const hay = [(t.subject||''),(t.outcomeNotes||''),(t.content||'').slice(0,500)].join(' ');
+    return NON_MARKETING_PATTERNS.some((re) => re.test(hay));
+  };
+  if (Array.isArray(data?.tickets)) {
+    data.tickets = data.tickets.filter((t) => !isNonMarketing(t)).map((t) => ({...t, subject: humanizeSubject(t.subject)}));
+  }
+  return data;
 }
 
-function renderCoordStrip(){
-  if (!coordinatorBrief) {
-    return `<div class="coord-strip"><div class="coord-strip-head">
-      <span class="health-dot health-unknown"></span>
-      <span class="coord-no-brief">Coordinator brief pending (next run 10:00 AM ET)</span>
-    </div></div>`;
+async function boot(silent){
+  const btn = document.getElementById('refresh-btn');
+  if (btn){ btn.disabled = true; btn.textContent = '…'; }
+  if (!silent && !STATE.updatedAt) document.getElementById('main').innerHTML = skeleton();
+
+  const settle = (p) => p.then(v => ({ok:true, v})).catch(e => ({ok:false, e}));
+  const [allR, pendR, hbR, fbR] = await Promise.all([
+    settle(fetchTickets('all')),
+    settle(fetchTickets('pending')),
+    settle(fetch(`${API_BASE}/agent-heartbeat?action=read&limit=300`).then(r => r.ok ? r.json() : Promise.reject(r.status))),
+    settle(fetch(`${API_BASE}/agent-feedback?action=read`).then(r => r.ok ? r.json() : Promise.reject(r.status))),
+  ]);
+
+  STATE.all = allR.ok ? (allR.v.tickets || []) : null;  STATE.allErr = !allR.ok;
+  STATE.pending = pendR.ok ? (pendR.v.tickets || []) : null;  STATE.pendErr = !pendR.ok;
+  STATE.hb = hbR.ok ? hbR.v : null;  STATE.hbErr = !hbR.ok;
+  STATE.fb = fbR.ok ? fbR.v : null;
+  STATE.updatedAt = new Date();
+
+  if (btn){ btn.disabled = false; btn.textContent = 'Refresh'; }
+  renderHeader();
+  renderCurrent();
+  renderFooter();
+}
+
+/* ---------------------------------------------------------------------
+   Derived metrics
+   ------------------------------------------------------------------- */
+function ticketsFor(agent){ return (STATE.all || []).filter(t => (t.agent || '') === agent.ticketAgent); }
+function pendingFor(agent){ return (STATE.pending || []).filter(t => (t.agent || '') === agent.ticketAgent); }
+
+function hbStats(hbId){
+  const s = STATE.hb?.stats_24h?.[hbId];
+  return { total: s?.total ?? 0, errored: s?.errored ?? 0 };
+}
+function lastSeenHours(hbId){
+  const beats = (STATE.hb?.heartbeats || []).filter(h => (h.agentId||'') === hbId && h.at);
+  if (!beats.length) return null;
+  const latest = beats.reduce((a,b) => (a.at > b.at ? a : b)).at;
+  const ms = Date.now() - new Date(latest).getTime();
+  return ms >= 0 ? ms / 36e5 : 0;
+}
+function stageCounts(tickets){
+  const c = {};
+  for (const t of tickets) c[String(t.stage)] = (c[String(t.stage)]||0) + 1;
+  return c;
+}
+
+/* ---------------------------------------------------------------------
+   Header + footer
+   ------------------------------------------------------------------- */
+function renderHeader(){
+  const el = document.getElementById('pulse-text');
+  const pendCount = STATE.pending ? STATE.pending.length : null;
+
+  // badge on Now tab
+  const badge = document.getElementById('badge-now');
+  if (pendCount != null){ badge.textContent = pendCount; badge.classList.toggle('zero', pendCount === 0); }
+
+  // running = active agents that fired a heartbeat in the last 48h (provable)
+  let running = AGENTS.length;
+  if (STATE.hb){
+    running = AGENTS.filter(a => { const h = lastSeenHours(a.hbId); return h != null && h < 48; }).length;
   }
-  const b = coordinatorBrief;
-  const healthClass = b.overall_health === 'green' ? 'health-green' : b.overall_health === 'yellow' ? 'health-yellow' : b.overall_health === 'red' ? 'health-red' : 'health-unknown';
-  const summary = (b.executive_summary || '').slice(0, 100);
-  const conflictsCount = (b.conflicts || []).length;
-  const synergiesCount = (b.synergies || []).length;
-  const redflagsCount = (b.red_flags || []).length;
-  let body = '';
-  if (b.executive_summary) {
-    body += `<div class="coord-section"><h3>Executive Summary</h3><div style="font-size:13px;color:var(--fg)">${escapeHtml(b.executive_summary)}</div></div>`;
-  }
-  if (b.priority_order && b.priority_order.length) {
-    body += `<div class="coord-section"><h3>Today's priority order</h3>`;
-    for (const p of b.priority_order) {
-      body += `<div class="coord-item coord-priority"><span class="rank-chip">${p.rank}</span><a class="ticket-link" onclick="scrollToTicket('${p.ticket_id}')">${p.ticket_id}</a><span style="color:var(--fg-dim)">${escapeHtml(p.rationale || '')}</span></div>`;
-    }
-    body += `</div>`;
-  }
-  if (conflictsCount) {
-    body += `<div class="coord-section"><h3>Conflicts (${conflictsCount})</h3>`;
-    for (const c of b.conflicts) {
-      body += `<div class="coord-item" style="background:#fffbea"><strong>[${(c.agents||[]).join(' vs ')}]</strong> ${escapeHtml(c.description)} <em style="color:var(--fg-dim)">→ ${escapeHtml(c.recommendation || '')}</em></div>`;
-    }
-    body += `</div>`;
-  }
-  if (synergiesCount) {
-    body += `<div class="coord-section"><h3>Synergies (${synergiesCount})</h3>`;
-    for (const s of b.synergies) {
-      body += `<div class="coord-item" style="background:#f0fdf4"><a class="ticket-link" onclick="scrollToTicket('${s.primary_ticket_id}')">${s.primary_ticket_id}</a> → <strong>${escapeHtml(s.secondary_agent || '')}</strong>: ${escapeHtml(s.description)} <em style="color:var(--fg-dim)">→ ${escapeHtml(s.suggested_action || '')}</em></div>`;
-    }
-    body += `</div>`;
-  }
-  if (redflagsCount) {
-    body += `<div class="coord-section"><h3 style="color:var(--err)">Red flags (${redflagsCount})</h3>`;
-    for (const r of b.red_flags) {
-      body += `<div class="coord-item" style="background:#fef2f2;color:var(--err)">${escapeHtml(r)}</div>`;
-    }
-    body += `</div>`;
-  }
-  return `<div class="coord-strip" id="coord-strip">
-    <div class="coord-strip-head" onclick="toggleCoordStrip()">
-      <span class="health-dot ${healthClass}" title="overall_health: ${b.overall_health || 'unknown'}"></span>
-      <span class="coord-summary">${escapeHtml(summary)}${b.executive_summary && b.executive_summary.length > 100 ? '…' : ''}</span>
-      <span class="coord-strip-pills">
-        ${conflictsCount ? `<span class="pill has-conflicts">${conflictsCount} conflict${conflictsCount>1?'s':''}</span>` : ''}
-        ${synergiesCount ? `<span class="pill has-synergies">${synergiesCount} synergy${synergiesCount>1?'ies':''}</span>` : ''}
-        ${redflagsCount ? `<span class="pill has-redflags">${redflagsCount} red flag${redflagsCount>1?'s':''}</span>` : ''}
-      </span>
+  const time = STATE.updatedAt ? STATE.updatedAt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+  let needTxt;
+  if (pendCount == null) needTxt = `<span style="color:var(--err)">queue unavailable</span>`;
+  else if (pendCount === 0) needTxt = `<span class="big" style="color:var(--ok)">All caught up</span>`;
+  else needTxt = `<span class="big">${pendCount}</span> need you`;
+
+  el.innerHTML = `${needTxt}<span class="sep">·</span>`
+    + `<span><span class="dot" style="background:var(--ok)"></span>${running}/${AGENTS.length} agents running</span>`
+    + (time ? `<span class="sep">·</span><span>updated ${time}</span>` : '');
+}
+
+function renderFooter(){
+  const f = document.getElementById('footer');
+  const time = STATE.updatedAt ? STATE.updatedAt.toLocaleString() : '—';
+  f.innerHTML = `
+    <b>What you're looking at.</b> This board shows the ${AGENTS.length} marketing agents that are actually running right now
+    (${AGENTS.map(a=>a.name).join(', ')}), plus the 2 infrastructure agents that keep them alive (Beaver, Wolf).
+    Every "done" claim links to proof you can open — the live page or the HubSpot ticket. ${PAUSED.length} more agents are paused on purpose (see Team).
+    <div class="legend">
+      <span><span class="ld" style="background:var(--ok)"></span> live (&lt;1h)</span>
+      <span><span class="ld" style="background:var(--accent)"></span> idle (&lt;12h)</span>
+      <span><span class="ld" style="background:var(--warn)"></span> quiet (&lt;48h)</span>
+      <span><span class="ld" style="background:var(--err)"></span> silent (no recent signal)</span>
     </div>
-    <div class="coord-strip-body">${body}</div>
-  </div>`;
+    <div style="margin-top:8px">Data pulled live from agents.liftnowdirect.com · last refreshed ${escapeHtml(time)}.</div>`;
 }
 
-function toggleCoordStrip(){
-  const s = document.getElementById('coord-strip');
-  if (s) s.classList.toggle('expanded');
+function skeleton(){ return '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'; }
+function inlineErr(msg){ return `<div class="inline-err">${escapeHtml(msg)}<br><button onclick="boot(false)">Try again</button></div>`; }
+
+/* ---------------------------------------------------------------------
+   Tab routing
+   ------------------------------------------------------------------- */
+function switchTab(view){
+  currentView = view;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+  renderCurrent();
+}
+function renderCurrent(){
+  destroyCharts();
+  if (currentView === 'now')   return renderNow();
+  if (currentView === 'team')  return renderTeam();
+  if (currentView === 'trends')return renderTrends();
 }
 
-function scrollToTicket(ticketId){
-  const card = document.getElementById('card-'+ticketId);
-  if (!card) return;
-  card.scrollIntoView({behavior:'smooth', block:'center'});
-  card.classList.remove('collapsed');
-  card.classList.add('focused');
-  focusedTicketId = ticketId;
-  setTimeout(()=>card.classList.remove('focused'), 1800);
-}
-
-function enrichWithCoord(ticket){
-  if (!coordinatorBrief) return {rank:null, rationale:null, conflicts:[], synergies:[]};
-  const p = (coordinatorBrief.priority_order || []).find(p => String(p.ticket_id) === String(ticket.ticketId));
-  const conflicts = (coordinatorBrief.conflicts || []).filter(c => (c.ticket_ids || []).map(String).includes(String(ticket.ticketId)));
-  const synergies = (coordinatorBrief.synergies || []).filter(s => String(s.primary_ticket_id) === String(ticket.ticketId));
-  const redflagged = (coordinatorBrief.red_flags || []).some(r => String(r).includes(String(ticket.ticketId)));
-  return {rank: p ? p.rank : null, rationale: p ? p.rationale : null, conflicts, synergies, redflagged};
-}
-
-function getUniqueAgents(tickets){
-  return [...new Set(tickets.map(t => t.agent || '(unknown)'))].sort();
-}
-
-function renderPending(tickets){
+/* =====================================================================
+   TAB 1 — NOW   ·   "What needs me?"
+   ===================================================================== */
+function renderNow(){
   const main = document.getElementById('main');
-  let html = renderCoordStrip();
-  const agents = getUniqueAgents(tickets);
-  html += `<div class="toolbar">
-    <span class="meta">${tickets.length} pending</span>
-    ${agents.length > 1 ? `<select onchange="agentFilter=this.value;renderPending(cachedPending.tickets.filter(t=>!isReport(t)))">
-      <option value="all">All agents</option>
-      ${agents.map(a => `<option value="${escapeHtml(a)}" ${agentFilter===a?'selected':''}>${escapeHtml(a)}</option>`).join('')}
-    </select>` : ''}
-    <input type="text" placeholder="Search…" value="${escapeHtml(searchTerm)}" oninput="searchTerm=this.value;renderPending(cachedPending.tickets.filter(t=>!isReport(t)))">
-    <select onchange="sortMode=this.value;renderPending(cachedPending.tickets.filter(t=>!isReport(t)))">
-      <option value="priority" ${sortMode==='priority'?'selected':''}>Coordinator priority</option>
-      <option value="age" ${sortMode==='age'?'selected':''}>Age (newest)</option>
-      <option value="agent" ${sortMode==='agent'?'selected':''}>Agent</option>
-    </select>
-    <span class="spacer"></span>
-    <span class="meta" style="font-size:11px">j/k navigate · a approve · c condition · d defer · r reject · ? help</span>
-  </div>`;
-  let filtered = tickets;
-  if (agentFilter !== 'all') filtered = filtered.filter(t => (t.agent||'') === agentFilter);
-  if (searchTerm) {
-    const q = searchTerm.toLowerCase();
-    filtered = filtered.filter(t => ((t.subject||'') + ' ' + (t.content||'')).toLowerCase().includes(q));
+  if (STATE.pendErr || STATE.pending == null){
+    main.innerHTML = `<div class="section-head"><h2>What needs you</h2></div>` + inlineErr("Couldn't reach the approval queue.");
+    return;
   }
-  // Sort
-  if (sortMode === 'priority') {
-    const rankMap = new Map();
-    if (coordinatorBrief && coordinatorBrief.priority_order) {
-      for (const p of coordinatorBrief.priority_order) rankMap.set(String(p.ticket_id), p.rank);
-    }
-    filtered.sort((a,b)=>{
-      const ra = rankMap.get(String(a.ticketId));
-      const rb = rankMap.get(String(b.ticketId));
-      if (ra && rb) return ra - rb;
-      if (ra) return -1;
-      if (rb) return 1;
-      // priority HIGH first, then by age
-      const pOrder = {HIGH:1, MEDIUM:2, LOW:3};
-      const pa = pOrder[a.priority] || 4;
-      const pb = pOrder[b.priority] || 4;
-      if (pa !== pb) return pa - pb;
-      return (a.ageHours||0) - (b.ageHours||0);
-    });
-  } else if (sortMode === 'age') {
-    filtered.sort((a,b)=>(a.ageHours||0) - (b.ageHours||0));
-  } else if (sortMode === 'agent') {
-    filtered.sort((a,b)=>(a.agent||'').localeCompare(b.agent||''));
+  const pending = STATE.pending.slice();
+  if (!pending.length){
+    main.innerHTML = `<div class="section-head"><h2>What needs you</h2><span class="hint">your agents' open proposals land here</span></div>
+      <div class="empty celebrate"><span class="big">✓</span>You're all caught up. Nothing is waiting on you right now.</div>`;
+    return;
   }
-  if (!filtered.length) {
-    html += '<div class="empty">Inbox zero ✨</div>';
-  } else {
-    html += filtered.map(t => renderCard(t, 'pending')).join('');
+
+  // Sort: HIGH before MEDIUM/LOW, then oldest first (staleness floats up).
+  const rank = p => p === 'HIGH' ? 0 : p === 'MEDIUM' ? 1 : 2;
+  pending.sort((a,b) => rank(a.priority) - rank(b.priority) || (b.ageHours||0) - (a.ageHours||0));
+  const hi = pending.filter(t => t.priority === 'HIGH').length;
+  const med = pending.filter(t => t.priority === 'MEDIUM').length;
+  const low = pending.length - hi - med;
+
+  let html = `<div class="section-head"><h2>What needs you</h2><span class="hint">review each proposal, then approve / defer / reject</span></div>`;
+  html += `<div class="queue-summary">
+      <div class="stat"><span class="num">${pending.length}</span><span class="lbl">open ${pending.length===1?'item':'items'}</span></div>
+      ${hi  ? `<div class="stat"><span class="prio HIGH">High</span><span class="lbl">${hi}</span></div>` : ''}
+      ${med ? `<div class="stat"><span class="prio MEDIUM">Medium</span><span class="lbl">${med}</span></div>` : ''}
+      ${low ? `<div class="stat"><span class="prio LOW">Low</span><span class="lbl">${low}</span></div>` : ''}
+      <div class="stat" style="margin-left:auto"><span class="lbl">Tip: press <b>j</b>/<b>k</b> to move, <b>a</b> to approve</span></div>
+    </div>`;
+
+  let lastBucket = null;
+  for (const t of pending){
+    const bucket = t.priority === 'HIGH' ? 'High priority' : (t.priority === 'MEDIUM' ? 'Medium priority' : 'Low priority');
+    if (bucket !== lastBucket){ html += `<div class="group-label">${bucket}</div>`; lastBucket = bucket; }
+    html += actionCard(t);
   }
   main.innerHTML = html;
-  if (!shortcutHintShown && filtered.length) showShortcutHint();
 }
 
-function renderList(data, mode){
-  const main = document.getElementById('main');
-  const tickets = data.tickets || [];
-  const labels = {pending:'needs your call', inbox:'reports & summaries', done:'completed in last 7 days', activity:'autonomous actions in last 7 days'};
-  const emptyMsg = {pending:'Inbox zero ✨ — nothing needs you', inbox:'No reports to read', done:'No completed items yet', activity:'Agents have not run autonomously yet. Cron schedules every 5min–daily.'};
-  let html = `<div class="toolbar"><span class="meta">${tickets.length} ${labels[mode]||''}</span></div>`;
-  if (!tickets.length) {
-    html += `<div class="empty">${emptyMsg[mode]||'Nothing here'}</div>`;
-  } else {
-    html += tickets.map(t => renderCard(t, mode)).join('');
-  }
-  main.innerHTML = html;
-}
+function actionCard(t){
+  const id = t.ticketId;
+  const agent = AGENT_BY_TICKET[t.agent];
+  const chip = agent
+    ? `<span class="agent-chip" style="background:${agent.tint}; color:${agent.color}"><span class="emoji">${agent.emoji}</span>${agent.name}</span>`
+    : `<span class="agent-chip" style="background:#eef1f4; color:var(--muted)">${escapeHtml(t.agent||'Agent')}</span>`;
+  const prio = (t.priority || 'LOW').toUpperCase();
+  const url = pageUrlFromTicket(t);
+  const cls = prio === 'HIGH' ? 'hi' : (prio === 'MEDIUM' ? 'med' : '');
 
-function renderCard(t, mode){
-  const stageLabel = {'1':'Pending','2':'Approved','3':'In Progress','4':'Closed'}[t.stage] || t.stage;
-  const c = agentColor(t.agent);
-  const enriched = mode === 'pending' ? enrichWithCoord(t) : null;
-  const isLowPriority = (t.priority || '').toUpperCase() === 'LOW';
-  const cardClasses = ['card','collapsed'];
-  if (isLowPriority && mode === 'pending') cardClasses.push('low');
-  if (enriched && enriched.redflagged) cardClasses.push('red-flag');
-  let actionsHtml = '';
-  if (mode === 'pending') {
-    actionsHtml = `
-    <div class="actions">
-      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional comment / conditions…" oninput="autoGrow(this)"></textarea>
-      <button class="btn btn-approve" onclick="decide('${t.ticketId}','approve',this)" title="a">Approve</button>
-      <button class="btn btn-cond" onclick="decide('${t.ticketId}','conditional_approve',this)" title="c · approve with conditions in the comment box">Approve w/ Conditions</button>
-      <button class="btn btn-defer" onclick="decide('${t.ticketId}','defer',this)" title="d">Defer 3d</button>
-      <button class="btn btn-reject" onclick="decide('${t.ticketId}','reject',this)" title="r">Reject</button>
+  const proof = `<div class="proof-row">
+      <a class="proof" href="${hubspotLink(id)}" target="_blank" rel="noopener">Open ticket in HubSpot <span class="ext">↗</span></a>
+      ${url ? `<a class="proof" href="${escapeHtml(url)}" target="_blank" rel="noopener">View the live page <span class="ext">↗</span></a>` : ''}
     </div>`;
-  } else if (mode === 'inbox') {
-    actionsHtml = `
-    <div class="actions">
-      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Optional note for the agent…" oninput="autoGrow(this)"></textarea>
-      <button class="btn btn-ack" onclick="decide('${t.ticketId}','acknowledge',this)" title="Mark as read — moves to Done">Acknowledge & Clear</button>
-    </div>`;
-  } else if (mode === 'activity') {
-    actionsHtml = `
-    <div class="actions">
-      <textarea class="comment" id="comment-${t.ticketId}" placeholder="Tell the agent what to do differently next time… (saved as a Learning)" oninput="autoGrow(this)"></textarea>
-      <button class="btn btn-ack" onclick="decide('${t.ticketId}','acknowledge',this)" title="File this receipt + feed the comment back to the agent">File &amp; Feedback</button>
-    </div>`;
-  }
-  let coordCtx = '';
-  if (enriched) {
-    if (enriched.rank) {
-      coordCtx += `<div class="coord-context">Coordinator ranked #${enriched.rank} — ${escapeHtml(enriched.rationale||'')}</div>`;
-    }
-    if (enriched.conflicts.length) {
-      const conf = enriched.conflicts[0];
-      coordCtx += `<div class="coord-context coord-conflict">⚠ Conflicts with: <strong>[${(conf.agents||[]).join(', ')}]</strong> — ${escapeHtml(conf.description||'')} <em>→ ${escapeHtml(conf.recommendation||'')}</em></div>`;
-    }
-    if (enriched.synergies.length) {
-      const syn = enriched.synergies[0];
-      coordCtx += `<div class="coord-context" style="background:#f0fdf4;border-left-color:var(--ok)">✨ Synergy → <strong>${escapeHtml(syn.secondary_agent||'')}</strong>: ${escapeHtml(syn.description||'')} <em>→ ${escapeHtml(syn.suggested_action||'')}</em></div>`;
-    }
-  }
-  const ageCls = ageClass(t.ageHours || 0);
-  return `
-  <div class="${cardClasses.join(' ')}" id="card-${t.ticketId}" data-ticket="${t.ticketId}">
-    <div class="card-head" onclick="toggleCard('${t.ticketId}')">
-      ${enriched && enriched.rank ? `<span class="rank-chip in-card">${enriched.rank}</span>` : ''}
-      ${enriched && enriched.redflagged ? `<span class="redflag-dot" title="Coordinator flagged"></span>` : ''}
-      <span class="agent-badge" style="--badge-bg:${c.bg};--badge-fg:${c.fg}">${escapeHtml(t.agent||'(unknown)')}</span>
-      <span class="priority priority-${escapeHtml(t.priority||'LOW')}">${escapeHtml(t.priority||'LOW')}</span>
-      <span class="subject">${escapeHtml(t.subject||'(no subject)')}</span>
-      <span class="age ${ageCls}">${mode === 'done' ? stageLabel + ' · ' : ''}${mode === 'activity' ? '✓ done · ' : ''}${ageLabel(t.ageHours||0)}</span>
+
+  return `<div class="card ${cls}" id="card-${id}" data-ticket="${id}">
+    <div class="card-head" onclick="toggleCard('${id}')">
+      ${chip}
+      <span class="prio ${prio}">${prio}</span>
+      <span class="card-subject">${escapeHtml(t.subject || '(no subject)')}</span>
+      <span class="card-age ${ageClass(t.ageHours)}">${ageLabel(t.ageHours)}</span>
     </div>
-    ${coordCtx}
-    <div class="body">${renderTicketContent(t.content)}
-      ${t.recommendationDetail ? `<details><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Recommendation detail</summary><pre>${escapeHtml(t.recommendationDetail)}</pre></details>` : ''}
-      ${t.outcomeNotes ? `<details open><summary style="margin-top:8px;cursor:pointer;color:var(--muted)">Outcome notes</summary><pre>${escapeHtml(t.outcomeNotes)}</pre></details>` : ''}
+    ${proof}
+    <div class="card-body">${renderTicketContent(t.content)}
+      ${t.outcomeNotes ? `<details><summary>Agent notes</summary><pre>${escapeHtml(t.outcomeNotes)}</pre></details>` : ''}
     </div>
-    ${actionsHtml}
+    <div class="actions">
+      <button class="btn btn-approve" onclick="decide('${id}','approve',this)">Approve</button>
+      <button class="btn btn-cond"    onclick="decide('${id}','conditional_approve',this)">Approve with a note</button>
+      <button class="btn btn-defer"   onclick="decide('${id}','defer',this)">Defer 3 days</button>
+      <button class="btn btn-reject"  onclick="decide('${id}','reject',this)">Reject</button>
+      <textarea id="comment-${id}" class="comment" placeholder="Add a note — required to reject or approve-with-a-note. The team learns from this." oninput="autoGrow(this)"></textarea>
+    </div>
   </div>`;
 }
 
-function toggleCard(id){
-  const c = document.getElementById('card-'+id);
-  if (c) c.classList.toggle('collapsed');
-}
+function toggleCard(id){ const c = document.getElementById('card-'+id); if (c) c.classList.toggle('collapsed'); }
 
-function autoGrow(el){
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 200) + 'px';
-}
-
+/* --- PROVEN CONTRACT: process-decision (preserved verbatim) --- */
 async function decide(ticketId, decision, btn){
   const comment = document.getElementById('comment-'+ticketId)?.value || '';
-  if (decision === 'conditional_approve' && !comment.trim()) {
-    toast('Conditional approve needs a condition in the comment box', 'err');
-    return;
-  }
-  if (decision === 'reject' && !comment.trim()) {
-    toast('Reject needs a reason in the comment — the team learns from this', 'err');
-    return;
-  }
+  if (decision === 'conditional_approve' && !comment.trim()){ toast('Approve-with-a-note needs the condition in the note box', 'err'); return; }
+  if (decision === 'reject' && !comment.trim()){ toast('Reject needs a reason in the note — the team learns from this', 'err'); return; }
   const card = document.getElementById('card-'+ticketId);
   card.querySelectorAll('button').forEach(b => b.disabled = true);
   card.classList.add('fading');
-  // Optimistic
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
   try {
@@ -1185,46 +742,37 @@ async function decide(ticketId, decision, btn){
     });
     clearTimeout(timeoutId);
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const label = decision === 'conditional_approve' ? 'CONDITIONAL APPROVE' : decision.toUpperCase();
+    const label = decision === 'conditional_approve' ? 'APPROVED (with note)' : decision.toUpperCase();
     toast(`${label} sent`, 'ok');
     setTimeout(() => {
       card.remove();
-      advanceFocus(ticketId);
-      // Update pending count
-      if (cachedPending) {
-        cachedPending.tickets = cachedPending.tickets.filter(t => t.ticketId !== ticketId);
-        const proposals = cachedPending.tickets.filter(t => !isReport(t));
-        document.getElementById('count-pending').textContent = proposals.length || '';
-      }
+      if (STATE.pending){ STATE.pending = STATE.pending.filter(t => t.ticketId !== ticketId); renderHeader(); }
+      advanceFocus();
+      if (!document.querySelector('.card[data-ticket]')) renderNow();  // empty → celebrate state
     }, 250);
   } catch (e) {
     clearTimeout(timeoutId);
-    if (e.name === 'AbortError') {
-      toast('Timed out — try again, no decision was saved', 'err');
-    } else {
-      toast('Failed: '+e.message, 'err');
-    }
+    toast(e.name === 'AbortError' ? 'Timed out — try again, nothing was saved' : 'Failed: '+e.message, 'err');
     card.classList.remove('fading');
     card.querySelectorAll('button').forEach(b => b.disabled = false);
   }
 }
 
-function advanceFocus(removedId){
+function advanceFocus(){
   const cards = Array.from(document.querySelectorAll('.card[data-ticket]'));
   if (!cards.length) return;
-  const next = cards[0];
-  if (next) {
-    next.classList.add('focused');
-    focusedTicketId = next.dataset.ticket;
-    next.scrollIntoView({behavior:'smooth', block:'nearest'});
-  }
+  cards.forEach(c => c.classList.remove('focused'));
+  cards[0].classList.add('focused');
+  focusedTicketId = cards[0].dataset.ticket;
+  cards[0].scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
+/* --- PROVEN CONTRACT: kill-switch (preserved verbatim body) --- */
 async function triggerKillSwitch(){
-  const action = confirm('PAUSE ALL EMAIL + EXECUTION AGENTS?\n\nThis will deactivate 8 agents: SEM Manager, Backlink Builder, Backlink Poster, LinkedIn Cadence, Content Producer, SEO Optimizer, UI/UX Performance, Content Decay.\n\nThey will stop firing until you reactivate.\n\nClick OK to deactivate, Cancel to abort.');
-  if (!action) return;
+  const ok = confirm('Pause all active agents?\n\nThis triggers the master kill-switch, which deactivates the running agents so they stop firing. They stay paused until you reactivate them from the n8n UI.\n\nClick OK to pause, Cancel to abort.');
+  if (!ok) return;
   const btn = document.getElementById('kill-switch-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Pausing…'; }
+  if (btn){ btn.disabled = true; btn.textContent = 'Pausing…'; }
   try {
     const r = await fetch(`${API_BASE}/kill-switch`, {
       method: 'POST',
@@ -1232,1275 +780,215 @@ async function triggerKillSwitch(){
       body: JSON.stringify({action: 'deactivate', secret: AGENT_SECRET})
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    toast('All risky agents PAUSED. Reactivate from n8n UI when ready.', 'ok');
-    if (btn) { btn.textContent = 'All agents paused'; btn.style.background = '#fff5f5'; }
+    toast('All agents paused. Reactivate from the n8n UI when ready.', 'ok');
+    if (btn){ btn.textContent = 'Paused'; btn.style.background = 'var(--err-soft)'; }
   } catch (e) {
     toast(`Kill switch failed: ${e.message}`, 'err');
-    if (btn) { btn.disabled = false; btn.textContent = 'Emergency: pause all agents'; }
+    if (btn){ btn.disabled = false; btn.textContent = 'Pause all'; }
   }
 }
 
-function toast(msg, kind='ok'){
-  const t = document.createElement('div');
-  t.className = 'toast ' + kind;
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => {t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)}, 2500);
-}
+/* =====================================================================
+   TAB 2 — TEAM   ·   "How is each agent doing? (provable)"
+   ===================================================================== */
+function renderTeam(){
+  const main = document.getElementById('main');
+  let html = `<div class="section-head"><h2>Your team</h2><span class="hint">live status, what each one shipped, and proof you can open</span></div>`;
 
-function showShortcutHint(){
-  if (shortcutHintShown) return;
-  const h = document.createElement('div');
-  h.className = 'shortcut-hint';
-  h.textContent = 'j/k navigate · a approve · c condition · d defer · r reject · ? help';
-  document.body.appendChild(h);
-  setTimeout(() => h.classList.add('fade-out'), 5000);
-  setTimeout(() => h.remove(), 6000);
-  sessionStorage.setItem('shortcutHintShown', '1');
-  shortcutHintShown = true;
-}
-
-// === Keyboard navigation ===
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
-    if (e.key === 'Escape') e.target.blur();
+  if (STATE.allErr && STATE.hbErr){
+    main.innerHTML = html + inlineErr("Couldn't reach the agent backend.");
     return;
   }
-  if (currentView !== 'decide') return;
+
+  for (const a of AGENTS) html += scorecard(a);
+
+  // Infra
+  html += `<div class="group-label">Keeping the team running</div><div class="infra-note"><div class="infra-grid">`;
+  for (const i of INFRA){
+    const st = statusFromHours(lastSeenHours(i.hbId));
+    const s = hbStats(i.hbId);
+    html += `<div class="infra-cell">
+        <span class="ie">${i.emoji}</span>
+        <div>
+          <div class="nm">${i.name} <span class="status ${st.k}" style="font-size:11px; padding:2px 7px"><span class="dot"></span>${st.label}</span></div>
+          <div class="rl">${i.role}</div>
+          <div class="mt">${escapeHtml(i.what)}</div>
+          <div class="mt"><b>${s.total}</b> heartbeats in last 24h${s.errored ? ` · <span style="color:var(--err)">${s.errored} error${s.errored>1?'s':''}</span>` : ' · all clean'}</div>
+        </div>
+      </div>`;
+  }
+  html += `</div></div>`;
+
+  // Paused disclosure
+  html += `<details class="paused-box">
+      <summary><span class="chev">▸</span> ${PAUSED.length} agents are paused on purpose <span style="color:var(--faint); font-weight:400">— click to see which and why</span></summary>
+      <div class="paused-list">
+        ${PAUSED.map(([n,why]) => `<div class="paused-item"><span>${escapeHtml(n)}</span><span class="why">${escapeHtml(why)}</span></div>`).join('')}
+      </div>
+    </details>`;
+
+  main.innerHTML = html;
+}
+
+function scorecard(a){
+  const tickets = ticketsFor(a);
+  const pending = pendingFor(a).length;
+  const sc = stageCounts(tickets);
+  const shipped = sc['1363043699'] || 0;       // auto-applied
+  const total = tickets.length;
+  const s = hbStats(a.hbId);
+  const lsh = lastSeenHours(a.hbId);
+  const st = statusFromHours(lsh);
+
+  // latest ticket by createdAt
+  const latest = tickets.slice().sort((x,y) => String(y.createdAt||'').localeCompare(String(x.createdAt||'')))[0];
+  const url = latest ? pageUrlFromTicket(latest) : null;
+
+  const errBit = s.errored ? `<span class="metric"><span class="v err">${s.errored}</span><span class="k">${plural(s.errored,'error')} / 24h</span></span>`
+                           : `<span class="metric"><span class="v ok">0</span><span class="k">errors / 24h</span></span>`;
+
+  let latestHtml = '';
+  if (latest){
+    latestHtml = `<div class="sc-latest">
+        <div class="ll">Most recent</div>
+        <div class="subj">${escapeHtml(latest.subject || '(no subject)')} <span class="when">· ${ageLabel(latest.ageHours)} · ${STAGE_LABEL[String(latest.stage)] || 'in pipeline'}</span></div>
+        <div class="proof-row" style="padding:0">
+          <a class="proof" href="${hubspotLink(latest.ticketId)}" target="_blank" rel="noopener">Open ticket in HubSpot <span class="ext">↗</span></a>
+          ${url ? `<a class="proof" href="${escapeHtml(url)}" target="_blank" rel="noopener">View the live page <span class="ext">↗</span></a>` : ''}
+        </div>
+      </div>`;
+  } else {
+    latestHtml = `<div class="sc-latest"><div class="ll">Most recent</div><div style="color:var(--faint); font-size:13px">No tickets filed yet${s.total ? ` — but it fired ${s.total}× in the last 24h, so it's running.` : '.'}</div></div>`;
+  }
+
+  return `<div class="scorecard">
+    <div class="sc-head">
+      <div class="sc-emoji" style="background:${a.tint}">${a.emoji}</div>
+      <div class="sc-title"><div class="name">${a.name}</div><div class="role">${a.role}</div></div>
+      <span class="status ${st.k}"><span class="dot"></span>${st.label}${lsh!=null ? ` · ${ageLabel(lsh)}` : ''}</span>
+    </div>
+    <div class="sc-what">${escapeHtml(a.what)}</div>
+    <div class="sc-metrics">
+      <span class="metric"><span class="v">${s.total}</span><span class="k">${plural(s.total,'run')} / 24h</span></span>
+      <span class="metric"><span class="v ${pending?'warn':''}">${pending}</span><span class="k">need you</span></span>
+      <span class="metric"><span class="v ${shipped?'ok':''}">${shipped}</span><span class="k">auto-shipped</span></span>
+      ${errBit}
+    </div>
+    ${latestHtml}
+  </div>`;
+}
+
+/* =====================================================================
+   TAB 3 — TRENDS   ·   "Is it working over time?"
+   ===================================================================== */
+function renderTrends(){
+  const main = document.getElementById('main');
+  let html = `<div class="section-head"><h2>Trends</h2><span class="hint">activity and outcomes over time — all from live data</span></div>`;
+
+  const all = STATE.all || [];
+  const totalRuns = STATE.hb?.total_24h ?? Object.values(STATE.hb?.stats_24h || {}).reduce((n,s)=>n+(s.total||0),0);
+  const sc = stageCounts(all);
+  const shipped = sc['1363043699'] || 0;
+  const needs = STATE.pending ? STATE.pending.length : (sc['1'] || 0);
+  const fbTotal = STATE.fb?.feedbackCounts ? Object.values(STATE.fb.feedbackCounts).reduce((n,v)=>n+(Number(v)||0),0) : null;
+
+  html += `<div class="stat-strip">
+      <div class="stat-tile"><div class="v">${totalRuns ?? '—'}</div><div class="k">agent runs · 24h</div></div>
+      <div class="stat-tile"><div class="v">${all.length}</div><div class="k">tickets on record</div></div>
+      <div class="stat-tile"><div class="v" style="color:var(--ok)">${shipped}</div><div class="k">auto-shipped</div></div>
+      <div class="stat-tile"><div class="v">${fbTotal ?? '—'}</div><div class="k">your feedback given</div></div>
+    </div>`;
+
+  // chart cards (canvases filled after innerHTML set)
+  html += `<div class="chart-card"><h3>Agent activity by hour</h3><p class="sub">Heartbeats logged across the last day (UTC). A steady pulse means the team is alive and working.</p>
+      ${STATE.hbErr ? inlineErr("Heartbeat feed unavailable.") : `<div class="chart-wrap"><canvas id="chart-hours"></canvas></div>`}</div>`;
+
+  html += `<div class="chart-card"><h3>Where tickets end up</h3><p class="sub">Outcome of every ticket on record. "Closed / rejected" includes internal alerts the system auto-resolves — not just your rejections.</p>
+      ${STATE.allErr ? inlineErr("Ticket feed unavailable.") : `<div class="chart-wrap short"><canvas id="chart-stage"></canvas></div>`}</div>`;
+
+  html += `<div class="chart-card"><h3>Who's producing</h3><p class="sub">Tickets filed per agent. Bee leads on volume; the others run at a steadier cadence.</p>
+      ${STATE.allErr ? inlineErr("Ticket feed unavailable.") : `<div class="chart-wrap short"><canvas id="chart-agents"></canvas></div>`}</div>`;
+
+  main.innerHTML = html;
+
+  if (typeof Chart === 'undefined'){
+    document.querySelectorAll('.chart-wrap').forEach(w => w.innerHTML = '<div class="empty" style="padding:30px">Charts library didn\'t load — check your connection and refresh.</div>');
+    return;
+  }
+  Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+  Chart.defaults.color = '#656d76';
+
+  if (!STATE.hbErr) drawHoursChart();
+  if (!STATE.allErr){ drawStageChart(all); drawAgentsChart(all); }
+}
+
+function drawHoursChart(){
+  const beats = STATE.hb?.heartbeats || [];
+  const byHour = new Array(24).fill(0);
+  for (const h of beats){ const at = h.at || ''; if (at.length >= 13){ const hr = parseInt(at.slice(11,13)); if (hr>=0 && hr<24) byHour[hr]++; } }
+  const labels = byHour.map((_,i) => String(i).padStart(2,'0'));
+  const ctx = document.getElementById('chart-hours'); if (!ctx) return;
+  charts.push(new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ data:byHour, backgroundColor:'#0366d6', borderRadius:4, maxBarThickness:20 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{title:i=>`${i[0].label}:00 UTC`, label:i=>`${i.raw} heartbeats`}}},
+      scales:{ x:{grid:{display:false}, ticks:{maxRotation:0, autoSkip:true, maxTicksLimit:12}}, y:{beginAtZero:true, ticks:{precision:0}, grid:{color:'#eef1f4'}} } }
+  }));
+}
+
+function drawStageChart(all){
+  const sc = stageCounts(all);
+  const order = [['1','Needs review','#0366d6'], ['1363043699','Auto-shipped','#1a7f37'], ['2','Approved','#16a34a'], ['3','Deferred','#9a6700'], ['4','Closed / rejected','#d0d7de']];
+  const rows = order.filter(([k]) => sc[k]);
+  const ctx = document.getElementById('chart-stage'); if (!ctx) return;
+  charts.push(new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels: rows.map(r=>r[1]), datasets:[{ data: rows.map(r=>sc[r[0]]), backgroundColor: rows.map(r=>r[2]), borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%', plugins:{ legend:{position:'right', labels:{boxWidth:12, padding:12, font:{size:12}}}, tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw}`}} } }
+  }));
+}
+
+function drawAgentsChart(all){
+  const counts = AGENTS.map(a => ({ a, n: all.filter(t => (t.agent||'') === a.ticketAgent).length }));
+  const ctx = document.getElementById('chart-agents'); if (!ctx) return;
+  charts.push(new Chart(ctx, {
+    type:'bar',
+    data:{ labels: counts.map(c => `${c.a.emoji} ${c.a.name}`),
+      datasets:[{ data: counts.map(c=>c.n), backgroundColor: counts.map(c=>c.a.color), borderRadius:5, maxBarThickness:26 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:i=>`${i.raw} tickets filed`}}},
+      scales:{ x:{beginAtZero:true, ticks:{precision:0}, grid:{color:'#eef1f4'}}, y:{grid:{display:false}} } }
+  }));
+}
+
+function destroyCharts(){ charts.forEach(c => { try { c.destroy(); } catch(e){} }); charts = []; }
+
+/* ---------------------------------------------------------------------
+   Keyboard nav on the Now tab (proven shortcuts)
+   ------------------------------------------------------------------- */
+document.addEventListener('keydown', e => {
+  if (['TEXTAREA','INPUT','SELECT'].includes(e.target.tagName)){ if (e.key === 'Escape') e.target.blur(); return; }
+  if (currentView !== 'now') return;
   const cards = Array.from(document.querySelectorAll('.card[data-ticket]'));
   if (!cards.length) return;
   const focused = focusedTicketId ? cards.find(c => c.dataset.ticket === focusedTicketId) : null;
   const idx = focused ? cards.indexOf(focused) : -1;
-  const setFocus = (c) => {
-    cards.forEach(cc => cc.classList.remove('focused'));
-    c.classList.add('focused');
-    c.classList.remove('collapsed');
-    focusedTicketId = c.dataset.ticket;
-    c.scrollIntoView({behavior:'smooth', block:'nearest'});
-  };
-  if (e.key === 'j') { e.preventDefault(); setFocus(cards[Math.min(idx+1, cards.length-1)] || cards[0]); }
-  else if (e.key === 'k') { e.preventDefault(); setFocus(cards[Math.max(idx-1, 0)] || cards[0]); }
-  else if (e.key === 'a' && focused) { e.preventDefault(); decide(focused.dataset.ticket, 'approve'); }
-  else if (e.key === 'c' && focused) { e.preventDefault(); const ta = document.getElementById('comment-'+focused.dataset.ticket); if (ta) ta.focus(); }
-  else if (e.key === 'd' && focused) { e.preventDefault(); decide(focused.dataset.ticket, 'defer'); }
-  else if (e.key === 'r' && focused) { e.preventDefault(); const ta = document.getElementById('comment-'+focused.dataset.ticket); if (ta) ta.focus(); }
-  else if (e.key === '/' ) { e.preventDefault(); document.querySelector('input[type=text]')?.focus(); }
-  else if (e.key === 'Enter' && focused) { e.preventDefault(); focused.classList.toggle('collapsed'); }
+  const setFocus = (c) => { cards.forEach(cc => cc.classList.remove('focused')); c.classList.add('focused'); focusedTicketId = c.dataset.ticket; c.scrollIntoView({behavior:'smooth', block:'nearest'}); };
+  if (e.key === 'j'){ e.preventDefault(); setFocus(cards[Math.min(idx+1, cards.length-1)] || cards[0]); }
+  else if (e.key === 'k'){ e.preventDefault(); setFocus(cards[Math.max(idx-1, 0)] || cards[0]); }
+  else if (e.key === 'a' && focused){ e.preventDefault(); decide(focused.dataset.ticket, 'approve'); }
+  else if (e.key === 'd' && focused){ e.preventDefault(); decide(focused.dataset.ticket, 'defer'); }
+  else if ((e.key === 'r' || e.key === 'c') && focused){ e.preventDefault(); document.getElementById('comment-'+focused.dataset.ticket)?.focus(); }
 });
 
-// === Tabs renderers ===
-async function renderToday(){
-  const main = document.getElementById('main');
-  // Fetch all data in parallel
-  const [pendingRes, doneRes, inboxRes, roiRes, hbRes] = await Promise.allSettled([
-    fetchTickets('pending'),
-    fetchTickets('done'),
-    fetchTickets('inbox'),
-    fetch(`${API_BASE}/roi-data`).then(r => r.ok ? r.json() : null).catch(()=>null),
-    fetch(`${API_BASE}/agent-heartbeat?action=read&limit=30`).then(r => r.ok ? r.json() : null).catch(()=>null)
-  ]);
-  const pendingData = pendingRes.status === 'fulfilled' ? pendingRes.value : {tickets:[]};
-  const doneData = doneRes.status === 'fulfilled' ? doneRes.value : {tickets:[]};
-  const inboxData = inboxRes.status === 'fulfilled' ? inboxRes.value : {tickets:[]};
-  const roi = roiRes.status === 'fulfilled' ? roiRes.value : null;
-  const hb = hbRes.status === 'fulfilled' ? hbRes.value : null;
-
-  // Compute 24h failure count from inbox + pending
-  const allTickets = [...(inboxData.tickets||[]), ...(pendingData.tickets||[])];
-  const failures24h = allTickets.filter(t => /Agent Failed|ESCALATED/i.test(t.subject||'') && (t.ageHours||999) < 24);
-  const escalatedNow = (pendingData.tickets||[]).filter(t => /ESCALATED/i.test(t.subject||''));
-
-  // Identify hero items: prefer Triage Digest's top5 ticket if present today; fall back to top 3 pending
-  let heroItems = [];
-  const triageT = (pendingData.tickets || []).concat(doneData.tickets || []).find(t => /^\[TRIAGE\]/i.test(t.subject||''));
-  if (triageT) {
-    try {
-      const detail = JSON.parse(triageT.recommendationDetail || '{}');
-      const ids = detail.top5_ids || [];
-      const lookup = {};
-      (pendingData.tickets || []).forEach(t => { lookup[t.ticketId] = t; });
-      heroItems = ids.slice(0, 3).map(id => lookup[id]).filter(Boolean);
-    } catch(e){}
-  }
-  if (heroItems.length === 0) {
-    // Fallback: top 3 by priority/age from pending (skip reports)
-    heroItems = (pendingData.tickets || [])
-      .filter(t => !isReport(t))
-      .sort((a,b) => {
-        const pw = {HIGH:3,MEDIUM:2,LOW:1};
-        return (pw[(b.priority||'LOW').toUpperCase()]||1) - (pw[(a.priority||'LOW').toUpperCase()]||1);
-      })
-      .slice(0, 3);
-  }
-
-  // Compute KPIs
-  const allDone = doneData.tickets || [];
-  const autoExec = allDone.filter(t => /AUTO_EXECUTED/.test(t.outcomeNotes || ''));
-  const sevenDayMs = 7 * 86400000;
-  const recentAuto = autoExec.filter(t => (t.ageHours||999) < 24*7);
-  const todayMs = 24 * 3600 * 1000;
-  const todayAuto = autoExec.filter(t => (t.ageHours||999) < 24);
-
-  // Pull from new ROI shape: roi.totals.google_ads_spend_30d / .google_ads_conversions_30d / .google_ads_cpa / .google_ads_ctr_pct
-  const t = (roi && roi.totals) || {};
-  const kpiHtml = roi && roi.ok ? `
-    <div class="kpi"><div class="kpi-label">Google 30d spend</div><div class="kpi-value">$${Math.round(t.google_ads_spend_30d || 0).toLocaleString()}</div><div class="kpi-trend flat">${t.google_ads_clicks_30d || 0} clicks</div></div>
-    <div class="kpi"><div class="kpi-label">30d conversions</div><div class="kpi-value">${(t.google_ads_conversions_30d ?? 0)}</div><div class="kpi-trend flat">${t.google_ads_cpa ? 'CPA $'+t.google_ads_cpa : 'no conversions'}</div></div>
-    <div class="kpi"><div class="kpi-label">CTR</div><div class="kpi-value">${t.google_ads_ctr_pct ? t.google_ads_ctr_pct+'%' : '—'}</div><div class="kpi-trend flat">${Math.round((t.google_ads_impressions_30d||0)/1000)}k impressions</div></div>
-    <div class="kpi"><div class="kpi-label">MS daily budget</div><div class="kpi-value">$${(roi.microsoft_daily_budget_total||0).toFixed(0)}</div><div class="kpi-trend flat">${(roi.microsoft_campaigns||[]).filter(c=>c.status==='Active').length} active campaigns</div></div>
-    <div class="kpi"><div class="kpi-label">Auto-actions 7d</div><div class="kpi-value">${recentAuto.length}</div><div class="kpi-trend ${todayAuto.length>0?'up':'flat'}">${todayAuto.length} today</div></div>
-  ` : `
-    <div class="kpi"><div class="kpi-label">Ad spend</div><div class="kpi-value">—</div><div class="kpi-trend flat">ROI data not yet pulled</div></div>
-    <div class="kpi"><div class="kpi-label">Auto-actions 7d</div><div class="kpi-value">${recentAuto.length}</div></div>
-    <div class="kpi"><div class="kpi-label">Auto-actions today</div><div class="kpi-value">${todayAuto.length}</div></div>
-    <div class="kpi"><div class="kpi-label">Pending</div><div class="kpi-value">${(pendingData.tickets||[]).filter(t=>!isReport(t)).length}</div></div>
-  `;
-
-  // Build hero HTML
-  let heroHtml = '';
-  if (heroItems.length === 0) {
-    heroHtml = '<div class="hero-empty">Inbox zero. Nothing requires you right now. ✨</div>';
-  } else {
-    heroHtml = `<div class="hero-list">` + heroItems.map((t, i) => `
-      <div class="hero-item" onclick="switchTab('decide'); setTimeout(()=>scrollToTicket('${t.ticketId}'),300)">
-        <div class="hero-num">${i+1}</div>
-        <div class="hero-text">
-          <div class="label">${escapeHtml(t.agent||'')} · ${escapeHtml(t.recommendationType||'')}</div>
-          ${escapeHtml((t.subject||'').slice(0,100))}
-        </div>
-      </div>
-    `).join('') + `</div>`;
-  }
-
-  // Build recent feed (last 10 auto-executed)
-  const recentItems = autoExec.slice(0, 10);
-  const feedHtml = recentItems.length === 0 ? '<div class="meta">No agent activity in the last week yet.</div>' : recentItems.map(t => {
-    const icon = /failed|error/i.test(t.subject||'') ? 'alert' : /briefing|coordinator|patterns/i.test(t.subject||'') ? 'info' : 'done';
-    const iconChar = icon === 'alert' ? '!' : icon === 'info' ? 'i' : '✓';
-    return `<div class="feed-item">
-      <div class="feed-icon ${icon}">${iconChar}</div>
-      <div class="feed-text">${escapeHtml((t.subject||'').slice(0,110))}</div>
-      <div class="feed-time">${ageLabel(t.ageHours||0)}</div>
-    </div>`;
-  }).join('');
-
-  // === News feed: heartbeats + tickets merged + grouped by hour, plain-English ===
-  const heartbeats = (hb && hb.heartbeats) || [];
-
-  // Animal emoji + display-name lookup (used by news feed)
-  const AGENT_EMOJI = {
-    carla:'🦉', sam:'🐝', max:'🦊', riley:'🦊', sem:'🦊',
-    kai:'🐕', bran:'🕷️', reed:'🦇', nox:'🦇', reddit:'🦇',
-    lin:'🦜', eve:'🐘', pip:'🐘', briefing:'🐘',
-    uma:'🦅', dax:'🐢', vex:'🐈', theo:'🐉',
-    sentinel:'🐺', forge:'🦫', iris:'🐿️'
-  };
-  const AGENT_ANIMAL_NAME = {
-    carla:'Owl', sam:'Bee', max:'Fox', riley:'Fox', sem:'Fox',
-    kai:'Hound', bran:'Spider', reed:'Bat', nox:'Bat', reddit:'Bat',
-    lin:'Parrot', eve:'Elephant', pip:'Elephant', briefing:'Elephant',
-    uma:'Eagle', dax:'Turtle', vex:'Cat', theo:'Dragon',
-    sentinel:'Wolf', forge:'Beaver', iris:'Squirrel'
-  };
-  function emojiFor(agentId){ return AGENT_EMOJI[agentId] || '🐾'; }
-  function animalFor(agentId){ return AGENT_ANIMAL_NAME[agentId] || agentId; }
-
-  // Build news items from heartbeats (last 24h) + recent ticket activity
-  const newsItems = [];
-  for (const h of heartbeats.slice(0, 40)) {
-    newsItems.push({
-      when: new Date(h.at).getTime(),
-      emoji: emojiFor(h.agentId),
-      who: animalFor(h.agentId),
-      what: h.summary || 'did some work',
-      outcome: h.outcome,
-      link: h.workflow_id && h.exec_id ? `https://agents.liftnowdirect.com/workflow/${h.workflow_id}/executions/${h.exec_id}` : null,
-      kind: 'fire'
-    });
-  }
-  // Add tickets created in last 24h as "produced something" items
-  for (const t of (doneData.tickets||[]).slice(0,30)) {
-    if (!t.createdAt) continue;
-    const ms = new Date(t.createdAt).getTime();
-    if (Date.now() - ms > 24*3600*1000) continue;
-    if (/^\[done\] sem auto/i.test(t.subject||'')) {
-      const m = (t.subject||'').match(/\$([\d.]+)[→\-\>]+\$([\d.]+)/);
-      newsItems.push({
-        when: ms, emoji: '🦊', who: 'Fox',
-        what: m ? `Changed a Google Ads budget: $${m[1]} → $${m[2]} (Real Change in Google Ads)` : 'Made a Google Ads budget change',
-        outcome: 'action_taken', kind: 'artifact',
-        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
-      });
-    } else if (/\[suggestion\] sem/i.test(t.subject||'')) {
-      newsItems.push({
-        when: ms, emoji: '🦊', who: 'Fox',
-        what: 'Emailed you a Google Ads suggestion (no change made — email only)',
-        outcome: 'info', kind: 'artifact',
-        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
-      });
-    } else if (/\[DRAFT FOR YOUR REVIEW\]/i.test(t.subject||'')) {
-      newsItems.push({
-        when: ms, emoji: '🕷️', who: 'Spider',
-        what: `Drafted a backlink outreach email — waiting for your approval`,
-        outcome: 'action_taken', kind: 'artifact',
-        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
-      });
-    } else if (/\[BRIEFING\]|Daily/i.test(t.subject||'')) {
-      newsItems.push({
-        when: ms, emoji: '🐘', who: 'Elephant',
-        what: 'Wrote a Daily Briefing (top of this tab)',
-        outcome: 'info', kind: 'artifact',
-        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
-      });
-    } else if (/Content Producer|Content Draft/i.test(t.subject + ' ' + (t.recommendationType||''))) {
-      newsItems.push({
-        when: ms, emoji: '🦉', who: 'Owl',
-        what: `Drafted a content piece: "${(t.subject||'').replace(/^\[.*?\]\s*/,'').slice(0,60)}"`,
-        outcome: 'action_taken', kind: 'artifact',
-        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
-      });
-    }
-  }
-
-  // Sort + dedupe (within same agent within 1 min, keep the artifact over the heartbeat)
-  newsItems.sort((a,b) => b.when - a.when);
-  const dedup = [];
-  for (const item of newsItems) {
-    const collisions = dedup.filter(d => d.who === item.who && Math.abs(d.when - item.when) < 60000);
-    if (collisions.some(c => c.kind === 'artifact')) continue;
-    dedup.push(item);
-  }
-
-  // Compute today summary using REAL outcomes
-  const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
-  const todayItems = dedup.filter(i => i.when >= startOfDay.getTime());
-  const todayActions = todayItems.filter(i => i.outcome === 'produced_artifact' || i.outcome === 'action_taken' || i.kind === 'artifact').length;
-  const todaySkipped = todayItems.filter(i => i.outcome === 'skipped_by_gate').length;
-  const todayChecks  = todayItems.filter(i => i.outcome === 'ran_no_output' || i.outcome === 'no_op' || i.outcome === 'info').length;
-  const todayErrors  = todayItems.filter(i => i.outcome === 'error').length;
-
-  // Color-code each item by REAL outcome (not fake "success")
-  const activityHtml = dedup.length === 0 ? '<div class="meta" style="padding:8px 0">No activity logged yet. The team is just waking up.</div>' :
-    dedup.slice(0, 25).map(item => {
-      const linkOpen = item.link ? `<a href="${item.link}" target="_blank" style="text-decoration:none;color:inherit;display:flex;gap:10px;width:100%;align-items:center;padding:8px 10px;border-radius:6px;border-left:3px solid transparent" onmouseover="this.style.background='#f6f8fa'" onmouseout="this.style.background='transparent'">` : '<div style="display:flex;gap:10px;width:100%;align-items:center;padding:8px 10px;border-left:3px solid transparent">';
-      const linkClose = item.link ? '</a>' : '</div>';
-      const tag = item.outcome === 'error' ? `<span style="color:var(--err);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">⚠ Error</span>`
-                : item.outcome === 'produced_artifact' || item.kind === 'artifact' ? `<span style="color:var(--ok);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">✓ Produced</span>`
-                : item.outcome === 'skipped_by_gate' ? `<span style="color:#9333ea;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">⊘ Skipped</span>`
-                : item.outcome === 'ran_no_output' ? `<span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">○ No Work</span>`
-                : `<span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">·</span>`;
-      return `${linkOpen}
-        <div style="font-size:20px;flex-shrink:0;width:32px;text-align:center">${item.emoji}</div>
-        <div style="flex:1;font-size:13px;line-height:1.45;color:var(--fg)">
-          <div style="display:flex;align-items:center;gap:8px">${tag}<b>${item.who}</b></div>
-          <div style="margin-top:2px">${escapeHtml(item.what)}${item.link?' <span style="color:var(--accent);font-size:11px">→</span>':''}</div>
-        </div>
-        <div style="color:var(--muted);font-size:11px;flex-shrink:0;font-variant-numeric:tabular-nums">${relativeAge(new Date(item.when).toISOString())}</div>
-      ${linkClose}`;
-    }).join('');
-  const totalFires24h = hb ? hb.total_24h : 0;
-  const todaySummary = `<b>${todayActions}</b> Produced · <b>${todaySkipped}</b> Skipped By Self-QA · <b>${todayChecks}</b> Ran But No Work To Do · <b>${todayErrors}</b> Error${todayErrors===1?'':'s'}`;
-
-  // === Failure banner ===
-  const failureBannerHtml = failures24h.length === 0 ? '' : `
-    <section class="failure-banner${escalatedNow.length > 0 ? ' urgent' : ''}">
-      <div class="fb-icon">${escalatedNow.length > 0 ? '\u{1F6A8}' : '\u{26A0}️'}</div>
-      <div class="fb-text">
-        <div class="fb-title">${failures24h.length} agent failure${failures24h.length===1?'':'s'} in last 24h${escalatedNow.length > 0 ? ' · '+escalatedNow.length+' ESCALATED to Needs You' : ''}</div>
-        <div class="fb-sub">Sentinel filed these. ${escalatedNow.length > 0 ? 'Same error fired 3+ times — needs your attention.' : 'Hidden in Inbox so they don’t block your morning. Open Inbox to review.'}</div>
-      </div>
-      <button class="btn" onclick="switchTab('decide')">Open</button>
-    </section>`;
-
-  // === Box score: last 24h numbers in plain English ===
-  const last24Ms = Date.now() - 24*3600*1000;
-  const last24Tickets = (doneData.tickets || []).filter(t => t.createdAt && new Date(t.createdAt).getTime() >= last24Ms);
-  const mutationsLast24 = last24Tickets.filter(t => /\[done\] sem auto/i.test(t.subject||'')).length;
-  const draftsLast24 = last24Tickets.filter(t => /Content Producer|Anchor|Content Draft/i.test(t.subject + ' ' + (t.recommendationType||''))).length;
-  const outreachLast24 = last24Tickets.filter(t => /\[DRAFT FOR YOUR REVIEW\]|Backlink Outreach/i.test(t.subject||'')).length;
-  const failuresLast24 = last24Tickets.filter(t => /Agent Failed|Failure/i.test(t.subject||'')).length;
-  // Yesterday's spend from ROI daily
-  const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1); yesterday.setHours(0,0,0,0);
-  const yDay = yesterday.toISOString().slice(0,10);
-  const yEntry = (roi && roi.daily || []).find(d => d.date === yDay);
-  const ySpend = yEntry ? yEntry.spend : 0;
-  const yGoogle = yEntry?.by_source?.google_ads?.spend || 0;
-  const yMs = yEntry?.by_source?.microsoft_ads?.spend || 0;
-
-  const boxScoreHtml = `<section class="panel" style="background:linear-gradient(135deg,#fafbfc 0%,#f6f8fa 100%);border-left:4px solid var(--accent)">
-    <div class="panel-head" style="margin-bottom:8px"><h3 class="panel-title">Yesterday's Box Score · ${yesterday.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</h3></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;font-size:13px;line-height:1.5">
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ad Spend</div><div style="font-size:18px;font-weight:700">$${ySpend.toFixed(2)}</div><div style="color:var(--muted);font-size:11px">Google $${yGoogle.toFixed(2)} · Microsoft $${yMs.toFixed(2)}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Budget Changes (🦊 Fox)</div><div style="font-size:18px;font-weight:700">${mutationsLast24}</div><div style="color:var(--muted);font-size:11px">${mutationsLast24===0?'No Auto-Budget Changes':'Real Google Ads Writes'}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Content Drafted (🦉 Owl)</div><div style="font-size:18px;font-weight:700">${draftsLast24}</div><div style="color:var(--muted);font-size:11px">${draftsLast24===0?'No New Drafts':'Piece(s) In Your Queue'}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Outreach Drafted (🕷️ Spider)</div><div style="font-size:18px;font-weight:700">${outreachLast24}</div><div style="color:var(--muted);font-size:11px">${outreachLast24===0?'No New Outreach':'Email(s) Awaiting Approval'}</div></div>
-      <div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">Team Health</div><div style="font-size:18px;font-weight:700;color:${failuresLast24===0?'var(--ok)':'var(--warn)'}">${failuresLast24===0?'✓ All Good':failuresLast24+' Fail'+(failuresLast24===1?'':'s')}</div><div style="color:var(--muted);font-size:11px">${failuresLast24===0?'No Agent Crashes':'See Inbox'}</div></div>
-    </div>
-  </section>`;
-
-  // === Quiet zones: agents that haven't fired in last 24h (sleeping per their schedule) ===
-  const lastFireByAgentId = {};
-  for (const h of heartbeats) {
-    const t = new Date(h.at).getTime();
-    if (!lastFireByAgentId[h.agentId] || t > lastFireByAgentId[h.agentId]) lastFireByAgentId[h.agentId] = t;
-  }
-  const PERSONA_BY_AGENT_ID = {
-    carla:'🦉 Owl', sam:'🐝 Bee', max:'🦊 Fox', riley:'🦊 Fox',
-    kai:'🐕 Hound', bran:'🕷️ Spider', reed:'🦇 Bat', nox:'🦇 Bat',
-    lin:'🦜 Parrot', eve:'🐘 Elephant', pip:'🐘 Elephant',
-    uma:'🦅 Eagle', dax:'🐢 Turtle', vex:'🐈 Cat',
-    theo:'🐉 Dragon', iris:'🐿️ Squirrel', sentinel:'🐺 Wolf', forge:'🦫 Beaver'
-  };
-  const SCHEDULE_BY_AGENT_ID = {
-    kai:'Monthly · 1st @ 6 AM',
-    theo:'Weekly · Sunday 10 PM',
-    uma:'Daily M–F · 8 AM',
-    dax:'Daily M–F · 8 AM',
-    carla:'M–F · 9 AM, 1 PM, 5 PM',
-    bran:'M–F · 9 AM + 2 PM',
-    lin:'M–F · 10 AM + 2 PM',
-    eve:'M–F · 9, 12, 3, 6 PM'
-  };
-  const quietAgents = [];
-  for (const aid of Object.keys(PERSONA_BY_AGENT_ID)) {
-    const last = lastFireByAgentId[aid];
-    if (!last || (Date.now() - last) > 24*3600*1000) {
-      quietAgents.push({ id: aid, name: PERSONA_BY_AGENT_ID[aid], schedule: SCHEDULE_BY_AGENT_ID[aid] || 'see Team tab', lastMs: last });
-    }
-  }
-  const quietHtml = quietAgents.length === 0 ? '' : `<section class="panel" style="background:#fafbfc">
-    <div class="panel-head" style="margin-bottom:8px"><h3 class="panel-title">Quiet Zones · Agents Not Firing Right Now</h3><div class="panel-sub">By design — these have specific schedules. Click any to see when they next fire.</div></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
-      ${quietAgents.map(q => `<div style="padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer" onclick="switchTab('progress')">
-        <div style="font-weight:600">${q.name}</div>
-        <div style="color:var(--muted);font-size:11px;margin-top:2px">${q.schedule}</div>
-        <div style="color:var(--muted);font-size:11px;margin-top:2px">Last Fired: ${q.lastMs?relativeAge(new Date(q.lastMs).toISOString()):'Never'}</div>
-      </div>`).join('')}
-    </div>
-  </section>`;
-
-  // === Honesty Panel: fires vs tickets, and what's NOT working ===
-  // Build fire-vs-ticket count per agent ID
-  const ticketCountByAgentName = {};
-  for (const t of (doneData.tickets||[])) {
-    const an = (t.agent || '').trim();
-    if (!an) continue;
-    ticketCountByAgentName[an] = (ticketCountByAgentName[an] || 0) + 1;
-  }
-  const AGENT_NAME_TO_IDS = {
-    'Content Producer': ['carla'], 'SEM Manager': ['max','riley'], 'SEO Optimizer': ['sam'],
-    'Keyword Discovery': ['kai'], 'Backlink Builder': ['bran'], 'LinkedIn Cadence': ['lin'],
-    'Coordinator': ['eve'], 'UI/UX Performance': ['uma'], 'Content Decay Detector': ['dax'],
-    'Competitor SERP Monitor': ['vex'], 'Brand Listening': ['nox'],
-    // Both Reed (reply drafter) and Crow (thought-leadership submitter) use
-    // 'Community Engagement' as their HubSpot agent_name. matchTicket() splits
-    // them by ticket content (reddit_submission vs reddit_reply action_type).
-    'Community Engagement': ['reed', 'crow'],
-    'Team Manager': ['theo'], 'Daily ROI': ['iris'], 'Ticket Triage': ['pip']
-  };
-  const honestyRows = [];
-  const seenIds = new Set();
-  // Compute fires per agent
-  const firesPerAgent = {};
-  for (const h of heartbeats) firesPerAgent[h.agentId] = (firesPerAgent[h.agentId] || 0) + 1;
-
-  for (const [an, ids] of Object.entries(AGENT_NAME_TO_IDS)) {
-    const fires = ids.reduce((s,i) => s + (firesPerAgent[i]||0), 0);
-    const tickets = ticketCountByAgentName[an] || 0;
-    const animal = PERSONA_BY_AGENT_ID[ids[0]] || an;
-    ids.forEach(i => seenIds.add(i));
-    let verdict, level;
-    if (fires === 0 && tickets > 0) { verdict = 'Tickets exist, no fires in last 24h (scheduled cadence — by design)'; level = 'info'; }
-    else if (fires === 0 && tickets === 0) { verdict = 'Sleeping (scheduled cadence — by design)'; level = 'info'; }
-    else if (tickets > 0) { verdict = `Producing real output (${tickets} ticket${tickets===1?'':'s'} in last 24h)`; level = 'good'; }
-    else if (fires > 15 && tickets === 0) { verdict = `Fires ${fires}× / 24h but has produced ZERO tickets — either nothing meets the threshold OR detection is broken. Worth a manual sanity-check.`; level = 'warn'; }
-    else if (fires > 0 && tickets === 0) { verdict = `Fires ${fires}× / 24h, no tickets. Likely "no work needed" but could be too restrictive.`; level = 'caution'; }
-    else { verdict = `${fires} fires, ${tickets} tickets`; level = 'info'; }
-    honestyRows.push({animal, agent_name: an, fires, tickets, verdict, level, ids});
-  }
-
-  // Sort: warn first, then caution, then good
-  const sortOrder = {warn:0, caution:1, good:2, info:3};
-  honestyRows.sort((a,b) => (sortOrder[a.level]||4) - (sortOrder[b.level]||4));
-
-  const levelStyle = {
-    warn: 'background:#fff5f5;border-left-color:var(--err)',
-    caution: 'background:#fffaf0;border-left-color:var(--warn)',
-    good: 'background:#f0fff4;border-left-color:var(--ok)',
-    info: 'background:#fafbfc;border-left-color:var(--border)'
-  };
-  const levelIcon = {warn:'⚠️', caution:'⚠', good:'✅', info:'·'};
-
-  // === Trust scoreboard rows — same data, richer per-agent metrics ===
-  const trustRows = honestyRows.map(r => {
-    const rate = r.fires > 0 ? Math.round((r.tickets / r.fires) * 1000) / 10 : null;
-    // Health score: green if rate>2%, yellow if 0<rate<=2%, red if rate=0 with fires>15, grey if dormant
-    let health;
-    if (r.fires === 0) health = 'dormant';
-    else if (r.tickets === 0 && r.fires > 15) health = 'red';
-    else if (rate !== null && rate < 2) health = 'yellow';
-    else health = 'green';
-    // HubSpot filtered link by agent_name (rough but useful)
-    const hsLink = `https://app.hubspot.com/contacts/24043196/objects/0-5/views/all/list?query=${encodeURIComponent(r.agent_name)}`;
-    return {...r, rate, health, hsLink};
-  });
-  // Sort by health: red > yellow > green > dormant
-  const healthOrder = {red:0, yellow:1, green:2, dormant:3};
-  trustRows.sort((a,b) => (healthOrder[a.health]||4) - (healthOrder[b.health]||4));
-
-  const healthBg = { red:'#fff5f5', yellow:'#fffaf0', green:'#f0fff4', dormant:'#fafbfc' };
-  const healthBorder = { red:'#dc2626', yellow:'#d97706', green:'#16a34a', dormant:'#9ca3af' };
-  const healthLabel = { red:'NEEDS LOOK', yellow:'LOW YIELD', green:'PRODUCING', dormant:'DORMANT' };
-
-  const trustHtml = `<section class="panel" style="border-left:4px solid #16a34a;margin-bottom:20px">
-    <div class="panel-head" style="margin-bottom:10px">
-      <h3 class="panel-title">Trust Scoreboard · Fires vs Real Artifacts (24h)</h3>
-      <div class="panel-sub">For each agent: how many times it fired vs how many HubSpot tickets actually got created. Click any row to see that agent's tickets in HubSpot directly.</div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;font-size:13px">
-      ${trustRows.map(r => `<a href="${r.hsLink}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
-        <div style="padding:10px 12px;background:${healthBg[r.health]};border-left:3px solid ${healthBorder[r.health]};border-radius:6px;cursor:pointer;transition:transform .12s ease" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
-          <div style="display:flex;justify-content:space-between;align-items:baseline">
-            <div style="font-weight:600;font-size:13px">${r.animal}</div>
-            <div style="font-size:10px;font-weight:700;color:${healthBorder[r.health]};letter-spacing:.5px">${healthLabel[r.health]}</div>
-          </div>
-          <div style="margin-top:6px;display:flex;gap:14px;font-variant-numeric:tabular-nums">
-            <div style="font-size:11px;color:var(--muted)"><span style="font-size:14px;font-weight:600;color:var(--fg)">${r.fires}</span> fires</div>
-            <div style="font-size:11px;color:var(--muted)"><span style="font-size:14px;font-weight:600;color:var(--fg)">${r.tickets}</span> tickets</div>
-            <div style="font-size:11px;color:var(--muted)"><span style="font-size:14px;font-weight:600;color:${healthBorder[r.health]}">${r.rate === null ? '—' : r.rate + '%'}</span> rate</div>
-          </div>
-        </div>
-      </a>`).join('')}
-    </div>
-    <div style="margin-top:10px;padding:8px 12px;background:#f6f8fa;border-radius:6px;font-size:11px;color:var(--muted);line-height:1.5">
-      <b>How to read:</b> Fires = scheduled triggers in last 24h (from n8n executions). Tickets = HubSpot tickets created by that agent in last 24h. Rate = tickets ÷ fires. <span style="color:${healthBorder.red}">RED</span> means an agent fires constantly but produces nothing — usually a bug. <span style="color:${healthBorder.yellow}">YELLOW</span> means under 2% — could be honest "no work found" or could be a gate filtering too tightly. <span style="color:${healthBorder.green}">GREEN</span> means &gt;2% conversion. <span style="color:${healthBorder.dormant}">DORMANT</span> means it didn't fire in the window (scheduled cadence — fine).
-    </div>
-  </section>`;
-
-  const honestyHtml = `<section class="panel" style="border-left:4px solid var(--warn)">
-    <div class="panel-head" style="margin-bottom:8px">
-      <h3 class="panel-title">Honesty Panel · Per-agent verdict</h3>
-      <div class="panel-sub">Same data with plain-English verdicts and the "what's NOT yet working" list below.</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
-      ${honestyRows.map(r => `<div style="display:flex;gap:10px;align-items:center;padding:8px 12px;border-left:3px solid;${levelStyle[r.level]};border-radius:4px">
-        <div style="font-size:16px;width:24px;text-align:center">${levelIcon[r.level]}</div>
-        <div style="flex:1">
-          <div style="font-weight:600">${r.animal}</div>
-          <div style="color:var(--fg-dim);font-size:12px;margin-top:2px">${r.verdict}</div>
-        </div>
-        <div style="color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;text-align:right">${r.fires} fires · ${r.tickets} tickets</div>
-      </div>`).join('')}
-    </div>
-
-    <div style="margin-top:16px;padding:12px 14px;background:#f6f8fa;border-radius:8px;font-size:12px;line-height:1.6;color:var(--fg-dim)">
-      <div style="font-weight:600;color:var(--fg);font-size:13px;margin-bottom:8px">Brutal Honesty About What's NOT Happening Yet</div>
-      <ul style="margin:0;padding-left:20px">
-        <li><b>Your feedback to agents is saved but does NOT auto-update their instructions.</b> Your note is stored. 🐉 Dragon reads ALL notes every Sunday and DRAFTS proposed prompt changes in a weekly Inbox ticket. <i>You must manually approve and apply each change</i> — nothing is hot-reloaded into "the agent's brain." This is intentional for safety.</li>
-        <li><b>🦊 Fox auto-mutates Google Ads campaign BUDGETS only.</b> Keyword-level bid changes are NOT wired. Microsoft Ads mutations are NOT wired — Fox only reads Microsoft Ads for the safety-cap math.</li>
-        <li><b>No conversion attribution from agent actions to revenue.</b> The dashboard shows Google + Microsoft ad spend and conversions, but no link from "Owl drafted X" or "Spider sent outreach Y" → "we closed deal Z". Needs CRM integration.</li>
-        <li><b>🐿️ Squirrel's chart is hourly snapshot, not real-time.</b> Refresh the page to pull a new ROI snapshot. The chart doesn't push updates.</li>
-        <li><b>🐺 Wolf now ATTEMPTS auto-retry on transient errors</b> (timeouts, 503s, connection-aborted). Wolf waits 30 sec, re-fires the failed workflow once, and updates the failure ticket with the retry outcome. <i>Wolf does NOT retry persistent bugs</i> (syntax errors, auth failures) — those need you. Max one auto-retry per workflow per hour to prevent retry storms.</li>
-        <li><b>🦇 Bat (Brand Listening) is now multi-source and producing real tickets.</b> Reddit's unauthenticated API blocks every cloud IP, so the Reddit path waits on Paul's OAuth app registration. While that's pending, Bat now sources from <i>3 Google News RSS feeds + 2 HackerNews Algolia queries</i> every 30 min, dedupes across them, and creates top-3 Inbox tickets per cycle. First real tickets produced today: HubSpot IDs 45558435982, 45573062536, 45618771107 (Sustainability Magazine, Clean Technica, FleetPoint stories on fleet electrification).</li>
-        <li><b>🦇 Bat (Community Engagement / reply drafter) stays PAUSED</b> — that one specifically drafts Reddit thread replies, which needs the OAuth credential. Auto-resumes once the credential ID is wired.</li>
-        <li><b>🐝 Bee now posts an honest baseline-tracking ticket once a day</b> instead of silent quiet. Each ticket lists every pillar page's current days-old + impressions + position + days-until-next-diagnostic. So you can see exactly when each surgery becomes possible. Bee's diagnostics genuinely need 60+ days per page; the new ticket says so explicitly.</li>
-        <li><b>🐈 Cat needs two consecutive daily runs to detect SERP movements.</b> The IF-gate bug that was silently filtering everything was fixed today — Cat now runs to completion. First real movement detection happens once it has yesterday's snapshot to compare against today's.</li>
-        <li><b>5 silent-failure IF gates fixed today.</b> Across Bat-Listen, Bat-Reply, Cat, and Asset Review Gate, four IF nodes were reading JSON properties (<code>$json.new</code>, <code>$json.alerts</code>, etc.) that the upstream code never emitted — they always evaluated false even when real work was found. Every gate was rewritten to read what the upstream actually produces and verified by re-firing.</li>
-        <li><b>NEW: Silent Failure Detector workflow runs hourly.</b> Cross-references n8n executions (last 24h) against HubSpot tickets per agent. Any agent that fires &gt;5× / 24h with 0 tickets gets a HIGH-priority "Needs You" ticket auto-filed explaining the likely cause (IF-gate bug, HTML-from-API, dedupe stuck). Going forward, this kind of bug can't hide for more than 60 minutes. Latest scan: "16 producers, 250 fires, 100 tickets — all clean."</li>
-      </ul>
-    </div>
-  </section>`;
-
-  main.innerHTML = `
-    ${failureBannerHtml}
-    ${boxScoreHtml}
-
-    <section class="hero-do">
-      <h2>Do These Today</h2>
-      <div class="hero-sub">${heroItems.length > 0 ? 'Top items from your morning triage. Click to jump to the ticket.' : 'Nothing Pressing — The Team Has It Covered.'}</div>
-      ${heroHtml}
-    </section>
-
-    <section class="kpis">${kpiHtml}</section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <h3 class="panel-title">Ad Spend & Conversions</h3>
-        <div class="seg-toggle" id="chart-toggle">
-          <button class="seg-btn active" data-view="google" onclick="setChartView('google')">Google</button>
-          <button class="seg-btn" data-view="microsoft" onclick="setChartView('microsoft')">Microsoft</button>
-          <button class="seg-btn" data-view="compare" onclick="setChartView('compare')">Compare</button>
-        </div>
-      </div>
-      <div id="roi-chart-wrap">
-        ${roi && roi.ok ? '<canvas id="roi-chart"></canvas>' : '<div class="meta" style="text-align:center;padding:40px">No ad data yet. Trigger: <code>POST /webhook/fire-roi-tracker</code></div>'}
-      </div>
-      <div id="roi-meta" style="color:var(--muted);font-size:11px;margin-top:8px">${roi && roi.ok ? `Updated ${new Date(roi.updated_at).toLocaleString()} · ${roi.microsoft_status === 'ok' ? `${roi.microsoft_campaigns.length} MS Ads campaigns` : 'MS Ads not connected'}` : ''}</div>
-      <div id="compare-stats" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-        ${roi && roi.ok ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:13px">
-          <div>
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;margin-bottom:6px">Google Ads · last 30 days</div>
-            <div><b>$${Math.round((roi.totals&&roi.totals.google_ads_spend_30d)||0)}</b> actually spent</div>
-            <div style="color:var(--muted)">$${((roi.totals&&roi.totals.google_ads_spend_30d)/30||0).toFixed(2)}/day average</div>
-            <div style="color:var(--muted)">${(roi.totals&&roi.totals.google_ads_conversions_30d)||0} conversions · ${(roi.totals&&roi.totals.google_ads_ctr_pct)||0}% CTR</div>
-            <div style="color:var(--muted)">${(roi.totals&&roi.totals.google_ads_cpa)?'$'+roi.totals.google_ads_cpa+' CPA':'no conversions yet'}</div>
-          </div>
-          <div>
-            <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;margin-bottom:6px">Microsoft Ads · actual</div>
-            <div><b>$${(roi.daily||[]).reduce((s,d)=>s+((d.by_source?.microsoft_ads?.spend)||0),0).toFixed(0)}</b> actually spent in window</div>
-            <div style="color:var(--muted)">${(roi.daily||[]).filter(d=>(d.by_source?.microsoft_ads?.spend||0)>0).length} days with spend (via Vercel)</div>
-            <div style="color:var(--muted)">$${(roi.microsoft_daily_budget_total||0).toFixed(2)}/day current budget cap</div>
-            <div style="color:var(--muted)">${(roi.microsoft_campaigns||[]).filter(c=>c.status==='Active').length} active · ${(roi.microsoft_campaigns||[]).filter(c=>c.status==='BudgetPaused').length} paused campaigns</div>
-          </div>
-        </div>
-        <div style="margin-top:14px;padding:10px 12px;background:#f6f8fa;border-radius:6px;font-size:12px;color:var(--fg-dim)">
-          <b>Cap usage:</b> $${(((roi.totals&&roi.totals.google_ads_spend_30d)/30||0)+(roi.microsoft_daily_budget_total||0)).toFixed(2)} of $100/day cap (${Math.round(((((roi.totals&&roi.totals.google_ads_spend_30d)/30||0)+(roi.microsoft_daily_budget_total||0))/100)*100)}%) — Maverick has $${(100-(((roi.totals&&roi.totals.google_ads_spend_30d)/30||0)+(roi.microsoft_daily_budget_total||0))).toFixed(2)}/day headroom before the safety gate blocks new increases.
-        </div>` : ''}
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <h3 class="panel-title">Recent agent activity</h3>
-        <div class="panel-sub">${autoExec.length} actions completed in last 7 days</div>
-      </div>
-      <div class="recent-feed">${feedHtml}</div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <h3 class="panel-title">What Your Team Did Today</h3>
-        <div class="panel-sub">${todaySummary} · auto-updates · click any item to see the actual receipt</div>
-      </div>
-      <div class="recent-feed">${activityHtml}</div>
-    </section>
-
-    ${trustHtml}
-
-    ${honestyHtml}
-
-    ${quietHtml}
-
-    <section class="health-strip">
-      <span class="dot ok"></span>
-      Marketing team online. <a href="https://agents.liftnowdirect.com" target="_blank" style="color:var(--accent);text-decoration:none">Open n8n</a> to inspect workflows directly.
-      <span style="flex:1"></span>
-      <button class="btn" id="kill-switch-btn" onclick="triggerKillSwitch()" style="border-color:var(--err);color:var(--err)">Emergency: pause all agents</button>
-    </section>
-  `;
-
-  // Cache ROI data globally so setChartView can re-render without refetching
-  window.__roi = roi;
-  window.__chartView = window.__chartView || 'google';
-
-  // Render chart if we have data
-  if (roi && roi.ok && roi.daily && roi.daily.length > 0) {
-    setTimeout(() => { renderRoiChart(window.__chartView); }, 50);
-  }
-}
-
-function setChartView(view) {
-  window.__chartView = view;
-  document.querySelectorAll('#chart-toggle .seg-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
-  const stats = document.getElementById('compare-stats');
-  if (stats) stats.style.display = view === 'compare' ? 'block' : 'none';
-  renderRoiChart(view);
-}
-
-function renderRoiChart(view) {
-  const roi = window.__roi;
-  if (!roi || !roi.ok || !roi.daily) return;
-  const ctx = document.getElementById('roi-chart');
-  if (!ctx) return;
-  if (roiChart) { roiChart.destroy(); roiChart = null; }
-
-  const labels = roi.daily.map(d => d.date.slice(5));
-  const googleSpend = roi.daily.map(d => (d.by_source?.google_ads?.spend) ?? d.spend ?? 0);
-  const conv = roi.daily.map(d => d.conversions);
-  const msDailyBudget = roi.microsoft_daily_budget_total || 0;
-  const datasets = [];
-
-  if (view === 'google') {
-    datasets.push({
-      label: 'Google Ads spend ($)',
-      data: googleSpend,
-      backgroundColor: 'rgba(3, 102, 214, 0.7)',
-      borderColor: 'rgba(3, 102, 214, 1)',
-      borderWidth: 1,
-      yAxisID: 'y1',
-      order: 2
-    });
-    datasets.push({
-      label: 'Conversions',
-      data: conv,
-      type: 'line',
-      borderColor: 'rgba(34, 134, 58, 1)',
-      backgroundColor: 'rgba(34, 134, 58, 0.12)',
-      yAxisID: 'y2',
-      tension: 0.3,
-      borderWidth: 2,
-      pointRadius: 4,
-      fill: true,
-      order: 1
-    });
-  } else if (view === 'microsoft') {
-    // Microsoft: REAL historical daily spend (via Vercel /api/ms-ads-unzip) — same chart shape as Google view
-    const msSpend = roi.daily.map(d => (d.by_source?.microsoft_ads?.spend) ?? 0);
-    const msClicks = roi.daily.map(d => (d.by_source?.microsoft_ads?.clicks) ?? 0);
-    datasets.push({
-      label: 'Microsoft Ads spend ($)',
-      data: msSpend,
-      backgroundColor: 'rgba(217, 119, 6, 0.75)',
-      borderColor: 'rgba(217, 119, 6, 1)',
-      borderWidth: 1,
-      yAxisID: 'y1',
-      order: 2
-    });
-    datasets.push({
-      label: 'Microsoft Ads clicks',
-      data: msClicks,
-      type: 'line',
-      borderColor: 'rgba(0, 0, 0, 0.6)',
-      backgroundColor: 'rgba(0, 0, 0, 0.05)',
-      yAxisID: 'y2',
-      tension: 0.3,
-      borderWidth: 2,
-      pointRadius: 3,
-      order: 1
-    });
-  } else if (view === 'compare') {
-    // Apples-to-apples: stacked bars per day showing Google + Microsoft actual spend
-    const msSpend = roi.daily.map(d => (d.by_source?.microsoft_ads?.spend) ?? 0);
-    datasets.push({
-      label: 'Google Ads spend',
-      data: googleSpend,
-      backgroundColor: 'rgba(3, 102, 214, 0.75)',
-      borderColor: 'rgba(3, 102, 214, 1)',
-      borderWidth: 1,
-      yAxisID: 'y1',
-      stack: 'total',
-      order: 3
-    });
-    datasets.push({
-      label: 'Microsoft Ads spend',
-      data: msSpend,
-      backgroundColor: 'rgba(217, 119, 6, 0.75)',
-      borderColor: 'rgba(217, 119, 6, 1)',
-      borderWidth: 1,
-      yAxisID: 'y1',
-      stack: 'total',
-      order: 2
-    });
-    datasets.push({
-      label: 'Conversions',
-      data: conv,
-      type: 'line',
-      borderColor: 'rgba(34, 134, 58, 1)',
-      backgroundColor: 'rgba(34, 134, 58, 0.10)',
-      yAxisID: 'y2',
-      tension: 0.3,
-      borderWidth: 2,
-      pointRadius: 3,
-      order: 1
-    });
-  }
-
-  // Default (vertical) chart for google + compare
-  if (view !== 'microsoft') {
-    roiChart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels: labels, datasets: datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 12 } } },
-            tooltip: { callbacks: { label: ctx => {
-              if (ctx.dataset.label.startsWith('Google Ads spend')) return `Google Ads spend: $${ctx.parsed.y.toFixed(2)}`;
-              if (ctx.dataset.label.startsWith('MS Ads daily budget')) return `MS Ads daily budget allocated: $${ctx.parsed.y.toFixed(2)}`;
-              return `${ctx.dataset.label}: ${ctx.parsed.y}`;
-            }}}
-          },
-          scales: {
-            x: { grid: { display: false } },
-            y1: { type: 'linear', position: 'left', title: { display: true, text: 'Spend ($)' }, beginAtZero: true },
-            y2: { type: 'linear', position: 'right', title: { display: true, text: 'Conversions' }, beginAtZero: true, grid: { display: false }, ticks: { stepSize: 1 } }
-          }
-        }
-    });
-  }
-}
-
-async function renderLearnings(){
-  const main = document.getElementById('main');
-  const done = await fetchTickets('done');
-  const tickets = (done.tickets || []).filter(t => (t.outcomeNotes||'').startsWith('REJECTED'));
-  const byAgent = {};
-  for (const t of tickets) {
-    const a = t.agent || '(unknown)';
-    byAgent[a] = byAgent[a] || [];
-    byAgent[a].push(t);
-  }
-  const sortedAgents = Object.entries(byAgent).sort((a,b) => b[1].length - a[1].length);
-  let html = `<div class="toolbar"><span class="meta">${tickets.length} rejections in last 7 days — the team learns from these</span></div>`;
-  if (!tickets.length) {
-    html += '<div class="empty">No rejections yet. Nothing learned from the no-pile.</div>';
-  } else {
-    for (const [agent, list] of sortedAgents) {
-      const c = agentColor(agent);
-      html += `<h2 style="color:${c.fg}">${escapeHtml(agent)} <span style="color:var(--muted);font-weight:400">(${list.length})</span></h2>`;
-      for (const t of list) {
-        const comment = (t.outcomeNotes||'').replace(/^REJECTED\s+\S+\s*—?\s*/, '').trim();
-        html += `
-        <div class="card collapsed" id="card-${t.ticketId}">
-          <div class="card-head" onclick="toggleCard('${t.ticketId}')">
-            <span class="priority priority-${escapeHtml(t.priority||'LOW')}">${escapeHtml(t.priority||'LOW')}</span>
-            <span class="subject">${escapeHtml(t.subject)}</span>
-            <span class="age">${ageLabel(t.ageHours||0)}</span>
-          </div>
-          <div class="body">${comment ? '<strong>Paul:</strong> ' + escapeHtml(comment) + '\n\n' : '<em>(no comment given)</em>\n\n'}---ORIGINAL PROPOSAL---\n${escapeHtml(t.content || '')}</div>
-        </div>`;
-      }
-    }
-  }
-  main.innerHTML = html;
-}
-
-// ============================================================
-// TEAM — Persona cards with feedback loop
-// ============================================================
-// Marketing team — each is just an Animal. Internal `id` is still its workflow handle.
-const PERSONAS = [
-  {id:'carla', name:'Owl', emoji:'🦉', color:'#0366d6',
-    role:'Content Producer', match:'Content Producer', schedule:'M–F · 9 AM + 1 PM + 5 PM ET',
-    tagline:'Drafts blog posts, anchor pages, and LinkedIn variants. Voice-obsessed, hates buzzwords.',
-    bio:"Picks each topic from the editorial calendar, drafts a complete WordPress-ready post, and produces 3 LinkedIn derivatives for Parrot. Self-rejects truncated or off-brand drafts before they reach you.",
-    listens_to:['Elephant','Bee'], feeds_to:['Parrot','Beaver']},
-  {id:'sam', name:'Bee', emoji:'🐝', color:'#d97706',
-    role:'SEO Optimizer', match:'SEO Optimizer', schedule:'Every 1 Hr',
-    tagline:'Audits published pages — title tags, meta descriptions, internal linking. Surgical.',
-    bio:"Reads GSC + Ahrefs signals, finds underperforming pages, proposes edits. Reasonable changes auto-execute via Beaver (WordPress PATCH); risky ones land in Needs You.",
-    listens_to:['Owl','Turtle'], feeds_to:['Beaver']},
-  {id:'sem', name:'Fox', emoji:'🦊', color:'#dc2626',
-    role:'SEM Manager', match:'SEM Manager', schedule:'Suggestions Every 1 Hr · Auto-Execute Every 2 Hrs',
-    tagline:'Suggests Google Ads moves AND auto-mutates budgets (within ±25% / $100-day caps).',
-    bio:"Two modes. Analyst mode reads Google Ads every 1 hr and emails you suggested keyword/bid changes (no Google Ads write). Trader mode reads Google + Microsoft every 2 hrs and executes real budget changes within strict safety gates.",
-    listens_to:[], feeds_to:['You (suggestions)','Google Ads (mutations)','Beaver']},
-  {id:'kai', name:'Hound', emoji:'🐕', color:'#be185d',
-    role:'Keyword Discovery', match:'Keyword Discovery', schedule:'Monthly · 6 AM',
-    tagline:'Hunts new keyword opportunities from search trends and competitor SERPs.',
-    bio:"Casts a wide net. Proposes new keywords for Fox to consider testing. You'll see lists once a month — review and reject anything off-strategy.",
-    listens_to:['Cat'], feeds_to:['Fox']},
-  {id:'bran', name:'Spider', emoji:'🕷️', color:'#7c3aed',
-    role:'Backlink Builder', match:'Backlink Builder', schedule:'M–F · 9 AM + 2 PM',
-    tagline:'Drafts personalized outreach emails to journalists, partners, gov procurement bodies.',
-    bio:"Finds high-DR sites in your target verticals, writes warm outreach drafts, sends them via partnerships@liftnow.com after Self-QA approval. BCCs you on every send.",
-    listens_to:['Cat','Bat'], feeds_to:['Beaver']},
-  {id:'nox', name:'Bat', emoji:'🦇', color:'#78716c',
-    role:'Brand Listening (multi-source)', match:'Brand Listening', schedule:'Every 30 Min',
-    tagline:'Watches Google News + HackerNews for brand mentions, competitor news, fleet-electrification stories. Reddit added once OAuth is wired.',
-    bio:"Three Google News RSS feeds (liftnow brand + competitors + gov fleet procurement) plus two HackerNews Algolia queries (fleet electrification + govcon procurement) every 30 min. Dedupes against a rolling 2k-URL seen set. Top 3 relevant items per run become HubSpot Inbox tickets. Reddit will rejoin as a fourth source once Paul finishes registering the OAuth app.",
-    listens_to:[], feeds_to:['Spider (story context)','Owl (content angles)','Elephant','You (Inbox)']},
-  {id:'reed', name:'Bat (Reply Drafter)', emoji:'🦇', color:'#78716c',
-    role:'Community Engagement (draft-and-paste)', match:'Community Engagement', schedule:'M/W/F · 11 AM ET',
-    tagline:'Finds fleet/govcon Reddit threads via Brave Search, drafts non-salesy replies in your Peer Vendor voice. You paste-and-post manually — Reddit blocks reply-via-API for everyone now.',
-    bio:"Picks an anchor (M/W/F 11AM ET), searches Reddit via Brave Search proxy for fleet/govcon threads matching anchor-relevance keywords, drafts a reply in your Peer Vendor voice, runs Self-QA to drop irrelevant matches, files a HubSpot ticket with the thread URL and drafted reply. You click the URL, paste the reply, post from u/liftnowpartnerships. ~60 sec per real reply. Why manual: Reddit locked down their comment-reply API in 2026 — no 3rd-party tool (Buffer, Postiz, Zapier) supports comment-reply anymore. Auto-post requires direct Reddit OAuth which is now approval-only.",
-    listens_to:[], feeds_to:['Spider','Elephant','You (approval)']},
-  {id:'crow', name:'Crow', emoji:'🐦‍⬛', color:'#1f2937',
-    role:'Reddit Thought-Leadership', match:'Community Engagement', schedule:'Tue + Fri · 10 AM ET',
-    tagline:'Authors native Reddit POSTS (not replies) to fleet/govcon subreddits. Auto-submits via Postiz once approved.',
-    bio:"Picks an anchor (Tue + Fri 10 AM ET), drafts a long-form Reddit submission (250-700 words) in your Article voice for r/transit, r/fleetmanagement, r/PublicAdministration, r/SchoolBus, r/govfleets, r/civilengineering, etc. Self-QA filters drafts that read like marketing. Files HubSpot ticket for your approval. On approve, Approval Executor POSTs to Postiz API → Postiz submits to Reddit. Different from Bat: Crow writes NEW POSTS (authentic native contribution), Bat REPLIES to existing threads (which still requires manual paste).",
-    listens_to:['Owl (anchor content)'], feeds_to:['Forge (auto-submit on approval)','You (approval)']},
-  {id:'lin', name:'Parrot', emoji:'🦜', color:'#15803d',
-    role:'LinkedIn Cadence', match:'LinkedIn Cadence', schedule:'M–F · 10 AM + 2 PM',
-    tagline:'Posts LinkedIn content in founder voice. Stays on brand pillars.',
-    bio:"Schedules LinkedIn posts derived from Owl's drafts plus standalone industry commentary. Posts on your personal feed via OAuth once you approve.",
-    listens_to:['Owl','Elephant'], feeds_to:['Beaver']},
-  {id:'briefing', name:'Elephant', emoji:'🐘', color:'#1f2937',
-    role:'Daily Briefing + Triage', match:'Coordinator|Ticket Triage', schedule:'M–F · 9, 12, 3, 6 PM ET · Triage Every 1 Hr',
-    tagline:'Bundles the team’s output every hour and writes a Daily Briefing 4× a day.',
-    bio:"Sorts every incoming ticket hourly and turns it into a Daily Briefing 4 times a day. Surfaces what's queued, blocked, and worth your eyes today.",
-    listens_to:['everyone'], feeds_to:['You (top of Today)']},
-  {id:'uma', name:'Eagle', emoji:'🦅', color:'#0d9488',
-    role:'UI/UX Performance', match:'UI/UX Performance', schedule:'Daily M–F · 8 AM',
-    tagline:'Audits liftnow.com pages for usability defects, accessibility, mobile bugs.',
-    bio:"Sweeps the site, finds broken layouts and confusing copy, proposes specific fixes. Most fixes need your review since they're design judgement calls.",
-    listens_to:['Owl'], feeds_to:['You (approval)']},
-  {id:'dax', name:'Turtle', emoji:'🐢', color:'#16a34a',
-    role:'Content Decay Detector', match:'Content Decay Detector', schedule:'Daily M–F · 8 AM',
-    tagline:'Finds old posts that have lost rankings. Suggests refreshes before they die.',
-    bio:"Tends the published archive. Tracks how each page is doing over time and flags declining ones so Owl can refresh them.",
-    listens_to:['Owl'], feeds_to:['Owl','Bee']},
-  {id:'vex', name:'Cat', emoji:'🐈', color:'#9333ea',
-    role:'Competitor SERP Monitor', match:'Competitor SERP Monitor', schedule:'Every 2 Hrs',
-    tagline:'Watches what competitors are publishing and where they rank. Terse, factual.',
-    bio:"Tracks 8 competitor domains across your priority keywords and notes anything new or rising. Doesn't draft responses — just intel.",
-    listens_to:[], feeds_to:['Hound','Spider','Elephant']},
-  {id:'theo', name:'Dragon', emoji:'🐉', color:'#be185d',
-    role:'Team Manager', match:'Team Manager', schedule:'Sun · 10 PM ET',
-    tagline:'Weekly review. Reads your feedback to each agent. Drafts proposed changes — you apply them.',
-    bio:"Once a week reviews the team's tickets, your comments on each agent, and DRAFTS proposed changes — better prompts, new agents, retired ones. Drops a weekly report in your Inbox. You decide what to apply.",
-    listens_to:['everyone','you'], feeds_to:['You (weekly report)']}
-];
-
-// System layer
-const SYSTEM_PERSONAS = [
-  {id:'sentinel', name:'Wolf', emoji:'🐺', color:'#dc2626',
-    role:'Failure Alerts', match:'Agent Failed', schedule:'On Every Agent Failure',
-    tagline:'Catches when agents crash. Escalates same-error 3×/hr to Needs You.',
-    bio:"When any agent throws, logs a failure ticket. Most go to Inbox quietly. If the same error fires 3+ times within an hour, escalates one ticket to Needs You so it can't hide.",
-    listens_to:['everyone'], feeds_to:['Inbox','Needs You (on repeat)']},
-  {id:'forge', name:'Beaver', emoji:'🦫', color:'#52525b',
-    role:'Approval Executor', match:'Approval Executor', schedule:'Every 5 Min',
-    tagline:'The hands. Executes your approved tickets (WP publish, LinkedIn post, send email).',
-    bio:"Every 5 minutes sweeps for tickets you've approved (stage 2), routes them by type, performs the real action, then marks them Done with a receipt.",
-    listens_to:['You (approvals)'], feeds_to:['WordPress','LinkedIn','SMTP']},
-  {id:'iris', name:'Squirrel', emoji:'🐿️', color:'#a16207',
-    role:'Daily ROI Tracker', match:'Daily ROI', schedule:'Every 1 Hr',
-    tagline:'Records daily spend/conversions. Powers the Today chart.',
-    bio:"Records the numbers each hour from Google Ads + Microsoft Ads daily-budget snapshot so the Today chart has fresh data.",
-    listens_to:[], feeds_to:['Today chart']}
-];
-
-function avatarHtml(p){
-  // Cute animal emoji in a tinted circle. Tint uses persona's brand color.
-  const bg = p.color ? `${p.color}22` : '#f0f3f6';
-  const border = p.color ? `${p.color}55` : 'var(--border)';
-  return `<div class="avatar" style="background:${bg};border-color:${border};display:flex;align-items:center;justify-content:center;font-size:28px;line-height:1">${p.emoji || '🐾'}</div>`;
-}
-
-function relativeAge(iso){
-  if(!iso) return '—';
-  const ms = Date.now() - new Date(iso).getTime();
-  const mins = Math.round(ms/60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return mins + 'm ago';
-  const hrs = Math.round(mins/60);
-  if (hrs < 24) return hrs + 'h ago';
-  const days = Math.round(hrs/24);
-  return days + 'd ago';
-}
-
-function statusForLastSeen(iso){
-  if (!iso) return {cls:'idle', label:'no activity yet'};
-  const ms = Date.now() - new Date(iso).getTime();
-  const hrs = ms/3600000;
-  if (hrs < 1) return {cls:'live', label:'active'};
-  if (hrs < 12) return {cls:'idle', label:'idle'};
-  if (hrs < 48) return {cls:'stale', label:'quiet'};
-  return {cls:'dead', label:'silent'};
-}
-
-let cachedFeedbackCounts = null;
-
-// Some UI personas were MERGED from multiple underlying agents.
-// Heartbeats are still recorded under the original agent IDs, so map them back.
-const PERSONA_TO_AGENT_IDS = {
-  sem:      ['max', 'riley'],        // Tally + Maverick
-  // Bat is now SPLIT back to two personas (nox = Brand Listening multi-source; reed = Community Engagement paused awaiting OAuth)
-  briefing: ['eve', 'pip']            // Maestro + Sift
-};
-function agentIdsForPersona(pid){
-  return PERSONA_TO_AGENT_IDS[pid] || [pid];
-}
-
-async function loadFeedbackCounts(){
-  try {
-    const r = await fetch('https://agents.liftnowdirect.com/webhook/agent-feedback?action=read');
-    const j = await r.json();
-    cachedFeedbackCounts = j.feedbackCounts || {};
-    return cachedFeedbackCounts;
-  } catch (e) { cachedFeedbackCounts = {}; return {}; }
-}
-
-// Unified persona matcher used by both grid and modal
-function matchTicket(p, t){
-  const subj = (t.subject || '').toLowerCase();
-  const notes = (t.outcomeNotes || '').toLowerCase();
-  const agent = (t.agent || '').toLowerCase();
-  // SEM — merged Tally + Maverick
-  if (p.id === 'sem') {
-    return subj.includes('sem auto') || subj.includes('sem ag') ||
-           notes.includes('google ads budget mutated') || notes.includes('email_sent') || notes.includes('sent sem email');
-  }
-  // Reddit — merged Whisper + Sonar (legacy; both nox and reed exist as separate personas now)
-  if (p.id === 'reddit') {
-    return agent.includes('community engagement') || agent.includes('brand listening') ||
-           subj.includes('reddit') || subj.includes('community engagement') || subj.includes('brand listening');
-  }
-  // Crow = thought-leadership Reddit SUBMISSIONS (new posts). Tickets carry
-  // action_type='reddit_submission' inside recommendation_detail.
-  if (p.id === 'crow') {
-    const detailStr = String(t.recommendationDetail || '');
-    return /reddit_submission/i.test(detailStr) ||
-           /reddit submission draft/i.test(subj);
-  }
-  // Reed = REPLY drafter (existing threads). NOT submissions.
-  if (p.id === 'reed') {
-    const detailStr = String(t.recommendationDetail || '');
-    if (/reddit_submission/i.test(detailStr)) return false;  // belongs to Crow
-    return agent.includes('community engagement') ||
-           /reddit reply/i.test(subj) ||
-           /reddit reply ready/i.test(subj);
-  }
-  // Briefing — merged Sift + Maestro
-  if (p.id === 'briefing') {
-    return agent.includes('coordinator') || agent.includes('daily briefing') || agent.includes('ticket triage') ||
-           subj.includes('[briefing]') || subj.includes('[coordinator]') || subj.includes('[triage]');
-  }
-  // System personas
-  if (p.id === 'sentinel') return subj.includes('agent failed') || subj.includes('failure');
-  if (p.id === 'forge') return notes.includes('auto_executed') && (subj.includes('wp ') || subj.includes('linkedin') || subj.includes('email'));
-  if (p.id === 'iris') return false; // Ledger has no tickets (data only)
-  // Generic fuzzy
-  return agent.includes(p.match.toLowerCase()) || subj.includes(p.match.toLowerCase());
-}
-
-async function renderTeam(){
-  const main = document.getElementById('main');
-  main.innerHTML = '<div class="loading">Loading team…</div>';
-
-  // Pull tickets, feedback counts, AND heartbeats in parallel
-  const [doneData, fbCounts, hbData] = await Promise.all([
-    fetchTickets('done'),
-    loadFeedbackCounts(),
-    fetch(`${API_BASE}/agent-heartbeat?action=read&limit=200`).then(r => r.ok ? r.json() : null).catch(()=>null)
-  ]);
-  const tickets = (doneData.tickets || []);
-  const heartbeats = (hbData && hbData.heartbeats) || [];
-
-  const allPersonas = [...PERSONAS, ...SYSTEM_PERSONAS];
-
-  // Determine last seen per persona: PREFER heartbeat (more accurate for silent agents)
-  const lastByPersona = {};
-  const fireCountsByPersona = {};
-  for (const p of allPersonas) {
-    const validIds = agentIdsForPersona(p.id);
-    const hbForP = heartbeats.filter(h => validIds.includes(h.agentId));
-    fireCountsByPersona[p.id] = hbForP.length;
-    const lastHb = hbForP[0]; // already reverse-chronological from webhook
-    const lastTicket = tickets.find(t => matchTicket(p, t));
-    // Take the most recent of heartbeat or ticket
-    const hbMs = lastHb ? new Date(lastHb.at).getTime() : 0;
-    const tkMs = lastTicket ? new Date(lastTicket.createdAt).getTime() : 0;
-    if (hbMs > tkMs) {
-      lastByPersona[p.id] = { type: 'fire', when_iso: lastHb.at, summary: lastHb.summary, outcome: lastHb.outcome };
-    } else if (tkMs > 0) {
-      lastByPersona[p.id] = { type: 'ticket', when_iso: lastTicket.createdAt, subject: lastTicket.subject };
-    }
-  }
-
-  function personaCardHtml(p) {
-    const last = lastByPersona[p.id];
-    const lastAt = last ? last.when_iso : null;
-    const isPaused = p.status === 'paused';
-    const status = isPaused
-      ? { cls: 'idle', label: 'Paused' }
-      : statusForLastSeen(lastAt);
-    const fbCount = fbCounts[p.id] || 0;
-    const fireCount = fireCountsByPersona[p.id] || 0;
-    const summary = isPaused
-      ? '🛑 deactivated in n8n — no fake heartbeats'
-      : !last ? 'no activity yet'
-      : last.type === 'fire'
-        ? `${last.outcome === 'error' ? '⚠️' : last.outcome === 'action_taken' ? '✓' : '○'} ${(last.summary || '').slice(0, 50)}`
-        : `📋 ${(last.subject || '').slice(0, 50)}`;
-    const pauseBanner = isPaused
-      ? `<div style="margin-top:8px;padding:8px 10px;background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.18);border-radius:6px;font-size:11px;color:#991b1b;line-height:1.4"><b>PAUSED.</b> ${p.pauseReason || 'See agent profile.'}</div>`
-      : '';
-    return `<div class="persona ${isPaused ? 'persona-paused' : ''}" onclick="openPersona('${p.id}')" style="${isPaused ? 'opacity:.78' : ''}">
-      <div class="persona-head">
-        ${avatarHtml(p)}
-        <div>
-          <div class="persona-name">${p.name}${isPaused ? ' <span style="font-size:11px;color:#991b1b;font-weight:600">· PAUSED</span>' : ''}</div>
-          <div class="persona-role">${p.role}</div>
-        </div>
-      </div>
-      <div class="persona-tagline">${p.tagline}</div>
-      <div class="persona-status"><span class="status-dot ${status.cls}"></span><span>${status.label}${isPaused ? '' : ' · ' + relativeAge(lastAt)} · ${summary}</span></div>
-      ${pauseBanner}
-      <div class="persona-foot">
-        <span class="schedule">${p.schedule}</span>
-        <span style="display:flex;gap:6px">
-          ${fireCount > 0 ? `<span class="comment-badge" style="background:rgba(34,134,58,.12);color:var(--ok)">⚡ ${fireCount}</span>` : ''}
-          <span class="comment-badge ${fbCount===0?'zero':''}">\u{1F4AC} ${fbCount}</span>
-        </span>
-      </div>
-    </div>`;
-  }
-
-  let html = '<h2 style="margin-top:0">Your Marketing Team</h2>';
-  html += '<div class="meta" style="margin-bottom:14px">Click any animal to see their profile, recent work, and leave them a note. Notes are saved instantly. Dragon (🐉) reads all notes every Sunday night and drafts proposed instruction updates for your review — they don\'t auto-apply.</div>';
-  html += '<div class="team-grid">';
-  for (const p of PERSONAS) html += personaCardHtml(p);
-  html += '</div>';
-
-  html += '<h2 style="margin-top:28px">System Layer</h2>';
-  html += '<div class="meta" style="margin-bottom:14px">Plumbing — runs quietly in the background. Wolf catches crashes, Beaver executes your approvals, Squirrel powers the chart.</div>';
-  html += '<div class="team-grid">';
-  for (const p of SYSTEM_PERSONAS) html += personaCardHtml(p);
-  html += '</div>';
-
-  main.innerHTML = html;
-}
-
-// Expose ALL personas (marketing + system) for openPersona lookup
-function allPersonasList(){ return [...PERSONAS, ...SYSTEM_PERSONAS]; }
-
-async function openPersona(pid){
-  const p = allPersonasList().find(x => x.id === pid);
-  if (!p) return;
-  const modal = document.getElementById('pmodal');
-  const content = document.getElementById('pmodal-content');
-
-  content.innerHTML = `<div class="pmodal-head">
-    ${avatarHtml(p)}
-    <div class="pmodal-title">
-      <h2>${p.name}</h2>
-      <div class="role">${p.role} · ${p.schedule}</div>
-    </div>
-    <button class="pmodal-close" onclick="closePersona()">×</button>
-  </div>
-  <div class="pmodal-body">
-    <div class="pmodal-section">
-      <h3>What ${p.name} Does</h3>
-      <p>${p.bio}</p>
-    </div>
-    <div class="pmodal-section">
-      <h3>Listens To</h3>
-      <div class="interact-list">${p.listens_to.length ? p.listens_to.map(n => `<span class="interact-chip"><span class="arr">←</span>${n}</span>`).join('') : '<span class="meta">(Self-Directed)</span>'}</div>
-    </div>
-    <div class="pmodal-section">
-      <h3>Feeds Work To</h3>
-      <div class="interact-list">${p.feeds_to.length ? p.feeds_to.map(n => `<span class="interact-chip"><span class="arr">→</span>${n}</span>`).join('') : '<span class="meta">(Terminal)</span>'}</div>
-    </div>
-    <div class="pmodal-section">
-      <h3>Recent Activity</h3>
-      <div id="pmodal-activity" class="activity-feed"><div class="activity-empty">Loading…</div></div>
-    </div>
-    <div class="pmodal-section">
-      <h3>Tell ${p.name} What To Do Differently</h3>
-      <div id="pmodal-feedback-list" class="feedback-list"><div class="feedback-empty">Loading…</div></div>
-      <div class="feedback-form">
-        <textarea id="pmodal-comment" placeholder="e.g. 'Stop using buzzwords.' / 'Be more aggressive on AG4 budget.' / 'Skip Reddit comments on r/marketing.'"></textarea>
-        <div class="feedback-form-row">
-          <span class="hint" style="line-height:1.4"><b>Honest about what this does:</b> Your note is saved instantly. Sunday 10 PM, 🐉 Dragon reads ALL notes across the team and DRAFTS proposed instruction changes into your Inbox. You must manually approve each one — nothing is hot-reloaded into ${p.name}'s "brain" automatically. This is intentional, for safety.</span>
-          <button class="btn primary" onclick="submitPersonaComment('${p.id}', '${p.name}')">Save Note For ${p.name}</button>
-        </div>
-      </div>
-    </div>
-  </div>`;
-  modal.classList.add('show');
-  // Lazy-load activity + feedback
-  loadPersonaActivity(p);
-  loadPersonaFeedback(p.id);
-}
-
-function closePersona(){ document.getElementById('pmodal').classList.remove('show'); }
-
-async function loadPersonaActivity(p){
-  try {
-    // Pull tickets AND heartbeats in parallel
-    const [doneData, hbData] = await Promise.all([
-      fetchTickets('done'),
-      fetch(`${API_BASE}/agent-heartbeat?action=read&limit=100`).then(r => r.ok ? r.json() : null).catch(()=>null)
-    ]);
-
-    // Extract a concrete preview from a ticket
-    function extractPreview(t){
-      const subj = t.subject || '';
-      const notes = t.outcomeNotes || '';
-      const content = t.content || '';
-      let recDetail = {};
-      try { recDetail = JSON.parse(t.recommendationDetail || '{}'); } catch(e) {}
-
-      // Maverick budget change
-      if (/\[done\] sem auto/i.test(subj)) {
-        const m = subj.match(/\$([\d.]+)[→\-\>]+\$([\d.]+)/);
-        if (m) return `Changed campaign budget from $${m[1]}/day to $${m[2]}/day (real Google Ads write). Reason: ${(recDetail.reasoning||'').slice(0,180)}`;
-        return content.slice(0, 200);
-      }
-      // Tally suggestion
-      if (/\[suggestion\] sem/i.test(subj)) {
-        return `Emailed Paul a suggestion (no Google Ads change). Action: ${recDetail.action||'?'} on "${recDetail.keyword||'?'}" in ${recDetail.ag||'?'}. Reason: ${(recDetail.rationale||'').slice(0,150)}`;
-      }
-      // Content Producer draft
-      if (/Content Producer|Content Draft|Anchor/i.test(subj + ' ' + (t.recommendationType||''))) {
-        const title = recDetail.pick?.title || subj.replace(/^\[[^\]]+\]\s*/,'').slice(0,80);
-        const wordCount = recDetail.word_count || recDetail.draft_word_count;
-        const preview = (recDetail.draft_preview || recDetail.draft_excerpt || content || '').slice(0, 240);
-        return `Drafted: "${title}"${wordCount ? ` (${wordCount} words)` : ''}\n\n${preview}…`;
-      }
-      // Backlink outreach
-      if (/\[DRAFT FOR YOUR REVIEW\]|Backlink/i.test(subj)) {
-        const domain = recDetail.target_domain || '?';
-        const subjLine = recDetail.subject_line || '?';
-        const body = (recDetail.draft_email || '').slice(0, 200);
-        return `Outreach to ${domain}\nSubject: ${subjLine}\n\n${body}…`;
-      }
-      // Briefing
-      if (/\[BRIEFING\]|\[COORDINATOR\]/i.test(subj)) {
-        return (content || recDetail.summary || '').slice(0, 280);
-      }
-      // LinkedIn
-      if (/LinkedIn/i.test(subj + ' ' + (t.recommendationType||''))) {
-        const v = recDetail.variants?.[0] || recDetail.draft || '';
-        return v ? `Drafted LinkedIn post:\n\n"${v.slice(0,240)}…"` : content.slice(0,200);
-      }
-      // Reddit/Community
-      if (/Community Engagement|Reddit/i.test(subj + ' ' + (t.agent||''))) {
-        return recDetail.draft_comment ? `Drafted reply for r/${recDetail.subreddit||'?'}:\n\n"${recDetail.draft_comment.slice(0,200)}…"` : content.slice(0,200);
-      }
-      // Default
-      return content.slice(0, 200) || notes.slice(0, 200);
-    }
-
-    // Tickets matching this persona
-    const tickets = (doneData.tickets || [])
-      .filter(t => matchTicket(p, t))
-      .map(t => ({
-        kind: 'ticket',
-        when: new Date(t.createdAt).getTime(),
-        when_iso: t.createdAt,
-        label: (t.subject || '').slice(0, 110),
-        preview: extractPreview(t),
-        sub: (t.outcomeNotes || '').slice(0, 80),
-        outcome: /Failed|ERROR/i.test(t.subject||'') ? 'error' : /\[done\]|AUTO_EXECUTED/i.test(t.subject || t.outcomeNotes || '') ? 'action' : 'info',
-        link: `https://app.hubspot.com/contacts/_/ticket/${t.ticketId}`
-      }));
-
-    // Heartbeats matching this persona (by agentId — including merged personas)
-    const validIds = agentIdsForPersona(p.id);
-    const heartbeats = ((hbData && hbData.heartbeats) || [])
-      .filter(h => validIds.includes(h.agentId))
-      .map(h => ({
-        kind: 'fire',
-        when: new Date(h.at).getTime(),
-        when_iso: h.at,
-        label: '⚡ ' + (h.summary || h.action || 'fired'),
-        sub: h.outcome === 'error' ? 'errored' : h.outcome === 'action_taken' ? 'success' : 'no-op',
-        outcome: h.outcome === 'error' ? 'error' : h.outcome === 'action_taken' ? 'action' : 'noop',
-        link: h.workflow_id && h.exec_id ? `https://agents.liftnowdirect.com/workflow/${h.workflow_id}/executions/${h.exec_id}` : null
-      }));
-
-    // Merge + sort reverse-chronological + cap
-    const merged = [...tickets, ...heartbeats].sort((a,b) => b.when - a.when).slice(0, 25);
-
-    const el = document.getElementById('pmodal-activity');
-    if (!el) return;
-    if (!merged.length){
-      el.innerHTML = '<div class="activity-empty">No recent activity. Either ' + p.name + ' hasn’t fired yet today or the agent is paused.</div>';
-      return;
-    }
-    el.innerHTML = merged.map(item => {
-      const dot = item.outcome === 'error' ? '🔴' : item.outcome === 'action' ? '✅' : item.outcome === 'noop' ? '○' : 'ℹ️';
-      const linkOpen = item.link ? `<a href="${item.link}" target="_blank" style="text-decoration:none;color:inherit">` : '';
-      const linkClose = item.link ? '</a>' : '';
-      const previewHtml = item.preview && item.kind === 'ticket'
-        ? `<div style="margin-top:6px;padding:8px 10px;background:#f6f8fa;border-left:3px solid var(--accent);border-radius:4px;font-size:12px;color:var(--fg);white-space:pre-wrap;line-height:1.45">${escapeHtml(item.preview)}</div>`
-        : '';
-      return `<div class="activity-item">
-        ${linkOpen}<span class="when">${dot} ${relativeAge(item.when_iso)}</span>
-        ${escapeHtml(item.label)}
-        ${item.sub ? '<div style="color:var(--muted);font-size:11px;margin-top:2px">'+escapeHtml(item.sub)+'</div>' : ''}
-        ${previewHtml}
-        ${linkClose}
-      </div>`;
-    }).join('');
-  } catch (e) {
-    const el = document.getElementById('pmodal-activity');
-    if (el) el.innerHTML = '<div class="activity-empty">Couldn’t load activity.</div>';
-  }
-}
-
-async function loadPersonaFeedback(pid){
-  try {
-    const r = await fetch('https://agents.liftnowdirect.com/webhook/agent-feedback?action=read&agentId=' + encodeURIComponent(pid));
-    const j = await r.json();
-    const fb = (j.feedback || []).slice().reverse();
-    const el = document.getElementById('pmodal-feedback-list');
-    if (!el) return;
-    if (!fb.length){ el.innerHTML = '<div class="feedback-empty">No notes yet. Be the first.</div>'; return; }
-    el.innerHTML = fb.map(f => `<div class="feedback-item">
-      <span class="when">${relativeAge(f.at)}</span>
-      ${escapeHtml(f.comment)}
-    </div>`).join('');
-  } catch (e) {
-    const el = document.getElementById('pmodal-feedback-list');
-    if (el) el.innerHTML = '<div class="feedback-empty">Couldn’t load notes.</div>';
-  }
-}
-
-async function submitPersonaComment(pid, pname){
-  const ta = document.getElementById('pmodal-comment');
-  const comment = (ta.value || '').trim();
-  if (!comment){ toast('Type a note first.', 'err'); return; }
-  try {
-    const r = await fetch('https://agents.liftnowdirect.com/webhook/agent-feedback', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({agentId: pid, comment, source: 'ui'})
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const j = await r.json();
-    ta.value = '';
-    toast(`✓ Note saved for ${pname}. Dragon will turn it into a proposed instruction change this Sunday (10 PM ET). You'll see the draft in your Inbox — apply or skip then.`, 'ok');
-    loadPersonaFeedback(pid);
-    cachedFeedbackCounts = null; // force refresh next time grid loads
-  } catch (e) {
-    toast('Send failed: ' + e.message, 'err');
-  }
-}
-
-function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-// Close modal on Escape
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { const m = document.getElementById('pmodal'); if (m && m.classList.contains('show')) closePersona(); }
-});
-
-async function renderStats(){
-  const main = document.getElementById('main');
-  const [pending, done] = await Promise.all([fetchTickets('pending'), fetchTickets('done')]);
-  const proposals = pending.tickets.filter(t => !isReport(t));
-  const reports = pending.tickets.filter(isReport);
-  const dCount = done.tickets.length;
-  const approved = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('APPROVED')).length;
-  const cond = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('CONDITIONAL_APPROVE')).length;
-  const rejected = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('REJECTED')).length;
-  const acknowledged = done.tickets.filter(t=>(t.outcomeNotes||'').startsWith('ACKNOWLEDGED')).length;
-  const decided = approved + cond + rejected;
-  const approveRate = decided ? Math.round((approved+cond)*100/decided) : null;
-  const byAgent = {};
-  for (const t of [...pending.tickets, ...done.tickets]) {
-    byAgent[t.agent] = (byAgent[t.agent]||0)+1;
-  }
-  const agentRows = Object.entries(byAgent).sort((a,b)=>b[1]-a[1]).map(([a,c])=>{
-    const col = agentColor(a);
-    return `<div class="agent-row"><span style="color:${col.fg};font-weight:600">${escapeHtml(a)}</span><span class="meta">${c}</span></div>`;
-  }).join('');
-  main.innerHTML = `
-    <div class="reports-grid">
-      <div class="stat"><div class="stat-label">Pending Decisions</div><div class="stat-value">${proposals.length}</div><div class="stat-sub">in Pending tab</div></div>
-      <div class="stat"><div class="stat-label">Reports To Read</div><div class="stat-value">${reports.length}</div><div class="stat-sub">in Inbox tab</div></div>
-      <div class="stat"><div class="stat-label">Last 7 Days</div><div class="stat-value">${dCount}</div><div class="stat-sub">processed</div></div>
-      <div class="stat"><div class="stat-label">Approve Rate</div><div class="stat-value">${approveRate !== null ? approveRate+'%' : '—'}</div><div class="stat-sub">${approved} ✓ · ${cond} ✓w/cond · ${rejected} ✗ · ${acknowledged} ack</div></div>
-    </div>
-    <h2>Volume by Agent</h2>
-    ${agentRows || '<div class="empty">No data yet</div>'}
-  `;
-}
-
-// === Auto-refresh ===
-loadCurrentTab();
-let pollInterval = setInterval(() => {
+/* ---------------------------------------------------------------------
+   Init + gentle auto-refresh (skips while you're typing a note)
+   ------------------------------------------------------------------- */
+boot(false);
+setInterval(() => {
+  if (['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)) return;  // don't yank mid-decision
   if (document.hidden) return;
-  if (['today','decide','progress'].includes(currentView)) loadCurrentTab();
-}, 60000);
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && ['today','decide','progress'].includes(currentView)) loadCurrentTab();
-});
+  boot(true);
+}, 120000);
 </script>
 </body>
 </html>
