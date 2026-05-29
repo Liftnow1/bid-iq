@@ -592,3 +592,39 @@ Deleted the **2,507-line, 15-agent FICTION** dashboard (−2309/+796 net). New f
 - **Known tool limitation (honest):** local `preview_screenshot` times out (network-idle defeated by the page's live webhook polling — not a page defect; eval proves full render). Visual confirmation = open the live URL in a browser.
 
 ### State unchanged: no agent re-activated, no cron touched, no n8n DELETE API called, no creds printed (AGENT_SECRET reused from the already-committed file, not new exposure).
+
+---
+
+## CHECKPOINT ~22:10 ET (2026-05-28) — Dashboard VISUAL iteration (screenshot → critique → tweak loop)
+Paul's follow-up: *"develop a way for you to look at the actual UI/UX and adjust/iterate… it's still LOOKING like shit even if it has correct data. Keep screenshotting, tweaking etc until it looks the way you know i want it."* Data was right; the **look** was the problem.
+
+### Screenshot pipeline (the missing capability)
+`preview_screenshot` is unusable on this page (its network-idle wait is defeated by the live webhook polling — times out every time). **Working pipeline = headless Chrome `--screenshot`** against the local static server, with `?static=1` (loads once, kills the poller) so the page reaches idle:
+`chrome --headless=new --window-size=W,H --virtual-time-budget=18000 --screenshot=out.png "http://127.0.0.1:8731/approvals/index.html?static=1#<tab>"`. I can now SEE the UI and iterate. Screenshots saved under `.tmp_n8n/` (gitignored).
+
+### Root cause of "looks like shit": every card rendered fully EXPANDED
+`toggleCard` toggled a `.collapsed` class that **had no CSS rule and was never applied by default** → all 14 cards dumped ASK/WHY/BODY/IF-APPROVE/IF-REJECT at once = unscannable wall of tiny gray text. The agent draft (`--- TITLE ---`, `--- META DESCRIPTION ---`, `BODY:`, `WP EDIT URL`) got swallowed into the WHY block and rendered raw.
+
+### Fixes (all in `public/approvals/index.html`, +107/−20)
+1. **Cards collapse by default.** New IA: collapsed card = agent chip · priority · subject · age · chevron + a 1–2 line **preview** (`askPreview()` pulls the ASK gist) + action bar. Click/Enter/Space expands to proof links + full body. CSS: `.card.collapsed .card-detail{display:none}`, rotating `.chev`.
+2. **Draft tucked away.** `splitDraft()` separates WHY rationale (stays inline) from the raw drafted content (`---…---` / `BODY:` / edit-URL markers) → collapsed `<details>View the full drafted content</details>`. Verified against a real Bee ticket's exact header map (ground-truthed via webhook, not guessed).
+3. **Typography/polish:** stronger subject (15px/650/ink), action-bar divider, card-head hover, visible keyboard-focus ring (`.card.focused` outline — previously focus was invisible).
+4. **Deep-linkable tabs:** `#team`/`#trends` survive refresh/bookmark (`switchTab` writes hash + scrolls top; `initTab()` reads it on load). Also what enables headless screenshots of non-default tabs.
+5. **Mobile:** collapsed cards hide the (stacked, tall) action bar so the list stays scannable (~8 cards/screen vs ~2); tap to reveal actions.
+
+### RECEIPTS (Test-Before-Done)
+- `node --check` on extracted inline JS (39.8KB) → **NODE_OK** after every edit batch.
+- Visually verified via headless Chrome (PNGs in `.tmp_n8n/`): **Now collapsed** (desktop) = scannable rows; **Now expanded** (desktop) = clean ASK→WHY→[draft disclosure]→IF-APPROVE/REJECT→actions, raw markers hidden; **Team** = scorecards intact; **Trends** = 3 Chart.js charts render; **mobile 390px** = compact collapsed list.
+- Throwaway expanded-state variant (`public/approvals/_expandtest.html`) created to screenshot the expanded look, then **deleted** (confirmed `public/approvals/` contains only `index.html`).
+- No behavior contracts touched: decide()/kill-switch/fetch flow unchanged; static-mode + 8s abort-cap (added earlier) are localhost-guarded.
+
+### ADDENDUM ~22:40 ET — second visual pass (mobile) + a screenshot-methodology correction
+Re-screenshotted the *current* file (didn't trust the prior state) and caught two things:
+
+1. **False alarm I almost shipped a "fix" for.** Mobile shots taken at `--window-size=390` *looked* like the preview text overflowed and clipped mid-word at the right edge. Injected a width-probe (`getBoundingClientRect` painted into the DOM) to get ground truth: **`vw=482, docScroll=482, main=482, card=454, preview=450`** — all internally consistent, **zero horizontal overflow.** Root cause was the *tool*, not the page: headless Chrome on this Windows box **clamps the CSS viewport to ~482px minimum** (true in both `--headless=new` and `--headless=old`) while still saving the *requested* 390px canvas → the screenshot cut off the right ~92px of a correctly-laid-out page. **Lesson logged: for faithful mobile shots, capture at canvas width == viewport (≥482px here); never trust a sub-482 mobile screenshot.** My first reflex `width:100%` "fix" did nothing for the (nonexistent) overflow — kept it only as harmless narrow-device hardening.
+2. **One *real* imperfection found + fixed.** With a faithful 482px render, cards with 3+ line previews showed a **faded partial 3rd line bleeding below the 2-line clamp** — the classic `-webkit-line-clamp` + `padding-bottom` bug (`overflow:hidden` clips at the *padding box*, so bottom padding leaves a window for line 3). Fix: moved `.card-preview` bottom spacing from `padding` → `margin` (`padding:0 16px; margin:-4px 0 14px`) so the clip lands exactly at 2 lines. Re-shot: clean `…` ellipsis on line 2, no bleed. Also added `overflow-wrap:break-word` so a long token can't blow out a real ≤390 phone.
+
+### RECEIPTS (this pass)
+- Width-probe readout (screenshotted): `vw=482 main=482 card=454 preview=450` → no overflow. Methodology bug, not layout bug.
+- Faithful renders captured at canvas==viewport: **mobile 482px** = clean 2-line clamp, tip text no longer clipped, scannable; **desktop 1280px Now** (collapsed) unchanged-good; **desktop expanded** (via throwaway `_exp.html`, since `--screenshot` can't click — created, shot, then **deleted**; confirmed `public/approvals/` = only `index.html`) = WHY prose clean with **no raw `--- TITLE ---`/`BODY:` markers** (correctly tucked in the draft `<details>`), IF-APPROVE/REJECT boxes intact.
+- Only CSS touched this pass (`.card-preview`) + build marker already at `dash-rebuild-2026-05-28-v3-collapse`. No JS, no behavior change.

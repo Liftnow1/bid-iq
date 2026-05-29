@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Liftnow Agents · Command Center</title>
-<meta name="build" content="dash-rebuild-2026-05-28-v2">
+<meta name="build" content="dash-rebuild-2026-05-28-v3-collapse">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root{
@@ -106,9 +106,23 @@
   .card.hi{border-left:3px solid var(--err)}
   .card.med{border-left:3px solid var(--warn)}
   .card.fading{opacity:0; transform:translateX(8px)}
+  .card.focused{outline:2px solid var(--accent); outline-offset:1px}
+  /* collapse mechanics: collapsed shows head+preview+actions; expanded swaps preview for full detail */
+  .card.collapsed .card-detail{display:none}
+  .card:not(.collapsed) .card-preview{display:none}
   .card-head{
-    display:flex; align-items:center; gap:10px; padding:13px 16px 11px; cursor:pointer;
+    display:flex; align-items:center; gap:10px; padding:14px 16px 12px; cursor:pointer;
     flex-wrap:wrap;
+  }
+  .card-head:hover{background:#fbfcfd}
+  .card-head .chev{
+    order:99; margin-left:2px; color:var(--faint); font-size:15px; line-height:1; flex-shrink:0;
+    transition:transform .16s ease, color .16s; transform:rotate(0deg);
+  }
+  .card:not(.collapsed) .card-head .chev{transform:rotate(90deg); color:var(--muted)}
+  .card-preview{
+    width:100%; padding:0 16px; margin:-4px 0 14px; color:var(--muted); font-size:13.5px; line-height:1.5;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:break-word;
   }
   .agent-chip{
     display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600;
@@ -122,7 +136,7 @@
   .prio.HIGH{background:var(--err-soft); color:var(--err)}
   .prio.MEDIUM{background:var(--warn-soft); color:var(--warn)}
   .prio.LOW{background:#eef1f4; color:var(--muted)}
-  .card-subject{font-weight:600; flex:1; min-width:180px; font-size:14.5px}
+  .card-subject{font-weight:650; flex:1; min-width:180px; font-size:15px; color:var(--ink); line-height:1.3; letter-spacing:-.01em}
   .card-age{font-size:12px; color:var(--faint); white-space:nowrap}
   .card-age.old{color:var(--warn); font-weight:600}
   .proof-row{
@@ -150,7 +164,7 @@
     white-space:pre-wrap; word-break:break-word; background:#f6f8fa; border:1px solid var(--border-soft);
     border-radius:7px; padding:9px; font-size:12px; margin:6px 0 0; max-height:240px; overflow:auto;
   }
-  .actions{display:flex; gap:8px; flex-wrap:wrap; padding:0 16px 15px; align-items:flex-start}
+  .actions{display:flex; gap:8px; flex-wrap:wrap; padding:13px 16px 15px; align-items:flex-start; border-top:1px solid var(--border-soft)}
   .btn{
     border:1px solid var(--border); background:#fff; color:var(--ink); border-radius:8px;
     padding:8px 14px; font-size:13.5px; font-weight:600; transition:.12s;
@@ -304,6 +318,8 @@
     .actions{flex-direction:column}
     .actions .btn{width:100%}
     .comment{width:100%}
+    /* on phones, keep the list scannable: reveal the action bar only when a card is open */
+    .card.collapsed .actions{display:none}
     .pulse{font-size:12px; gap:9px}
     .brand .tag{display:none}
   }
@@ -390,6 +406,18 @@ const STAGE_LABEL = {'1':'Needs review','2':'Approved','3':'Deferred','4':'Close
 
 let currentView = 'now';
 const STATE = { all:null, allErr:false, pending:null, pendErr:false, hb:null, hbErr:false, fb:null, updatedAt:null };
+
+// Design/QA mode. Add ?static=1 to the URL to load data once and then STOP the
+// auto-refresh poller, so the page reaches network-idle and can be screenshotted
+// and iterated on. Persisted to localStorage ONLY on localhost (so a stray
+// ?static link can never freeze the live dashboard for a real user). ?live clears it.
+let STATIC_MODE = false;
+try {
+  const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])/.test(location.hostname);
+  if (location.search.indexOf('live') !== -1) { localStorage.removeItem('dashStatic'); }
+  if (location.search.indexOf('static') !== -1) { STATIC_MODE = true; if (isLocal) localStorage.setItem('dashStatic','1'); }
+  else if (isLocal && localStorage.getItem('dashStatic') === '1') { STATIC_MODE = true; }
+} catch(e) { STATIC_MODE = location.search.indexOf('static') !== -1; }
 let charts = [];
 let focusedTicketId = null;
 
@@ -504,17 +532,52 @@ function renderTicketContent(content){
   }
   let html = '';
   if (sections['ASK'])           html += `<div class="section"><div class="section-label">What it's asking</div><div class="section-body">${escapeHtml(sections['ASK'])}</div></div>`;
-  if (sections['WHY'])           html += `<div class="section"><div class="section-label">Why</div><div class="section-body">${escapeHtml(sections['WHY'])}</div></div>`;
+  if (sections['WHY']){
+    // The WHY span often swallows the agent's full draft (--- TITLE ---, BODY:, WP EDIT URL …).
+    // Keep the rationale prose inline; tuck the raw draft into a collapsed disclosure.
+    const { prose, draft } = splitDraft(sections['WHY']);
+    if (prose)  html += `<div class="section"><div class="section-label">Why</div><div class="section-body">${escapeHtml(prose)}</div></div>`;
+    if (draft)  html += `<details class="draft"><summary>View the full drafted content</summary><pre>${escapeHtml(draft)}</pre></details>`;
+  }
   if (sections['IF YOU APPROVE'])html += `<div class="section-approve"><div class="section-label">If you approve</div><div class="section-body">${escapeHtml(sections['IF YOU APPROVE'])}</div></div>`;
   if (sections['IF YOU REJECT']) html += `<div class="section-reject"><div class="section-label">If you reject</div><div class="section-body">${escapeHtml(sections['IF YOU REJECT'])}</div></div>`;
   return html;
 }
 
+// Separate WHY rationale (prose) from a drafted-content block. The draft starts at the
+// first "--- SECTION ---" divider, a "BODY:" line, or an edit-URL line — whichever comes first.
+function splitDraft(text){
+  const lines = String(text).split('\n');
+  let cut = -1;
+  for (let i = 0; i < lines.length; i++){
+    const s = lines[i].trim();
+    if (/^-{2,}.*-{2,}$/.test(s) || /^BODY:?$/i.test(s) || /^(WP|MY)\s+EDIT\s+URL/i.test(s)){ cut = i; break; }
+  }
+  if (cut === -1) return { prose: text.replace(/\s+$/, ''), draft: '' };
+  return {
+    prose: lines.slice(0, cut).join('\n').replace(/\s+$/, ''),
+    draft: lines.slice(cut).join('\n').replace(/^\s+|\s+$/g, ''),
+  };
+}
+
+// One- to two-line plain-text gist of a ticket, for the collapsed card.
+// Prefers the ASK block; falls back to the first meaningful line.
+function askPreview(content){
+  const raw = decodeEntities(String(content || '')).trim();
+  if (!raw) return '';
+  let text;
+  const m = /(^|\n)ASK\s*\n([\s\S]*?)(?:\n(?:WHY|BODY|IF YOU APPROVE|IF YOU REJECT)\s*\n|$)/.exec(raw);
+  if (m) text = m[2];
+  else text = raw.replace(/^(ASK|WHY|BODY|IF YOU (APPROVE|REJECT))\s*\n/i, '');
+  text = text.replace(/\s+/g, ' ').trim();
+  return text.length > 165 ? text.slice(0, 162).replace(/\s+\S*$/, '') + '…' : text;
+}
+
 /* ---------------------------------------------------------------------
    Data layer — every source loads independently (no all-or-nothing)
    ------------------------------------------------------------------- */
-async function fetchTickets(view){
-  const r = await fetch(`${API_BASE}/agent-proposals?view=${view}`);
+async function fetchTickets(view, signal){
+  const r = await fetch(`${API_BASE}/agent-proposals?view=${view}`, signal ? { signal } : undefined);
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   const data = await r.json();
   // Hide non-marketing infra tickets that can leak in (kill switch, webhooks, SFD, etc.)
@@ -541,12 +604,17 @@ async function boot(silent){
   if (!silent && !STATE.updatedAt) document.getElementById('main').innerHTML = skeleton();
 
   const settle = (p) => p.then(v => ({ok:true, v})).catch(e => ({ok:false, e}));
+  // Cap every source at 8s and actually ABORT the request — a hung webhook must
+  // not keep the page spinning (and must not block network-idle for screenshots).
+  const ctrl = new AbortController();
+  const capId = setTimeout(() => ctrl.abort(), 8000);
   const [allR, pendR, hbR, fbR] = await Promise.all([
-    settle(fetchTickets('all')),
-    settle(fetchTickets('pending')),
-    settle(fetch(`${API_BASE}/agent-heartbeat?action=read&limit=300`).then(r => r.ok ? r.json() : Promise.reject(r.status))),
-    settle(fetch(`${API_BASE}/agent-feedback?action=read`).then(r => r.ok ? r.json() : Promise.reject(r.status))),
+    settle(fetchTickets('all', ctrl.signal)),
+    settle(fetchTickets('pending', ctrl.signal)),
+    settle(fetch(`${API_BASE}/agent-heartbeat?action=read&limit=300`, { signal: ctrl.signal }).then(r => r.ok ? r.json() : Promise.reject(r.status))),
+    settle(fetch(`${API_BASE}/agent-feedback?action=read`, { signal: ctrl.signal }).then(r => r.ok ? r.json() : Promise.reject(r.status))),
   ]);
+  clearTimeout(capId);
 
   STATE.all = allR.ok ? (allR.v.tickets || []) : null;  STATE.allErr = !allR.ok;
   STATE.pending = pendR.ok ? (pendR.v.tickets || []) : null;  STATE.pendErr = !pendR.ok;
@@ -635,6 +703,8 @@ function inlineErr(msg){ return `<div class="inline-err">${escapeHtml(msg)}<br><
 function switchTab(view){
   currentView = view;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+  try { history.replaceState(null, '', '#' + view); } catch(e) { /* ignore */ }
+  window.scrollTo(0, 0);
   renderCurrent();
 }
 function renderCurrent(){
@@ -700,23 +770,29 @@ function actionCard(t){
       ${url ? `<a class="proof" href="${escapeHtml(url)}" target="_blank" rel="noopener">View the live page <span class="ext">↗</span></a>` : ''}
     </div>`;
 
-  return `<div class="card ${cls}" id="card-${id}" data-ticket="${id}">
+  const preview = askPreview(t.content);
+
+  return `<div class="card collapsed ${cls}" id="card-${id}" data-ticket="${id}">
     <div class="card-head" onclick="toggleCard('${id}')">
       ${chip}
       <span class="prio ${prio}">${prio}</span>
       <span class="card-subject">${escapeHtml(t.subject || '(no subject)')}</span>
       <span class="card-age ${ageClass(t.ageHours)}">${ageLabel(t.ageHours)}</span>
+      <span class="chev" aria-hidden="true">›</span>
     </div>
-    ${proof}
-    <div class="card-body">${renderTicketContent(t.content)}
-      ${t.outcomeNotes ? `<details><summary>Agent notes</summary><pre>${escapeHtml(t.outcomeNotes)}</pre></details>` : ''}
+    ${preview ? `<div class="card-preview">${escapeHtml(preview)}</div>` : ''}
+    <div class="card-detail">
+      ${proof}
+      <div class="card-body">${renderTicketContent(t.content)}
+        ${t.outcomeNotes ? `<details><summary>Agent notes</summary><pre>${escapeHtml(t.outcomeNotes)}</pre></details>` : ''}
+      </div>
     </div>
     <div class="actions">
       <button class="btn btn-approve" onclick="decide('${id}','approve',this)">Approve</button>
       <button class="btn btn-cond"    onclick="decide('${id}','conditional_approve',this)">Approve with a note</button>
       <button class="btn btn-defer"   onclick="decide('${id}','defer',this)">Defer 3 days</button>
       <button class="btn btn-reject"  onclick="decide('${id}','reject',this)">Reject</button>
-      <textarea id="comment-${id}" class="comment" placeholder="Add a note — required to reject or approve-with-a-note. The team learns from this." oninput="autoGrow(this)"></textarea>
+      <textarea id="comment-${id}" class="comment" placeholder="Add a note — required to reject or add a condition. The team learns from it." oninput="autoGrow(this)"></textarea>
     </div>
   </div>`;
 }
@@ -975,6 +1051,7 @@ document.addEventListener('keydown', e => {
   const setFocus = (c) => { cards.forEach(cc => cc.classList.remove('focused')); c.classList.add('focused'); focusedTicketId = c.dataset.ticket; c.scrollIntoView({behavior:'smooth', block:'nearest'}); };
   if (e.key === 'j'){ e.preventDefault(); setFocus(cards[Math.min(idx+1, cards.length-1)] || cards[0]); }
   else if (e.key === 'k'){ e.preventDefault(); setFocus(cards[Math.max(idx-1, 0)] || cards[0]); }
+  else if ((e.key === 'Enter' || e.key === ' ') && focused){ e.preventDefault(); toggleCard(focused.dataset.ticket); }
   else if (e.key === 'a' && focused){ e.preventDefault(); decide(focused.dataset.ticket, 'approve'); }
   else if (e.key === 'd' && focused){ e.preventDefault(); decide(focused.dataset.ticket, 'defer'); }
   else if ((e.key === 'r' || e.key === 'c') && focused){ e.preventDefault(); document.getElementById('comment-'+focused.dataset.ticket)?.focus(); }
@@ -983,12 +1060,22 @@ document.addEventListener('keydown', e => {
 /* ---------------------------------------------------------------------
    Init + gentle auto-refresh (skips while you're typing a note)
    ------------------------------------------------------------------- */
+// Deep-link the active tab: #team / #trends survive a refresh or bookmark.
+(function initTab(){
+  const h = (location.hash || '').replace('#', '');
+  if (h === 'team' || h === 'trends' || h === 'now'){
+    currentView = h;
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === h));
+  }
+})();
 boot(false);
-setInterval(() => {
-  if (['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)) return;  // don't yank mid-decision
-  if (document.hidden) return;
-  boot(true);
-}, 120000);
+if (!STATIC_MODE) {
+  setInterval(() => {
+    if (['TEXTAREA','INPUT'].includes(document.activeElement?.tagName)) return;  // don't yank mid-decision
+    if (document.hidden) return;
+    boot(true);
+  }, 120000);
+}
 </script>
 </body>
 </html>
