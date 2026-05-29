@@ -772,3 +772,31 @@ The Eagle and CDD probes returned **`total_matches=0`** even when the signature 
 All three targets were **already active** — no agent re-activated, no cron cadence touched, no n8n DELETE API called. No creds printed (DM webhook is unauthenticated GET; HubSpot only via credential `S7YZNtmkHgtF72gN`, never read). `.tmp_n8n/` scripts + `work/` backups are gitignored. PUTs sent only `{name,nodes,connections,settings}` per the n8n contract; `active` preserved by n8n and re-verified.
 
 ### Next: report #163 to Paul (wired + verified + the conservative-matching caveat & proposed follow-up); batch-commit this journal checkpoint with the carried-over #164/#165 CONFIRMED receipt (single push, explicit paths only).
+
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — OVERNIGHT RUN: FIX 1 (Content Producer P0) + FIX 2 (Master Kill Switch coverage) DONE+VERIFIED; GSC OAuth credential FLAGGED
+
+Paul on a 6-8h break. Per the overnight directive ("apply every bug/debug across all agents; certify another 4-8; no stone unturned"), running as a surgeon-of-one: read-only swarm for recon, single careful PUTs for fixes, no real side effects (no WP publish, no email beyond paulj@, no ad spend, no n8n DELETE, NEVER fire the kill switch).
+
+### FIX 1 - Content Producer (d7YwC4ezub4g1LrI) P0 orphan-crash - DONE+VERIFIED
+Auditor verdict was BLOCKED: an orphan `Auto-Publish Private Draft` node (inbound []) fed `Create Content Ticket`, which referenced `$("Auto-Publish Private Draft").first().json.link` - guaranteeing a crash on the proceed path, plus a false "published to WP" claim and a stage-3 override of the gate's stage-1 ticket.
+- Two surgical edits (`_cp_fix1.py`): (1) `Create Content Ticket.jsonBody = "={{ $json.body_str }}"` (use the Self-Reject Gate's emitted stage-1 body); (2) severed the orphan->CCT edge (`del conns["Auto-Publish Private Draft"]`; node left inert, not deleted).
+- RECEIPT: 7 preconditions OK, PUT 200, 8 postconditions OK (active=True, nodes=19, CCT single inbound = Self-Reject Passed?, zero orphan refs anywhere). FIX 1 VERIFIED.
+- E2E PROOF: fired CP live -> exec 10060 status=SUCCESS, 15 nodes ran, full proceed path clean. Orphan crash gone.
+
+### THE REAL REASON CP PRODUCES 0 TICKETS (found by live firing - static analysis missed it)
+- exec 10060 (success): CP self-rejected - Self-Reject Gate failed 4 checks (closing_tagline, cta, banned_competitors, word_count_ok; word_count=3224 vs 1500-2800 ceiling for refresh pieces). Gate WORKING; the model's draft didn't comply. -> content-quality watch (flag, not a code bug).
+- exec 10067 (error): hard error at `GSC Anchor Performance` - Google Search Console OAuth2 credential R24TuEIQaF3bmQSZ has an invalid/expired/revoked refresh token. `neverError:true` does NOT catch it (auth-layer throw, not an HTTP response).
+- Blast radius (`_gsc_blast.py`): same dead credential used by 3 ACTIVE agents - Content Producer, Bee (N03TEmB50zG0XiiP), Content Decay Detector (yYyj4TnP9Ho9O85l) - plus 7 paused. OPERATOR-ONLY FIX: interactive Google re-auth (prohibited for me). FLAGGED, not fixed. P0-urgent for Paul.
+
+### FIX 2 - Master Kill Switch (ljEP1fIxSr2UmJHA) coverage gap - DONE+VERIFIED
+The kill switch fanned out to 8 Toggle nodes but MISSED two ACTIVE action-taking agents: Approval Executor (hpgbBAmRmqtsfr6g, does WP PATCH / HubSpot writes) and 7b Conditional Pre-Processor (67uuAQEIjvv5pcCB). A kill switch that cannot stop the executor is the most dangerous gap in the system.
+- Fix (`_ks_fix2.py`): cloned an existing `Toggle:` httpRequest node twice via `copy.deepcopy` (preserves the X-N8N-API-KEY header in memory; never printed/written), gave each a fresh uuid4 node id, edited ONLY name/position/url-workflow-id, wired `Parse Action -> new toggle -> Aggregate Results`. PUT mutates the definition only - the kill switch was NOT fired.
+- RECEIPT: 9 preconditions OK, PUT 200, 11 postconditions OK - active=True, nodes 12->14, exactly 10 toggles, AE + 7b ids now covered, Parse Action fans to 10, Aggregate Results 10 inbound, both new toggles' shape matches siblings (POST + X-N8N-API-KEY + Content-Type + neverError), all node ids unique, original 8 toggles intact. Kill switch now covers 10 ids. FIX 2 VERIFIED.
+
+### Safety / state discipline
+No agent activated/paused, no cron touched, no DELETE API, kill switch never fired, no creds printed. All PUTs sent only {name,nodes,connections,settings,staticData}; `active` preserved by n8n and re-verified each time. `.tmp_n8n/` scripts + `work/` backups gitignored.
+
+### Next (overnight queue): FIX 3 Silent Failure Detector flood (eUhp1uc2wj4SrDbQ) -> Wave 2 re-cert (Bee/Eagle/CDD/7b) -> process Wave 3 paused-agent reports -> UI/UX retest -> morning report.
