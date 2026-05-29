@@ -800,3 +800,30 @@ The kill switch fanned out to 8 Toggle nodes but MISSED two ACTIVE action-taking
 No agent activated/paused, no cron touched, no DELETE API, kill switch never fired, no creds printed. All PUTs sent only {name,nodes,connections,settings,staticData}; `active` preserved by n8n and re-verified each time. `.tmp_n8n/` scripts + `work/` backups gitignored.
 
 ### Next (overnight queue): FIX 3 Silent Failure Detector flood (eUhp1uc2wj4SrDbQ) -> Wave 2 re-cert (Bee/Eagle/CDD/7b) -> process Wave 3 paused-agent reports -> UI/UX retest -> morning report.
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — FIX 3 (Silent Failure Detector false-positive flood) DONE+VERIFIED
+
+Detector `eUhp1uc2wj4SrDbQ` runs hourly over a rolling 24h window with NO memory -> a single persistent failure spawned ~24 duplicate HubSpot tickets/day (the "flood"), and 7b was being false-flagged every run. Two surgical edits to the `Scan + Detect Silent Failures` Code node; WF_TO_AGENT map re-embedded VERBATIM; Build Alert Payload / subject format / IF gate untouched.
+
+### (A) 7b added to NO_ARTIFACT_OK
+PROVEN before editing (`_sfd_verify_targets.py`): 7b's only ticket-create node ("Create Holdback Ticket") attributes `agent_name='Coordinator'`, NEVER 'Conditional Approval Pre-Processor' — so its own bucket is ALWAYS 0 and it tripped `fires>=5 && tickets===0` every time. Its real output is PATCH hand-offs (invisible to a ticket count), exactly like the gates/triagers already skip-listed. NO_ARTIFACT_OK 11 -> 12.
+
+### (B) per-wf 24h cooldown + recovery-reset
+Added `sd.lastAlertedByWf` stamping: a stuck wf re-alerts at most once per COOLDOWN_MS (24h). When a wf produces tickets again, its stamp is cleared so the very next failure alerts immediately (per-episode, not a blunt timer). Suppressed-but-still-failing wfs are counted in `sd.suppressedByCooldown` and surfaced in the all-clean note (visibility preserved — failures are throttled, never hidden).
+
+### Why this does NOT mask the real CP failure (flag #5 concern)
+The cooldown throttles REPEATS, not first-detections. A newly-failing agent (no stamp) alerts immediately; a persistent one nags once/day. So CP's genuine GSC-driven 0-ticket failures still surface daily — just not 24x/day.
+
+### RECEIPTS (Receipt Law)
+- Live mutation (`_sfd_fix3.py`): node --check OK, 9 preconditions OK, PUT 200, 11 postconditions OK (active=True, nodes=10 unchanged, settings unchanged, WF_TO_AGENT==live/27, 7b in skip, skip grew by exactly 1, threshold intact, cooldown+recovery present, Build Alert Payload untouched, '[SILENT FAILURE]' subject preserved).
+- Logic (`_sfd_cooldown_test.js`, runs the LIVE jsCode through a controlled clock, ZERO live side effects): **14/14 PASS** across 5 scans — SCAN1 flags CP + skips 7b + ignores healthy SEO + stamps CP; SCAN2 (+30m) all-clean shape with suppressed_by_cooldown==1 (no dup ticket); SCAN3 (+25h) re-alerts; SCAN4 CP recovers -> stamp cleared; SCAN5 immediate re-alert after recovery.
+- Backup: `work/bak_eUhp1uc2wj4SrDbQ_20260529-135616.json`.
+
+### BONUS BUG FLAGGED (not bundled — distinct from the flood, causes false NEGATIVES)
+`Fetch Executions List` uses `?limit=250` with no time filter -> it sees only the 250 most-recent executions across all ~27 agents, which may span far less than the claimed 24h window. Real silent failures whose fires aged past the 250-row cutoff go UNDETECTED. Fix = cursor pagination until startedAt < cutoff (adds nodes). Flagged for a follow-up; kept FIX 3 single-purpose.
+
+### Safety/state: SFD stayed ACTIVE (it's a watcher, correct to leave on); no other agent touched; no creds printed; no test tickets created (logic proven offline).
+
+### Next: Wave 2 re-cert (Bee/Eagle/CDD/7b live-state verify) -> Wave 3 paused-agent reports -> UI/UX retest -> morning report.
