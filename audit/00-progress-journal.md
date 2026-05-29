@@ -951,3 +951,40 @@ No agent fired/activated/paused-toggled; no cron cadence changed; no n8n DELETE 
 Wire LinkedIn posting (or keep draft-and-paste); enable the ROI Tracker, then surface `total_spend_30d` on the dashboard; visual glance at the v7 History tab to close the one verification stone I couldn't reach without your browser approval.
 
 **#172 + #173 COMPLETE.** No stones left except the explicitly-flagged operator decisions + the one browser glance.
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — #174: WAVE-4 RE-CERT (8 paused v2 agents) + SEM OFF-agents safety insurance
+
+**Scope:** the 8 paused v2 agents not yet re-certified in Waves 1–3, run through the full systemic-bug-class scanner (`_w4_triage.py`) then deep-dived where any flag tripped (`_w4_deep.py`). Plus a dedicated read-only safety insurance pass on the two intentionally-OFF ad-spend agents (`_w4_sem_safety.py` → `_w4_a15_gate.py` → `_w4_a15_decide.py`). **All read-only (GET only). Zero PUTs — no bug found that warranted a fix. No activation, no cron change, no side effects, key never printed.**
+
+**Live inventory at run time:** 60 workflows · 17 ACTIVE · 43 PAUSED.
+
+### ✅ Result: all 8 HEALTHY — 0 fixes. The 3 triage flags were FALSE ALARMS, each disproven by reading the actual node bodies:
+
+| Agent | ID | Triage flag | Verdict after deep-dive |
+|---|---|---|---|
+| Agent 5 — Keyword Discovery v2 | `4FoOz5TX184zH0Zn` | GATE-EMPTY-OUT on `Worth a Ticket?` | **OK.** IF returns `skip?0:1`, tests `>0`. not-skip→TRUE(idx0)→`Create Keyword Ticket`; skip→FALSE(idx1)→empty = intended no-op. Empty FALSE branch is correct. |
+| Agent 12 — Team Manager (Weekly Self-Improvement) | `wTkLhqNY7pfIU5ro` | HONESTY (`AUTO_EXECUTED`) on `Execute Auto-Fixes` / `Aggregate Insights` | **OK — does NOT mutate.** `Execute Auto-Fixes` code literally comments *"Safety: don't actually mutate anything in this MVP — log the intent"*; every item tagged `status:"proposed (MVP: not auto-applied this run; review and approve)"`. Only HubSpot write is `Create Team Review Ticket` (POST → stage-4 report). `Fetch 7d Tickets` POST is a `/search` (read). No PATCH/mutate, never touches stage 2 → **no collision with the ACTIVE Approval Executor.** The `AUTO_EXECUTED` token in `Aggregate Insights` is classification/counting only, not a false "I did it" claim. |
+| Agent 13 — Ticket Triage Digest | `i8AjYKBt0V15VGA7` | HONESTY (`AUTO_EXECUTED`) on `Score and Group` | **OK.** `AUTO_EXECUTED` appears only as a category label the code counts/buckets by — no completion claim. |
+| Agent 6c — Community Engagement (Reddit) | `QrKVBx6jtkseu8xH` | — | clean (draft-and-paste design, paused). |
+| Agent 7 — Coordinator (Daily Briefing) | `VtBvtrYqS4vChTi2` | — | clean. |
+| Agent 10 — Competitor SERP Monitor v2 | `dEKZkETwoVsSQO0A` | — | clean. |
+| Pattern Detector (Weekly Learning) | `ixerSw7gbu26M1DP` | — | clean. |
+| Daily Briefing — Morning Digest | `97cM8tRymJ06WEEL` | — | clean. |
+
+This satisfies the overnight directive's "make sure at least another 4-8 of them are working perfectly." Combined with Waves 1–3, the paused v2 fleet is now substantially re-certified.
+
+### 🛡️ SEM OFF-agents safety insurance (the no-real-ad-spend rail, verified end-to-end)
+
+- **Agent 15 — SEM Auto-Optimizer (`rZW6J0ccvzWjDxYr`): `active=False` ✓ (paused, fully inert).** It DOES contain a real Google Ads budget MUTATE node (`Mutate Campaign Budget`, POST `…/campaignBudgets:mutate`, `updateMask:amount_micros`). Full upstream chain traced: `Every 4 hrs` cron / `Manual Fire (Webhook)` → read perf → `Decide Action` (code) → `Route by Decision` (IF `decision != no_op`) → `Eligible for Auto?` (IF `needs_approval === false`) → mutate. **It is NOT an ungated footgun** — `Decide Action` bakes in genuine rails: `SAFETY_TOTAL_DAILY_BUDGET_CAP_USD = 100`, `MAX_CHANGE_PCT = 25`, `TARGET_CHANGE_PCT = 12`, and a **1-mutation-per-campaign-budget-per-calendar-day cooldown** (UTC, tracked in `staticData`). Changes above the auto threshold route to a HubSpot `Create Needs-You Ticket` instead of firing. **BUT** the `needs_approval===false` auto path still mutates real Google Ads budgets (customer 7778429352) with **no per-change human approval** — i.e. it IS real autonomous ad spend → **correctly stays OFF until Paul explicitly authorizes spend.** Note (n8n behavior): a paused workflow's production webhook is dead, so `Manual Fire (Webhook)` cannot fire it either while paused — paused = both cron AND webhook inert. *Pre-activation recommendation:* confirm/accept the auto-threshold, and consider routing ALL budget mutates (not just big ones) through the same HubSpot approval queue the dashboard drives, for belt-and-suspenders parity with the rest of the ecosystem.
+- **Agent 4 — SEM Manager v2 (`tW1hYtfGWddfg7TF`): `active=False` ✓.** Its only ad-API node is `Google Ads — Campaign Performance (try)` = a `searchStream` **READ**. **No mutate node exists** → zero ad-spend risk even if accidentally activated. Correctly OFF.
+
+### 🏷️ New cosmetic flags (verify-when-convenient — none block anything, none touched)
+- Agent 6c cron labeled "M/W/F 11AM" actually fires **every 2h**.
+- Agent 7 cron labeled "Daily 10AM" actually **Mon–Fri @9/12/15/18**.
+- Agent 10 cron labeled "Daily 7AM" actually **every 2h**.
+- Agent 13 cron labeled "Daily 7:45AM" actually **hourly**.
+- Agent 12 `Execute Auto-Fixes` **node name overpromises** — it's proposal-only MVP (logs intent, doesn't mutate). Cosmetic rename suggested if it ever confuses review.
+
+**#174 COMPLETE — Wave-4: 8/8 paused v2 agents healthy, 0 fixes; both OFF SEM agents confirmed paused & spend-safe; rails fully honored.**
