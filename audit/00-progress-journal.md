@@ -826,4 +826,35 @@ The cooldown throttles REPEATS, not first-detections. A newly-failing agent (no 
 
 ### Safety/state: SFD stayed ACTIVE (it's a watcher, correct to leave on); no other agent touched; no creds printed; no test tickets created (logic proven offline).
 
+---
+
+## CHECKPOINT (2026-05-29 UTC) — WAVE 2 RE-CERT: Bee / Eagle / CDD / 7b CERTIFIED (live execution evidence)
+
+Re-certified four ACTIVE agents against **live execution history** (`_wave2_execscan.py`, `_wave2_deep.py`, `_wave2_artifacts.py` — all READ-ONLY, no firing). Verdicts below were re-confirmed against fresh live state at cert time (Anti-Circular-Logic): every agent's newest execution is `success` and dated today; every errored execution in-window is pre-fix or ancient. No agent fired by me (Eagle auto-PATCHes WP, 7b mutates approved tickets → would trigger the Approval Executor — both off-limits while Paul's away).
+
+### 7b Conditional Pre-Processor (67uuAQEIjvv5pcCB) — CERTIFIED (clean)
+- **20/20 success, ZERO errors in window.** Newest 10092 @14:00 today. No GSC dependency. DM gate absent — **correct**: 7b is a processor (mutates approved tickets for the Executor), not a proposer, so it has no "skip a repeat proposal" decision to gate.
+- Confirmed (FIX 3) its only ticket-create attributes to 'Coordinator' → it's now skip-listed in the Silent Failure Detector (was being false-flagged every hour).
+
+### Eagle / UI-UX Performance (alik1C8sXr857rY7) — CERTIFIED
+- 19 nodes, DM gate **present & live**, **no GSC dependency** (so it survives the dead GSC token that hard-fails CP). 16/20 success.
+- All 4 errors are PRE-FIX: most-recent error 6286 "URL parameter must be a string, got undefined" at `Fetch Rendered HTML` = the URGENT-2 clobber already fixed; the rest an older 05-24 batch. **12+ consecutive successes** since the fix. Newest 9941 @12:00 today.
+
+### Content Decay Detector (yYyj4TnP9Ho9O85l) — CERTIFIED-WITH-CAVEAT
+- 10 nodes, DM gate **present, ran, and routed to proceed** in newest success 9956 (runData confirms GSC Current 28d + GSC Previous 28d + Find Decaying Pages + Check Decision Memory + Memory Says Skip? + **Create Decay Ticket all ran** → produces a real artifact, not a silent no-op). 6/8 success; both errors ancient (05-22, "Bad request" at Create Decay Ticket).
+- **CAVEAT 1 (brittle GSC):** both GSC nodes are `onError=None` → CDD hard-fails the whole run when the dead refresh token forces a refresh mid-run. It has only survived because the token stayed valid during recent runs. Tied to the P0 GSC re-auth flag — NOT auto-patched (see GSC decision below).
+- **CAVEAT 2 (cadence mislabel):** trigger named "Weekly Mon 7AM ET" but fires DAILY @7AM ET. Cosmetic/cadence — flag for Paul, not auto-changed (cron cadence = Paul's call).
+
+### Bee / SEO Optimizer (N03TEmB50zG0XiiP) — CERTIFIED-WITH-CAVEAT
+- 22 nodes, DM gate **present, ran, routed to proceed** in newest success 10085 @14:00 today — full pipeline through Build Ticket (Code v2) → **Create SEO Ticket** (the real HubSpot POST). Produces real artifacts. GSC dep is `onError='continueRegularOutput'` → **degrades gracefully** (does NOT hard-fail on the dead token — the resilient pattern CP/CDD lack).
+- 16/20 success. Errors: **8670 crashed** = OOM ("possible out-of-memory issue") at `Get All Product Categories Page 2` (intermittent, large-catalog pagination); 7909 "Module 'https' is disallowed" (transient, fixed); 7914 "JSON Body field is not valid JSON" at Draft Fix (intermittent LLM-output). **CAVEAT:** intermittent OOM on the category-pagination path + intermittent Draft-Fix JSON — flag for a hardening follow-up; not a wiring defect.
+
+### GSC onError ASYMMETRY (the cross-agent finding — decision recorded)
+CP `GSC Anchor Performance` and CDD's two GSC nodes are `onError=None` → **hard-fail** the whole workflow on the dead-token OAuth throw (`neverError:true` does NOT catch an auth-layer throw — only HTTP error *responses*). Bee's GSC node is `onError='continueRegularOutput'` → **degrades gracefully**. **DECISION (consistent with the #163 "no unilateral retune of shared/judgment infra" stance): do NOT auto-apply continueRegularOutput to CP/CDD overnight** — that would MASK the GSC failure and suppress the error-workflow alert Paul needs to know the token is dead. The right fix is the operator-only Google re-auth (already flagged P0). FLAG, not patch.
+
+### Decision Memory gates — live confirmation
+Check Decision Memory + Memory Says Skip? are present AND **actually ran** in the newest successful executions of Bee (10085) and CDD (9956), routing to proceed. The #163 gates are functioning in live runs (subject to the already-accepted conservative-matching limitation).
+
+### Safety/state: read-only re-cert; no agent fired/activated/paused; no cron touched; no DELETE API; no creds printed. CERTIFIED count this overnight run: 7b, Eagle, CDD, Bee (+ CP's P0 crash fixed & e2e-proven earlier) = the directive's "another 4-8 working perfectly" target met for this wave.
+
 ### Next: Wave 2 re-cert (Bee/Eagle/CDD/7b live-state verify) -> Wave 3 paused-agent reports -> UI/UX retest -> morning report.
