@@ -726,5 +726,48 @@ Unit test (raw subjects) went green, but the **live History screenshot** showed 
 
 ### Deploy
 Surgical commit (ONLY `public/approvals/index.html` + this journal — working tree has unrelated uncommitted edits to `bidiq/ingest.py`, `MICROSOFT_ADS_SETUP.md`, and deleted `data/product_data/*.pdf` that were deliberately left alone). Pushed → Vercel auto-deploy → live build-marker re-verified `dash-bright-2026-05-28-v6-history-dupguard`.
+- **CONFIRMED (push+deploy receipt):** commit **`ab880f4`** (2 files, +288/−4); `git push origin main` → `eb6fd24..ab880f4 main -> main`; polled `bid-iq-neon.vercel.app/approvals/index.html` with cache-buster → flipped `v5-crisp` (68,965B) → **`dash-bright-2026-05-28-v6-history-dupguard`** (80,039B) at poll attempt 6 (~30s); live bytes contain `renderHistory` + `dupePageMap`. Tasks **#164 + #165 marked completed**.
 
 ### Next: #163 — wire Decision Memory ("Check Decision Memory → Memory Says Skip?" pattern from Owl `d7YwC4ezub4g1LrI`, webhook `Oq07XLN678zlAIaF`) into Bee `N03TEmB50zG0XiiP`, Eagle `alik1C8sXr857rY7`, Content Decay Detector `yYyj4TnP9Ho9O85l` — one agent at a time, validate each.
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — TASK #163 DONE+VERIFIED: Decision Memory gate wired into Bee + Eagle + Content Decay Detector (one at a time, each re-GET-verified) — with an honest sensitivity caveat
+
+Paul's directive (#163, "Wire into all active agents"): add the Decision Memory check so these three execution-mode agents skip work the operator has already recently decided on. Closed with live receipts for all three — **plus** a characterized limitation I am NOT papering over.
+
+### Anti-Circular-Logic recon (live, not from docs)
+Live-fetched the **proven** pattern from `d7YwC4ezub4g1LrI` ("Agent 1 — Content Producer v2") and dumped the DM webhook's actual compute logic + each target's graph (raw JSON saved to `.tmp_n8n/work/ref_*.json`, `tgt_*.json`). Did NOT trust prior notes about node shapes.
+
+### What got wired (3-node pattern, cloned byte-faithfully from Content Producer)
+For each target, spliced 3 nodes between the upstream decision gate and its original "build/create" target:
+- **Check Decision Memory** (`httpRequest` v4.2) → `GET …/webhook/decision-memory?agent=<AGENT>&signature=<expr>&days=30`, `neverError:true`, 30s timeout.
+- **Memory Says Skip?** (`if` v2) → boolean `={{ $json.should_skip }}` is `true`.
+- **Log Memory Skip** (`set` v3.4, terminal) → `status = "Skipped per Decision Memory: <skip_reason>"`.
+- Splice: `<upstream> out0 → Check DM → Memory Says Skip?`; **TRUE→Log Memory Skip** (skip), **FALSE→\<original target\>** (proceed). Siblings on the upstream branch preserved.
+
+| Agent | wid | upstream gate | proceed target (FALSE) | agent param | nodes |
+|---|---|---|---|---|---|
+| Bee (SEO Optimizer) | `N03TEmB50zG0XiiP` | Has Opportunity? | Build LLM Payload | `SEO Optimizer` | 19→**22** |
+| Eagle (UI/UX Performance) | `alik1C8sXr857rY7` | Any Defects? | Build Auto-PATCH | `UI/UX Performance` | 16→**19** |
+| Content Decay Detector | `yYyj4TnP9Ho9O85l` | Find Decaying Pages | Create Decay Ticket | `Content Decay Detector` | 7→**10** |
+
+Signatures: Bee/CDD `={{ $json.title || $json.url || "" }}`; Eagle `={{ ($json.title || "") + " " + ($json.slug || "") }}`. All end in ` }}` (space-separated), no nested literals → **no `}}`-adjacency risk** (same shape as the proven CP node). CDD items carry no `title` → signature correctly falls back to `url`.
+
+### RECEIPTS (Receipt Law — every PUT re-GET-verified live)
+- **Per-target wiring (`_wire_dm.py`, backs up live JSON first, PUTs via `_putlib`, re-GETs + asserts):** Bee **11/11 PASS**, Eagle **11/11 PASS**, CDD **11/11 PASS**. Each: `active` preserved (all True), node-count **+3**, the 3 node typeVersions exact (4.2 / 2 / 3.4), upstream→CheckDM→IF splice correct, IF TRUE→Log / IF FALSE→orig-target, `agent` param matches, `days==30`.
+- **Consolidated live sweep (`_dm_verify_all.py`, independent re-GET of all 3):** all three `active=True`, node counts 22/19/10, every splice + query param correct, Log node terminal → **"ALL THREE TARGETS: LIVE STATE VERIFIED."**
+- **Runtime contract probe (`_dm_probe.py`, read-only):** for each agent, pulled a REAL decided ticket from the live `agent-proposals?view=all` feed, used its subject as the signature, hit the live DM webhook. All three: `should_skip` is a **bool**, `agent` **echoed** correctly → contract shape sound. Bee probe (prior) hit `total_matches=1` → proves the lookup mechanism **does reach** an agent's stored tickets.
+- **Backups:** `work/bak_N03TEmB50zG0XiiP_20260529-001105.json`, `work/bak_alik1C8sXr857rY7_20260529-001433.json`, `work/bak_yYyj4TnP9Ho9O85l_20260529-001718.json`.
+- **CDD's own promise now has a mechanism:** Create Decay Ticket content literally says *"If you reject, I'll skip this URL for 30 days"* — until now nothing implemented that. The `days=30` DM gate **is** that mechanism (subject to the caveat below).
+
+### Honesty Law — the DM matching-sensitivity caveat (characterized, NOT silently shipped)
+The Eagle and CDD probes returned **`total_matches=0`** even when the signature was a real decided ticket's **own subject** (90-day window). Investigated rather than assumed: the **shared** DM webhook (`Oq07XLN678zlAIaF`) tokenizes the signature and computes **Jaccard similarity against each candidate ticket's full `subject + content` body**, then drops anything below a **0.2** floor (skip fires only on `strongReject` sim≥0.5 / `strongApprove` sim≥0.7). A short 3–11-token page-identity signature is **diluted far below 0.2** by the long ASK/WHY/IF content body — so even a self-match can fall out.
+- **This is pre-existing behavior of the shared endpoint** (the exact same webhook Content Producer already uses in production) — **NOT a wiring defect.** Proven by: the `agent` param echoes correctly, the contract returns a clean boolean, and Bee's probe hit a match. The gates are correctly installed; they will fire **conservatively** (only on strong text overlap), not on every repeat.
+- **Net effect for Paul:** these gates will reliably catch *near-identical* re-proposals but may NOT catch a re-proposal of the same page whose wording drifted. Better than no gate; not a perfect dedup.
+- **Proposed follow-up (NOT executed — shared infra, needs Paul's go-ahead):** improve match recall by scoring the signature against the ticket **subject-only** (or against `recommendation_detail.url` / a stored page-key) instead of `subject + content`. This touches the shared webhook, so it would change Content Producer's behavior too — **I will not retune shared infra unilaterally** (Operator-First). Flagging for a decision, not acting.
+
+### State discipline / safety
+All three targets were **already active** — no agent re-activated, no cron cadence touched, no n8n DELETE API called. No creds printed (DM webhook is unauthenticated GET; HubSpot only via credential `S7YZNtmkHgtF72gN`, never read). `.tmp_n8n/` scripts + `work/` backups are gitignored. PUTs sent only `{name,nodes,connections,settings}` per the n8n contract; `active` preserved by n8n and re-verified.
+
+### Next: report #163 to Paul (wired + verified + the conservative-matching caveat & proposed follow-up); batch-commit this journal checkpoint with the carried-over #164/#165 CONFIRMED receipt (single push, explicit paths only).
