@@ -858,3 +858,96 @@ Check Decision Memory + Memory Says Skip? are present AND **actually ran** in th
 ### Safety/state: read-only re-cert; no agent fired/activated/paused; no cron touched; no DELETE API; no creds printed. CERTIFIED count this overnight run: 7b, Eagle, CDD, Bee (+ CP's P0 crash fixed & e2e-proven earlier) = the directive's "another 4-8 working perfectly" target met for this wave.
 
 ### Next: Wave 2 re-cert (Bee/Eagle/CDD/7b live-state verify) -> Wave 3 paused-agent reports -> UI/UX retest -> morning report.
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — WAVE 3 paused-agent fixes (Crow / ROI / LinkedIn) + SAFETY FINDING on the ACTIVE Approval Executor
+
+**Three paused-agent fixes applied this overnight run (fix-in-place via PUT, stay paused, offline-tested + live re-GET postcond — precedent #151):**
+- **Crow — Reddit Thought-Leadership (`VdYI5nLqDTt5jWYR`)**, node `Draft Submission`: removed the redundant manual `x-api-key` header (it referenced an UNATTACHED `$credentials.anthropicApi.apiKey`, so it resolved empty and would 401). The attached httpHeaderAuth "Anthropic API Key" credential auto-injects x-api-key (proven by the working sibling Community Engagement "Draft Value-Add Reply"). Live header now `['anthropic-version']`; credential preserved; authentication still genericCredentialType; paused. Backup saved.
+- **Daily ROI Tracker (`JjIHLI2AdZ3DfnbY`)**, node `Aggregate ROI Data`: added combined-channel totals so the dashboard isn't Google-only — new `total_spend_30d`, `total_conversions_30d`, `total_clicks_30d`, `total_impressions_30d`, `total_revenue_30d`, `total_cpa`, and `microsoft_ads_actual_spend_30d` (= combined − Google). `daily_array`/`date_range` now iterate ALL dates (Google ∪ MS), not Google-only. Existing `google_ads_*` fields kept verbatim. Added `onError=continueRegularOutput` to the 4 `MS: *` nodes so a Microsoft-feed hiccup degrades instead of nuking the daily roll-up. Offline harness: OLD `{dailyLen:2, total_spend:None}` → NEW `{dailyLen:3, total_spend:42, ms_actual:12}`. Paused. Backup saved.
+- **LinkedIn Cadence v2 (`f7d4k95CQPJMiuqv`)**, node `Create LinkedIn Ticket` (Honesty Law): the ticket claimed "DONE: I posted to your LinkedIn personal feed." + `AUTO_EXECUTED` + a fake "LinkedIn post ID" read off `$json.id` (the clobbered Check-Decision-Memory response), at `hs_pipeline_stage:"3"` — while `Auto-Post LinkedIn` is ORPHANED (nothing is ever posted). Rewrote the ticket to be TRUTHFUL (draft-and-paste), stage `"4"` (informational), `outcome_notes` prefix `DRAFT_READY`, removed every `$json.id`/fake-post-id reference; `agent_name`/`recommendation_type` unchanged. Hardened `Get LinkedIn URN` onError→continueRegularOutput (its output feeds only the orphaned poster). Did **NOT** wire posting (real side effect → Paul's call). Offline harness proved old-lies vs new-honest deltas. Paused; `Auto-Post LinkedIn` STILL orphaned. Backup saved.
+
+**Backlink Builder leg of the Wave-3 audit — SAFETY FINDING (read-only; NOT changed):**
+- Producer **Backlink Builder v2 (`YP07sPEQgTyrQ5BK`, paused)** is healthy: ticket is an honest DRAFT (stage 1, "Approve to send"), the "dead memory gate" was a FALSE ALARM (Check Decision Memory params match the working Keyword Discovery caller), Self-QA routes `emailTo="paulj@liftnow.com"`. Its `Auto-Send Outreach` (emailSend) node is ORPHANED dead scaffolding.
+- **BUT** the real send decision lives in the **ACTIVE** Approval Executor - Coordinator Brain (`hpgbBAmRmqtsfr6g`, ON, scheduleTrigger every 15 min). Its `Process & Route` Backlink branch (`agent_name==='Backlink Builder' || recommendation_type==='Backlink Outreach'`) **IGNORES the ticket's emailTo and re-derives the recipient as `info@<recommendation_detail.target_domain>` — an EXTERNAL address** — then `Send Email (SMTP)` sends `toEmail={{ $json.emailTo }}` from `partnerships@liftnow.com` (BCC paulj@). The "empty-recipient" FINAL GUARD does NOT catch this because `info@<domain>` is non-empty. The auto-execute filter is `hs_pipeline=0 AND hs_pipeline_stage=2 (APPROVED) AND outcome_notes NOT_CONTAINS_TOKEN 'CONDITIONAL_APPROVE'`.
+- **This is the ONLY external-email path in the executor** (every other branch is auto_ack / wp_create / wp_patch / handoff). It directly conflicts with the standing rail "no real email outside paulj@liftnow.com without approval; Spider/Backlink stays OFF."
+- **CONTAINMENT (currently SAFE):** live HubSpot check — **0 Backlink tickets at stage 2** (41 Backlink tickets total: only stages 4 / 3 / 1363043699). Producer is OFF, so no new backlink tickets are minted ⇒ nothing auto-fires right now. Risk is **LATENT**: it would only fire if a `Backlink Outreach` ticket is moved to stage 2 (APPROVED) while the executor stays active.
+- **DECISION (rail-compliant):** do NOT autonomously rewire the ACTIVE Approval Executor (real-email side effect + active-workflow). **FLAG for Paul** — recommend changing the Backlink branch to `action_type:'auto_ack'` (draft-and-paste to paulj@, matching the LinkedIn/Reddit pattern) UNLESS Paul actually wants autonomous external outreach wired. Interim safeguard: do not approve (stage 2) any Backlink Outreach ticket until decided. Also FLAG: Backlink cron labeled "Tue 9AM ET" actually fires Mon–Fri @ 9 & 14.
+- Safety/state: read-only on the active executor (GET only); no agent fired/activated/paused; no cron touched; no DELETE API; no creds printed; HubSpot reads were read-only.
+
+### LIVE RE-CERT of the 3 Wave-3 fixes (Anti-Circular-Logic — re-GET, not trusting notes) — ALL PERSISTED
+- **Crow** `VdYI5nLqDTt5jWYR`: live header params `['anthropic-version']` (no manual x-api-key), authentication=genericCredentialType, cred httpHeaderAuth present, paused. ✓
+- **ROI** `JjIHLI2AdZ3DfnbY`: jsCode has `total_spend_30d` + `microsoft_ads_actual_spend_30d` + `allDates`; the **4 MS HTTP nodes** (Read Daily Budgets / Submit Spend Report / Poll Spend Report / Unzip via Vercel) are all `continueRegularOutput`; paused. ✓ (Note: the 5th MS node `MS: Wait 20s for Report` is a Wait node — no external call to fail — correctly left at default; an over-strict re-cert assertion that demanded all 5 mis-flagged it, NOT a regression.)
+- **LinkedIn** `f7d4k95CQPJMiuqv`: stage `"4"` live, old `"3"` gone, no "I posted"/`AUTO_EXECUTED`/`$json.id`; Get LinkedIn URN onError=continueRegularOutput; Auto-Post LinkedIn STILL orphaned; paused. ✓
+
+### Brand Listening (`uRIzR7Uh8d9fUx9T`, paused) — HEALTHY, NO FIX (both "reported defects" are correct-by-design)
+- 18 nodes, clean fan-in chain (5 sources → 5 parsers → Merge → Dedupe+Classify → Has New? → Build Ticket Payload → Create Mention Ticket | Log Quiet); **no orphans**; trigger "Every 30 Min" + Manual webhook.
+- `Build Ticket Payload`: `agent_name:'Brand Listening'`, `recommendation_type:'Brand Mention'`, `hs_pipeline:'0'`, `hs_pipeline_stage:'4'`. The hardcoded **stage 4 is CORRECT** — brand mentions are Inbox/informational ("not 'needs you'"), auto-ack'd per #72/#73. Not a defect.
+- `Create Mention Ticket` onError=None is on a **leaf** node — a HubSpot failure SHOULD surface via the failure-alert workflow. Forcing `continueRegularOutput` would SILENCE a real ticketing failure (contra the standing GSC "don't mask failures Paul needs to see" decision). Correct as-is. ⇒ no change.
+
+### OLD UI/UX — Agent 8 v1 (`77rXTw8CdOIFbtW6`, paused) — RETIRE candidate (confirmed paused + safe; NOT fixed)
+- 10 nodes; triggers = Weekly Schedule (Mon 7AM) + Manual; **no webhook** ⇒ nothing external can fire it; paused ⇒ cron won't fire.
+- Nodes are WP/GSC **reads** + `Design Audit & Analysis` (code) + `Create HubSpot Ticket` (HubSpot POST) + Log. **NO WP PATCH/write nodes** — it is a pure PROPOSER. (The `[WP-WRITE?]` tags in the scan were false positives from a crude substring heuristic.) Fully superseded by **Eagle v3 (`alik1C8sXr857rY7`)**, the auto-PATCH executor. **FLAG to Paul for deletion** (operator-executed via n8n UI; I do NOT call the n8n DELETE API and do NOT "fix" a retiring agent).
+
+### #171 (Wave-3 paused-agent audits) — COMPLETE. Net this wave: 3 fixed-in-place + verified (Crow, ROI, LinkedIn); 1 healthy-no-fix (Brand Listening); 1 retire-flag (OLD UI/UX); + the high-priority ACTIVE-Approval-Executor external-email SAFETY FLAG above. All paused agents stayed paused; no firing; no active-workflow rewire.
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — TASK #172 DONE+VERIFIED: dashboard F1 (conditional-approve + just-approved tickets now appear in History), DEPLOYED v7 + live-bytes + runtime-logic receipts
+
+**Root cause (two independent bugs that hid decided tickets from the History view):**
+1. **Token mismatch.** The Process-Decision write-webhook (`NAjdXCnFDyV5Z4Ep`, node `Build PATCH Body`) emits `outcome_notes` token **`CONDITIONAL_APPROVE`** for conditional approvals — but the dashboard's `classifyDecision()` only matched the legacy/dead token `APPROVED_VIA_CONDITION`. The anchored regex returned `null` ⇒ the ticket was silently dropped from History.
+2. **Stage gap.** History's `DECIDED` set was `{4, 1363043699}`. Conditional-approved tickets sit **permanently at stage 2** (the Approval Executor `Fetch Approved Tickets` filter is `… NOT_CONTAINS_TOKEN 'CONDITIONAL_APPROVE'`, so it never advances them), and plain approvals sit at stage 2 transiently (≤15 min) before the executor moves them. Both were invisible to History.
+
+**The fix — 4 surgical edits to `public/approvals/index.html` (build `dash-bright-2026-05-29-v7-cond-history`):**
+- `classifyDecision` regex (L636): added `CONDITIONAL_APPROVE` alternative.
+- token handler (L641): `token === 'CONDITIONAL_APPROVE' || token === 'APPROVED_VIA_CONDITION'` → `{kind:'cond', label:'Approved with a note'}` (legacy token kept as OR-alias ⇒ no regression).
+- History `DECIDED` set (L1187): `{2, 4, 1363043699}` (added stage 2).
+- build marker (L8): `…v6-history-dupguard` → `…v7-cond-history`.
+
+**Anti-Circular-Logic — verified against LIVE state, not notes:**
+- Live feeds (read-only GET of the dashboard's own public webhook): `view=all` = 50 tickets, stages `{4:22, 1:20, 1363043699:8}` — **0 at stage 2 right now**; `view=pending` = 20 tickets, **stage-1 only**. ⇒ (a) `DECIDED+='2'` is a *no-op today* but is **required** going forward (next conditional-approve sits at stage 2 forever; next plain-approve sits there ≤15 min); (b) **no double-listing** — Now/Pending reads the separate stage-1 `STATE.pending` feed, History reads `STATE.all` filtered to `DECIDED`, and stage 2 ∉ stage 1.
+
+**Receipts (Receipt Law + Test-Before-Done):**
+- Commit **`e4d1e9b`** ("Dashboard v7…"), 1 file, +4/−4 (only the 4 edited lines; the unrelated working-tree changes — deleted product PDFs, `ingest.py`, `MICROSOFT_ADS_SETUP.md` — were NOT staged). Push **`ce7c4ad..e4d1e9b main -> main`**.
+- LIVE poll of `https://bid-iq-neon.vercel.app/approvals/index.html`: marker flipped to `dash-bright-2026-05-29-v7-cond-history` (80,352 B). 5/5 content receipts in deployed bytes: regex-has-CONDITIONAL_APPROVE ✓, token OR-alias ✓, `DECIDED=new Set(['2','4','1363043699'])` ✓, marker==v7 ✓, legacy token still aliased ✓.
+- **Runtime-logic harness** (Node) — extracted the **actual deployed** `classifyDecision` + `isHistoryNoise` + `DECIDED` literal from the live page and ran 8 synthetic tickets: **8/8 PASS.** Decisive cases: `cond-approve @2` → in History as "Approved with a note" (the exact class F1 was dropping); `plain-approve @2` → no longer vanishes; legacy `APPROVED_VIA_CONDITION @2` → still classifies (no regress); `pending @1` → correctly **excluded** by the DECIDED gate despite classifying (proves no stage-1 leakage). `Function()` eval succeeding also proves the edited functions parse cleanly as served.
+
+**Honest verification boundary (Law 5):** the visual/browser render spot-check is the one stone left unturned — no headless browser is installed (and I won't add a dep without approval), and the computer-use / Chrome MCP both need Paul's interactive access approval while he's away. Logic + live-bytes are verified to that ceiling; a 15-second visual glance is all that remains and is safe to leave for Paul.
+
+**Recorded as MOOT, not done:** the earlier "point dashboard at `total_spend_30d`" idea does not apply to *this* build — the daily-driver dashboard has no spend/ROI display (only PAUSED-agent status labels). Logged as a future build item to wire when the ROI Tracker is enabled.
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — #173: MORNING REPORT FOR PAUL (overnight run summary + decisions needed)
+
+**TL;DR — shipped + verified, rails fully honored, and a short list of decisions only you can make.**
+
+### ✅ Shipped this overnight run (all verified against live state)
+- **Dashboard v7 (F1):** conditional-approve + just-approved tickets now show in your History tab. Live at `bid-iq-neon.vercel.app/approvals/` — proven by deployed-bytes receipts + an 8/8 runtime-logic harness on the real deployed function.
+- **3 paused-agent fixes, fixed-in-place via PUT and live re-certified (still PAUSED — not fired):**
+  - **Crow (Reddit thought-leadership):** removed a broken manual `x-api-key` header that would 401; the attached Anthropic credential auto-injects it.
+  - **Daily ROI Tracker:** added combined Google+Microsoft spend totals (`total_spend_30d`, etc.) and `onError=continue` on the 4 MS HTTP nodes so a Microsoft hiccup degrades instead of nuking the roll-up.
+  - **LinkedIn Cadence:** Honesty-Law rewrite — the ticket used to claim "I posted to your LinkedIn" with a fake post ID while nothing was ever posted; it now tells the truth (draft-and-paste, informational). Posting still NOT wired (your call).
+- **Two paused agents inspected, NO change needed:** Brand Listening (healthy by design); OLD UI/UX v1 (safe, paused, superseded → retire-flag below).
+
+### 🛡️ What I deliberately did NOT do (standing rails)
+No agent fired/activated/paused-toggled; no cron cadence changed; no n8n DELETE API; no real email / no WP publish / no ad spend; no rewrite of any ACTIVE workflow; no credential values printed; surgical commits by explicit path only (never `git add -A`).
+
+### 🔴 DECISIONS I NEED FROM YOU (prioritized)
+1. **HIGH — Approval Executor external email.** The ACTIVE `Approval Executor - Coordinator Brain` (`hpgbBAmRmqtsfr6g`) has a Backlink branch that, for any **APPROVED (stage 2)** `Backlink Outreach` ticket, **ignores the ticket's recipient and auto-sends a real email to `info@<target_domain>`** (external) from `partnerships@liftnow.com`. This is the only external-email path in the executor and conflicts with the "no real email outside paulj@" rail. **Currently contained/safe:** 0 backlink tickets at stage 2 and the producer is OFF, so nothing fires. **Latent** — it would fire if you approve a Backlink ticket while the executor is on. *My recommendation:* change that branch to draft-to-`paulj@` (`auto_ack`), matching LinkedIn/Reddit — UNLESS you actually want autonomous outreach. **Until you decide, don't approve any Backlink Outreach ticket.** (I left the active executor untouched.)
+2. **OLD UI/UX v1 (`77rXTw8CdOIFbtW6`)** → delete. It's a pure proposer, paused, fully superseded by Eagle v3. Operator-delete via the n8n UI (I don't call the DELETE API).
+3. **Still pending from before (operator-only, via n8n UI):** delete the 16 kill-list workflows + temps; decide holdback ticket `45635364612`; delete test ticket `45620973745`.
+
+### 🏷️ Low-priority flags (cosmetic / verify-when-convenient — none block anything)
+- (c) Crow `agent_name`="Thought Leadership" / `recommendation_type`="Reddit Reply" — confirm these match your HubSpot enum.
+- (d) ROI cron labeled "Daily Midnight ET" actually fires hourly.
+- (e) LinkedIn: orphaned `Auto-Post LinkedIn` node (posting not wired); cron labeled "M/W/F 10:30 ET" actually Mon–Fri @10&14.
+- (f) Backlink cron labeled "Tue 9AM ET" actually Mon–Fri @9&14.
+- (g) Brand Listening cron labeled "Every 30 Min" — verify.
+
+### 🔭 Forward items (not blocking)
+Wire LinkedIn posting (or keep draft-and-paste); enable the ROI Tracker, then surface `total_spend_30d` on the dashboard; visual glance at the v7 History tab to close the one verification stone I couldn't reach without your browser approval.
+
+**#172 + #173 COMPLETE.** No stones left except the explicitly-flagged operator decisions + the one browser glance.
