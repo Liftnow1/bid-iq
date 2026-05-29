@@ -988,3 +988,26 @@ This satisfies the overnight directive's "make sure at least another 4-8 of them
 - Agent 12 `Execute Auto-Fixes` **node name overpromises** — it's proposal-only MVP (logs intent, doesn't mutate). Cosmetic rename suggested if it ever confuses review.
 
 **#174 COMPLETE — Wave-4: 8/8 paused v2 agents healthy, 0 fixes; both OFF SEM agents confirmed paused & spend-safe; rails fully honored.**
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — #175: WAVE-5 (the last 3 in-ecosystem paused agents) — fleet now fully reconciled
+
+**Reconciliation first (so "no stone unturned" is provable, not asserted).** Live inventory = 60 wf · 17 ACTIVE · 43 PAUSED. The 43 paused break down as: **3 policy-OFF & verified-safe** (Agent 15 SEM + Agent 4 SEM done in #174; Agent 6 Backlink v2 stays OFF per the email rail) · **13 already re-certified in Waves 1–4** · **24 kill-list legacy-v1 duplicates + TEMP/test wf** (all pending *operator* deletion — not mine to certify) · **3 genuinely un-certified in-ecosystem agents** → this wave. All read-only (GET only); **0 PUTs** (no bug found warranting a fix); no activation/cron change/side-effects; key never printed.
+
+### ✅ Asset Review Gate (`f25BTprTci297v7W`) — CERTIFIED HEALTHY, 0 fixes
+Triage tripped one GATE-EMPTY-OUT on `Need to Create?` (FALSE branch empty). Because this node was one of the 5 broken IF gates fixed back in #99, I verified polarity with receipts instead of assuming:
+- `Has Work?` IF = `($json.noWork||$json.noAssets)?0:1` `> 0` → work→TRUE→`Check Existing Asset Review`; none→FALSE→`No Work`. ✓
+- `Need to Create?` IF = `$json._skip != true` → not-skip→TRUE→`Compose Asset Review`; **skip (review already exists)→FALSE→empty = intended dedup no-op.** ✓ — the benign skip-when-exists class, NOT the old #99 inversion.
+- Dedup is real: `Check Existing Asset Review` searches pipeline-0 for `agent_name="Asset Review Gate"` + `recommendation_type="Asset Review"` + `recommendation_detail CONTAINS parentTicketId`; `Filter Out Existing` sets `_skip:true` on matches.
+- `Create Asset Review Ticket`: `hs_pipeline:"0"`, `hs_pipeline_stage:"1"` (Pending Review — correct proposal), `agent_name:"Asset Review Gate"` (the identity de-collided + enum-added in #157), leaf `onError=None` (correct — surfaces via Agent Failure Alerts). Cron "Every 15 Min".
+
+### ✅ Strategic Director (Master-Plan Anchored) (`NYV1Ge9jT7Ux2vFE`) — CERTIFIED HEALTHY, 0 fixes
+Clean triage: no orphans / no empty gates / no honesty tokens / no $json clobber. One leaf write `Create Ticket per Recommendation` POST `/tickets` (onError=None = correct for a leaf create). `agent_name` enum-safety previously verified in #154. Cron "Daily 5AM ET".
+
+### ⚠️ Phase 5 — Quote Watcher (`fX21AsfCPF5FhMIj`, 42 nodes) — OUT OF MARKETING-SYMPHONY SCOPE → flagged, NOT touched
+The 42-node manifest makes the scope unambiguous: this is a **sales-ops CRM ingestion pipeline, not a marketing agent.** It polls OneDrive for PDF quotes every 5 min → downloads → Claude parses the PDF → version-detects → fuzzy-matches the company → **creates HubSpot Quote custom objects (`2-62682219`) + Line Items (`2-62682915`) + new Companies**, associates them, and PATCHes prior versions. Plus a manual `Reprocess Trigger` branch to backfill quote numbers.
+- **Confirmed `active=False` (paused).** Structurally it looks sound (all 4 IFs correctly wired except the benign `IF Not Already Processed` dedup-skip empty branch; the write path uses `onError=continueErrorOutput` to degrade gracefully; a HubSpot dedup guard exists).
+- **I did NOT certify, activate, or modify it.** Rationale: (a) it's outside my marketing-symphony remit; (b) it has **real live-CRM-write side effects** (creates Companies + Quote objects autonomously) that I won't validate-toward-activation while Paul's away. **FLAG for Paul:** if this pipeline is wanted, it deserves its own dedicated review/test pass (especially the auto-create-Company path and the OneDrive credential); if it's abandoned, fold it into the kill-list.
+
+**#175 COMPLETE — Wave-5: 2 marketing agents certified healthy (0 fixes); Quote Watcher confirmed paused, out-of-scope, flagged. The entire in-ecosystem PAUSED marketing fleet is now reconciled & certified. Remaining 43-paused are only: policy-OFF (verified) + kill-list/TEMP (operator-delete) + the one out-of-scope Quote Watcher.**
