@@ -411,3 +411,184 @@ Product pages (incl. Hunter, local-sales, no co-op claims) now get on-page SEO f
 - exec 8903 (non-Hunter targeted), 8908 (Hunter pre-strip leak), 8917 (Hunter post-strip clean)
 - E2E handoff id=9 → to_agent='SEO Optimizer'
 - commits fc5ffd8 (design), 9489b71 (impl); backups in .tmp_n8n/bee_backup_pre_*.json
+
+---
+
+## CHECKPOINT 17:31 ET — Paused-agent ⇄ watchdog cohesion audit: 3 in-place fixes (verified)
+
+Scope of this pass: walk the *still-paused* agents and cross-reference them against the two watchdogs (Agent Failure Alerts = hard-crash errorWorkflow; Silent Failure Detector = "fired ≥5×/24h but 0 tickets") to confirm the team works as one cohesive automated unit. Audit-and-fix IN PLACE: no agent activated, no cron bumped. 3 real gaps found and fixed; the rest are judgment calls flagged for Paul below.
+
+### Honest corrections (Law 5)
+- My first flood-detection regex (`_floodscan.py`) was too broad — `dedupe|dedup|...|staticData` matched the n8n `$getWorkflowStaticData` boilerplate in nearly every flow, so the "has-dedup" signal was noise. I discarded it and instead read each terminal `return arr.map(...)` fan-out by hand to judge real re-flood risk. Conclusion stands but the method, not the regex, is the evidence.
+- The SFD agent_name map was NOT guessed. Anti-Circular Law: I opened each agent's own ticket-creation node and read the literal `agent_name` it writes to HubSpot. Two names could not be resolved to a single static string (Strategic Director writes a dynamic per-rec `b.name`; SEO Rank Tracker's value is the ambiguous "Other") — those are recorded as gaps below, not papered over.
+
+### Fix A — hard-crash watchdog coverage closed (verified)
+Three paused agents had no `errorWorkflow`, so a hard crash would have failed silently. Wired `errorWorkflow=qMeBXIjguVuaKLLF` (Agent Failure Alerts) on:
+- Crow / Reddit `VdYI5nLqDTt5jWYR`
+- Duplicate Workflow Detector `CsPth7e5pqRdBDln`
+- Maverick `rZW6J0ccvzWjDxYr` (executionOrder=v0 preserved)
+
+All three: PUT 200, `active` stayed **False** (still paused). Re-GET receipt below.
+
+### Fix B — Silent Failure Detector coverage 4 → 27 agents (verified, stayed ACTIVE)
+SFD only knew 4 agents (Content Producer, SEO Optimizer, UI/UX Performance, Content Decay Detector). The other ~23 ticket-creating agents were invisible to it. Replaced **only the two data literals** in node "Scan + Detect Silent Failures" — detector logic byte-for-byte untouched (loop / `fires >= 5 && tickets === 0` threshold / single `$getWorkflowStaticData('global')` all re-verified present post-PUT):
+- `WF_TO_AGENT` 4 → 27 entries (every name confirmed from the agent's own code).
+- `NO_ARTIFACT_OK` 7 → 11 (added Content Dup Sentinel, Dup WF Detector, Strategic Director, Maverick — these legitimately emit 0 HubSpot tickets, so they're scanned-but-not-false-flagged).
+- node --check PASS; PUT 200; `active` **True → True** (the auto-reactivate safety net was present but never fired — n8n kept it active). Coverage auto-engages the moment Paul activates any newly-mapped agent.
+
+### Fix C — Site Audit flood guard (verified, still paused)
+Site Audit `QBaTurTGBiAo113f` node "Format Audit Tickets" did `return issues.map(...)` over an *unbounded external crawl* with no cap and no cross-run dedup — the one true uncapped terminal ticket fan-out on the team (Cat caps 12, Hound 12, Nox 3, SEO Rank 10). Added a HIGH-first sort + `MAX_TICKETS = 15` slice so one noisy crawl can't spawn dozens of pipeline-0 tickets. Body/intent unchanged. node --check PASS; PUT 200; `active` **False → False**; errorWorkflow intact.
+
+### Flagged for Paul — judgment calls, NOT auto-changed
+1. **agent_name collisions among flaggable agents** (masking risk): "Community Engagement" ×2 (Reed `QrKVBx6jtkseu8xH` + Crow `VdYI5nLqDTt5jWYR`), "Coordinator" ×3 (`VtBvtrYqS4vChTi2`,`xZCWfSlfZEZYXuOV`,`wTkLhqNY7pfIU5ro`). If two collided agents both run, their ticket counts merge and one could mask the other's silence. **Harmless in practice today** — all are daily/weekly, none can hit ≥5/24h — but if cadence ever rises, normalize to unique agent_names.
+2. **SEO Rank Tracker `BDRaqnlzKM2lv3iA` → "Other"**: its real HubSpot agent_name is ambiguous; "Other" likely won't match a ticket bucket, so silent-fail monitoring for it is effectively a no-op until the true name is confirmed. Needs Paul/HubSpot to confirm the literal it writes.
+3. **Strategic Director `NYV1Ge9jT7Ux2vFE`**: writes a dynamic per-recommendation name (`b.name`), not mappable to one static string → parked in NO_ARTIFACT_OK (scanned, not flagged). A per-rec detector would need different logic.
+4. **Site Audit cross-run dedup gap**: the cap is per-run only. A persistently broken page will re-ticket on every scheduled scan. A `staticData` "already-ticketed URL" memory would fix it — deferred (out of scope for a paused-in-place pass).
+5. **Cadence notes**: Nox is per-mention; SEO Rank is daily — both fine while paused, worth a cap/cooldown review before activation.
+
+### State
+- Every agent that was paused is **still paused**. SFD is **still active** (it was already active before this pass; I did not activate anything). No cron cadences touched. No deletions.
+- Hard-crash watchdog coverage: now every audited agent points to Agent Failure Alerts.
+- Silent-failure watchdog coverage: 27 agents mapped (was 4).
+
+### Receipts attached
+- `_verify_all.py` live re-GET (17:31 ET): Fix A all three `active=False errorWorkflow=qMeBXIjguVuaKLLF OK`; Fix C `active=False MAX_TICKETS present=True capped.map=True old issues.map gone=True`; Fix B `active=True, WF_TO_AGENT entries=27, NO_ARTIFACT_OK=11, logic intact loop/threshold/staticData all True`.
+- Scripts: `.tmp_n8n/_do_A.py`, `_do_B.py`, `_do_C.py` (apply + self-verify), `_resolve_names.py` (agent_name ground truth), `_floodscan.py` (fan-out triage), `_verify_all.py` (consolidated receipt).
+- Deletion kill-list (16 workflows, all confirmed `active=False` with healthy keepers via `_killlist_verify.py`) is **presented for approval, NOT executed** — see end-of-shift report. Deletion needs Paul's explicit go-ahead.
+
+---
+
+## CHECKPOINT 17:58 ET — Paul's directives: unique names + explain/fix the 4 others + approve deletion
+
+Paul replied: "Create unique names ... explain [the other items] in layman terms. Fix and make it make sense. You can approve the 16-workflow deletion list." Worked each item; two are fully fixed-and-verified, one is verified-already-fine, one is documented-as-designed, and the rename + deletion both hit a hard constraint that routes the final action back to Paul (by safety rule / CRM-schema limit). No agent activated; no cron touched.
+
+### Critical discovery — `agent_name` is a LOCKED HubSpot enumeration
+`get_properties(tickets, agent_name)` → type=enumeration, 17 fixed options: SEM Manager, SEO Optimizer, Content Producer, Backlink Builder, Keyword Discovery, LinkedIn Cadence, Coordinator, Pattern Detector, UI/UX Performance, Brand Listening, Content Decay Detector, Competitor SERP Monitor, Daily Briefing, Community Engagement, Site Audit, Backlink Poster, Other. **HubSpot 400s any ticket whose agent_name is not in this list.** So "create unique names" cannot be a free-text rename — each new name must first be added as a dropdown option, or the renamed agent's tickets will fail to create (and the watchdog would then see 0 tickets = the exact false-flag we're removing). The agents' own "add_hubspot_enum" auto-fix (Team Manager) is the evidence this is enum-typed.
+
+### Item 3 — Strategic Director dynamic agent_name = enum-safe (no fix needed, verified)
+`Parse & Build Tickets` builds tickets from a FIXED `buckets` array; `agent_name:b.name` only ever emits `['Content Producer','SEO Optimizer','Keyword Discovery','SEM Manager','UI/UX Performance']` — all valid enum values (machine-checked vs the 17). So Strategic Director attributes each strategic rec to the *doing* agent; it never tags tickets "Strategic Director," which is exactly why SFD parks it in NO_ARTIFACT_OK. Working as designed. Receipt: `_do_D.py` ITEM 3 line → "all valid enum values: True | invalid: none".
+
+### Item 4 — Site Audit cross-run dedup (FIXED, verified, still paused)
+The 15-cap was per-run only, so a persistently-broken page would re-ticket every scan. Added a `$getWorkflowStaticData('global')` memory keyed `pageId|type`, filtered before the cap, recorded after; entries expire after 30 days so a genuine regression can re-alert. Body unchanged. node --check PASS; PUT 200; active False→False; errorWorkflow intact. Receipt: `_do_D.py` → "live: staticData=True ticketedIssues=True freshIssues=True cap=True".
+
+### Item 5 — cadence review = already capped (verified, no change)
+Nox/Brand Listening: `Dedupe + Classify` slice 8 → `Build Ticket Payload` slice 3 = ≤3 deduped tickets/run. SEO Rank Tracker: `Format HubSpot Tickets` slice 10 = ≤10/day. Neither can flood. Safe to activate as-is on the cadence front.
+
+### Items 1 + 2 — unique names (PREP DONE; blocked on a 4-value HubSpot dropdown add)
+The collisions are real but every rename needs a NEW enum option first. Plan, ready to apply in one coordinated pass the moment the options exist (agent ticket-node literal + SFD WF_TO_AGENT must change together):
+- Crow `VdYI5nLqDTt5jWYR` "Community Engagement" → **"Thought Leadership"** (Reed `QrKVBx6jtkseu8xH` keeps "Community Engagement").
+- Coordinator Daily `VtBvtrYqS4vChTi2` "Coordinator" → **"Coordinator Daily"**.
+- Weekly Summary `xZCWfSlfZEZYXuOV` "Coordinator" → **"Weekly Summary"** (Team Manager `wTkLhqNY7pfIU5ro` keeps "Coordinator").
+- SEO Rank Tracker `BDRaqnlzKM2lv3iA` "Other" → **"SEO Rank Tracker"** (also folds it back into Coordinator Daily's summary, which currently filters out 'Other').
+4 new options to add: **Thought Leadership, Coordinator Daily, Weekly Summary, SEO Rank Tracker**. MCP has no property-schema write tool and I won't extract the HubSpot token, so this is Paul's Settings action (or his explicit go-ahead to add via the agents' existing HubSpot connection). I will NOT pre-edit the paused agents to write not-yet-valid enum values (would 400 on activation).
+
+### Deletion — APPROVED by Paul; prepped, operator-executed (safety)
+Permanent deletion stays operator-run (hard safety rule), so I prepared `_delete_killlist.py`: dry-run re-verified all **16/16 active=False** and wrote fresh full backups to `.tmp_n8n/killlist_backup/<id>.json` (re-importable to restore). Paul runs `python _delete_killlist.py --confirm` to execute; the script re-checks inactive and skips anything that flipped active.
+
+### Receipts attached
+- `get_properties(tickets, agent_name)` → enumeration + 17 options (the linchpin finding).
+- `_do_D.py`: Item 3 buckets-vs-enum (all valid) + Item 4 Site Audit dedup PUT 200/verified.
+- `_delete_killlist.py` dry run: 16/16 inactive + backed up.
+- `_inspect_names.py`: agent_name write-sites + caps (cadence evidence).
+
+---
+
+## CHECKPOINT 18:45 ET — Unique-name rename EXECUTED + a real UI/UX collision found & fixed
+Paul authorized: "Claude adds the enum options via your n8n→HubSpot connection." Ran the whole chain end-to-end and verified each layer. All agent edits stayed **paused**; SFD stayed **active**; no cron touched; the n8n DELETE API was never called.
+
+### Enum options added (17 → 21), verified live
+MCP has no property-schema write tool (`manage_crm_objects` = CRM-instance CRUD only) and I won't extract the HubSpot token. So I stood up a throwaway n8n workflow `pNEpr1PLVKn3WCPP` (Webhook → HTTP PATCH) that **reuses the agents' own 'HubSpot Private App' credential** (`S7YZNtmkHgtF72gN`, generic `httpHeaderAuth`), fired its webhook once, then deactivated it. PATCH `/crm/v3/properties/tickets/agent_name` sent **all 17 existing + 4 new** (HubSpot replaces the options array on PATCH, so sending the full set guarantees no existing option is dropped). Receipt: webhook returned a 21-option property; an **independent `get_properties` re-read** confirmed 21 — added **Thought Leadership, Coordinator Daily, Weekly Summary, SEO Rank Tracker**; 17 originals intact, no extras. Temp workflow left INACTIVE for Paul to delete with the kill-list batch. Scripts: `_enum_create.py`, `_enum_fire.py`.
+
+### 4 renames applied (paused, verified live) — `_rename4.py` → ALL 4 OK
+- Crow `VdYI5nLqDTt5jWYR` "Community Engagement" → **Thought Leadership**
+- Coordinator Daily `VtBvtrYqS4vChTi2` "Coordinator" → **Coordinator Daily**
+- Weekly Summary `xZCWfSlfZEZYXuOV` "Coordinator" → **Weekly Summary**
+- SEO Rank Tracker `BDRaqnlzKM2lv3iA` "Other" → **SEO Rank Tracker**
+Each edit: old literal count==1 asserted, exactly one string-leaf replaced, `node --check` PASS (code nodes), PUT 200, active False→False, `errorWorkflow` preserved.
+
+### SFD `WF_TO_AGENT` remapped + a genuine pre-existing collision fixed
+Updated the 4 wfId→name entries to match the renamed agents. While proving value-uniqueness, surfaced a latent bug: **Asset Review Gate (`f25BTprTci297v7W`) was mapped to "UI/UX Performance"** — the same label as Eagle v3 (`alik1C8sXr857rY7`), the real UI/UX agent. `f25` is already in `NO_ARTIFACT_OK` (always skipped by the scanner), so its map entry was dead weight **and** the source of a collision. Removed it (map **27→26, all values unique**; "UI/UX Performance" now resolves to **only** Eagle). SFD stayed active, threshold `fires >= 5 && tickets === 0` intact, `errorWorkflow` preserved. Scripts: `_sfd_map.py`, `_sfd_fix_collision.py`.
+
+### Cohesion receipt — `_verify_cohesion.py` → ALL ALIGNED = True
+For all 6 agents (4 renamed + Reed + Team Manager) the **three layers agree**: (a) the agent's ticket node writes X, (b) the SFD map attributes its wfId→X, (c) X is a valid HubSpot enum value. SFD map = 26 entries, all-unique values.
+
+### Problem A — surfaced to Paul (dormant now; needs his decision)
+Asset Review Gate's ticket node still **writes** `agent_name="UI/UX Performance"`. It's paused, so zero effect today. But if it's ever reactivated, its tickets would inflate Eagle's "UI/UX Performance" bucket and could **mask a real Eagle silent failure**. The clean fix needs a **5th enum value "Asset Review Gate"** + relabel its ticket node — beyond Paul's authorized 4, so holding for his go-ahead. The SFD map is collision-free regardless of this decision.
+
+### Operator-executed remainder
+16 kill-list workflows **+ the 1 temp enum workflow `pNEpr1PLVKn3WCPP`** → Paul deletes via the n8n UI (click-by-click walkthrough delivered in chat).
+
+---
+
+## CHECKPOINT 19:05 ET — Delivery: plain-English item explainer + exact-name deletion list + task close
+Operator-facing wrap-up (no engineering changes this step; everything below is read-only verification + comms).
+
+### Fresh pre-deletion receipt — `_killlist_names.py` (live GET ×17)
+Re-pulled all 17 deletion targets live: **ALL 17 active=False** (safe to delete). Captured exact live names so Paul deletes by name in the UI, not by ID guesswork. Notable: the two Backlink Builder v1/v2 entries (`bR89sj5tK6Rcy7SY`, `dOzXskoAG16triVQ`) share the **identical display name "Backlink Builder - Agent 6"** — flagged in the walkthrough so Paul deletes BOTH and doesn't stop at one. The keepers (Spider, P7c1fwvrmRV5CTrd, Cat, Owl, Beacon, Tally, Bee, Eagle, BDRaqnlzKM2lv3iA, 4FoOz5TX184zH0Zn, xZCWfSlfZEZYXuOV) were NOT in the pull — none at risk.
+
+### Task board
+- **#155 → completed** (was in_progress): rename executed + verified, not just "prepped." Subject/description updated to reflect execution.
+- **#157 → created (pending, blocked on Paul)**: Problem A — Asset Review Gate ticket node still writes 'UI/UX Performance'; needs a 5th enum value + relabel; holding for go-ahead.
+
+### Delivered to Paul in chat
+1. Completion report w/ receipts (enum 17→21, 4 renames live+paused, SFD remap + UI/UX collision fix, cohesion ALL ALIGNED).
+2. Plain-English explainer of all flagged items (what each meant, what I did).
+3. n8n UI click-by-click deletion walkthrough for the 17 (exact names + IDs + active=False receipt).
+4. Problem A decision ask (add 5th enum 'Asset Review Gate' + relabel, or leave paused as-is).
+
+### State unchanged: every agent still paused; SFD still active; no cron touched; n8n DELETE API never called; no creds printed.
+
+---
+
+## CHECKPOINT 18:40 ET (2026-05-28) — Problem A EXECUTED (Paul chose Option A), fully verified
+Paul: "Option A." So I did the clean de-collision of Asset Review Gate (`f25BTprTci297v7W`) end-to-end. Same verified method as the 4 renames. Asset Review Gate stayed **PAUSED**; SFD stayed **ACTIVE**; no cron touched; n8n DELETE API never called; HubSpot token never extracted.
+
+### Recon first (read-only) — `_arg_recon.py` + live `get_properties`
+- Ticket node `Create Asset Review Ticket` is an httpRequest (v4.2); the literal `agent_name:"UI/UX Performance"` appears **exactly once** in node params (clean single-leaf swap).
+- SFD convention confirmed: **6 NO_ARTIFACT_OK wfIds are also present in WF_TO_AGENT** (JjIHLI2AdZ3DfnbY, i8AjYKBt0V15VGA7, Zufhtq3fu4AJR6an, CsPth7e5pqRdBDln, NYV1Ge9jT7Ux2vFE/Strategic Director, rZW6J0ccvzWjDxYr/Maverick) — so the map intentionally documents skip-list flows; re-adding f25 with a unique name is consistent + future-proofs it for monitoring.
+- Live enum = 21 (all value==label), 'Asset Review Gate' not yet present, no current map collisions.
+
+### Step 1 — enum 21 → 22, verified live — `_enum_add5.py`
+Reused the existing throwaway `pNEpr1PLVKn3WCPP` (Webhook→HTTP PATCH, HubSpot Private App cred `S7YZNtmkHgtF72gN`): rewrote its jsonBody to all 21 live options + **"Asset Review Gate"** (PATCH replaces the array, so full set sent), PUT 200, activate→fire(200)→deactivate. **Independent `get_properties` re-read = 22 options**, all 21 prior intact, "Asset Review Gate" present. Temp wf left INACTIVE (still on the delete list; its job is permanent in HubSpot regardless of deletion).
+
+### Step 2 — relabel ticket node (paused) — `_arg_relabel.py`
+`agent_name:"UI/UX Performance"` → `agent_name:"Asset Review Gate"`. Structure-preserving (quoted-string→quoted-string, neither value contains `{}[]":,`); asserted OLD count==1 / NEW==0, struct-char counts identical pre/post, `node --check` on the extracted n8n expression PASS, PUT 200, **active False→False**, errorWorkflow preserved, re-GET confirms writes "Asset Review Gate" / 0 OLD left.
+
+### Step 3 — SFD map 26 → 27 — `_arg_sfd_add.py`
+Added `f25BTprTci297v7W → "Asset Review Gate"`; **f25 KEPT in NO_ARTIFACT_OK** (it's a gate that legitimately produces 0 tickets most runs — must not be silent-failure-flagged; un-skipping is a future op's call, and now it's correctly attributed). node --check PASS, map 27 entries all-unique, no collision, 4 prior renames intact, threshold `fires >= 5 && tickets === 0` intact, **SFD active True→True**, errorWorkflow preserved.
+
+### Cohesion receipt — `_verify_cohesion2.py` → ALL ALIGNED = True
+All **7** agents (4 renamed + Reed + Team Manager + Asset Review Gate): (a) ticket writes X == (b) SFD map says X == (c) X in live 22-enum. SFD map = 27 entries, all-unique, **residual collisions: NONE**. Problem A closed — UI/UX Performance now resolves to Eagle ONLY whether Asset Review Gate is paused or running.
+
+### Note for Paul's deletion walkthrough
+`pNEpr1PLVKn3WCPP` was reused for the enum add and re-deactivated — it remains item #17 on the delete list and is still safe to delete (the 22 HubSpot options persist independently of the workflow).
+
+---
+
+## CHECKPOINT ~20:50 ET (2026-05-28) — Daily-driver dashboard rebuilt, DEPLOYED + VERIFIED LIVE
+Paul's ask: "a fully built and functional, very amazing and friendly UI/UX… shows important information in easy to digest ways, makes it very clear the progress of each agent (verifiable, things i can see and prove), progress and performance over time, action items i need to accomplish. Thorough but not overwhelming." Rebuilt `public/approvals/index.html` from scratch as a 3-tab command center and shipped it. Commit **7a786ba**, pushed `53a6ffd..7a786ba` to main → Vercel.
+
+### Ground truth first (no guessing) — `.tmp_n8n/_dash_recon.py` + `_dash_recon2.py`
+Re-pulled live before designing: workflow active-state, and the exact webhook shapes the page renders. Confirmed `/webhook/roi-data` is **404 (dead)** → ROI chart intentionally OMITTED (was fiction). Confirmed only **4 marketing agents actually run**: Bee/sam (SEO), Turtle/dax (Content Decay), Eagle/uma (UI/UX), Owl/carla (Content Producer). Beaver/forge + Wolf/sentinel are infra. 12 others paused.
+
+### What replaced the old dashboard
+Deleted the **2,507-line, 15-agent FICTION** dashboard (−2309/+796 net). New file is lean + honest:
+- **Now tab** = action queue I must work. Sorted HIGH→MED then oldest-first. Each card: agent chip, priority, age, humanized subject, ASK/WHY/IF-YOU-APPROVE/IF-YOU-REJECT body, and a **proof row** with two links — the HubSpot ticket AND the live liftnow.com page — so every item is verifiable. Buttons: Approve / Approve with a note (conditional) / Defer 3 days / Reject (+comment box). Keyboard nav j/k/a/d/r/c gated to this view.
+- **Team tab** = honest per-agent scorecard (runs/24h, need-you, auto-shipped, errors/24h) + most-recent-ticket proof links + status dot from last heartbeat. Owl's real problem (17 runs/24h, 0 tickets, 3 errors) is SURFACED, not hidden. Infra agents in a separate grid; 12 paused agents behind a `<details>` disclosure with reasons.
+- **Trends tab** = 4 stat tiles + 3 Chart.js charts (activity by hour, where tickets end up, who's producing). No dead ROI chart.
+- Independent per-source loading (`Promise.all` of settle-wrapped fetches) so one slow webhook never hangs the page.
+
+### Bugs fixed during the rebuild
+1. **Double-escape** (`&amp;`, `&quot;` rendering literally): HubSpot data arrives HTML-encoded; my escapeHtml re-encoded it. Added `decodeEntities()` (textarea decode) at the top of `humanizeSubject` + `renderTicketContent` → pipeline is now decode→escape. Verified: subjects render clean.
+2. **Singular/plural grammar** ("1 runs", "1 errors"): added `plural(n,word)` helper, applied to scorecard labels. Verified live: Turtle shows "1 run / 24h", Bee shows "1 error / 24h".
+
+### RECEIPTS (Test-Before-Done + Receipt Law)
+- `node --check` on extracted inline JS (37.5KB) → **SYNTAX_OK**.
+- Console (warn+error) → **No console logs** (clean).
+- **Now tab eval**: 14 cards (5 HIGH/9 MED); first card = Bee HIGH, HubSpot link `…/0-5/45620009250` + live `liftnow.com/types-of-vehicle-lifts/`, 4 action buttons; subjects clean (decode fix confirmed).
+- **Team tab eval**: 4 scorecards w/ real metrics + correct grammar (Bee 10 runs/1 error, Turtle 1 run/0 errors, Eagle 3/0, Owl 17/3).
+- **Trends tab**: 3 live Chart.js instances (verified earlier via `Chart.instances`).
+- **LIVE DEPLOY**: polled `https://bid-iq-neon.vercel.app/approvals/index.html` → build marker `dash-rebuild-2026-05-28-v2` present (attempt 9, ~54s post-push); "Command Center" present; old `const PERSONAS` array **gone (0)**; 53.7KB. **Daily-driver URL is live.**
+- **Known tool limitation (honest):** local `preview_screenshot` times out (network-idle defeated by the page's live webhook polling — not a page defect; eval proves full render). Visual confirmation = open the live URL in a browser.
+
+### State unchanged: no agent re-activated, no cron touched, no n8n DELETE API called, no creds printed (AGENT_SECRET reused from the already-committed file, not new exposure).
