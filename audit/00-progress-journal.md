@@ -659,3 +659,72 @@ Paul: *"everything in results is still blurry."* **Root cause (diagnosed, not gu
 - **Fix (6 surgical edits, presentation-only):** (1) `cardIn` keyframe — dropped `scale(.985)` (the worst sub-pixel offender), now translateY-only → still slides, crisp at rest. (2) `fadeUp` → opacity-only (the `#main` tab-switch wrapper no longer transforms the whole Results subtree). (3) new `fadeIn` opacity-only keyframe; `.stat-tile` + `.chart-card` now use `animation:fadeIn` (no transform ⇒ never composited+scaled ⇒ crisp). (4) pinned `devicePixelRatio:Math.max(window.devicePixelRatio||1,2)` on all 3 Chart.js configs so canvases always rasterize at ≥2× backing store regardless of the screen.
 - **RECEIPTS:** `node --check` extracted inline JS (44.9KB) → **NODE_OK**. Grep: `@keyframes cardIn`×1, `@keyframes fadeIn`×1, `animation:fadeIn`×2 (stat-tile+chart-card), `scale(.985)`×0, `devicePixelRatio:Math.max`×3. Local 2× re-screenshot of Results → all 3 charts + 4 stat tiles render clean, **no regression**. Network/decide/charts data contracts untouched.
 - **Test-Before-Done caveat (honest):** this class of blur is display-scaling-dependent and my headless pipeline can't reproduce the fractional-DPR promoted-layer state, so I cannot *prove* the pixels on Paul's screen are now crisp — only that the known mechanism is removed. Asked Paul to hard-refresh + confirm, and to report his OS display scaling (125%/150%?) and device (desktop/phone) if any softness remains.
+
+---
+
+## CHECKPOINT (2026-05-28 ET / runs 2026-05-29 UTC) — TASK #162 DONE+VERIFIED: 7b Conditional Pre-Processor re-activated, enforce path wired + E2E-proven
+Paul's directive (AskUserQuestion #162): *"Re-activate + wire it — turn 7b back on; verify it routes conditions into execution; test end-to-end before claiming done."* This closes #162 with live receipts. (Workflow `67uuAQEIjvv5pcCB` = Agent 7b — Conditional Approval Pre-Processor.)
+
+### What 7b does (recap)
+Pre-processes APPROVED-with-conditions tickets BEFORE the Approval Executor sees them. Parses the operator's CONDITIONAL_APPROVE note (Haiku) → validates against a SUPPORTED_V1 map of {condition→eligible agent} → **Enforce?** gate splits two ways:
+- **enforce:true** (condition is supported + satisfiable now) → re-tag the ticket so the executor runs it → ENFORCE path.
+- **enforce:false** (unsupported/needs a human) → file a [HOLDBACK] ticket for human eyes + park the original at stage 4 → HOLDBACK path.
+
+### The bug that had 7b failing (root cause, fixed)
+Both terminal HTTP nodes (Create Holdback, Mutate Ticket) built their JSON bodies as **inline nested object literals** inside `={{ JSON.stringify({properties:{...}}) }}` → produced a `}}` adjacency that n8n's Tournament expression parser rejects as **"invalid syntax"** the moment a ticket actually flows through. Latent until exercised. Same `}}`-adjacency class documented earlier in this journal.
+- **FIX (both paths, proven pattern):** build the body string in an upstream **Code** node, reference it FLATLY from the HTTP node (zero braces).
+  - ENFORCE: new **"Build Mutate Body"** Code node (n8n-nodes-base.code v2) → Mutate jsonBody = `={{ $json.mutate_body }}`.
+  - HOLDBACK: existing **"Build Holdback Bodies"** Code node → Create Holdback jsonBody = `={{ $json.holdback_body }}`.
+
+### RECEIPTS (Receipt Law — re-verified live post-compaction, not trusting prior notes)
+- **7b live state** (`GET /workflows/67uuAQEIjvv5pcCB`): `active=true`. Wiring: `Enforce?[0]→Build Mutate Body→Mutate Ticket for Execution`; `Enforce?[1]→Build Holdback Bodies→Create Holdback Ticket→Park Original at Stage 4`. Mutate url `=…/tickets/{{ $json.ticket_id }}`, jsonBody `={{ $json.mutate_body }}`; Holdback jsonBody `={{ $json.holdback_body }}`. **Zero `}}`-adjacency remaining.**
+- **Gate operators correct:** `Has Conditional?` = boolean `operation:"false"` + `singleValue:true` + `options.version:1`; `Enforce?` = boolean `operation:"true"` + `singleValue:true`. (Avoids the unary-truthiness `notEqual+singleValue` malformed-IF trap.)
+- **ENFORCE path E2E — run 9494 (webhook, status=success).** Synthetic stage-2 ticket (agent_name=SEO Optimizer, `hold_until_date` condition = supported in v1) → parsed high-confidence → `enforce:true` → Build Mutate Body → **Mutate PATCH HTTP 200**, outcome_notes re-tagged `APPROVED_VIA_CONDITION … COND_APPR …` (CONDITIONAL_APPROVE token stripped so it no longer matches the executor's NOT_CONTAINS filter / it now CAN be picked up). Node trace dumped per-node items_out, no errors.
+- **HOLDBACK path E2E — run 9478 (webhook, success)** (prior session, still holds): Paul's real stuck ticket 45631939391 → parked stage 4 + new **[HOLDBACK] 45635364612** filed at stage 1. **Idempotency — run 9481 (success):** re-fire created NO duplicate.
+- **Cron health:** run **9504 (trigger, success)** fired on 7b's normal schedule AFTER the fix — confirms the scheduled path runs clean, not just manual webhook fires. Run history 9450→9504: all success EXCEPT 9455/9458/9466/9471 which are **pre-fix debugging fires** (the "invalid syntax" errors that the fix eliminated; retained as the before-picture).
+- **Ticket states (live HubSpot, portal 24043196, re-read just now):**
+  - Synthetic test `45620973745` → stage **4** (parked, "safe to delete"). Designed with empty `recommendation_detail` so the executor resolves it to `auto_ack` (NO WP/email/LinkedIn) even under a race — defense in depth; the test still exercised the REAL production HubSpot credential path (S7YZNtmkHgtF72gN), not a sandbox.
+  - Legit holdback `45635364612` → stage **1** (HIGH, agent Coordinator), **left for Paul to re-decide** — this is real output, not test debris.
+  - Stale escalation `45635350117` → stage **4** with full operator RESOLVED note (root-cause = the `}}` bug; both nodes rebuilt; holdback 9478 + enforce 9494 verified).
+
+### Honesty Law — the stale escalation (reported, not silently closed)
+Sentinel auto-filed escalation `45635350117` (HIGH, 3x-in-an-hour) when MY OWN pre-fix debugging fires (execs 9466/9471) threw "invalid syntax" at Create Holdback; Wolf couldn't auto-retry (`WOLF_NO_AUTO_RETRY`: no manual-fire webhook registered on 7b). It was a **stale artifact of my debugging, not a live production failure.** Resolved to stage 4 with an accurate root-cause note rather than quietly deleting it.
+
+### State discipline / safety
+No agent other than 7b re-activated (Paul explicitly authorized 7b only). No cron cadence changed. No n8n DELETE API called. No creds printed (HubSpot token used only via n8n credential S7YZNtmkHgtF72gN; never read). `.tmp_n8n` scripts are gitignored.
+
+### Operator-pending (Paul, via n8n UI — Claude must NOT delete workflows)
+- Temp E2E helper **`85NSPxIMzJ0SFZ2p`** ("TEMP -- 7b enforce E2E helper (Claude, delete after)") — left **INACTIVE**; safe to delete.
+- Synthetic test ticket `45620973745` — parked stage 4; safe to delete.
+- Decide the real holdback ticket `45635364612` (#45631939391's conditional approval needs your eyes).
+- (Carried-over) the 16 kill-list workflows + temp `pNEpr1PLVKn3WCPP`.
+
+### Next (this session): #164 + #165 (one dashboard commit/deploy/verify) → then #163 (Decision Memory into Bee/Eagle/Content Decay Detector, one at a time with validation).
+
+---
+
+## CHECKPOINT (2026-05-28 ET / runs 2026-05-29 UTC) — TASKS #164 + #165 DONE+VERIFIED (dashboard History tab + duplicate-page guard)
+
+One surgical change to `public/approvals/index.html` (+219 / −4). Build marker bumped `v5-crisp → **dash-bright-2026-05-28-v6-history-dupguard**`. Both features ship together (one commit/deploy). `decide()` contract, API keys, kill-switch body all **untouched** (verified by diff grep).
+
+### #164 — "📜 History" tab (grandma-proof "what happened")
+4th tab → `renderHistory()` filters `STATE.all` to decided stages **{4, 1363043699}**, drops infra noise, classifies each decision, sorts newest-first, renders summary pills + per-row cards (decision badge, agent chip, relative time, subject, note, links to the HubSpot ticket + the live page). No new webhook — `STATE.all` already carries decided tickets.
+- **Shared helpers added** (also feed #165): `pageRefFromTicket` (url→normalized `u:<host/path>` key, else `wp:<id>`), `dupePageMap` (groups by key, ≥2 = dupe), `classifyDecision` (stage 1363043699→done; else regex on outcomeNotes for APPROVED/APPROVED_VIA_CONDITION/REJECTED/HOLDBACK/ACK + ISO ts + detail, strips leading separators incl. mangled `�`), `isHistoryNoise`, `histWhen`.
+
+### #165 — duplicate-page guard on the "Needs you" queue
+`dupePageMap(pending)` drives (a) a top **"⚠ Heads up: N of these point at the same page…"** banner and (b) a per-card **"⚠ M other requests also target <page> — you may only need one."** strip. Singletons untouched. `actionCard(t,i,dupes)` signature threaded through.
+
+### THE LIVE-DATA BUG I CAUGHT (Test-Before-Done earned its keep)
+Unit test (raw subjects) went green, but the **live History screenshot** showed ~4 "*Content Producer fires constantly but produced 0 tickets in last 24h*" rows leaking in. Root cause: `humanizeSubject()` runs at fetch time (line ~847) and **rewrites** `[SILENT FAILURE] X fired N×/24h, 0 tickets` → `X fires constantly but produced 0 tickets…`, **stripping the `[SILENT FAILURE]` prefix** my `isHistoryNoise` keyed on. (The `Escalated:`/`Heads-up:` rewrites keep prefixes I already catch — only silent-failure leaked.) **FIX:** added `/fires constantly but produced 0 tickets/i` to `isHistoryNoise`; added the humanized form to the unit test as a regression guard. The raw-data unit test alone would NEVER have caught this — the screenshot against live state did.
+
+### RECEIPTS (Receipt Law)
+- **Logic — unit test `_test_history_logic.js`: 12/12 PASS** (9 real ticket samples incl. em-dash + mangled-`�` separators + all 4 noise classes, 2 humanized live-forms, 1 synthetic 3-ticket dup → 3 grouped / singleton clean / exactly 1 group). `node --check` on extracted inline JS → **NODE_OK**.
+- **Live data — `_hist_counts.py`** (replicates the dashboard's full filter chain on `GET agent-proposals?view=all`): 50 tickets → 28 History rows = **14 done-by-team / 13 skipped / 1 held**; **silent-failure/health rows leaking through: 0 (clean)**.
+- **Rendered DOM — headless `--dump-dom` (script-stripped):** **28** `hist-subject` rows; badges **{Done by the team:14, Rejected:13, Held for review:1}** = 28; rendered rows matching any noise pattern: **0**; pills read "✓ 14 done by the team / ✕ 13 you skipped / ⏸ 1 held for review"; build marker present in served file.
+- **Visual — headless screenshots** (`.tmp_n8n/hist_v6.png`, `dup_v6.png`, `dup_v6_mobile.png`): History tab clean newest-first; dup banner + per-card strips render on the 3 same-page synthetic cards while the unrelated /financing card stays clean; mobile (482px) wraps correctly, brand renders "Liftnow" (lowercase n).
+- **Honesty note (#165 live):** the live pending queue currently has **1** ticket, so the dup warning can't trigger for Paul right now — correct behavior. The banner/strip were proven via a **synthetic** 3-same-page-ticket injector that runs AFTER boot() and only overrides `STATE.pending`, calling the REAL unmodified `renderNow()`. Not a mock of the render path.
+
+### Deploy
+Surgical commit (ONLY `public/approvals/index.html` + this journal — working tree has unrelated uncommitted edits to `bidiq/ingest.py`, `MICROSOFT_ADS_SETUP.md`, and deleted `data/product_data/*.pdf` that were deliberately left alone). Pushed → Vercel auto-deploy → live build-marker re-verified `dash-bright-2026-05-28-v6-history-dupguard`.
+
+### Next: #163 — wire Decision Memory ("Check Decision Memory → Memory Says Skip?" pattern from Owl `d7YwC4ezub4g1LrI`, webhook `Oq07XLN678zlAIaF`) into Bee `N03TEmB50zG0XiiP`, Eagle `alik1C8sXr857rY7`, Content Decay Detector `yYyj4TnP9Ho9O85l` — one agent at a time, validate each.

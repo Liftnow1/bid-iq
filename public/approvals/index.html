@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Liftnow Agents · Your Marketing Team</title>
-<meta name="build" content="dash-bright-2026-05-28-v5-crisp">
+<meta name="build" content="dash-bright-2026-05-28-v6-history-dupguard">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root{
@@ -375,9 +375,55 @@
   .toast.ok{background:linear-gradient(135deg, #22c55e, #16a34a)}
   .toast.err{background:linear-gradient(135deg, #f87171, #ef4444)}
 
+  /* ---------- #165 duplicate-page warnings ---------- */
+  .dup-banner{
+    display:flex; gap:7px; align-items:baseline; flex-wrap:wrap;
+    background:var(--warn-soft); color:var(--warn-ink); border:1.5px solid #f4d68a;
+    border-radius:14px; padding:13px 16px; margin:0 2px 20px; font-size:14px; line-height:1.5; font-weight:600;
+  }
+  .dup-warn{
+    width:100%; margin:-2px 0 12px; padding:8px 18px; color:var(--warn-ink);
+    font-size:13px; font-weight:700; line-height:1.45;
+  }
+  .dup-warn b{font-weight:800}
+
+  /* ---------- History tab ---------- */
+  .hist-summary{display:flex; gap:9px; flex-wrap:wrap; margin:0 2px 20px}
+  .hs-pill{
+    font-size:13px; font-weight:700; padding:7px 13px; border-radius:999px; white-space:nowrap;
+    border:1.5px solid transparent;
+  }
+  .hs-pill.ok{background:var(--ok-soft); color:var(--ok-ink); border-color:#bfe7cd}
+  .hs-pill.err{background:var(--err-soft); color:var(--err-ink); border-color:#f4c7c7}
+  .hs-pill.warn{background:var(--warn-soft); color:var(--warn-ink); border-color:#f4d68a}
+  .hist-list{display:flex; flex-direction:column; gap:11px}
+  .hist-row{
+    background:var(--card); border:1.5px solid var(--border); border-left:5px solid var(--border);
+    border-radius:14px; padding:14px 16px; box-shadow:var(--shadow);
+    animation:cardIn .4s cubic-bezier(.2,.7,.3,1) both;
+  }
+  .hist-row:has(.hist-badge.ok){border-left-color:var(--ok)}
+  .hist-row:has(.hist-badge.err){border-left-color:var(--err)}
+  .hist-row:has(.hist-badge.warn){border-left-color:var(--warn)}
+  .hist-top{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:7px}
+  .hist-badge{
+    font-size:12px; font-weight:800; letter-spacing:.01em; padding:4px 11px; border-radius:999px; white-space:nowrap;
+  }
+  .hist-badge.ok{background:var(--ok-soft); color:var(--ok-ink)}
+  .hist-badge.err{background:var(--err-soft); color:var(--err-ink)}
+  .hist-badge.warn{background:var(--warn-soft); color:var(--warn-ink)}
+  .hist-badge.muted{background:#eef2f8; color:var(--muted)}
+  .agent-chip.sm{font-size:12px; padding:3px 9px; gap:5px}
+  .agent-chip.sm .emoji{font-size:13px}
+  .hist-when{margin-left:auto; font-size:12.5px; color:var(--faint); font-weight:600; white-space:nowrap}
+  .hist-subject{font-weight:700; font-size:15.5px; color:var(--ink); line-height:1.35; letter-spacing:-.01em}
+  .hist-note{margin-top:5px; font-size:13.5px; color:var(--muted); line-height:1.55; white-space:pre-wrap; overflow-wrap:break-word}
+  .hist-links{display:flex; gap:9px; flex-wrap:wrap; margin-top:11px}
+
   /* ---------- Mobile ---------- */
   @media (max-width:640px){
     .head-row{padding:13px 15px 0; gap:11px}
+    .hist-when{margin-left:0; width:100%}
     .tabs{padding:12px 12px; gap:7px; flex-wrap:wrap}
     .tab{padding:9px 15px; font-size:14px}
     main{padding:20px 15px 56px}
@@ -426,6 +472,7 @@
     <button class="tab active" data-view="now" onclick="switchTab('now')">📋 Needs you <span class="badge zero" id="badge-now">0</span></button>
     <button class="tab" data-view="team" onclick="switchTab('team')">🤖 Team</button>
     <button class="tab" data-view="trends" onclick="switchTab('trends')">📈 Results</button>
+    <button class="tab" data-view="history" onclick="switchTab('history')">📜 History</button>
   </nav>
 </header>
 
@@ -539,6 +586,90 @@ function hubspotLink(ticketId){ return `https://app.hubspot.com/contacts/${HUBSP
 function pageUrlFromTicket(t){
   try { const d = JSON.parse(t.recommendationDetail || '{}'); return d.url || d.target_url || d.page_url || null; }
   catch { return null; }
+}
+
+// Robust page reference: checks recommendationDetail JSON, then any URL embedded in the
+// outcome notes / subject, then a WordPress page id. Returns {url,label,key} or null.
+// `key` is a normalized identity so two tickets aimed at the SAME page group together.
+function pageRefFromTicket(t){
+  const normUrl = (u) => {
+    try { return String(u).trim().replace(/^https?:\/\//i,'').replace(/^www\./i,'').split(/[?#]/)[0].replace(/\/+$/,'').toLowerCase(); }
+    catch(e){ return ''; }
+  };
+  let url = pageUrlFromTicket(t);
+  if (!url){
+    const hay = `${t.outcomeNotes||''} ${t.subject||''} ${String(t.recommendationDetail||'')}`;
+    const m = hay.match(/https?:\/\/[^\s)"'<>]+/i);
+    if (m) url = m[0].replace(/[.,;]+$/,'');
+  }
+  if (url){
+    const k = normUrl(url);
+    if (k) return { url, key:'u:'+k, label: k.replace(/^liftnow\.com\/?/,'') || k };
+  }
+  try {
+    const d = JSON.parse(t.recommendationDetail || '{}');
+    const wp = d.wpId || d.wp_page_id || d.page_id;
+    if (wp) return { url:null, key:'wp:'+wp, label:`WP page ${wp}` };
+  } catch(e){}
+  return null;
+}
+
+// Group tickets by target page → { key: [{id,label},...] } for any page with 2+ tickets.
+function dupePageMap(tickets){
+  const byKey = {};
+  for (const t of (tickets||[])){
+    const ref = pageRefFromTicket(t);
+    if (!ref) continue;
+    (byKey[ref.key] = byKey[ref.key] || []).push({ id:t.ticketId, label:ref.label });
+  }
+  const dupes = {};
+  for (const k in byKey){ if (byKey[k].length >= 2) dupes[k] = byKey[k]; }
+  return dupes;
+}
+
+// Classify a decided ticket's outcome for the History view. Returns null if unrecognizable.
+function classifyDecision(t){
+  const notes = String(t.outcomeNotes || '').trim();
+  if (String(t.stage) === '1363043699'){
+    return { kind:'done', label:'Done by the team', cls:'ok', detail: notes };  // executor applied it
+  }
+  const m = notes.match(/^(APPROVED_VIA_CONDITION|APPROVED|REJECTED|HOLDBACK|ACK(?:NOWLEDGED)?)\b\s*(\d{4}-\d\d-\d\dT[\d:.]+Z)?([\s\S]*)$/i);
+  if (!m) return null;
+  const token = m[1].toUpperCase();
+  const when  = m[2] || '';
+  const detail = (m[3] || '').replace(/^[\s—–‒:\-•·|>�]+/, '').trim();
+  if (token === 'APPROVED_VIA_CONDITION') return { kind:'cond',    label:'Approved with a note', cls:'ok',    detail, when };
+  if (token === 'APPROVED')               return { kind:'approve', label:'Approved',             cls:'ok',    detail, when };
+  if (token === 'REJECTED')               return { kind:'reject',  label:'Rejected',             cls:'err',   detail, when };
+  if (token === 'HOLDBACK')               return { kind:'hold',    label:'Held for review',      cls:'warn',  detail, when };
+  return { kind:'ack', label:'Acknowledged', cls:'muted', detail, when };
+}
+
+// Infra/test/auto-retry noise that should NOT show in the human decision history.
+function isHistoryNoise(t){
+  const subj = String(t.subject || '');
+  const notes = String(t.outcomeNotes || '');
+  // Raw infra prefixes (some tickets arrive un-humanized).
+  if (/^\s*(Heads-up:|Escalated:|\[SILENT FAILURE\]|\[TEST-)/i.test(subj)) return true;
+  // humanizeSubject() runs before tickets reach STATE.all and REWRITES infra subjects:
+  // "[SILENT FAILURE] X fired N×/24h, 0 tickets" -> "X fires constantly but produced 0
+  // tickets in last 24h". Catch that humanized form so health alerts stay out of History.
+  if (/fires constantly but produced 0 tickets/i.test(subj)) return true;
+  if (/^\s*(WOLF_|RESOLVED\b.*\(operator\)|\[TEST-)/i.test(notes)) return true;
+  return false;
+}
+
+// Friendly relative time for a history row (falls back to a short date).
+function histWhen(iso){
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const ms = Date.now() - d.getTime();
+  if (ms < 36e5) return 'just now';
+  if (ms < 864e5) return `${Math.round(ms/36e5)}h ago`;
+  const days = Math.floor(ms/864e5);
+  if (days < 7) return `${days}d ago`;
+  return d.toLocaleDateString([], {month:'short', day:'numeric'});
 }
 
 function autoGrow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,200)+'px'; }
@@ -839,6 +970,7 @@ function renderCurrent(){
   if (currentView === 'now')   return renderNow();
   if (currentView === 'team')  return renderTeam();
   if (currentView === 'trends')return renderTrends();
+  if (currentView === 'history')return renderHistory();
 }
 
 /* =====================================================================
@@ -878,6 +1010,15 @@ function renderNow(){
       </div>
     </div>`;
 
+  // #165 — duplicate-page guard: warn when 2+ pending tickets point at the same page.
+  const dupes = dupePageMap(pending);
+  const dupKeys = Object.keys(dupes);
+  if (dupKeys.length){
+    const totalDup = dupKeys.reduce((nn,k) => nn + dupes[k].length, 0);
+    html += `<div class="dup-banner">⚠ <b>Heads up:</b> ${totalDup} of these point at the same ${dupKeys.length===1?'page':'pages'}.
+      Approving more than one may apply duplicate changes to the same page — open them and check before you approve.</div>`;
+  }
+
   const GROUP = {
     'HIGH':   ['🔥', 'Look at these first'],
     'MEDIUM': ['👀', 'Worth a look'],
@@ -892,13 +1033,13 @@ function renderNow(){
       html += `<div class="group-label"><span class="gl-emoji">${em}</span>${lbl}</div>`;
       lastBucket = key;
     }
-    html += actionCard(t, i++);
+    html += actionCard(t, i++, dupes);
   }
   main.innerHTML = html;
   main.querySelectorAll('[data-count]').forEach(countUp);
 }
 
-function actionCard(t, i){
+function actionCard(t, i, dupes){
   const id = t.ticketId;
   const agent = AGENT_BY_TICKET[t.agent];
   const chip = agent
@@ -917,6 +1058,14 @@ function actionCard(t, i){
 
   const preview = askPreview(t.content);
 
+  // #165 — does another pending ticket target the same page?
+  const dupRef = pageRefFromTicket(t);
+  const dupGroup = (dupes && dupRef && dupes[dupRef.key]) ? dupes[dupRef.key] : null;
+  const others = dupGroup ? dupGroup.length - 1 : 0;
+  const dupStrip = others > 0
+    ? `<div class="dup-warn">⚠ ${others} other ${others===1?'request':'requests'} also target <b>${escapeHtml(dupRef.label)}</b> — you may only need one.</div>`
+    : '';
+
   return `<div class="card collapsed ${cls}" id="card-${id}" data-ticket="${id}" style="${delay}">
     <div class="card-head" onclick="toggleCard('${id}')">
       ${chip}
@@ -925,6 +1074,7 @@ function actionCard(t, i){
       <span class="card-age ${ageClass(t.ageHours)}">${ageLabel(t.ageHours)}</span>
       <span class="chev" aria-hidden="true">›</span>
     </div>
+    ${dupStrip}
     ${preview ? `<div class="card-preview">${escapeHtml(preview)}</div>` : ''}
     <div class="card-detail">
       ${proof}
@@ -1023,6 +1173,71 @@ async function triggerKillSwitch(){
     toast(`Kill switch failed: ${e.message}`, 'err');
     if (btn){ btn.disabled = false; btn.textContent = 'Pause all'; }
   }
+}
+
+/* =====================================================================
+   TAB 4 — HISTORY   ·   "What happened" (your decisions + what the team applied)
+   ===================================================================== */
+function renderHistory(){
+  const main = document.getElementById('main');
+  if (STATE.allErr || STATE.all == null){
+    main.innerHTML = `<div class="section-head"><h2>History</h2></div>` + inlineErr("Couldn't load your history right now.");
+    return;
+  }
+  const DECIDED = new Set(['4','1363043699']);
+  const rows = [];
+  for (const t of STATE.all){
+    if (!DECIDED.has(String(t.stage))) continue;
+    if (isHistoryNoise(t)) continue;
+    const c = classifyDecision(t);
+    if (!c) continue;
+    rows.push({ t, c, when: c.when || t.createdAt || '' });
+  }
+  rows.sort((a,b) => String(b.when).localeCompare(String(a.when)));
+
+  let html = `<div class="section-head"><h2>History</h2></div>`;
+  html += `<p class="lead">Everything your team has applied, and every call you've made — newest first. Each row links to the proof so you always have a paper trail.</p>`;
+
+  if (!rows.length){
+    main.innerHTML = html + `<div class="empty"><span class="big">📭</span>Nothing here yet.
+      <div class="sub">As you approve or skip things — and as your team applies changes — they'll show up here automatically.</div></div>`;
+    return;
+  }
+
+  const n = (k) => rows.filter(r => r.c.kind === k).length;
+  const done = n('done'), approved = n('approve') + n('cond'), rejected = n('reject'), held = n('hold');
+  html += `<div class="hist-summary">
+    ${done     ? `<span class="hs-pill ok">✓ ${done} done by the team</span>` : ''}
+    ${approved ? `<span class="hs-pill ok">✓ ${approved} you approved</span>` : ''}
+    ${rejected ? `<span class="hs-pill err">✕ ${rejected} you skipped</span>` : ''}
+    ${held     ? `<span class="hs-pill warn">⏸ ${held} held for review</span>` : ''}
+  </div>`;
+
+  html += '<div class="hist-list">';
+  for (const { t, c, when } of rows){
+    const agent = AGENT_BY_TICKET[t.agent];
+    const chip = agent
+      ? `<span class="agent-chip sm" style="background:${agent.tint}; color:${agent.color}"><span class="emoji">${agent.emoji}</span>${agent.name}</span>`
+      : `<span class="agent-chip sm" style="background:#eef1f4; color:var(--muted)">${escapeHtml(t.agent||'Agent')}</span>`;
+    const ref = pageRefFromTicket(t);
+    const detail = c.detail ? decodeEntities(c.detail) : '';
+    const note = detail ? `<div class="hist-note">${escapeHtml(detail.length > 240 ? detail.slice(0,240) + '…' : detail)}</div>` : '';
+    html += `<div class="hist-row">
+      <div class="hist-top">
+        <span class="hist-badge ${c.cls}">${escapeHtml(c.label)}</span>
+        ${chip}
+        ${when ? `<span class="hist-when">${escapeHtml(histWhen(when))}</span>` : ''}
+      </div>
+      <div class="hist-subject">${escapeHtml(humanizeSubject(t.subject) || '(no subject)')}</div>
+      ${note}
+      <div class="hist-links">
+        <a class="proof" href="${hubspotLink(t.ticketId)}" target="_blank" rel="noopener">Ticket <span class="ext">↗</span></a>
+        ${ref && ref.url ? `<a class="proof" href="${escapeHtml(ref.url)}" target="_blank" rel="noopener">View the page <span class="ext">↗</span></a>` : ''}
+      </div>
+    </div>`;
+  }
+  html += '</div>';
+  main.innerHTML = html;
 }
 
 /* =====================================================================
@@ -1225,7 +1440,7 @@ document.addEventListener('keydown', e => {
 // Deep-link the active tab: #team / #trends survive a refresh or bookmark.
 (function initTab(){
   const h = (location.hash || '').replace('#', '');
-  if (h === 'team' || h === 'trends' || h === 'now'){
+  if (h === 'team' || h === 'trends' || h === 'now' || h === 'history'){
     currentView = h;
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === h));
   }
