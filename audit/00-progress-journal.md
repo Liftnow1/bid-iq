@@ -1036,3 +1036,50 @@ Cron *labels* that lie about cadence (behavior is fine, only the display name is
 Wire LinkedIn posting (or keep draft-and-paste) · enable ROI Tracker then surface `total_spend_30d` on the dashboard · the one verification stone I couldn't reach without your browser: a 15-sec visual glance at the v7 History tab (`bid-iq-neon.vercel.app/approvals/`) to confirm the conditional-approve render looks right.
 
 **Overnight run COMPLETE. Tasks #1–175 all closed. Marketing-symphony fleet fully reconciled & certified; rails honored end-to-end (read-only on active/OFF agents, fix-in-place only where a real bug existed — none found in Waves 4–5; no firing, no activation, no cron change, no real side effects, no DELETE API, surgical commits by explicit path, key never printed).**
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — BUILD #1 DONE+VERIFIED: Backlink crawl-for-recipient + approval-gated auto-send (CAPSTONE decision #1, resolved per Paul's directive)
+
+*Paul's directive (verbatim): "You can auto send them from partnerships@liftnow.com. Where to send them.. you should be able to crawl on the interested website to find marketing or partnership inquiry direct email address." + "Keep my approval gate." This is the HIGH-priority CAPSTONE decision #1 — now BUILT, not just flagged. The latent landmine ("auto-sends to a blind info@") is removed: the agent now crawls a real recipient, and sends ONLY to a vetted role inbox AND only after Paul approves the ticket.*
+
+### What was built (two live, ACTIVE workflows — authorized by Paul for this agent only)
+1. **Agent 6 Backlink Builder (`YP07sPEQgTyrQ5BK`, now active=True)** — `Self-QA` Code node crawls the target domain in-process via `this.helpers.httpRequest` (NOT a separate httpRequest node — that would clobber `$json`). Walks 10 likely paths (/contact, /partnerships, /advertise, /media, /press, …), extracts + entity-decodes emails, scores them:
+   - word-based role-token match (partnership/partner/bizdev/marketing/press/media/editor/… ranked 100→30), same-domain +25 / off-domain −20, junk/placeholder/no-reply/asset-URL excluded.
+   - **role-inbox threshold = score ≥ 50.** Below that → NOT auto-picked.
+   - **confidence tiers:** `role-inbox` (sendable best) · `personal-only` (found only personal staff emails → surfaces candidates, best="") · `none`.
+   - Writes `recipient_email`, `recipient_candidates`, `recipient_confidence` into `recommendation_detail`, plus a human `recipient_summary` string. `Create Backlink Ticket` shows that summary in the ticket body.
+2. **Approval Executor (`hpgbBAmRmqtsfr6g`, active=True throughout — load-bearing, runs every 15 min)** — branch #7 reads `recDetail.recipient_email`: populated → `email_send` (to crawled addr, BCC paulj@liftnow.com, from partnerships@liftnow.com); empty → `auto_ack` (NO send, "handle manually"). **No blind info@ fallback.** Plus a FINAL GUARD that downgrades any email_send with empty emailTo to auto_ack (defense in depth). Executor only ever acts on **stage-2 (APPROVED)** tickets ⇒ Paul's gate is structurally upstream of every send.
+
+### RECEIPTS (Receipt Law + Test-Before-Done — nothing trusted from notes; live-verified)
+- **Live-state re-GET (Anti-Circular-Logic):** Agent 6 active=True, crawl present, threshold≥50, confidence tiers, recipient_summary, ticket reads summary — all True. Executor active=True, reads recipient_email, no blind 'info@' guess, final empty-guard present — all True.
+- **Executor ROUTING PROOF — ran the REAL exported `Process & Route` code under Node (`_b1_pr_sim.mjs`) against synthetic APPROVED tickets, 12/12 PASS, ZERO real email sent:**
+  - role-inbox ticket → `email_send`, emailTo=`partnerships@fleetowner.com`, BCC=`paulj@liftnow.com`, subject carried, body paragraphized.
+  - personal-only ticket (empty recipient) → `auto_ack`, emailTo="", notes explain no-send.
+  - conditional-approve role-inbox → `email_send` WITH the conditional note appended to the body.
+- **Offline crawl unit tests (`_b1_crawl_test.mjs`, mirrors live Self-QA):** 12/12 PASS (role-inbox picked over info@, entity-decoded sponsors@, no-reply/png/off-domain-gmail excluded, govtech personal-only → best="" + candidates surfaced, generic hello@/info@ association inbox sendable).
+- **Two prior LIVE execution receipts** (built earlier this task): exec 10382 (govtech, pre-refine — exposed the personal-email bug) and exec 10388 (apta, post-refine — correctly empty/personal-only). Test-Before-Done caught the design flaw via live fire, not static analysis.
+- **REAL hit-rate over Paul's 25 actual targets (`_b1_hitrate.mjs`, live GETs, 0 errors):**
+  - **8/25 (32%) role-inbox → AUTO-SEND-eligible:** press@firehouse.com, editor@fleetowner.com, media@nlc.org, info@napt.org, info@yellowbuses.org, editors@bobit.com (×3: automotive-fleet / government-fleet / worktruckonline — all Bobit Media properties; crawl correctly resolved to the publisher's editorial inbox).
+  - **5/25 (20%) personal-only → candidates surfaced, NO auto-send:** governing, masstransit, govtech, naco, vehicleservicepros.
+  - **12/25 (48%) none → ticket says "no recipient, handle manually":** mostly contact-form-only big publishers (equipmentworld, truckinginfo, schoolbusfleet, metro-magazine, …). Expected — email crawling can't beat a contact form.
+  - **Crucially: 0 personal emails auto-picked.** The govtech bug that started this is gone.
+
+### Honesty Law — known behaviors flagged to Paul (not silently shipped)
+- **`editors@bobit.com` for 3 different target domains.** Bobit Media owns automotive-fleet/government-fleet/worktruckonline; "editors" scores 82 −20 off-domain = 62 (≥50, sendable). Defensible (it IS the real publisher inbox) but Paul should know outreach "follows" to the parent media company.
+- **Personal-only design choice is REVERSIBLE.** Today: surface candidates, don't auto-send. If Paul prefers best-guess auto-send on personal-only sites, that's a one-line change (lower the threshold / send `candidates[0]`). Flagged as a decision, not assumed.
+- **Two test tickets I created (both stage-1 Pending Review, neither can send without Paul approving):**
+  - `45639338892` (apta) — recipient_email="" → SAFE (approve = auto_ack, no send).
+  - `45637936934` (govtech) — **recipient_email="nknell@govtech.com" baked in (PRE-refine artifact). Latent hazard: govtech.com is a real target Paul may want, so he could approve this specific ticket not realizing it carries the old personal recipient.** → Recommend REJECT; I offered to close/defuse it via HubSpot MCP on his OK (did NOT modify a CRM record unilaterally — tool + rails require confirmation).
+
+### Safety / state discipline
+- External email from partnerships@liftnow.com is the ONE authorization Paul granted for this agent, and it remains **approval-gated** (executor acts only on stage-2). No autonomous send path exists.
+- Agent 6 was activated (authorized + required to live-test the build); it only DRAFTS tickets on its cron — nothing sends without Paul. Executor untouched in its active status. No cron changed. No DELETE API. Key never printed. No real outreach email left the box (routing proven offline).
+- All scratch artifacts in `.tmp_n8n/` (gitignored): `_b1_export_for_sim.py`, `_b1_pr_live.js`, `_b1_pr_sim.mjs`, `_b1_hitrate.mjs`, `_b1_hitrate_result.json`, `_b1_crawl_test.mjs`, `_b1_targets.json`, `_b1_refine.py`, `_b1_activate_fire.py`.
+
+### Operator-pending for Paul (build #1)
+1. Reject test ticket `45637936934` (govtech, personal email baked in) — or tell me to close/defuse it. `45639338892` (apta) is harmless but also disposable.
+2. Decide the personal-only policy (surface candidates [current] vs. best-guess auto-send).
+3. Optional: pause Agent 6 if he wants to review drafts before it runs on schedule (it's Mon–Fri @ 9 & 14; nothing sends without approval regardless).
+
+### Next: Build #2 — SEM Agent 15 (`rZW6J0ccvzWjDxYr`) multi-source expansion (CAPSTONE decision #2): budgets auto-apply within the existing $100/day cap; new keywords + ad copy → approval queue; incorporate SEO/Ahrefs/SERP/ad-performance signals; activate with gating.
