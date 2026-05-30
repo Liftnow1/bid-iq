@@ -1082,4 +1082,162 @@ Wire LinkedIn posting (or keep draft-and-paste) · enable ROI Tracker then surfa
 2. Decide the personal-only policy (surface candidates [current] vs. best-guess auto-send).
 3. Optional: pause Agent 6 if he wants to review drafts before it runs on schedule (it's Mon–Fri @ 9 & 14; nothing sends without approval regardless).
 
+---
+
+## CHECKPOINT (2026-05-29 UTC) — BUILD #2 / PHASE 2 DONE+VERIFIED: Executor SEM apply-on-approval (closes the dead-"Maverick" gap), live validateOnly dry-run = ZERO real Google Ads writes
+
+*The gap this closes: Agent 15's approval ticket promised "IF approved: I add it via the Google Ads API," but the executor's SEM branch #6 said "Maverick will pick this up" — a workflow that no longer routes keywords. So an approved keyword/negative went nowhere and the ticket still flipped to Auto-Applied. That was a Honesty-Law violation baked into the pipeline. Now the executor actually performs the keyword/negative mutation via the Google Ads API on approval; ad-copy stays human-applied (RSA asset/policy review); budgets stay auto-applied inside Agent 15 within the $100/day cap.*
+
+### What was built (live, into the ACTIVE Approval Executor `hpgbBAmRmqtsfr6g`, active=True throughout)
+- **New `Apply Google Ads Change` node** (httpRequest v4.2) — `POST .../v20/customers/{gads_customer_id}/adGroupCriteria:mutate`, creds `googleAdsOAuth2Api` (`0oNjOtM2QsX3Pasp`), headers developer-token (sourced from Agent15's Mutate Campaign Budget node — value never printed) + login-customer-id `4271006215`. Body builds an add-keyword or add-negative operation and sets `validateOnly: $json.gads_validate_only === true`. Hardened: `options.response.neverError:true` + `onError:continueRegularOutput` + `continueOnFail:true` ⇒ a 4xx returns the API body as inspectable data instead of breaking the run.
+- **Process & Route branch #6 rewritten** (SEM Manager / Bid Adjustment): `add_keyword`/`add_negative_keyword` with a real ad-group RN + keyword + customer_id → `action_type='google_ads_mutate'` (flattens `gads_*` apply fields); `review_ad_copy`/Ad Copy Change → honest `auto_ack` ("apply in Google Ads UI"); budget → honest `auto_ack` ("auto-applies inside the SEM agent"); malformed → `auto_ack` (not a broken apply). Dead "Maverick" reference removed.
+- **Route by Action switch** — appended a 5th named rule `google_ads_mutate`. **Switch-reindex hazard handled explicitly:** wrote the full 6-output connection map by hand (out0→Publish WP, out1→WP PATCH, out2→Send Email, out3→Get LinkedIn, out4→Apply Google Ads Change, out5→Merge in0) so the auto_ack fallback relocates from out4→out5 without silently breaking every other agent's routing. Apply node → Merge spare input (in1).
+- **Mark Tickets Executed** — added `gadsBranchError('Apply Google Ads Change')` (reads the Apply node's output: `{error}`/`partialFailureError` ⇒ fail) and a `google_ads_mutate` integrity arm. validateOnly/real success → stage `1363043699` (Auto-Applied); gads error → stage `1` (back to Pending Review) + "EXECUTION FAILED" note. ticketId carry-through is automatic: Mark reads `$('Write Handoffs').all()`, which runs BEFORE Route by Action — the apply branch needs zero ticketId plumbing.
+
+### RECEIPTS (Receipt Law + Test-Before-Done + Anti-Circular-Logic — nothing trusted from notes)
+- **Backup before surgery:** `_b2_executor_phase2_backup.json` (full pre-change export).
+- **Transforms are fail-loud:** `assert PR_OLD in src` / `assert MARK_OLD_* in src` confirmed the LIVE code had not drifted before any replace. (`_b2_p2_transform.py`)
+- **Offline proof (`_b2_p2_sim.mjs`) — ran the REAL transformed jsCode under the n8n AsyncFunction harness, 27/27 PASS, 0 network/0 writes:** New Keyword→google_ads_mutate (validate_only honored, real ad_group_resource_name/keyword/PHRASE/customer_id carried); Negative→is_negative + validate_only defaults false (real apply on approval); Ad Copy→auto_ack; Bid→auto_ack; malformed→auto_ack; Maverick gone; regression Content Producer→wp_create + Brand Listening→auto_ack; Mark validateOnly-success & real-success ({results[].resourceName})→1363043699; gads-error→stage 1 + "EXECUTION FAILED"+"gads 400"; wp_patch regression both directions.
+- **Live structural re-GET (`_b2_build_phase2.py`):** active=True, 16 nodes; Apply node present (type/creds/dev-token-set/url has `adGroupCriteria:mutate`/body has `validateOnly`); switch rules `[wp_create,wp_patch,email_send,linkedin_post,google_ads_mutate]` + fallback; Route OUT map 6 outputs as designed; Apply OUT→Merge(in1); Process&Route has `google_ads_mutate` & Maverick gone; Mark has `gadsBranchError`; Merge numberInputs 5. ALL structural asserts passed.
+- **LIVE validateOnly dry-run (`_b2_p2_fire.py`) — fired the ACTIVE executor against synthetic APPROVED ticket `45640344207` (validate_only:true), exec `10506`, exec-level error none:**
+  - Process & Route → `google_ads_mutate`, `gads_validate_only=true`, real ad-group RN `customers/7778429352/adGroups/201912953691`, keyword "phase2 validateonly probe kw" (PHRASE).
+  - **Apply Google Ads Change OUTPUT = `{}`** → `has .error envelope: False`, **`has results[].resourceName (=real write): False`**. Empty body is Google's documented validateOnly-success signature: request validated (ad group exists, keyword valid) and **NOTHING written**. ✅ ZERO real Google Ads writes.
+  - Mark Tickets Executed → `hs_pipeline_stage 1363043699`, `integrityFail False`.
+  - PATCH Ticket Stage ran (1 item).
+  - **Live HubSpot re-query (not trusting the execution's self-report):** ticket `45640344207` `hs_pipeline_stage="1363043699"`, outcome_notes = the VALIDATE-ONLY dry-run line. The PATCH actually landed.
+
+### Honesty Law — current truthful state
+- Executor is now **honest about SEM**: an approved keyword/negative is really mutated via the API; ad-copy and budgets say exactly where they're applied; a failed mutate sends the ticket BACK to Pending with the reason (it does NOT lie "Auto-Applied").
+- **validateOnly is ticket-controlled, not code-controlled:** `gads_validate_only = (recDetail.validate_only === true)`. The probe ticket set it true (dry run). Production Agent-15 tickets omit it ⇒ default false ⇒ real apply on approval. No code edit needed between test and go-live — self-documenting.
+
+### Safety / state discipline
+- Executor stayed ACTIVE the whole time (load-bearing, every 15 min); `active` never sent in PUT (preserved). No cron changed. No DELETE API. Master Kill Switch untouched. dev-token/API-key never printed. The ONLY live mutation attempt was validateOnly ⇒ provably zero ad spend / zero ad-account change.
+- Scratch artifacts (`.tmp_n8n/`, gitignored): `_b2_recon5.py`, `_b2_recon6.py`, `_b2_p2_transform.py`, `_b2_pr_v5.out.js`, `_b2_mark_v5.out.js`, `_b2_p2_sim.mjs`, `_b2_build_phase2.py`, `_b2_p2_fire.py`, `_b2_executor_phase2_backup.json`.
+
+### Operator-pending for Paul (build #2 / phase 2)
+1. **Delete probe ticket `45640344207`** (synthetic; now sitting in Auto-Applied). Safe to delete — operator-only via HubSpot UI, or say the word and I'll defuse via MCP.
+2. **GATED — coordinated Agent-15 go-live** (not done; needs your go): fix Agent 15's "Build Needs-You Body" honesty text (currently still says "Approve and I will execute the mutation."); re-enable Create Proposal Tickets; reactivate Agent 15; fire + verify ~5 real proposal tickets; then ONE real E2E approve→apply with `validateOnly:false` on a single low-risk keyword to confirm a real `resourceName` comes back. Keyword/copy stays approval-gated; budgets stay within the $100/day cap (note: budget cooldown `mutatedToday[15555915009]="2026-05-29"` blocks another budget mutation until next UTC day).
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — BUILD #2 / PHASE 3: Agent-15 KEYWORD go-live LIVE (honesty text fixed, keyword path enabled+activated, 5 REAL proposal tickets created); REAL apply GATED on Paul
+
+*Paul chose "Full go-live now." Executed the non-real-write parts; the single real (validateOnly:false) keyword apply is held at the approval gate for Paul's explicit OK on a specific keyword.*
+
+### Pre-flight verification (Anti-Circular-Logic — verified live, not assumed)
+- **Producer/consumer contract VERIFIED (`_b2_p3_recon.py`):** Agent 15 `Propose Keywords & Copy` emits `recommendation_detail` EXACTLY matching executor branch #6: New Keyword→`action:add_keyword`+`ad_group_resource_name`+`keyword`+`customer_id:7778429352`+`match_type:PHRASE`; Negative→`action:add_negative_keyword`+same; Ad Copy→`action:review_ad_copy`→auto_ack; no `validate_only` on production tickets ⇒ real apply on approval. Keyword tickets carry `agent_name:'SEM Manager'` ⇒ branch #6 catches them. So real approvals APPLY (don't silently auto_ack).
+- **Branch independence VERIFIED (`_b2_p3_conns.py`):** trigger fans out to 3 independent branches; keyword path (Read Search Terms→Read Ahrefs Organic→Propose Keywords & Copy→Create Proposal Tickets) is separate from budget path. Enabling ONLY Create Proposal Tickets ⇒ zero budget side effects.
+- **One dishonest text found + fixed:** only `Build Needs-You Body` (budget gated ticket) said "Approve and I will execute the mutation." — false, because the executor auto_acks gated budget tickets (it applies keywords, not budgets). The KEYWORD producer text was already honest ("IF approved: I add it ... via the Google Ads API").
+
+### What went live (`_b2_p3_golive.py` → PUT 200 → re-GET verified; then `_b2_p3_activate_fire.py`)
+- Backup `_b2_agent15_golive_backup.json`. Replaced the dishonest budget line with an honest "above auto-apply safety gate; set it in Google Ads yourself; approving records your decision only." Enabled ONLY `Create Proposal Tickets`. The 3 budget output nodes (Mutate Campaign Budget, Create Receipt Ticket, Create Needs-You Ticket) **stay disabled** — budget auto-apply go-live is a SEPARATE later step.
+- **Activated Agent 15** (`rZW6J0ccvzWjDxYr`, active=True via POST /activate) and fired `fire-sem-auto`.
+
+### RECEIPTS (exec `10525`, status success, exec-level error none)
+- `Propose Keywords & Copy` emitted **5 real apply-ready New Keyword tickets** (status-NONE search terms with high CTR, all customer 7778429352, real ad-group RNs, PHRASE).
+- `Create Proposal Tickets` **created 5 HubSpot tickets at stage 1 (Pending Review)**: `45640668783` car lift portable · `45641137245` portable car lift for garage · `45640747948` 4 post car lift · `45640783704` in ground car lift · `45641148072` portable scissor car lift.
+- **Budget branch INERT:** Mutate Campaign Budget / Create Receipt Ticket / Create Needs-You Ticket all `ran: False` (disabled). Zero budget mutation, zero budget tickets.
+
+### ⚠️ The approval gate is now HOT
+Agent 15 is ACTIVE and the executor runs every 15 min on stage-2 tickets. **Approving any of these 5 in the dashboard = a REAL keyword added to Google Ads.** That is the intended behavior post-go-live — flagging so Paul knows the gate is live.
+
+### GATED — awaiting Paul (the one real write)
+Recommended E2E candidate: **`45641148072` "portable scissor car lift"** (ad group `201912953691` — the SAME ad group the Phase-2 validateOnly probe already passed against; lowest 30-day spend $1.86; highest CTR 86%). On Paul's explicit OK I either move it to stage-2 via MCP + fire the executor, or he approves it in the dashboard; then I verify a real `results[].resourceName` returns and the ticket lands at 1363043699, and read it back from Google Ads. Reversible (pause/remove the keyword).
+
+### Operator-pending additions
+- 5 real proposal tickets now in Paul's Pending Review queue (above) — real proposals, his to approve/reject. (Plus the synthetic probe `45640344207` still flagged for deletion.)
+- Budget auto-apply go-live remains separate + dormant (budget output nodes disabled; cooldown set for 2026-05-29).
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — BUILD #2 / PHASE 3 COMPLETE: REAL apply E2E PROVEN — Agent-15 keyword approved by Paul → executor wrote a LIVE Google Ads keyword (resourceName returned)
+
+*Paul chose "Apply 45641148072 now" (explicit, specific OK for one real ad-account write). Pre-fire safety check: stage-2 queue was EMPTY (search_crm_objects total=0), so the batch contained ONLY this ticket — zero collateral. Moved `45641148072` → stage-2 via HubSpot MCP (CONFIRMED, single property change shown first). Fired the executor.*
+
+### RECEIPTS — the full honest loop, end to end, with a REAL write (`_b2_p3_realapply_fire.py`, exec `10546`, exec-level error none)
+- **Process & Route:** `45641148072` → `google_ads_mutate`, **`gads_validate_only=false`** (production ticket has no validate_only flag ⇒ real apply), keyword "portable scissor car lift" (PHRASE), ad group `customers/7778429352/adGroups/201912953691`.
+- **Apply Google Ads Change OUTPUT:** `{ results: [ { resourceName: "customers/7778429352/adGroupCriteria/201912953691~31961772986" } ] }` — **a live criterion was created.** No `.error`. The `~31961772986` suffix is the criterion ID Google assigns ONLY on successful creation ⇒ this is the account-side write+existence receipt (a separate GAQL SELECT would re-fetch the same identifier; Google never returns a resourceName for a resource it didn't write).
+- **Mark Tickets Executed:** stage `1363043699` (Auto-Applied), `integrityFail=false`.
+- **PATCH Ticket Stage:** ran (1 item).
+- **Live HubSpot re-query (independent receipt #2):** `45641148072` `hs_pipeline_stage="1363043699"`, outcome_notes "Applied keyword \"portable scissor car lift\" (PHRASE) ... via Google Ads API." — **note has NO "[VALIDATE-ONLY dry run]" tag**, confirming this was the real apply, not the dry-run.
+
+### What this means
+The dishonest-"Maverick" gap is now fully closed AND proven in production: **Agent 15 proposes (from real search-term + Ahrefs signals) → Paul approves → the executor really adds the keyword via the Google Ads API → ticket truthfully shows Auto-Applied.** Promise == reality.
+
+### Read-back note (Honesty Law)
+I told Paul I'd "read the keyword back." The mutate response already returned the live resource identifier (`...adGroupCriteria/201912953691~31961772986`) — that IS the account-side existence proof. An independent GAQL re-fetch would require either extracting OAuth secrets (the n8n public API does not expose credential secrets) or bolting a temporary read node onto the live ACTIVE executor — unjustified risk for a redundant confirmation. Offered to Paul as optional belt-and-suspenders.
+
+### Reversibility / safety
+- The keyword is reversible (pause/remove `201912953691~31961772986` in Google Ads). Historical 30-day spend on this term was $1.86 at 86% CTR; bounded by campaign budget + the $100/day cap philosophy.
+- Executor stayed ACTIVE; Agent 15 ACTIVE (keyword path only). Budget auto-apply path STILL dormant (3 budget output nodes disabled) — separate go-live. No DELETE API, no secret printed, surgical edits only.
+
+### Still GATED / operator-pending for Paul
+1. **Budget auto-apply go-live** (separate, not done): re-enable `Mutate Campaign Budget` + `Create Receipt Ticket` + `Create Needs-You Ticket`; this turns on real budget mutations within the $100/day cap (cooldown `mutatedToday[15555915009]="2026-05-29"` blocks today). Needs Paul's explicit go.
+2. **4 remaining keyword proposals** in Pending Review (`45640668783`, `45641137245`, `45640747948`, `45640783704`) — approve/reject at will; approving now applies for real.
+3. **Delete synthetic probe** `45640344207` (Auto-Applied, inert).
+
 ### Next: Build #2 — SEM Agent 15 (`rZW6J0ccvzWjDxYr`) multi-source expansion (CAPSTONE decision #2): budgets auto-apply within the existing $100/day cap; new keywords + ad copy → approval queue; incorporate SEO/Ahrefs/SERP/ad-performance signals; activate with gating.
+
+## CHECKPOINT (2026-05-29 UTC) — BUILD #2 follow-through: budget cap walk-through delivered (NO go-live) + 4 keyword proposals REJECTED (verified live)
+
+*Paul's two decisions via AskUserQuestion: (1) budget go-live → "Walk me through the cap logic first" (so NO budget go-live — still dormant); (2) the 4 remaining keyword proposals → "Reject all 4". Both handled read-only / reversibly. ZERO Google Ads writes this checkpoint.*
+
+### Budget gate walk-through — pulled from LIVE code (`_b2_p3_budget_caplogic.py`, read-only), not memory
+Agent-15 `Decide Action` constants + logic (ground truth): `SAFETY_TOTAL_DAILY_BUDGET_CAP_USD=100`, `MAX_CHANGE_PCT=25`, `TARGET_CHANGE_PCT=12`. Picks ONE highest-spend campaign per run that trips a trigger; else `no_op`.
+- **Triggers:** increase if CTR>1.0% & impShare<55% & 7d-spend>$3; decrease if CPA>$120 & spend>$30; decrease if 20+ clicks & $20+ spend & 0 conv.
+- **Change size:** fixed ±12% (rounded to the cent).
+- **Two hard gates (both must pass or it routes to a "needs-you" ticket, no write):** (1) change ≤25%; (2) new TOTAL daily budget across Google+MS Ads ≤ $100/day.
+- **Cooldown:** one change per campaign per UTC day.
+- **Write:** `POST campaignBudgets:mutate`, update `amount_micros` only.
+
+### Concrete real example (`_b2_p3_reject_contract.py`, exec `10429`, zero-write — Mutate node disabled)
+`Decide Action` produced: **increase** "Liftnow - AG1 - HD Truck Lifts" (campaign 23815011498, budget 15555915009) **$12.13 → $13.59/day (+$1.46, +12.0%)**; reason CTR 3.42% strong + impShare ~10% (budget-constrained), $79.50 spent/7d. Gate1 ✅ (12.0%≤25%), Gate2 ✅ (total daily $49.24 → $50.70 ≤ $100). `needs_approval=false` ⇒ would have auto-applied. Today's later run (exec 10525) `no_op`'d on cooldown for the same budget. So ~$50/day headroom under the cap right now.
+
+### THREE code findings flagged to Paul BEFORE any budget go-live (Honesty Law)
+1. **No validate-only on the budget mutate node** (`options.response={}`, no `validateOnly` in body, `onError`/`continueOnFail` unset ⇒ fail-loud). First enabled run is a REAL write. → I'll add a validateOnly dry-run pass first (same discipline as keywords) when Paul greenlights.
+2. **Cooldown is banked optimistically** — `Decide Action` stamps `mutatedToday[budgetId]` when `eligibleForAuto`, BEFORE the write happens. That's why today's slot for 15555915009 is already used even though the node was disabled (nothing was written). Conservative (never more writes) but a failed write would still burn the day. Tighten before go-live.
+3. **Stale human-readable strings** — code decreases at CPA>$120 but the message says "$150"; no-op summary says "CTR>1.5" but code uses 1.0. Cosmetic (doesn't change execution) but tickets would misstate logic. Clean up before go-live.
+**Budget path remains DORMANT** (Mutate Campaign Budget + Create Receipt Ticket + Create Needs-You Ticket still `disabled=True`). No flip made.
+
+### 4 keyword proposals REJECTED via the system's canonical path (`_b2_p3_reject4.py`)
+Discovered the real reject contract from live `Webhook: Process Decision (write)` (`NAjdXCnFDyV5Z4Ep`, path `process-decision`): reject ⇒ `hs_pipeline_stage="4"` + `outcome_notes` prefixed `REJECTED <ts>${" — "+comment}`. (Decision Memory keys decisions off the `outcome_notes` PREFIX, not the stage — a naive stage-only reject would be invisible to it.) Fired the webhook 4× (auth secret + path sourced from the live workflow, never printed); each returned `{ok:true, decision:reject, newStage:"4"}`.
+- **Live HubSpot read-back (independent receipt):** all 4 now `hs_pipeline_stage="4"`, notes `REJECTED 2026-05-29T23:55… — Rejected by Paul on manual review — not pursuing these keyword adds right now.`
+  - `45640668783` car lift portable · `45641137245` portable car lift for garage · `45640747948` 4 post car lift · `45640783704` in ground car lift.
+- **Zero Google Ads writes.** Pending queue now clear of this run's proposals; Decision Memory won't re-propose these terms.
+
+### State after this checkpoint
+- One REAL keyword live (`45641148072` → criterion `201912953691~31961772986`). Agent 15 ACTIVE (keyword path only); Approval Executor ACTIVE. Budget auto-apply STILL dormant.
+- Tasks: #179 + #180 complete; #178 stays in_progress for the ONE remaining gated piece = budget auto-apply go-live.
+
+### Still GATED / operator-pending for Paul
+1. **Budget auto-apply go-live** — gated; needs explicit go. When given: add validateOnly dry-run + fix the 3 findings above first.
+2. **Delete synthetic probe** `45640344207` (Auto-Applied, inert) — operator-only (permanent deletion; I won't call DELETE).
+3. Prior carried items unchanged (superseded-workflow deletion list; test tickets `45637936934` govtech personal-email landmine + `45639338892` apta; personal-only auto-send policy; v7 History visual glance).
+
+---
+
+## CHECKPOINT (2026-05-29 UTC) — UI/UX SWEEP: ugly cards fixed + Team tab made truthful (verified vs 50 live tickets; NOT yet deployed)
+
+*Paul (with screenshot of the approval dashboard): "These look like shit. Also is team tab updated? Do full UI/UX sweep again." The shot showed a Coordinator HOLDBACK card dumping a raw `Parsed:{…}` JSON blob + an "LLM raw:" label. Both halves now resolved and verified against LIVE data. **One gate remains: I have NOT pushed this live — Paul's explicit go needed to deploy (commit+push rule).** Edits are local-only in `public/approvals/index.html`; the live page is still v7 and still ugly until deploy.*
+
+### What "looks like shit" actually was — root-caused to 4 content shapes, all now handled
+`renderTicketContent()` rewrite + 6 helpers (`normalizeEscapes`, `promoteInlineHeaders`, `renderHoldback`, `humanizeReason`, `renderProse`, `extractBalancedJson`): (1) inline `ASK:` SEM tickets → promoted to clean sections; (2) partial-structure backlink drafts → ASK prose + email tucked in `<details>`; (3) literal-`\n`+JSON floods → JSON tucked; (4) HOLDBACK (the screenshotted shape) → friendly headline + bulleted conditions + JSON tucked. `askPreview()` wired to the same normalize/promote/holdback logic so collapsed cards stop leaking `\n`/JSON. Subject humanizer: added `[HOLDBACK] Conditional approval needs human eyes (#id)` → "Your approval needs a manual step — ticket #id"; added `[DRAFT FOR YOUR REVIEW] Outreach to <dom> (<type>)` → "Backlink outreach draft — <dom> (<type>)"; broadened the catch-all `[TAG]` stripper to also eat multi-word ALL-CAPS tags.
+
+### RECEIPT — render harness against the LIVE feed (`.tmp_n8n/_ui_render_test.mjs`, read-only)
+Loaded the page's real 59KB `<script>` into a Node `vm` (browser-global shims), ran the REAL `renderTicketContent`/`askPreview`/`humanizeSubject` over all **50 live tickets** (27 pending + history). Pass criterion = no raw JSON / literal `\n` / `Parsed:` / `LLM raw:` in VISIBLE (non-`<details>`/`<pre>`) output. **Result: 0 leaks across 50 tickets.** (First run was a FALSE PASS — my shim's Proxy made `decodeEntities`' textarea trick return the proxy so everything stringified to ''; caught it via the `[Function]` sample output, gave the shim a faithful entity-decoder, added a non-string-return guard, re-ran honest. Then it found 2 REAL leaks — the `[DRAFT FOR YOUR REVIEW]` backlink subjects — which I fixed; re-ran → 0.) The full script executing end-to-end in the vm also proves zero syntax errors.
+- HOLDBACK #45635364612 now renders: subject "Your approval needs a manual step — ticket #45631939391"; body "Needs your manual follow-through… Why it couldn't auto-apply… Your conditions [bullets]"; JSON in `<details>`.
+
+### SILENT FAILURE flood filtered out of the Now queue
+Added `/\[silent failure\]/i` to `NON_MARKETING_PATTERNS` (the existing `/silent failure detector/i` only matched the workflow NAME, not the `[SILENT FAILURE]` ticket tag). Live check: **10 of 27 pending tickets** were this infra false-positive noise → now hidden from Paul's queue (17 real marketing tickets remain). Liveness still shown honestly on the Team tab.
+
+### "Is team tab updated?" — was STALE, now TRUTHFUL (ground-truthed against live n8n API)
+Added Fox (SEM Manager, hbId riley) + Spider (Backlink Builder, hbId bran) to AGENTS (now 6); removed the 3 now-live entries from PAUSED (now 9). Verified two independent live sources:
+- **Heartbeats (24h):** all 6 AGENTS hbIds firing — sam, dax, uma, carla, **riley(3)=Fox**, **bran(2)=Spider**. (`forge`/`sentinel` = infra pollers, correctly not personas.)
+- **Workflow `active` API:** 60 workflows, 19 active; exactly **6 are marketing agents = Bee/Turtle/Eagle/Owl/Fox/Spider** (perfect match). All 9 PAUSED names confirmed NOT active (the lone "Coordinator" API hit = "Approval Executor - Coordinator Brain", the infra executor, not the strategic persona).
+- Pending `agent` attribution: SEM Manager(5)+Backlink Builder(2) now resolve to Fox/Spider (were orphans pre-fix); one `agent:"Coordinator"` holdback renders as a graceful gray fallback chip (not broken).
+- Build meta bumped `v7-cond-history` → `v8-cards-team` (so a live page-source check confirms the deploy landed).
+
+### GATED / flagged
+1. **DEPLOY GATE** — all edits are local in `public/approvals/index.html`; live dashboard unchanged until commit+push. Awaiting Paul's explicit "deploy/ship it." (Prior sweeps #120/#121 committed+pushed, but I hold to the commit-only-when-asked rule.)
+2. **Upstream reliability bug (flagged, not started):** Silent Failure Detector false-positives on event-driven 7b (legitimately 0 tickets) AND emits literal-`\n` content. Filtering it in the UI is a band-aid; the real fix is in the SFD workflow.
+3. **Duplicate SEM keyword proposals** reappearing under new ticket IDs — Decision Memory should suppress FUTURE re-proposals; pre-existing dupes remain. Do NOT auto-reject without Paul's say.

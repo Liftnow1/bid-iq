@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Liftnow Agents · Your Marketing Team</title>
-<meta name="build" content="dash-bright-2026-05-29-v7-cond-history">
+<meta name="build" content="dash-bright-2026-05-29-v8-cards-team">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root{
@@ -504,6 +504,10 @@ const AGENTS = [
     what:'Audits /resources/ pages for structural and UX defects, then bundles the fixes that need a look.' },
   { key:'owl',    emoji:'🦉', name:'Owl',    role:'Content Producer',       ticketAgent:'Content Producer',       hbId:'carla', color:'#0366d6', tint:'rgba(3,102,214,.12)',
     what:'Drafts brand-new articles and content pieces for liftnow.com, ready for you to approve.' },
+  { key:'fox',    emoji:'🦊', name:'Fox',    role:'Google Ads Optimizer',   ticketAgent:'SEM Manager',            hbId:'riley', color:'#c2410c', tint:'rgba(194,65,12,.12)',
+    what:'Watches your Google & Microsoft Ads performance and proposes new keywords and ad copy for your review.' },
+  { key:'spider', emoji:'🕷️', name:'Spider', role:'Backlink Outreach',      ticketAgent:'Backlink Builder',       hbId:'bran',  color:'#6d28d9', tint:'rgba(109,40,217,.12)',
+    what:'Finds relevant industry sites and drafts peer-vendor outreach emails to earn backlinks — nothing sends until you approve it.' },
 ];
 const AGENT_BY_TICKET = Object.fromEntries(AGENTS.map(a => [a.ticketAgent, a]));
 const AGENT_BY_HB = Object.fromEntries(AGENTS.map(a => [a.hbId, a]));
@@ -517,9 +521,6 @@ const INFRA = [
 
 // --- Agents intentionally OFF, with honest one-line reasons ---
 const PAUSED = [
-  ['SEM Manager',            'needs ad-spend approval'],
-  ['SEM Auto-Optimizer',     'needs ad-spend approval'],
-  ['Backlink Builder',       'needs email-send approval'],
   ['LinkedIn Cadence',       'not enabled yet'],
   ['Keyword Discovery',      'not enabled yet'],
   ['Community Engagement',   'not enabled yet'],
@@ -763,7 +764,11 @@ function humanizeSubject(subj){
   s = s.replace(/^\[done\]\s*SEM Auto:\s*/i, 'Google Ads: budget ');
   s = s.replace(/^\[suggestion\]\s*/i, 'Google Ads suggestion — ');
   s = s.replace(/^\[review\]\s*SEM:\s*/i, 'Google Ads change needs your approval: ');
-  s = s.replace(/^\[[A-Z][A-Z_]+\]\s*/, '');
+  s = s.replace(/^\[HOLDBACK\]\s*Conditional approval needs human eyes\s*\(#(\d+)\)\s*/i, (_, id) => `Your approval needs a manual step — ticket #${id}`);
+  s = s.replace(/^\[DRAFT FOR YOUR REVIEW\]\s*Outreach to\s+(\S+?)\s*\(([^)]+)\)\s*$/i,
+    (_, domain, kind) => `Backlink outreach draft — ${domain} (${kind.replace(/_/g, ' ')})`);
+  s = s.replace(/^\[DRAFT FOR YOUR REVIEW\]\s*/i, 'Draft for your review — ');
+  s = s.replace(/^\[[A-Z][A-Z_ ]+\]\s*/, '');  // catch-all: strip any remaining ALL-CAPS [TAG], incl. multi-word
   s = s.replace(/^Content decay:\s*https?:\/\/[^/]+\/(.+?)\/?\s*—\s*(-?\d+(?:\.\d+)?)%\s*clicks,\s*(-?\d+(?:\.\d+)?)\s*positions?$/i,
     (_, path, clicks, pos) => {
       const slug = path.split('/').filter(Boolean).pop() || path;
@@ -773,12 +778,20 @@ function humanizeSubject(subj){
 }
 
 function renderTicketContent(content){
-  const raw = decodeEntities(String(content || ''));
-  if (!raw.trim()) return '<div style="color:var(--faint)">(no detail)</div>';
-  const hasAsk = /(^|\n)ASK\s*\n/.test(raw);
-  const hasWhy = /(^|\n)WHY\s*\n/.test(raw);
-  const hasApprove = /(^|\n)IF YOU APPROVE\s*\n/.test(raw);
-  if (!(hasAsk && hasWhy && hasApprove)) return `<div class="section-body">${escapeHtml(raw)}</div>`;
+  let raw = normalizeEscapes(decodeEntities(String(content || ''))).replace(/\r/g, '').trim();
+  if (!raw) return '<div style="color:var(--faint)">(no detail)</div>';
+
+  // (1) Holdback notice — a conditional approval the executor couldn't auto-apply.
+  if (/(could not be auto-enforced|conditionally approved but)/i.test(raw)) return renderHoldback(raw);
+
+  // (2) Promote single-line "ASK: / WHY: / IF approved:" into block headers so the one
+  //     parser below covers every shape (SEM keyword tickets use this inline form).
+  raw = promoteInlineHeaders(raw);
+
+  // (3) No recognizable ASK header → render as safe prose (any JSON blob gets tucked away).
+  if (!/(^|\n)ASK\s*\n/.test(raw)) return renderProse(raw);
+
+  // (4) Section parse — tolerant of ANY subset of ASK / WHY / IF YOU APPROVE / IF YOU REJECT.
   const re = /(^|\n)(ASK|WHY|IF YOU APPROVE|IF YOU REJECT)\s*\n/g;
   const sections = {}; const matches = []; let m;
   while ((m = re.exec(raw)) !== null) matches.push({label: m[2], headerStart: m.index, bodyStart: m.index + m[0].length});
@@ -787,7 +800,13 @@ function renderTicketContent(content){
     sections[matches[i].label] = raw.slice(matches[i].bodyStart, end).replace(/\s+$/, '');
   }
   let html = '';
-  if (sections['ASK'])           html += `<div class="section"><div class="section-label">What it's asking</div><div class="section-body">${escapeHtml(sections['ASK'])}</div></div>`;
+  if (sections['ASK']){
+    // The ASK body can carry a drafted artifact (outreach email: "--- DRAFTED BODY ---").
+    // Keep the request prose inline; tuck the draft into a disclosure.
+    const { prose, draft } = splitDraft(sections['ASK']);
+    if (prose) html += `<div class="section"><div class="section-label">What it's asking</div><div class="section-body">${escapeHtml(prose)}</div></div>`;
+    if (draft) html += `<details class="draft"><summary>View the full draft</summary><pre>${escapeHtml(draft)}</pre></details>`;
+  }
   if (sections['WHY']){
     // The WHY span often swallows the agent's full draft (--- TITLE ---, BODY:, WP EDIT URL …).
     // Keep the rationale prose inline; tuck the raw draft into a collapsed disclosure.
@@ -797,10 +816,96 @@ function renderTicketContent(content){
   }
   if (sections['IF YOU APPROVE'])html += `<div class="section-approve"><div class="section-label">If you approve</div><div class="section-body">${escapeHtml(sections['IF YOU APPROVE'])}</div></div>`;
   if (sections['IF YOU REJECT']) html += `<div class="section-reject"><div class="section-label">If you reject</div><div class="section-body">${escapeHtml(sections['IF YOU REJECT'])}</div></div>`;
+  return html || renderProse(raw);
+}
+
+// Some upstream agents emit content with literal "\n" / "\t" / '\"' escape sequences (two
+// characters) instead of real line breaks. Convert them so the card reads cleanly.
+function normalizeEscapes(s){
+  if (s.indexOf('\\n') === -1 && s.indexOf('\\t') === -1 && s.indexOf('\\"') === -1) return s;
+  return s.replace(/\\r\\n|\\n|\\r/g, '\n').replace(/\\t/g, '  ').replace(/\\"/g, '"');
+}
+
+// Turn single-line "ASK: …", "WHY: …", "IF approved: …", "IF rejected: …" into the
+// canonical block headers — only when the block form isn't already present.
+function promoteInlineHeaders(raw){
+  if (/(^|\n)ASK\s*\n/.test(raw)) return raw;
+  return raw
+    .replace(/(^|\n)[ \t]*ASK:[ \t]*/i, '$1ASK\n')
+    .replace(/(^|\n)[ \t]*WHY:[ \t]*/i, '$1WHY\n')
+    .replace(/(^|\n)[ \t]*IF\s+approved:?[ \t]*/i, '$1IF YOU APPROVE\n')
+    .replace(/(^|\n)[ \t]*IF\s+rejected:?[ \t]*/i, '$1IF YOU REJECT\n');
+}
+
+// Friendly render for a "conditional approval couldn't be auto-applied" holdback ticket.
+function renderHoldback(raw){
+  const reasonM = raw.match(/Reason:\s*([\s\S]*?)(?:\n\s*\n|\nParsed:|\nLLM raw:|$)/i);
+  const reason = reasonM ? reasonM[1].trim() : '';
+  let conds = [];
+  const pIdx = raw.search(/Parsed:/i);
+  if (pIdx > -1){
+    const js = extractBalancedJson(raw, pIdx);
+    if (js){ try {
+      const o = JSON.parse(js);
+      conds = (o.conditions || [])
+        .map(c => (c.details && (c.details.instruction || c.details.what_to_verify)) || c.type)
+        .filter(Boolean);
+    } catch(e){} }
+  }
+  let html = `<div class="section"><div class="section-label">Needs your manual follow-through</div>`
+    + `<div class="section-body">You approved this with a condition, but your team couldn't apply that condition automatically — please review it and handle it yourself.</div></div>`;
+  if (reason) html += `<div class="section"><div class="section-label">Why it couldn't auto-apply</div><div class="section-body">${escapeHtml(humanizeReason(reason))}</div></div>`;
+  if (conds.length){
+    html += `<div class="section-approve"><div class="section-label">Your condition${conds.length>1?'s':''}</div>`
+      + `<ul style="margin:6px 0 0; padding-left:20px; line-height:1.55; color:var(--ink)">`
+      + conds.map(c => `<li>${escapeHtml(String(c))}</li>`).join('') + `</ul></div>`;
+  }
+  html += `<details class="draft"><summary>Technical detail</summary><pre>${escapeHtml(raw)}</pre></details>`;
   return html;
 }
 
-// Separate WHY rationale (prose) from a drafted-content block. The draft starts at the
+function humanizeReason(r){
+  const s = r.replace(/^unsupported:\s*/i, '').trim();
+  const types = [...s.matchAll(/([a-z][a-z_]+)\s+not supported/gi)].map(x => x[1].replace(/_/g, '-'));
+  const uniq = [...new Set(types)];
+  if (uniq.length) return `Your team can't apply ${uniq.join(' or ')} conditions automatically yet, so it held this for you to do by hand.`;
+  return s;
+}
+
+// Safe prose fallback: show lead text with line breaks; tuck any embedded JSON object into
+// a disclosure so a raw "{…}" blob never lands on the face of the card.
+function renderProse(raw){
+  const braceIdx = raw.indexOf('{');
+  if (braceIdx > -1){
+    const js = extractBalancedJson(raw, braceIdx);
+    if (js && js.length > 40 && /"\s*:/.test(js)){
+      const lead = raw.slice(0, braceIdx).trim();
+      const tail = raw.slice(braceIdx + js.length).trim();
+      let html = '';
+      if (lead) html += `<div class="section-body">${escapeHtml(lead)}</div>`;
+      html += `<details class="draft"><summary>Technical detail</summary><pre>${escapeHtml(js + (tail ? '\n\n' + tail : ''))}</pre></details>`;
+      return html;
+    }
+  }
+  return `<div class="section-body">${escapeHtml(raw)}</div>`;
+}
+
+// Extract the first balanced {...} JSON object at/after fromIdx (string-aware).
+function extractBalancedJson(s, fromIdx){
+  const start = s.indexOf('{', fromIdx);
+  if (start === -1) return null;
+  let depth = 0, inStr = false, esc = false;
+  for (let i = start; i < s.length; i++){
+    const ch = s[i];
+    if (inStr){ if (esc) esc = false; else if (ch === '\\') esc = true; else if (ch === '"') inStr = false; }
+    else if (ch === '"') inStr = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}'){ if (--depth === 0) return s.slice(start, i + 1); }
+  }
+  return null;
+}
+
+// Separate WHY/ASK rationale (prose) from a drafted-content block. The draft starts at the
 // first "--- SECTION ---" divider, a "BODY:" line, or an edit-URL line — whichever comes first.
 function splitDraft(text){
   const lines = String(text).split('\n');
@@ -819,10 +924,13 @@ function splitDraft(text){
 // One- to two-line plain-text gist of a ticket, for the collapsed card.
 // Prefers the ASK block; falls back to the first meaningful line.
 function askPreview(content){
-  const raw = decodeEntities(String(content || '')).trim();
+  let raw = normalizeEscapes(decodeEntities(String(content || ''))).replace(/\r/g,'').trim();
   if (!raw) return '';
+  if (/(could not be auto-enforced|conditionally approved but)/i.test(raw))
+    return 'You approved this with a condition that needs your manual follow-through.';
+  raw = promoteInlineHeaders(raw);
   let text;
-  const m = /(^|\n)ASK\s*\n([\s\S]*?)(?:\n(?:WHY|BODY|IF YOU APPROVE|IF YOU REJECT)\s*\n|$)/.exec(raw);
+  const m = /(^|\n)ASK\s*\n([\s\S]*?)(?:\n(?:WHY|BODY|IF YOU APPROVE|IF YOU REJECT)\s*\n|\n\n|$)/.exec(raw);
   if (m) text = m[2];
   else text = raw.replace(/^(ASK|WHY|BODY|IF YOU (APPROVE|REJECT))\s*\n/i, '');
   text = text.replace(/\s+/g, ' ').trim();
@@ -842,6 +950,7 @@ async function fetchTickets(view, signal){
     /master\s*kill\s*switch/i, /daily\s*health\s*check/i,
     /webhook[:\s].*decision\s*memory/i, /webhook[:\s].*agent\s*proposals/i, /webhook[:\s].*process\s*decision/i,
     /silent\s*failure\s*detector/i, /agent\s*heartbeat\s*store/i, /agent\s*feedback\s*store/i,
+    /\[silent failure\]/i,
     /^\[UI\/UX\]\s+0\s+defects\s+on\s+\?$/i,
   ];
   const isNonMarketing = (t) => {
